@@ -1,0 +1,1 @@
+export { PageRegister } from './ui';

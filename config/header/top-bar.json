@@ -1,0 +1,13 @@
+{
+  "facebookFollowers": "500k Followers",
+  "phoneNumber": "",
+  "promotionalBanner": {
+    "buttonText": "Hot",
+    "emoji": "👋",
+    "text": "Intro price. Get {siteName} for Big Sale -95% off."
+  },
+  "socialLinks": {
+    "enabled": true,
+    "customLinks": []
+  }
+}

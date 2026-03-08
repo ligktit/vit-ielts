@@ -1,0 +1,9 @@
+{
+  "title": "Ready to start creating a standard website?",
+  "description": "Finest choice for your home & office",
+  "button": {
+    "text": "Purchase Histudy",
+    "link": "#"
+  },
+  "backgroundGradient": "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%);"
+}

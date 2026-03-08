@@ -1,0 +1,53 @@
+{
+  "banner": {
+    "title": "Privacy Policy",
+    "subtitle": "IELTS Prediction Privacy Policy Here",
+    "backgroundImage": "/img-admin/banner-bg-1-1766660634137.jpg"
+  },
+  "content": {
+    "introTitle": "Welcome to IELTS Prediction Privacy Policy",
+    "introParagraphs": [
+      "At IELTS Prediction, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.",
+      "Please read this Privacy Policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the site or use our services. By using our website, you consent to the collection and use of information in accordance with this policy."
+    ],
+    "sections": [
+      {
+        "title": "The Type of Personal Information We Collect",
+        "content": "We collect information that you provide directly to us when you register for an account, subscribe to our services, contact us for support, or participate in surveys. The types of personal information we may collect include your name, email address, phone number, billing address, payment information, and any other information you choose to provide."
+      },
+      {
+        "title": "How We Collect Personal Information",
+        "content": "We collect personal information through various methods: Direct Collection when you register or make a purchase, Automatic Collection of IP address and browser information, and Third-Party Sources such as payment processors."
+      },
+      {
+        "title": "How We Use Your Information",
+        "content": "We use the information we collect to provide, maintain, and improve our services, process your transactions, send you technical notices and updates, respond to your comments and questions, monitor and analyze trends, detect and prevent technical issues, and personalize your experience on our platform."
+      },
+      {
+        "title": "Information Sharing and Disclosure",
+        "content": "We do not sell, trade, or rent your personal information to third parties. We may share your information only with service providers who assist us in operating our platform, when required by law, to protect our rights, or in connection with a merger or acquisition."
+      },
+      {
+        "title": "Data Security",
+        "content": "We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure, and we cannot guarantee absolute security."
+      },
+      {
+        "title": "Your Rights and Choices",
+        "content": "You have the right to access and receive a copy of your personal information, rectify inaccurate information, request deletion of your information, object to or restrict processing, and withdraw consent at any time."
+      },
+      {
+        "title": "Cookies and Tracking Technologies",
+        "content": "We use cookies and similar tracking technologies to track activity on our website. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service."
+      },
+      {
+        "title": "Changes to This Privacy Policy",
+        "content": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the Last Updated date. You are advised to review this Privacy Policy periodically for any changes."
+      },
+      {
+        "title": "Contact Us",
+        "content": "If you have any questions about this Privacy Policy, please contact us through our contact page or email us directly. We are committed to addressing your privacy concerns and providing transparent information about how we handle your data."
+      }
+    ]
+  },
+  "heroImage": "/img-admin/blog-bl-02-1766660641444.webp"
+}

@@ -1,0 +1,44 @@
+{
+  "badge": {
+    "text": "CATEGORIES"
+  },
+  "backgroundGradient": "linear-gradient(180deg, orange 0%, red 100%)",
+  "title": {
+    "line1": "Explore Top Courses Caterories",
+    "line2": "That",
+    "line3": "Change",
+    "line4": "Yourself"
+  },
+  "categories": [
+    {
+      "name": "IELTS Full Test",
+      "href": "/ielts-exam-library",
+      "icon": "/img-admin/server-1766547980662.png"
+    },
+    {
+      "name": "Listening Test",
+      "href": "/ielts-practice-library/listening",
+      "icon": "/img-admin/pantone-1766508050243.png"
+    },
+    {
+      "name": "Reading Test",
+      "href": "/ielts-practice-library/reading",
+      "icon": "/img-admin/design-1766507797101.png"
+    },
+    {
+      "name": "Sample Writing",
+      "href": "/ielts-writing-sample",
+      "icon": "/img-admin/web-design-1766507837856.png"
+    },
+    {
+      "name": "Sample Speaking",
+      "href": "/ielts-speaking-sample",
+      "icon": "/img-admin/smartphone-1766507895088.png"
+    },
+    {
+      "name": "Ielts Tips",
+      "href": "https://ieltspredictiontest.com/post",
+      "icon": "/img-admin/personal-1766508134498.png"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { supabaseAdmin } from "~supabase/admin";
+import { createOrder } from "../../../services/order";
+
+const AFFILIATE_COOKIE_NAME = "affiliate_ref";
+
+type ResponseData = {
+  success: boolean;
+  order?: Record<string, unknown>;
+  error?: string;
+};
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<ResponseData>,
+) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
+
+  try {
+    const {
+      packageType,
+      duration,
+      skillType,
+      amount,
+      originalAmount,
+      couponId,
+      couponCode,
+      discountAmount,
+      userId,
+    } = req.body;
+
+    if (!packageType || !duration || !amount) {
+      return res.status(400).json({ success: false, error: "Missing required fields" });
+    }
+
+    // userId từ body hoặc temp ID
+    const finalUserId = userId || `temp_${Date.now()}`;
+
+    // Affiliate ref từ cookie
+    const affiliateRef = req.cookies[AFFILIATE_COOKIE_NAME];
+
+    // Tạo order qua service (bao gồm coupon validation)
+    const order = await createOrder(supabaseAdmin, {
+      userId: finalUserId,
+      packageType,
+      duration,
+      skillType,
+      amount,
+      originalAmount,
+      couponId,
+      couponCode,
+      discountAmount,
+      affiliateRef: affiliateRef || undefined,
+    });
+
+    // KHÔNG tính hoa hồng affiliate ở đây
+    // Hoa hồng chỉ được tính khi order status = "completed" (sau khi thanh toán thành công)
+    // TODO(task-09): Affiliate commission logic sẽ được migrate sang Supabase
+
+    return res.status(200).json({
+      success: true,
+      order: {
+        id: order.id,
+        orderId: order.order_id,
+        orderFields: {
+          packageType: order.package_type,
+          duration: order.duration,
+          skillType: order.skill_type,
+          amount: order.amount,
+          status: order.status,
+          paymentMethod: order.payment_method,
+          transferContent: order.transfer_content,
+          createdAt: order.created_at,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[API /api/orders/create]", error);
+
+    // Coupon validation errors → 400
+    if (error instanceof Error && error.message.includes("giảm giá")) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "link_1766596053054_7epf4ydtd",
+    "affiliateId": "affiliate_1766595750044_c0ttkxjle",
+    "link": "http://localhost:3000/subscription?ref=affiliat",
+    "createdAt": "2025-12-24T17:07:33.054Z"
+  },
+  {
+    "id": "link_1766596317969_lj4t1mj7c",
+    "affiliateId": "affiliate_1766595750044_c0ttkxjle",
+    "link": "http://localhost:3000/subscription?ref=affiliat",
+    "createdAt": "2025-12-24T17:11:57.969Z"
+  },
+  {
+    "id": "link_1766597305493_appvmnqmy",
+    "affiliateId": "affiliate_1766595750044_c0ttkxjle",
+    "link": "http://localhost:3000/subscription?ref=123",
+    "customLink": "123",
+    "createdAt": "2025-12-24T17:28:25.493Z"
+  },
+  {
+    "id": "link_1766597724426_4gelp4lsn",
+    "affiliateId": "affiliate_1766595750044_c0ttkxjle",
+    "link": "http://localhost:3000/subscription?ref=5DLZhrnjqD",
+    "customLink": "5DLZhrnjqD",
+    "createdAt": "2025-12-24T17:35:24.426Z"
+  },
+  {
+    "id": "link_1766597735395_p7kmcnuaw",
+    "affiliateId": "affiliate_1766595750044_c0ttkxjle",
+    "link": "http://localhost:3000/subscription?ref=RCuJdZi9sv",
+    "customLink": "RCuJdZi9sv",
+    "createdAt": "2025-12-24T17:35:35.395Z"
+  }
+]

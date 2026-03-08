@@ -1,0 +1,55 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  readConfig,
+  writeConfig,
+} from "~services/cms-config";
+import { supabaseAdmin } from "~supabase/admin";
+import type { PracticeLibraryBannerConfig } from "@/shared/types/admin-config";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const sectionName = "ielts-practice-library/banner";
+
+  if (req.method === "GET") {
+    try {
+      const config = await readConfig<PracticeLibraryBannerConfig>(supabaseAdmin, sectionName);
+      return res.status(200).json(config);
+    } catch (error) {
+      return res.status(500).json({
+        message: "Không đọc được file config",
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (req.method === "POST") {
+    try {
+      // TODO: Thêm authentication check ở đây
+      // if (!isAdmin(req)) return res.status(401).json({ message: "Unauthorized" });
+
+      const body = req.body as PracticeLibraryBannerConfig;
+      
+      // Validate body không rỗng
+      if (!body || !body.listening || !body.reading) {
+        return res.status(400).json({
+          message: "Invalid config data",
+          error: "Config data is missing required fields",
+        });
+      }
+      
+      await writeConfig<PracticeLibraryBannerConfig>(supabaseAdmin, sectionName, body);
+      return res.status(200).json({ message: "Lưu config thành công" });
+    } catch (error) {
+      console.error("Error writing config:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      
+      return res.status(500).json({
+        message: "Không ghi được file config",
+        error: errorMessage,
+        ...(process.env.NODE_ENV === "development" && { stack: errorStack }),
+      });
+    }
+  }
+
+  return res.status(405).json({ message: "Method not allowed" });
+}

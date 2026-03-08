@@ -1,0 +1,122 @@
+/**
+ * Sample Essay Service — IELTS Prediction
+ *
+ * Replaces WPGraphQL sample essay queries + filter logic.
+ * Supports 12 filter parameters matching the WordPress taxonomy/meta_query system.
+ *
+ * @origin functions.php L550–671 (graphql_post_object_connection_query_args filter)
+ * @see LEGACY_CODEBASE_DOCS.md §10 (Blog & Sample Essays)
+ */
+
+import { SupabaseClient } from "@supabase/supabase-js";
+import type {
+    SampleEssay,
+    SampleEssayFilters,
+    PaginatedResponse,
+} from "./types/database";
+
+// ============================================================================
+// Public Read Functions
+// ============================================================================
+
+/**
+ * Lấy bài mẫu theo slug.
+ * Chỉ trả về bài có status = 'published'.
+ *
+ * @param supabase - Supabase client instance
+ * @param slug - Sample essay slug (unique)
+ * @returns SampleEssay hoặc null nếu không tìm thấy
+ */
+export async function getSampleEssayBySlug(
+    supabase: SupabaseClient,
+    slug: string
+): Promise<SampleEssay | null> {
+    const { data, error } = await supabase
+        .from("sample_essays")
+        .select("*")
+        .eq("slug", slug)
+        .eq("status", "published")
+        .single();
+
+    if (error) {
+        if (error.code === "PGRST116") return null; // Not found
+        throw error;
+    }
+
+    return data as SampleEssay;
+}
+
+/**
+ * Lấy danh sách bài mẫu với 12 filter params + phân trang.
+ *
+ * Filter mapping từ WordPress:
+ *   - skill → tax_query (taxonomy=sample-essay-type) → eq("skill", ...)
+ *   - part → meta_query (key=part) → eq("part", ...)
+ *   - questionType → meta_query LIKE (key=question_type) → ilike("question_type", ...)
+ *   - quarter → meta_query (key=quarter) → eq("quarter", ...)
+ *   - year → tax_query (taxonomy=annual_period) → eq("year", ...)
+ *   - source → tax_query (taxonomy=sample-source) → eq("source", ...)
+ *   - topic → meta_query LIKE (key=topic) → ilike("topic", ...)
+ *   - task → meta_query (key=task) → eq("task", ...)
+ *   - passage → meta_query (key=passage) → eq("passage", ...)
+ *   - search → s parameter → ilike("title", ...)
+ *
+ * @origin functions.php L550–671 (filter logic)
+ *
+ * @param supabase - Supabase client instance
+ * @param filters - Bộ lọc sample essay (12 params)
+ * @returns Paginated list of sample essays
+ */
+export async function getSampleEssays(
+    supabase: SupabaseClient,
+    filters: SampleEssayFilters = {}
+): Promise<PaginatedResponse<SampleEssay>> {
+    const page = filters.page || 1;
+    const pageSize = filters.pageSize || 12;
+
+    let query = supabase
+        .from("sample_essays")
+        .select("*", { count: "exact" })
+        .eq("status", "published");
+
+    // Exact match filters
+    if (filters.skill) query = query.eq("skill", filters.skill);
+    if (filters.part) query = query.eq("part", filters.part);
+    if (filters.quarter) query = query.eq("quarter", filters.quarter);
+    if (filters.year) query = query.eq("year", filters.year);
+    if (filters.source) query = query.eq("source", filters.source);
+    if (filters.task) query = query.eq("task", filters.task);
+    if (filters.passage) query = query.eq("passage", filters.passage);
+
+    // LIKE match filters (partial match — mirrors WordPress meta_query LIKE)
+    if (filters.questionType) {
+        query = query.ilike("question_type", `%${filters.questionType}%`);
+    }
+    if (filters.topic) {
+        query = query.ilike("topic", `%${filters.topic}%`);
+    }
+
+    // Search by title
+    if (filters.search) {
+        query = query.ilike("title", `%${filters.search}%`);
+    }
+
+    // Pagination + ordering
+    query = query
+        .range((page - 1) * pageSize, page * pageSize - 1)
+        .order("created_at", { ascending: false });
+
+    const { data, error, count } = await query;
+
+    if (error) throw error;
+
+    const totalCount = count ?? 0;
+
+    return {
+        data: (data ?? []) as SampleEssay[],
+        count: totalCount,
+        page,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+    };
+}

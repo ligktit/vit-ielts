@@ -1,0 +1,741 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif&display=swap");
+@layer theme, base, antd, components, utilities;
+
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --font-noto-sans: "Noto Sans", sans-serif;
+  --font-nunito: "Nunito", sans-serif;
+  --font-noto-serif: "Noto Serif", serif;
+  --color-default: rgb(36, 41, 56);
+  --breakpoint-xs: 350px;
+  --breakpoint-sm: 550px;
+  --breakpoint-md: 850px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1536px;
+
+  --color-quaternary: oklch(72.151% 0.14993 40.693);
+  --color-quaternary-50: oklch(100% 0 none);
+  --color-quaternary-100: oklch(97.136% 0.01365 46.234);
+  --color-quaternary-200: oklch(90.381% 0.04523 40.314);
+  --color-quaternary-300: oklch(83.992% 0.0789 41.256);
+  --color-quaternary-400: oklch(77.743% 0.11475 40.711);
+  --color-quaternary-500: oklch(72.151% 0.14993 40.693);
+  --color-quaternary-600: oklch(65.579% 0.19353 38.658);
+  --color-quaternary-700: oklch(56.649% 0.17956 37.524);
+  --color-quaternary-800: oklch(45.698% 0.14138 37.942);
+  --color-quaternary-900: oklch(34.067% 0.10019 38.691);
+  --color-quaternary-950: oklch(27.807% 0.07879 39.811);
+
+  --color-tertiary: oklch(76.695% 0.14944 66.645);
+  --color-tertiary-50: oklch(96.6% 0.022 74.1);
+  --color-tertiary-100: oklch(94.3% 0.03786 73.74);
+  --color-tertiary-200: oklch(89.608% 0.06904 71.722);
+  --color-tertiary-300: oklch(84.988% 0.0987 70.772);
+  --color-tertiary-400: oklch(80.851% 0.12733 69.732);
+  --color-tertiary-500: oklch(76.695% 0.14944 66.645);
+  --color-tertiary-600: oklch(69.938% 0.15892 61.178);
+  --color-tertiary-700: oklch(57.682% 0.12908 62.304);
+  --color-tertiary-800: oklch(44.691% 0.0984 62.524);
+  --color-tertiary-900: oklch(30.727% 0.06357 65.628);
+  --color-tertiary-950: oklch(23.229% 0.04544 69.362);
+
+  --color-primary: oklch(60.987% 0.17833 19.421);
+  --color-primary-50: oklch(93.194% 0.02539 11.596);
+  --color-primary-100: oklch(89.188% 0.04059 12.25);
+  --color-primary-200: oklch(81.388% 0.07406 13.55);
+  --color-primary-300: oklch(73.913% 0.10977 14.352);
+  --color-primary-400: oklch(67.086% 0.14478 16.999);
+  --color-primary-500: oklch(60.987% 0.17833 19.421);
+  --color-primary-600: oklch(53.383% 0.18786 22.446);
+  --color-primary-700: oklch(43.921% 0.1519 22.045);
+  --color-primary-800: oklch(33.739% 0.11236 21.197);
+  --color-primary-900: oklch(23.142% 0.06827 20.347);
+  --color-primary-950: oklch(17.395% 0.04392 17.457);
+
+  --color-secondary: oklch(85.917% 0.1353 90.85);
+  --color-secondary-50: oklch(100% 0 none);
+  --color-secondary-100: oklch(99.068% 0.00946 93.566);
+  --color-secondary-200: oklch(95.536% 0.04466 91.737);
+  --color-secondary-300: oklch(92.14% 0.07738 91.279);
+  --color-secondary-400: oklch(89.052% 0.10928 91.783);
+  --color-secondary-500: oklch(85.917% 0.1353 90.85);
+  --color-secondary-600: oklch(81.985% 0.1578 88.339);
+  --color-secondary-700: oklch(72.743% 0.14581 86.289);
+  --color-secondary-800: oklch(59.064% 0.11745 87.452);
+  --color-secondary-900: oklch(44.306% 0.08701 88.55);
+  --color-secondary-950: oklch(36.463% 0.07062 89.512);
+
+  --shadow-primary: 0 4px 8px -2px rgba(16, 24, 40, 0.1),
+    0 2px 4px -2px rgba(16, 24, 40, 0.06);
+}
+
+body {
+  color: rgb(36, 41, 56);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.material-symbols-rounded {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-rounded.filled {
+  font-variation-settings: "FILL" 1, "wght" 300, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-rounded.grade-200 {
+  font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 200, "opsz" 24;
+}
+
+.material-symbols-rounded.bold {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 200, "opsz" 24;
+}
+
+.material-symbols-rounded.xbold {
+  font-variation-settings: "FILL" 0, "wght" 700, "GRAD" 200, "opsz" 24;
+}
+
+.material-symbols-rounded.xxbold {
+  font-variation-settings: "FILL" 0, "wght" 900, "GRAD" 200, "opsz" 24;
+}
+
+.anticon-loading {
+  @apply block;
+}
+
+@layer antd {
+  body a {
+    color: inherit;
+  }
+}
+
+p {
+  line-height: 1.5 !important;
+}
+
+.placeholder-bold::placeholder {
+  font-weight: 700;
+  color: #000;
+}
+
+.prose-sm :where(p):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-size: 16px;
+  line-height: 1.6 !important;
+  color: #000;
+  font-weight: 500;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-splitter-horizontal>.ant-splitter-bar .ant-splitter-bar-dragger::before {
+  height: 100%;
+  width: 2px;
+  background: #7f7f7f;
+}
+
+.prose-sm :where(p):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 24px !important;
+  margin-bottom: 24px !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-splitter>.ant-splitter-bar .ant-splitter-bar-dragger::after {
+  background-image: url('../../../public/arrow.png');
+  width: 36px;
+  height: 36px;
+  background-size: cover;
+  z-index: 99999;
+}
+
+:where(.css-10l2ewt).ant-splitter>.ant-splitter-bar .ant-splitter-bar-dragger::after {
+    background-image: url('../../../public/arrow.png');
+      width: 36px;
+      height: 36px;
+      background-size: cover;
+}
+
+.hambuger {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hambuger .bar {
+  width: 20px;
+  height: 3px;
+  background-color: #222222;
+  border-radius: 2px;
+}
+
+/* Thêm vào cuối file globals.css của bạn */
+
+/* --- Text Size Control --- */
+/* Kích thước mặc định (medium) */
+html {
+  font-size: 16px;
+  /* Hoặc 1rem */
+}
+
+html.text-size-small {
+  font-size: 14px;
+}
+
+html.text-size-medium {
+  font-size: 16px;
+}
+
+html.text-size-large {
+  font-size: 19px;
+}
+
+html.text-size-xlarge {
+  font-size: 22px;
+}
+
+html.text-size-large h2 {
+  font-size: 25px;
+}
+
+html.text-size-xlarge h2 {
+  font-size: 29px;
+}
+
+html.text-size-large .prose-sm :where(p):not(:where([class~="not-prose"], html.text-size-large [class~="not-prose"] *)),
+html.text-size-large h3 {
+  font-size: 19px;
+}
+
+html.text-size-xlarge .prose-sm :where(p):not(:where([class~="not-prose"], html.text-size-large [class~="not-prose"] *)),
+html.text-size-xlarge h3 {
+  font-size: 22px;
+}
+
+html.text-size-large .text-\[16px\] {
+  font-size: 19px !important;
+}
+
+html.text-size-xlarge .text-\[16px\] {
+  font-size: 22px !important;
+  line-height: 32px !important;
+}
+
+
+html.text-size-large .pt-6.border-t div[aria-roledescription="sortable"],
+html.text-size-large .text-\[14px\] {
+  font-size: 16px;
+}
+
+html.text-size-large .ant-splitter-panel div {
+  font-size: 19px !important;
+}
+
+html.text-size-xlarge .ant-splitter-panel div,
+html.text-size-xlarge .pt-6.border-t div[aria-roledescription="sortable"],
+html.text-size-xlarge .text-\[14px\] {
+  font-size: 22px;
+}
+
+.sandbox .min-w-\[96px\] {
+  min-width: 520px !important;
+  display: block;
+}
+
+.space-y-6 .sandbox .min-w-\[96px\] {
+  min-width: 96px !important;
+  display: inline-block;
+}
+
+/* --- Fullscreen Modal Style --- */
+.fullscreen-modal .ant-modal {
+  max-width: 100%;
+  top: 0;
+  padding-bottom: 0;
+  margin: 0;
+}
+
+.fullscreen-modal .ant-modal-content {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.fullscreen-modal .ant-modal-body {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.tool-box,
+.go-submit {
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  border-radius: 4px;
+}
+
+.go-submit {
+  color: #fff;
+  background-color: #e31837;
+  margin-bottom: 17px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+}
+
+.go-submit .title {
+  color: #fff;
+}
+
+.icon-left {
+  width: 21px;
+  height: 21px;
+}
+
+.icon-right {
+  height: 16px;
+  width: 10px;
+  max-width: 80%;
+
+}
+
+.go-submit .icon-right {
+  filter: brightness(0) invert(1);
+}
+
+.tool-group {
+  border: solid 1px #C1C1C1;
+  border-radius: 4px;
+}
+
+.ant-modal-close {
+  background-color: transparent !important;
+}
+
+html .ant-splitter-panel div {
+  font-size: 16px;
+}
+
+.text-size-large .ant-modal-title .popup-title {
+  font-size: 32px;
+}
+
+.text-size-xlarge .ant-modal-title .popup-title {
+  font-size: 37px;
+}
+
+.text-size-large .size-text {
+  font-size: 20px !important;
+}
+
+.option-icon {
+  width: 20px !important;
+}
+
+.text-size-xlarge .option-icon {
+  width: 25px !important;
+}
+
+.text-size-xlarge .size-text {
+  font-size: 28px !important;
+}
+
+.text-size-xlarge .check-size {
+  font-size: 34px;
+}
+
+.ant-checkbox-label {
+  font-size: 16px;
+}
+
+.text-size-large .ant-checkbox-label {
+  font-size: 19px;
+}
+
+.text-size-xlarge .ant-checkbox-label {
+  font-size: 22px;
+}
+
+/* Thêm đoạn CSS mới này vào */
+.droppable-slot-mq.active-slot {
+  border-color: #418ec8 !important;
+  border-width: 2px !important;
+}
+
+.droppable-slot-mq.is-active {
+  border-color: #418ec8 !important;
+  border-width: 2px !important;
+}
+
+.active-slot {
+  border: 2px dashed #418ec8;
+}
+
+.plyr--audio {
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+.plyr__controls {
+  padding-bottom: 0 !important;
+}
+
+/* Fix Plyr settings menu bị che bởi overflow-hidden */
+.plyr__menu {
+  z-index: 10000 !important;
+  position: absolute !important;
+  overflow: visible !important;
+}
+
+.plyr__menu__container {
+  overflow: visible !important;
+  z-index: 10000 !important;
+  position: relative !important;
+  margin-bottom: 0 !important
+}
+
+/* Đảm bảo container của Plyr không clip menu */
+.plyr__controls__item[data-plyr="settings"] {
+  position: relative !important;
+  z-index: 10000 !important;
+  overflow: visible !important;
+}
+
+.plyr__menu .plyr__control svg {
+  margin-right: -4.5px;
+}
+
+.plyr__controls__item[data-plyr="settings"] .plyr__menu {
+  overflow: visible !important;
+}
+
+/* Đảm bảo parent containers không clip menu */
+.plyr__controls {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.plyr {
+  overflow: visible !important;
+}
+
+/* Fix cho test result page - đảm bảo menu settings không bị clip */
+.plyr__menu__container > .plyr__menu__value {
+  overflow: visible !important;
+}
+
+.plyr__menu__container > .plyr__menu__value > ul {
+  overflow: visible !important;
+  position: relative !important;
+  z-index: 10001 !important;
+}
+
+/* Đảm bảo tất cả containers cha của Plyr không clip menu */
+.plyr__controls__item {
+  overflow: visible !important;
+}
+
+/* Fix cho Splitter.Panel - đảm bảo không clip menu */
+.ant-split-panel {
+  overflow: visible !important;
+}
+
+.ant-split-panel > div {
+  overflow: visible !important;
+}
+
+/* Fix cụ thể cho Splitter.Panel chứa Plyr */
+.ant-split-panel:has(.plyr) {
+  overflow: visible !important;
+}
+
+.ant-split-panel:has(.plyr) > div {
+  overflow: visible !important;
+}
+
+/* Đảm bảo Splitter container không clip */
+.ant-split {
+  overflow: visible !important;
+}
+
+.ant-split > div {
+  overflow: visible !important;
+}
+
+/* Override cho test result page cụ thể */
+.plyr__menu,
+.plyr__menu__container,
+.plyr__menu__container > * {
+  overflow: visible !important;
+  clip: unset !important;
+  clip-path: none !important;
+}
+
+/* Đảm bảo Splitter.Panel không clip menu của Plyr */
+.ant-split-panel:has(.plyr) {
+  overflow: visible !important;
+}
+
+.ant-split-panel:has(.plyr) > div {
+  overflow: visible !important;
+}
+
+/* Fix cụ thể cho test result listening panel */
+.ant-split-panel:has(.plyr__controls) {
+  overflow: visible !important;
+}
+
+/* Đảm bảo menu được render đúng cách */
+.plyr__menu[role="menu"] {
+  position: absolute !important;
+  z-index: 10002 !important;
+  overflow: visible !important;
+  max-height: none !important;
+  clip: unset !important;
+  clip-path: none !important;
+}
+
+/* Fix cho tất cả containers cha của Plyr menu */
+.plyr__menu__container,
+.plyr__menu__container > *,
+.plyr__controls__item[data-plyr="settings"],
+.plyr__controls__item[data-plyr="settings"] > * {
+  overflow: visible !important;
+  clip: unset !important;
+  clip-path: none !important;
+}
+
+/* Đảm bảo Splitter và Panel không clip menu */
+.ant-split:has(.plyr),
+.ant-split-panel:has(.plyr),
+.ant-split-panel:has(.plyr) > div:not(.ex-right):not([class*="overflow-y-auto"]) {
+  overflow: visible !important;
+  overflow-y: visible !important;
+}
+
+/* Chỉ giữ overflow-y-auto cho explanations area */
+.ant-split-panel:has(.plyr) > div.overflow-y-auto:has(.ex-right) {
+  overflow-y: auto !important;
+  overflow-x: visible !important;
+}
+
+.fill-dark {
+  filter: brightness(0) saturate(100%);
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper .ant-radio-inner::after {
+  background-color: #0075ff !important;
+  transform: scale(0.5);
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper .ant-radio-checked .ant-radio-inner {
+  border-color: #0075ff !important;
+  background-color: #fff !important
+}
+
+.ant-radio-wrapper:hover :where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper,
+:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper:hover .ant-radio-inner {
+  border-color: #000 !important;
+}
+
+.ant-radio-wrapper {
+  width: 100%;
+}
+
+.ant-radio-group {
+  padding-left: 0 !important;
+  width: 100% !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-space-gap-col-small {
+  row-gap: 4px !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper .ant-radio-inner {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+input.active-quizz {
+  border: 2px solid #418ec8;
+}
+
+.active-quizz .stt {
+  border: 2px solid #418ec8;
+  border-radius: 2px;
+}
+
+.sandbox p .w-\[96px\] {
+  width: 550px !important;
+  min-width: 550px !important;
+  display: block;
+  margin-top: 20px;
+}
+
+.heading-list .sandbox {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.sandbox p .w-\[96px\] div .sandbox {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  line-height: 1;
+}
+
+/* Class chúng ta vừa thêm ở file Checkbox.tsx */
+.exam-checkbox-group .ant-checkbox-wrapper {
+  padding: 11px 12px;
+
+  transition: background-color 0.2s ease;
+  display: flex;
+  align-items: flex-start;
+  line-height: 1.5;
+}
+
+/* Đây là style khi đáp án ĐƯỢC CHỌN (giống hệt hình demo) */
+.exam-checkbox-group .ant-checkbox-wrapper-checked {
+  background-color: #bbd8f0;
+  /* Đây là màu xanh bạn muốn */
+}
+
+/* Hiệu ứng hover cho đẹp mắt */
+.exam-checkbox-group .ant-checkbox-wrapper:not(.ant-checkbox-wrapper-checked):hover {
+  background-color: #e4e4e4;
+}
+
+/* Căn chỉnh lại cái ô checkbox cho thẳng hàng */
+.exam-checkbox-group .ant-checkbox-wrapper .ant-checkbox {
+  position: relative;
+  top: 4px;
+}
+
+/* Căn chỉnh text bên cạnh checkbox */
+.exam-checkbox-group .ant-checkbox-wrapper span:last-child {
+  flex: 1;
+  padding-left: 10px;
+}
+
+.exam-checkbox-group .ant-checkbox-wrapper .ant-checkbox {
+  top: -1px !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #0075ff !important;
+  border-color: #0075ff !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-wrapper:not(.ant-checkbox-wrapper-disabled):hover .ant-checkbox-inner {
+  border-color: #0075ff !important;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-disabled+span {
+  color: #000 !important;
+}
+
+.ant-checkbox-inner,
+.ant-checkbox {
+  border-color: #767676;
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 3px !important;
+}
+
+.exam-checkbox-group .ant-checkbox-wrapper span:last-child {
+  padding-left: 7px !important;
+}
+
+.ex-right .prose-sm.md\:p-12 {
+  padding-top: 0 !important;
+}
+
+.ex-right .prose-sm.md\:p-12 p {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.ant-collapse-content-box .md\:p-12 {
+  padding: 0 !important;
+}
+
+.ant-radio-label {
+  width: 100%;
+}
+
+:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-disabled .ant-checkbox-inner:after {
+  border-color: #fff;
+}
+
+/* Ẩn scrollbar của toàn trang nhưng vẫn cho cuộn */
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent;
+
+}
+
+/* Chỉ .listening-board có scrollbar riêng */
+.listening-board {
+  overflow-y: scroll !important;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+
+  /* để chắc chắn vùng này được render scrollbar */
+  background-clip: padding-box;
+}
+
+.basis-100 {
+  flex-basis: 100% !important;
+  flex-grow: 0;
+}
+
+br {
+  display: none;
+}
+
+.leading-\[2\].prose.prose-sm.max-w-none p br {
+  display: block;
+}
+
+.prose-base.text-black.leading-relaxed .sandbox {
+  width: fit-content;
+}
+
+.prose-base.text-black.leading-relaxed .sandbox p {
+  margin: 5px 0 !important;
+}
+
+.splide__arrow {
+  background-color: #242938 !important;
+  opacity: 1 !important; 
+  top: 120px !important;
+}
+
+.splide__arrow--prev {
+  left: -13px !important;
+}
+
+.splide__arrow--next {
+  right: -13px !important;
+}
+
+.splide__arrow svg {
+  fill: #fff !important;
+  height: 1em !important;
+  width: 1em !important;
+}

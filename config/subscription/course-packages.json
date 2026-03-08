@@ -1,0 +1,172 @@
+{
+  "currencySuffix": "đ",
+  "popularBadgeText": "POPULAR",
+  "priceSuffix": "/Monthly",
+  "monthText": {
+    "singular": "Month",
+    "plural": "Months"
+  },
+  "accessText": "Access",
+  "dealNoteTemplate": "SAME PRICE AS THE SHORTER PLAN",
+  "features": {
+    "included": [
+      "Unlimited Access Courses",
+      "Certificate After Completion"
+    ],
+    "excluded": [
+      "24/7 Dedicated Support"
+    ]
+  },
+  "skillLabels": {
+    "listening": "LISTENING",
+    "reading": "READING"
+  },
+  "combo": {
+    "title": "Combo",
+    "ctaText": "Join Course Plan",
+    "basePrice": 250000,
+    "monthlyIncrementPrice": 200000,
+    "plans": [
+      {
+        "name": "Standard Plan",
+        "months": 1,
+        "price": 200000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 2,
+        "price": 400000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 3,
+        "price": 600000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 4,
+        "price": 800000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 5,
+        "price": 1000000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 6,
+        "price": 1000000,
+        "originalPrice": 1200000,
+        "featuredDeal": true,
+        "dealNote": "Giảm 200.000đ"
+      },
+      {
+        "name": "Standard Plan",
+        "months": 7,
+        "price": 1400000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 8,
+        "price": 1600000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 9,
+        "price": 1800000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 10,
+        "price": 2000000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 11,
+        "price": 2200000
+      },
+      {
+        "name": "Standard Plan",
+        "months": 12,
+        "price": 1800000,
+        "originalPrice": 2400000,
+        "featuredDeal": true,
+        "dealNote": "Giảm 600.000đ"
+      }
+    ]
+  },
+  "single": {
+    "title": "Single Pack",
+    "ctaText": "Join Course Plan",
+    "basePrice": 200000,
+    "monthlyIncrementPrice": 100000,
+    "skills": [
+      "listening",
+      "reading"
+    ],
+    "plans": [
+      {
+        "name": "Single Pack",
+        "months": 2,
+        "price": 200000
+      },
+      {
+        "name": "Single Pack",
+        "months": 3,
+        "price": 300000
+      },
+      {
+        "name": "Single Pack",
+        "months": 4,
+        "price": 400000
+      },
+      {
+        "name": "Single Pack",
+        "months": 5,
+        "price": 500000
+      },
+      {
+        "name": "Single Pack",
+        "months": 6,
+        "price": 500000,
+        "originalPrice": 600000,
+        "popular": true,
+        "featuredDeal": true,
+        "dealNote": "Giảm 100.000đ"
+      },
+      {
+        "name": "Single Pack",
+        "months": 7,
+        "price": 700000
+      },
+      {
+        "name": "Single Pack",
+        "months": 8,
+        "price": 800000
+      },
+      {
+        "name": "Single Pack",
+        "months": 9,
+        "price": 900000
+      },
+      {
+        "name": "Single Pack",
+        "months": 10,
+        "price": 1000000
+      },
+      {
+        "name": "Single Pack",
+        "months": 11,
+        "price": 1100000
+      },
+      {
+        "name": "Single Pack",
+        "months": 12,
+        "price": 900000,
+        "originalPrice": 1200000,
+        "featuredDeal": true,
+        "dealNote": "Giảm 300.000đ"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "trustpilot": {
+    "rating": "Excellent 4.7 out of 5",
+    "image": "/img-admin/o-trustpilot.png"
+  },
+  "headline": {
+    "line1": "Education Is The Best",
+    "line2": "Key",
+    "line3": "Success",
+    "line4": "In Life"
+  },
+  "description": {
+    "text": "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint.",
+    "highlightText": "Velit officia consequat."
+  },
+  "buttons": {
+    "primary": {
+      "text": "Get Started",
+      "link": "/account/register"
+    }
+  },
+  "backgroundImage": "/img-admin/z7372912583445-37c4a42ee79600ddb61e719a1b72e48d-1766891122411.jpg",
+  "bannerImage": "/img-admin/o-banner-1766077848129-1766498390339.png",
+  "decorativeShape": {
+    "image": "/img-admin/o-shape-1.png"
+  },
+  "featureCards": [
+    {
+      "icon": "/img-admin/o-icon-1.png",
+      "title": "Your",
+      "subtitle": "Admission Complete"
+    },
+    {
+      "icon": "/img-admin/o-icon-2.png",
+      "value": "36k+",
+      "subtitle": "Enrolled Students",
+      "avatars": [
+        "/img-admin/art-stu-2.png",
+        "/img-admin/art-stu-1.png",
+        "/img-admin/art-stu-3.png",
+        "/img-admin/i-team.png"
+      ]
+    },
+    {
+      "icon": "/img-admin/o-icon-3.png",
+      "value": "99%",
+      "subtitle": "Satisfied"
+    }
+  ]
+}

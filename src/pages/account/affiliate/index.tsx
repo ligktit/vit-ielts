@@ -1,0 +1,2 @@
+export { PageAffiliate } from "./ui";
+

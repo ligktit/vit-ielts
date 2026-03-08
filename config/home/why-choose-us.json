@@ -1,0 +1,29 @@
+{
+  "badge": {
+    "text": "Why Choose Us"
+  },
+  "title": "Creating A Community Of Life Long Learners.",
+  "description": "There are many variations of passages of the Ipsum available, but the majority have suffered alteration in some form, by injected humour.",
+  "statistics": [
+    {
+      "icon": "favorite",
+      "value": "500+",
+      "label": "Learners & counting"
+    },
+    {
+      "icon": "show_chart",
+      "value": "800+",
+      "label": "Courses & Video"
+    },
+    {
+      "icon": "cast",
+      "value": "1,000+",
+      "label": "Certified Students"
+    },
+    {
+      "icon": "map",
+      "value": "100+",
+      "label": "Certified Students"
+    }
+  ]
+}

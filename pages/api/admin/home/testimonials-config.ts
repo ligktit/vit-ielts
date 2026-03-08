@@ -1,0 +1,105 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import { readConfig } from "~services/cms-config";
+import { supabaseAdmin } from "~supabase/admin";
+import type { TestimonialsConfig } from "@/shared/types/admin-config";
+
+/**
+ * API route để đọc testimonials config
+ * Chỉ dùng trong getServerSideProps
+ */
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<TestimonialsConfig | { error: string }>
+) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    const config = await readConfig<TestimonialsConfig>(supabaseAdmin, "testimonials");
+    // Validate config có đầy đủ properties
+    if (!config || !config.title) {
+      throw new Error("Invalid config structure");
+    }
+    return res.status(200).json(config);
+  } catch {
+    // Trả về config mặc định nếu file không tồn tại
+    const defaultConfig: TestimonialsConfig = {
+      title: "What Our Learners Say",
+      description:
+        "Learning communicate to global world and build a bright future with our histudy.",
+      button: {
+        text: "Marquee Y",
+        link: "#",
+      },
+      testimonials: [
+        {
+          name: "Martha Maldonado",
+          title: "Executive Chairman",
+          company: "@ Google",
+          quote:
+            "After the launch, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-1.png",
+        },
+        {
+          name: "Michael D. Lovelady",
+          title: "CEO",
+          company: "@ Google",
+          quote:
+            "Histudy education, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-2.png",
+        },
+        {
+          name: "Valerie J. Creasman",
+          title: "Executive Designer",
+          company: "@ Google",
+          quote:
+            "Our educational, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-3.png",
+        },
+        {
+          name: "Hannah R. Sutton",
+          title: "Executive Chairman",
+          company: "@ Facebook",
+          quote:
+            "People says about, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/i-team.png",
+        },
+        {
+          name: "Pearl B. Hill",
+          title: "Chairman SR",
+          company: "@ Facebook",
+          quote:
+            "Like this histudy, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-1.png",
+        },
+        {
+          name: "Mandy F. Wood",
+          title: "SR Designer",
+          company: "@ Google",
+          quote:
+            "Educational template, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-2.png",
+        },
+        {
+          name: "Mildred W. Diaz",
+          title: "Executive Officer",
+          company: "@ Yelp",
+          quote:
+            "Online leaning, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/art-stu-3.png",
+        },
+        {
+          name: "Christopher H. Win",
+          title: "Product Designer",
+          company: "@ Google",
+          quote:
+            "Remote learning, vulputate at sapien sit amet, auctor iaculis lorem. In vel hend rerit nisi. Vestibulum eget risus velit.",
+          avatar: "/img-admin/i-team.png",
+        },
+      ],
+    };
+    return res.status(200).json(defaultConfig);
+  }
+}
+
