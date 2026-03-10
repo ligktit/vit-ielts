@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { registerAffiliate, getAffiliateByUserId } from "../../../services/affiliate";
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 type ResponseData = { success: boolean; affiliate?: unknown; message?: string; error?: string };
 
 export default async function handler(
@@ -14,6 +16,10 @@ export default async function handler(
 
       if (!userId) {
         return res.status(400).json({ success: false, error: "User ID is required" });
+      }
+
+      if (typeof userId !== "string" || !UUID_REGEX.test(userId)) {
+        return res.status(400).json({ success: false, error: "Invalid User ID format" });
       }
 
       const { affiliate, isNew } = await registerAffiliate(supabaseAdmin, userId);
@@ -49,6 +55,10 @@ export default async function handler(
 
       if (!userId || typeof userId !== "string") {
         return res.status(400).json({ success: false, error: "User ID is required" });
+      }
+
+      if (!UUID_REGEX.test(userId)) {
+        return res.status(400).json({ success: false, error: "Invalid User ID format" });
       }
 
       const affiliate = await getAffiliateByUserId(supabaseAdmin, userId);

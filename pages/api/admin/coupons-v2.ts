@@ -1,8 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 /** Enhanced coupons API supporting type, expires_at fields */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     if (req.method === "GET") {
         try {
             const { data, error } = await supabaseAdmin

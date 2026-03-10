@@ -8,7 +8,18 @@ function Answer({
 }: {
   passage: IPracticeSingle["quizFields"]["passages"][number];
 }) {
-  const question = useMemo(() => passage.questions[0], [passage.questions]);
+  const question = useMemo(() => passage.questions?.[0], [passage.questions]);
+
+  if (!question) {
+    return (
+      <section className="space-y-6">
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold">
+          🔥 Answers & Explanations
+        </h2>
+        <p className="text-gray-400 italic">No questions available.</p>
+      </section>
+    );
+  }
 
   const answer = useMemo(() => {
     switch (question.type[0]) {
@@ -45,10 +56,14 @@ function Answer({
           <p className="inline">{answer}</p>
         </div>
         <p className="text-base font-semibold">Explanation</p>
-        <div
-          className="prose prose-sm"
-          dangerouslySetInnerHTML={{ __html: question.explanations[0].content }}
-        />
+        {question.explanations?.[0]?.content ? (
+          <div
+            className="prose prose-sm"
+            dangerouslySetInnerHTML={{ __html: question.explanations[0].content }}
+          />
+        ) : (
+          <p className="text-gray-400 italic">No explanation available.</p>
+        )}
       </div>
       <Button href="#download-pdf" variant="filled" color="primary" block>
         <span>View Full Answers & Explanations</span>

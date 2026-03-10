@@ -5,6 +5,7 @@ import type {
   CoursePackageItem,
   CoursePackagesConfig,
 } from "@/shared/types/admin-config";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 const fixedComboTiers = [
   { months: 1, price: 200000 },
@@ -108,6 +109,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "POST") {
     try {
+      const user = await requireAdmin(req, res);
+      if (!user) return;
+
       const body = req.body as CoursePackagesConfig;
       const normalizedComboPlans = normalizeComboPlans(body.combo.plans);
       const normalizedSinglePlans = normalizeSinglePlans(body.single.plans);

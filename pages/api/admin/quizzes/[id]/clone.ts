@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { createQuiz } from "../../../../../services/quiz";
+import { requireAdmin } from "../../../../../lib/admin-auth";
 
 export default async function handler(
     req: NextApiRequest,
@@ -9,6 +10,9 @@ export default async function handler(
     if (req.method !== "POST") {
         return res.status(405).json({ success: false, error: "Method not allowed" });
     }
+
+    const user = await requireAdmin(req, res);
+    if (!user) return;
 
     const { id } = req.query;
     if (!id || typeof id !== "string") {
@@ -54,6 +58,10 @@ export default async function handler(
             message: "Quiz cloned successfully",
         });
     } catch (error) {
+        const pgErr = error as any;
+        if (pgErr?.code === "PGRST116") {
+            return res.status(404).json({ success: false, error: "Quiz not found" });
+        }
         console.error(`[API /api/admin/quizzes/${id}/clone]`, error);
         return res.status(500).json({
             success: false,

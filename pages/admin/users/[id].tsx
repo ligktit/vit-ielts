@@ -255,7 +255,7 @@ export default function AdminUserDetailPage() {
                         </Descriptions.Item>
                         <Descriptions.Item label="SĐT">{user.phone_number || "—"}</Descriptions.Item>
                         <Descriptions.Item label="Roles">
-                            {(Array.isArray(user.roles) ? user.roles : []).map((r) => (
+                            {(typeof user.roles === 'string' ? [user.roles] : Array.isArray(user.roles) ? user.roles : []).map((r) => (
                                 <Tag key={r} color={r === "administrator" ? "red" : "blue"}>{r}</Tag>
                             ))}
                         </Descriptions.Item>

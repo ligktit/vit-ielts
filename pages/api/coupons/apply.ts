@@ -30,7 +30,7 @@ export default async function handler(
     return res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : "Có lỗi xảy ra khi áp dụng mã giảm giá",
-      error: error instanceof Error ? error.message : String(error),
+      error: error instanceof Error ? error.message : (error as any)?.message ?? String(error),
     });
   }
 }

@@ -88,7 +88,7 @@ export const DraggableOption = ({
         className
       )}
     >
-      <TextSelectionWrapper>{parse(content)}</TextSelectionWrapper>
+      <TextSelectionWrapper>{parse(content || "")}</TextSelectionWrapper>
     </div>
   );
 };
@@ -451,7 +451,7 @@ export function MatchingQuestion({
                         className="border rounded-md px-3 py-0.5 bg-gray-50 text-[#000] text-sm"
                       >
                         <TextSelectionWrapper>
-                          {parse(option.optionText)}
+                          {parse(option.optionText || "")}
                         </TextSelectionWrapper>
                       </div>
                     ))}
@@ -478,7 +478,7 @@ export function MatchingQuestion({
                                 {" "}
                                 <TextSelectionWrapper>
                                   {" "}
-                                  {parse(question.explanations[0].content)}{" "}
+                                  {parse(question.explanations?.[0]?.content || "")}{" "}
                                 </TextSelectionWrapper>{" "}
                               </div>
                             ),
@@ -724,7 +724,7 @@ export function MatchingQuestion({
                                 >
                                   <div className={twMerge("invisible text-sm", shouldBeBold ? "font-bold" : "font-normal")}>
                                     <TextSelectionWrapper>
-                                      {parse(optionText)}
+                                      {parse(optionText || "")}
                                     </TextSelectionWrapper>
                                   </div>
                                 </div>
@@ -848,7 +848,7 @@ export function MatchingQuestion({
                         {/* Nội dung tàng hình để giữ chiều cao */}
                         <div className={twMerge("invisible text-sm", shouldBeBold ? "font-bold" : "font-normal")}>
                           <TextSelectionWrapper>
-                            {parse(optionText)}
+                            {parse(optionText || "")}
                           </TextSelectionWrapper>
                         </div>
                       </div>
@@ -870,7 +870,7 @@ export function MatchingQuestion({
                     className={twMerge("block rounded-sm border border-gray-200 px-3 py-0 text-[17px] text-[#000]", shouldBeBold ? "font-bold" : "font-normal")}
                   >
                     <TextSelectionWrapper>
-                      {parse(option.optionText)}
+                      {parse(option.optionText || "")}
                     </TextSelectionWrapper>
                   </div>
                 ))}
@@ -889,7 +889,7 @@ export function MatchingQuestion({
                           {" "}
                           <TextSelectionWrapper>
                             {" "}
-                            {parse(question.explanations[0].content)}{" "}
+                            {parse(question.explanations?.[0]?.content || "")}{" "}
                           </TextSelectionWrapper>{" "}
                         </div>
                       ),
@@ -1139,7 +1139,7 @@ export function MatchingQuestion({
                             >
                               <div className="text-[16px] text-[#000]">
                                 <TextSelectionWrapper>
-                                  {parse(item.questionPart)}
+                                  {parse(item.questionPart || "")}
                                 </TextSelectionWrapper>
                               </div>
 
@@ -1192,7 +1192,7 @@ export function MatchingQuestion({
                               className={twMerge("block rounded-md px-4 py-2 bg-white text-[#000] text-center", shouldBeBold ? "font-bold" : "font-normal")}
                             >
                               <TextSelectionWrapper>
-                                {parse(option.optionText)}
+                                {parse(option.optionText || "")}
                               </TextSelectionWrapper>
                             </div>
                           ))}
@@ -1212,7 +1212,7 @@ export function MatchingQuestion({
                               children: (
                                 <div className="prose prose-sm max-w-none p-2 rounded">
                                   <TextSelectionWrapper>
-                                    {parse(question.explanations[0].content)}
+                                    {parse(question.explanations?.[0]?.content || "")}
                                   </TextSelectionWrapper>
                                 </div>
                               ),
@@ -1251,7 +1251,7 @@ export function MatchingQuestion({
                           >
                             <div className="text-[16px] text-[#000]">
                               <TextSelectionWrapper>
-                                {parse(item.questionPart)}
+                                {parse(item.questionPart || "")}
                               </TextSelectionWrapper>
                             </div>
 
@@ -1401,7 +1401,7 @@ export function MatchingQuestion({
                         >
                           <div className="text-[16px] mb-[2px]">
                             <TextSelectionWrapper>
-                              {parse(item.questionPart)}
+                              {parse(item.questionPart || "")}
                             </TextSelectionWrapper>
                           </div>
 
@@ -1453,7 +1453,7 @@ export function MatchingQuestion({
                           className={twMerge("block rounded-sm border border-gray-200 px-3 py-0.5 bg-gray-50 text-[#000]", shouldBeBold ? "font-bold" : "font-normal")}
                         >
                           <TextSelectionWrapper>
-                            {parse(option.optionText)}
+                            {parse(option.optionText || "")}
                           </TextSelectionWrapper>
                         </div>
                       ))}
@@ -1472,7 +1472,7 @@ export function MatchingQuestion({
                             children: (
                               <div className="prose prose-sm max-w-none p-2 rounded">
                                 <TextSelectionWrapper>
-                                  {parse(question.explanations[0].content)}
+                                  {parse(question.explanations?.[0]?.content || "")}
                                 </TextSelectionWrapper>
                               </div>
                             ),
@@ -1507,7 +1507,7 @@ export function MatchingQuestion({
                         >
                           <div className="text-[16px] mb-[2px]">
                             <TextSelectionWrapper>
-                              {parse(item.questionPart)}
+                              {parse(item.questionPart || "")}
                             </TextSelectionWrapper>
                           </div>
                           <SortableContext
@@ -1595,7 +1595,7 @@ export function MatchingQuestion({
                                 >
                                   <div className={twMerge("invisible text-sm", shouldBeBold ? "font-bold" : "font-normal")}>
                                     <TextSelectionWrapper>
-                                      {parse(optionText)}
+                                      {parse(optionText || "")}
                                     </TextSelectionWrapper>
                                   </div>
                                 </div>

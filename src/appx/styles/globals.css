@@ -739,3 +739,8 @@ br {
   height: 1em !important;
   width: 1em !important;
 }
+
+/* Rich Text Editor (Quill) */
+.ql-editor {
+  min-height: 50px;
+}

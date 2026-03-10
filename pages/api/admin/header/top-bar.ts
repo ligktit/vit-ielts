@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
 import type { TopBarConfig } from "../../../../src/widgets/layouts/base/ui/header/types";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export type { TopBarConfig };
 
@@ -22,6 +23,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (req.method === "POST") {
     try {
+      const user = await requireAdmin(req, res);
+      if (!user) return;
+
       const body = req.body as TopBarConfig;
       await writeConfig<TopBarConfig>(supabaseAdmin, sectionName, body);
       return res.status(200).json({ message: "Lưu config thành công" });

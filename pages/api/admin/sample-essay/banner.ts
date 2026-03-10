@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export interface SampleEssayBannerConfig {
   writing: {
@@ -57,8 +58,8 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      // TODO: Thêm authentication check ở đây
-      // if (!isAdmin(req)) return res.status(401).json({ message: "Unauthorized" });
+      const user = await requireAdmin(req, res);
+      if (!user) return;
 
       const body = req.body as SampleEssayBannerConfig;
       await writeConfig<SampleEssayBannerConfig>(supabaseAdmin, sectionName, body);

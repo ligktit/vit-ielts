@@ -66,9 +66,13 @@ export default async function handler(
     });
   } catch (error) {
     console.error("[API /api/test-flow/submit]", error);
-    return res.status(500).json({
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    const statusCode = errorMessage.includes("đăng nhập") ? 401
+      : errorMessage.includes("PRO") ? 403
+      : 500;
+    return res.status(statusCode).json({
       success: false,
-      error: error instanceof Error ? error.message : "Internal server error",
+      error: errorMessage,
     });
   }
 }

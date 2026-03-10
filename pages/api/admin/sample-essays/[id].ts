@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     const { id } = req.query;
     if (!id || typeof id !== "string") return res.status(400).json({ success: false, error: "Missing ID" });
 
@@ -11,6 +15,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (error) throw error;
             return res.status(200).json({ success: true, data });
         } catch (error) {
+            const pgErr = error as any;
+            if (pgErr?.code === "PGRST116") {
+                return res.status(404).json({ success: false, error: "Sample essay not found" });
+            }
             return res.status(500).json({ success: false, error: error instanceof Error ? error.message : "Internal error" });
         }
     }

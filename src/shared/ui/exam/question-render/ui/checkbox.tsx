@@ -155,7 +155,7 @@ export const Checkbox = ({
                       onClick={() => setIsFocused(true)} 
                     >
                       <TextSelectionWrapper>
-                        {parse(option.option)}
+                        {parse(option.option || "")}
                       </TextSelectionWrapper>
                     </AntCheckbox>
                   );
@@ -178,7 +178,7 @@ export const Checkbox = ({
                   children: (
                     <div className="prose">
                       <TextSelectionWrapper>
-                        {parse(question.explanations[0].content || "")}
+                        {parse(question.explanations?.[0]?.content || "")}
                       </TextSelectionWrapper>
                     </div>
                   ),

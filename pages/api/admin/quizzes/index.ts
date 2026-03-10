@@ -1,11 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { createQuiz } from "../../../../services/quiz";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     if (req.method === "GET") {
         try {
             const { search, skill, type, status, page = "1", pageSize = "20" } = req.query;

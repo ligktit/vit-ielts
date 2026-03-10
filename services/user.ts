@@ -13,6 +13,7 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import dayjs from "dayjs";
+import { isAdminRole } from "../lib/parseRoles";
 
 // ============================================================
 // Types
@@ -126,8 +127,7 @@ export async function checkProStatus(
     if (!data) return { isPro: false, expirationDate: null };
 
     // Admin luôn Pro
-    const roles: string[] = Array.isArray(data.roles) ? data.roles : [];
-    if (roles.includes("administrator")) {
+    if (isAdminRole(data.roles)) {
         return { isPro: true, expirationDate: data.pro_expiration_date };
     }
 

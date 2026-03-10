@@ -27,7 +27,7 @@ export default async function handler(
     console.error("[API /api/affiliate/stats]", error);
     return res.status(500).json({
       error: "Failed to fetch affiliate stats",
-      message: error instanceof Error ? error.message : String(error),
+      message: error instanceof Error ? error.message : (error as any)?.message ?? String(error),
     });
   }
 }

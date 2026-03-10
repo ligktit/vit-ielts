@@ -4,6 +4,9 @@ if (typeof window !== 'undefined') {
 }
 
 import nodemailer from 'nodemailer';
+import { dbg } from '../debug';
+
+const log = dbg.email;
 
 /**
  * Tạo SMTP transporter
@@ -58,13 +61,13 @@ export async function sendEmail(
 
     const info = await transporter.sendMail(mailOptions);
     
-    console.log(`[Email] Email sent successfully to ${to}`);
-    console.log(`[Email] Message ID: ${info.messageId}`);
+    log(`[Email] Email sent successfully to ${to}`);
+    log(`[Email] Message ID: ${info.messageId}`);
     
     return true;
   } catch (error) {
-    console.error(`[Email] Error sending email to ${to}:`, error);
-    console.error(`[Email] Error details:`, error instanceof Error ? error.message : 'Unknown error');
+    log.error(`[Email] Error sending email to ${to}:`, error);
+    log.error(`[Email] Error details:`, error instanceof Error ? error.message : 'Unknown error');
     return false;
   }
 }
@@ -78,10 +81,10 @@ export async function verifySMTPConnection(): Promise<boolean> {
   try {
     const transporter = createTransporter();
     await transporter.verify();
-    console.log('[Email] SMTP connection verified successfully');
+    log('[Email] SMTP connection verified successfully');
     return true;
   } catch (error) {
-    console.error('[Email] SMTP connection verification failed:', error);
+    log.error('[Email] SMTP connection verification failed:', error);
     return false;
   }
 }

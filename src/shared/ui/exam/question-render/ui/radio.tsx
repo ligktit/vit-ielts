@@ -86,7 +86,7 @@ export const Radio = ({
               <span className="w-[28px] h-[27px] flex items-center justify-center stt mr-[5px] font-bold">
                 {questionIndex + 1}
               </span>
-              <TextSelectionWrapper>{parse(subQ.question)}</TextSelectionWrapper>
+              <TextSelectionWrapper>{parse(subQ.question || "")}</TextSelectionWrapper>
             </div>
 
             <Controller
@@ -174,7 +174,7 @@ export const Radio = ({
                                 )}
                               >
                                 <TextSelectionWrapper>
-                                  {parse(option.content)}
+                                  {parse(option.content || "")}
                                 </TextSelectionWrapper>
                               </span>
                               {suffix}

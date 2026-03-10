@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { activateProAccount } from "../../../../../services/user";
+import { requireAdmin } from "../../../../../lib/admin-auth";
 
 export default async function handler(
     req: NextApiRequest,
@@ -9,6 +10,9 @@ export default async function handler(
     if (req.method !== "POST") {
         return res.status(405).json({ success: false, error: "Method not allowed" });
     }
+
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
 
     const { id } = req.query;
     if (!id || typeof id !== "string") {

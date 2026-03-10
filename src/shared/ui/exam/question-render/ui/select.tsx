@@ -233,7 +233,7 @@ export const Select = ({
       </div>
       {readOnly && (
         <div className="space-y-4">
-          {question.explanations.map((explanation, index) => (
+          {(question.explanations || []).map((explanation, index) => (
             <Fragment key={index}>
               <p className="space-x-1">
                 <span className="font-semibold">

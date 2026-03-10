@@ -84,6 +84,15 @@ export default async function handler(
       return res.status(400).json({ success: false, error: error.message });
     }
 
+    // FK constraint violation (e.g. temp_ userId not in users table) → 400
+    const pgErr = error as any;
+    if (pgErr?.code === "23503") {
+      return res.status(400).json({
+        success: false,
+        error: "User ID không hợp lệ. Vui lòng đăng nhập trước khi đặt hàng.",
+      });
+    }
+
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : "Internal server error",

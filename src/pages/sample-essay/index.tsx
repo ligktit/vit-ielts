@@ -7,6 +7,7 @@ import { getSampleEssays, getSampleEssayBySlug } from "~services/sample-essay";
 import { readConfig } from "~services/cms-config";
 import type { SampleEssayBannerConfig } from "./ui/archive/types";
 import type { SampleEssayFilters } from "~services/types/database";
+import { isAdminRole } from "~lib/parseRoles";
 
 export * from "./ui";
 
@@ -149,9 +150,8 @@ export const getServerSidePropsSingle = async (
       .eq("id", user.id)
       .single();
 
-    const roles: string[] = Array.isArray(profile?.roles) ? profile.roles : [];
     const isPro =
-      roles.includes("administrator") ||
+      isAdminRole(profile?.roles) ||
       (profile?.is_pro &&
         profile?.pro_expiration_date &&
         new Date(profile.pro_expiration_date) > new Date());

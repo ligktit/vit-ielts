@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,6 +8,9 @@ export default async function handler(
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const user = await requireAdmin(req, res);
+  if (!user) return;
 
   const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
   const hasImgBBKey = !!process.env.IMGBB_API_KEY;

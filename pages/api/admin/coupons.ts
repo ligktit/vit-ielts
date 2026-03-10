@@ -6,6 +6,7 @@ import {
   updateCoupon,
   deleteCoupon,
 } from "../../../services/coupon";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 // Re-export Coupon type for backward compatibility with other imports
 export type { Coupon } from "../../../services/coupon";
@@ -14,6 +15,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const user = await requireAdmin(req, res);
+  if (!user) return;
+
   if (req.method === "GET") {
     try {
       const coupons = await getCoupons(supabaseAdmin);

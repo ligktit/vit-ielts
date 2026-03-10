@@ -1,4 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { dbg } from "../../../lib/debug";
+
+const log = dbg.email;
 
 type ResponseData = {
   success: boolean;
@@ -25,7 +28,7 @@ export default async function handler(
 
     // For now, log the contact form data.
     // TODO: Hook up to a real email service (SendGrid, Resend, etc.)
-    console.log("[Contact Form Submission]", {
+    log("[Contact Form Submission]", {
       name,
       email,
       subject,
@@ -35,7 +38,7 @@ export default async function handler(
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("[API /api/contact/send-email]", error);
+    log.error("[API /api/contact/send-email]", error);
     return res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : "Internal server error",

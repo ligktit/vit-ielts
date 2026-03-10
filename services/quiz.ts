@@ -259,7 +259,7 @@ export async function createQuiz(
 
     // 3. Insert questions for each passage
     const allQuestions = passagesInput.flatMap((p, pIndex) =>
-        p.questions.map((q, qIndex) => ({
+        (Array.isArray(p.questions) ? p.questions : []).map((q, qIndex) => ({
             passage_id: passages[pIndex].id,
             type: q.type,
             title: q.title,

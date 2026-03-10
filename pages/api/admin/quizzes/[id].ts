@@ -1,11 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { getQuizBySlug, updateQuiz, deleteQuiz } from "../../../../services/quiz";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
 ) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     const { id } = req.query;
     if (!id || typeof id !== "string") {
         return res.status(400).json({ success: false, error: "Missing quiz ID" });
@@ -35,6 +39,10 @@ export default async function handler(
 
             return res.status(200).json({ success: true, data });
         } catch (error) {
+            const pgErr = error as any;
+            if (pgErr?.code === "PGRST116") {
+                return res.status(404).json({ success: false, error: "Quiz not found" });
+            }
             console.error(`[API /api/admin/quizzes/${id}] GET`, error);
             return res.status(500).json({
                 success: false,

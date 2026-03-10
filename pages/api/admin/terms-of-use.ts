@@ -2,11 +2,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
 import type { TermsOfUseConfig } from "@/shared/types/admin-config";
+import { requireAdmin } from "../../../lib/admin-auth";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const user = await requireAdmin(req, res);
+  if (!user) return;
   const sectionName = "terms-of-use";
 
   if (req.method === "GET") {
@@ -23,9 +26,6 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      // TODO: Thêm authentication check ở đây
-      // if (!isAdmin(req)) return res.status(401).json({ message: "Unauthorized" });
-
       const body = req.body as TermsOfUseConfig;
       await writeConfig<TermsOfUseConfig>(supabaseAdmin, sectionName, body);
       return res.status(200).json({ message: "Lưu config thành công" });

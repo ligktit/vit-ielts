@@ -12,7 +12,7 @@ function Question({
         ❓ List of questions
       </h2>
       <div className="space-y-6">
-        {passage.questions.map((question, index) => (
+        {(Array.isArray(passage.questions) ? passage.questions : []).map((question, index) => (
           <div key={index}>
             <QuestionRender
               question={question}

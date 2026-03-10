@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     if (req.method === "GET") {
         try {
             const { data, error } = await supabaseAdmin.from("site_settings").select("*");

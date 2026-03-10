@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "../../../../lib/admin-auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    const user = await requireAdmin(req, res);
+    if (!user) return;
+
     const { id } = req.query;
     if (!id || typeof id !== "string") return res.status(400).json({ success: false, error: "Missing ID" });
 

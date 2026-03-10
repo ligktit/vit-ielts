@@ -92,7 +92,7 @@ export default async function handler(
       console.error("[API /api/affiliate/links POST]", error);
       return res.status(500).json({
         error: "Failed to create affiliate link",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : (error as any)?.message ?? String(error),
       });
     }
   }
@@ -141,7 +141,7 @@ export default async function handler(
       console.error("[API /api/affiliate/links GET]", error);
       return res.status(500).json({
         error: "Failed to fetch affiliate links",
-        message: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : (error as any)?.message ?? String(error),
       });
     }
   }

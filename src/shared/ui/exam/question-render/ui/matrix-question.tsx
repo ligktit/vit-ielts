@@ -109,7 +109,7 @@ export const MatrixQuestion = ({
         {matrixCategories.map((category) => (
           <div key={category.categoryLetter} className="flex border-b border-black last:border-b-0">
             <span className="w-16 p-2 text-center font-bold border-r border-black">{category.categoryLetter}</span>
-            <span className="p-2 flex-1"><TextSelectionWrapper>{parse(category.categoryText)}</TextSelectionWrapper></span>
+            <span className="p-2 flex-1"><TextSelectionWrapper>{parse(category.categoryText || "")}</TextSelectionWrapper></span>
           </div>
         ))}
       </div>
@@ -143,7 +143,7 @@ export const MatrixQuestion = ({
                   <div className="h-[34px] w-7 flex items-center justify-center rounded-sm mx-auto">{absoluteIndex + 1}</div>
                 </td>
                 <td className="p-3 align-middle text-[16px] pl-[0] break-words">
-                  <TextSelectionWrapper>{parse(item.itemText)}</TextSelectionWrapper>
+                  <TextSelectionWrapper>{parse(item.itemText || "")}</TextSelectionWrapper>
                 </td>
                 {matrixCategories.map((category, index) => {
                   const currentLetter = category.categoryLetter;
@@ -195,7 +195,7 @@ export const MatrixQuestion = ({
         {question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`}
       </h3>
       <div className="leading-[2] prose prose-sm max-w-none text-black">
-        {parse(contentToCheck)}
+        {parse(contentToCheck || "")}
       </div>
     </div>
   );
@@ -243,7 +243,7 @@ export const MatrixQuestion = ({
                               </div>
                             </td>
                             <td className="p-3 align-middle text-[16px] pl-[0] break-words">
-                              <TextSelectionWrapper>{parse(item.itemText)}</TextSelectionWrapper>
+                              <TextSelectionWrapper>{parse(item.itemText || "")}</TextSelectionWrapper>
                             </td>
                             {matrixCategories.map((category, index) => {
                               const isChecked = field.value?.[itemIndex] === category.categoryLetter;
@@ -285,7 +285,7 @@ export const MatrixQuestion = ({
           {layoutType === "standard" && CategoryListJSX}
           {question.explanations && question.explanations[0]?.content && (
             <div className="mt-4">
-              <Collapse size="small" items={[{ key: `general-explanation-${realStartIndex}`, label: "View General Explanation", children: (<div className="prose prose-sm max-w-none p-2 rounded"><TextSelectionWrapper>{parse(question.explanations[0].content)}</TextSelectionWrapper></div>) }]} />
+              <Collapse size="small" items={[{ key: `general-explanation-${realStartIndex}`, label: "View General Explanation", children: (<div className="prose prose-sm max-w-none p-2 rounded"><TextSelectionWrapper>{parse(question.explanations?.[0]?.content || "")}</TextSelectionWrapper></div>) }]} />
             </div>
           )}
         </div>
@@ -303,7 +303,7 @@ export const MatrixQuestion = ({
           {question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`}
         </h3>
         <div className="leading-[2] prose prose-sm max-w-none text-black">
-          {parse(contentToCheck, {
+          {parse(contentToCheck || "", {
             replace: (domNode: any) => {
               if (domNode.name === 'img' || domNode.name === 'video' || domNode.name === 'canvas' || domNode.name === 'figure') {
                 return <></>;

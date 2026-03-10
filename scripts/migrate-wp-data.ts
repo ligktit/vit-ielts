@@ -267,20 +267,63 @@ async function migrateQuizzes() {
                 for (let qi = 0; qi < questions.length; qi++) {
                     const q = questions[qi];
 
+                    // Ensure JSONB fields are proper objects (not double-encoded strings)
+                    // WPGraphQL may return pre-serialized strings that Supabase would double-encode
+                    const ensureJsonb = (val: any) => {
+                        if (val === null || val === undefined) return null;
+                        if (typeof val === 'string') {
+                            try { return JSON.parse(val); } catch { return val; }
+                        }
+                        return val;
+                    };
+
+                    // Detect correct question type based on actual data
+                    const detectType = (q: any): string => {
+                        const loq = ensureJsonb(q.list_of_questions);
+                        const hasRadioQ = Array.isArray(loq) && loq.some((lq: any) => lq?.question);
+
+                        const loo = ensureJsonb(q.list_of_options);
+                        const hasOptions = Array.isArray(loo) && loo.length > 0 && loo.some((o: any) => o?.option_text || o?.option);
+
+                        const mq = ensureJsonb(q.matchingQuestion);
+                        const hasMatching = mq && (
+                            (Array.isArray(mq.matching_items) && mq.matching_items.length > 0) ||
+                            (Array.isArray(mq.matchingItems) && mq.matchingItems.some((mi: any) => mi.questionPart)) ||
+                            (mq.summary_text?.trim() || mq.summaryText?.trim())
+                        );
+
+                        const mx = ensureJsonb(q.matrixQuestion);
+                        const hasMatrix = mx && (
+                            (Array.isArray(mx.matrix_items) && mx.matrix_items.length > 0) ||
+                            (Array.isArray(mx.matrixItems) && mx.matrixItems.length > 0)
+                        );
+
+                        const questionText = q.question || '';
+                        const hasGaps = /\{[^}]+\}/.test(questionText);
+
+                        if (hasMatrix) return 'matrix';
+                        if (hasMatching) return 'matching';
+                        if (hasRadioQ) return 'radio';
+                        if (hasGaps && hasOptions) return 'select';
+                        if (hasGaps) return 'fillup';
+                        if (hasOptions) return 'checkbox';
+                        return q.type || 'radio';
+                    };
+
                     const { error: qErr } = await supabase
                         .from("questions")
                         .insert({
                             passage_id: passageRow!.id,
-                            type: q.type || "radio",
+                            type: detectType(q),
                             title: q.title || null,
                             question_text: q.question || null,
                             instructions: q.instructions || null,
                             question_form: q.question_form || null,
-                            list_of_questions: q.list_of_questions || null,
-                            list_of_options: q.list_of_options || null,
-                            matching_question: q.matchingQuestion || null,
-                            matrix_question: q.matrixQuestion || null,
-                            explanations: q.explanations || null,
+                            list_of_questions: ensureJsonb(q.list_of_questions),
+                            list_of_options: ensureJsonb(q.list_of_options),
+                            matching_question: ensureJsonb(q.matchingQuestion),
+                            matrix_question: ensureJsonb(q.matrixQuestion),
+                            explanations: ensureJsonb(q.explanations),
                             sort_order: qi,
                         });
 

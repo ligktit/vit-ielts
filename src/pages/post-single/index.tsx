@@ -2,6 +2,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { createServerSupabase } from "~supabase/server";
 import { getPostBySlug } from "~services/post";
 import { ROUTES } from "@/shared/routes";
+import { isAdminRole } from "~lib/parseRoles";
 
 export { PageSingle } from "./ui";
 
@@ -37,9 +38,8 @@ export const getServerSideProps = async (
       .eq("id", user.id)
       .single();
 
-    const roles: string[] = Array.isArray(profile?.roles) ? profile.roles : [];
     const isPro =
-      roles.includes("administrator") ||
+      isAdminRole(profile?.roles) ||
       (profile?.is_pro &&
         profile?.pro_expiration_date &&
         new Date(profile.pro_expiration_date) > new Date());

@@ -36,6 +36,10 @@ PHASE 5: Admin Dashboard (phụ thuộc services tương ứng)
 PHASE 6: Migration + Cleanup
   Task 22: Data Migration Scripts (phụ thuộc Phase 1)
   Task 23: Cleanup + Deploy (sau TẤT CẢ tasks)
+
+PHASE 7: Bug Fixes & Security (từ API audit 10/03/2026)
+  Task 24: Fix API Error Handling (không phụ thuộc)
+  Task 25: Admin API Auth Guard ⚠️ BẢO MẬT (phụ thuộc 02 + 16)
 ```
 
 ## Quy tắc cho Agent
