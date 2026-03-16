@@ -191,60 +191,33 @@ export const PracticeTestItem = ({ item }: { item: IPracticeTest }) => {
           <Skeleton.Button active />
         ) : (
           <> */}
-        {item.quizFields.type[0] === "practice" && (
+        {item.quizFields.proUserOnly && !currentUser?.userData.isPro ? (
           <>
-            {item.quizFields.proUserOnly && !currentUser?.userData.isPro ? (
-              <>
-                {/* {isInProgress ? (
-                      <Button
-                        size="large"
-                        color="blue"
-                        variant="outlined"
-                        onClick={handleOpen}
-                      >
-                        <span className="material-symbols-rounded text-blue-500!">
-                          pause_circle
-                        </span>
-                        <span className="font-semibold">Continue</span>
-                      </Button>
-                    ) : ( */}
-                <Button size="large" onClick={handleOpen}>
-                  <span className="material-symbols-rounded text-primary!">
-                    play_circle
-                  </span>
-                  <span className="font-semibold">Start Practice</span>
-                </Button>
-                {/* )} */}
-              </>
-            ) : (
-              <Link
-                href={
-                  currentUser
-                    ? ROUTES.TAKE_THE_TEST(item.slug)
-                    : ROUTES.LOGIN(ROUTES.TAKE_THE_TEST(item.slug))
-                }
-                passHref
-                title={item.title}
-                legacyBehavior
-              >
-                {/* {isInProgress ? (
-                      <LinkButton size="large" color="blue" variant="outlined">
-                        <span className="material-symbols-rounded text-blue-500!">
-                          pause_circle
-                        </span>
-                        <span className="font-semibold">Continue</span>
-                      </LinkButton>
-                    ) : ( */}
-                <LinkButton size="large">
-                  <span className="material-symbols-rounded text-primary!">
-                    play_circle
-                  </span>
-                  <span className="font-semibold">Start Practice</span>
-                </LinkButton>
-                {/* )} */}
-              </Link>
-            )}
+            <Button size="large" onClick={handleOpen}>
+              <span className="material-symbols-rounded text-primary!">
+                play_circle
+              </span>
+              <span className="font-semibold">Start Practice</span>
+            </Button>
           </>
+        ) : (
+          <Link
+            href={
+              currentUser
+                ? ROUTES.TAKE_THE_TEST(item.slug)
+                : ROUTES.LOGIN(ROUTES.TAKE_THE_TEST(item.slug))
+            }
+            passHref
+            title={item.title}
+            legacyBehavior
+          >
+            <LinkButton size="large">
+              <span className="material-symbols-rounded text-primary!">
+                play_circle
+              </span>
+              <span className="font-semibold">Start Practice</span>
+            </LinkButton>
+          </Link>
         )}
         {/* </>
         )} */}

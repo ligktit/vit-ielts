@@ -15,7 +15,7 @@ Use the following steps when the browser agent needs to log in to the admin dash
 
 ## Steps
 
-1. Navigate to the login page (e.g. `http://localhost:3000/login` or the deployed URL's `/login` route).
+1. Navigate to the admin login page (e.g. `http://localhost:3000/admin/login` or the deployed URL's `/admin/login` route).
 2. Enter the **email** `techlead.holy@gmail.com` into the email input field.
 3. Enter the **password** `IeltsTest@2026` into the password input field.
 4. Click the **Sign In** / **Login** button.

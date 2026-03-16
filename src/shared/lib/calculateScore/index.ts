@@ -534,7 +534,7 @@ export const calculateScore = (
   const roundedScore = (Math.round(scoreValue * 2) / 2).toFixed(1);
   const missedCount = totalQuestions - correctCount - incorrectCount;
 
-  console.log(`>>> KẾT QUẢ TÍNH ĐIỂM CUỐI CÙNG (V10): Correct=${correctCount}, Incorrect=${incorrectCount}, Missed=${missedCount}, Total=${totalQuestions}, Score=${roundedScore}`);
+
 
   const finalResult: ScoreResult = {
     score: roundedScore,

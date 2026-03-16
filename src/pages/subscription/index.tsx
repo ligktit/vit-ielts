@@ -45,7 +45,12 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
           testimonials: [],
         },
         faqConfig: faqConfig ?? { items: [] },
-        subscriptionBannerConfig: subscriptionBannerConfig ?? {},
+        bannerConfig: subscriptionBannerConfig ?? {
+          backgroundImage: "/img-admin/bg-image-11.jpg",
+          subtitle: { text: "Premium" },
+          title: "Nâng cấp tài khoản Pro",
+          description: "Trải nghiệm toàn bộ tính năng cao cấp",
+        },
       },
     };
   }

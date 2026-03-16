@@ -69,6 +69,15 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       return getServerSidePropsSampleEssayArchive(context, "speaking");
     } else if (slug === "ielts-writing-sample") {
       return getServerSidePropsSampleEssayArchive(context, "writing");
+    } else if (slug === "ielts-reading-sample") {
+      return getServerSidePropsSampleEssayArchive(context, "reading");
+    } else if (slug === "ielts-listening-sample") {
+      return getServerSidePropsSampleEssayArchive(context, "listening");
+    }
+
+    // Handle known post category routes
+    if (slug === "ielts-prediction") {
+      return getServerSidePropsArchive(context, "IELTS Prediction");
     }
 
     // Resolve slug against Supabase tables
@@ -101,7 +110,7 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
     const { data: categoryPosts } = await supabase
       .from("posts")
       .select("id")
-      .contains("categories", [slug])
+      .filter("categories", "cs", JSON.stringify([slug]))
       .eq("status", "published")
       .limit(1);
 

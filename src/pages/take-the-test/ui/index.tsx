@@ -156,9 +156,9 @@ export function PageTakeTheTestWrapper({
     defaultValues: {
       answers: (
         JSON.parse(testResultFields.answers || '{"answers":[]}') as {
-          answers: (string | number[] | object)[];
+          answers: (string | number[] | object | null)[];
         }
-      ).answers.map((a) => a || ""),
+      ).answers.map((a) => (a !== null && a !== undefined && a !== "") ? a : null),
     },
   });
 

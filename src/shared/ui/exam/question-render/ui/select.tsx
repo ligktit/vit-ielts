@@ -144,6 +144,7 @@ export const Select = ({
                               disabled={readOnly}
                               tagRender={(props) => <div>{props.value}</div>}
                               size="small"
+                              placeholder="--"
                               options={(question.list_of_options || [])
                                 .filter((o) => o.option !== "")
                                 .map((o, i) => ({
@@ -151,6 +152,7 @@ export const Select = ({
                                   value: i,
                                 }))}
                               {...field}
+                              value={field.value !== null && field.value !== undefined && field.value !== "" ? field.value : undefined}
                               onFocus={() => {
                                 if (!readOnly) {
                                   setActiveIndex(questionIndex); 

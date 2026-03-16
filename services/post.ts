@@ -68,7 +68,11 @@ export async function getPosts(
 
     // Filter by category (JSONB array contains)
     if (filters.category) {
-        query = query.contains("categories", [filters.category]);
+        query = query.filter(
+            "categories",
+            "cs",
+            JSON.stringify([filters.category])
+        );
     }
 
     // Search by title
@@ -83,7 +87,17 @@ export async function getPosts(
 
     const { data, error, count } = await query;
 
-    if (error) throw error;
+    if (error) {
+        console.error("[getPosts] Supabase error:", error);
+        // Return empty result instead of throwing — prevents page crash
+        return {
+            data: [],
+            count: 0,
+            page,
+            pageSize,
+            totalPages: 0,
+        };
+    }
 
     const totalCount = count ?? 0;
 
@@ -95,6 +109,7 @@ export async function getPosts(
         totalPages: Math.ceil(totalCount / pageSize),
     };
 }
+
 
 // ============================================================================
 // Interaction Functions

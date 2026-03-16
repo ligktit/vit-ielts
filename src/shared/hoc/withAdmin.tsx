@@ -30,7 +30,7 @@ export const withAdmin: GetServerSideProps = async (
   if (!user) {
     return {
       redirect: {
-        destination: `/account/login?redirect=${encodeURIComponent(context.resolvedUrl)}`,
+        destination: `/admin/login?redirect=${encodeURIComponent(context.resolvedUrl)}`,
         statusCode: 302,
       },
     };

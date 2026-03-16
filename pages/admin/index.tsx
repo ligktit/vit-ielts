@@ -78,12 +78,15 @@ export default function AdminDashboard() {
         {
             title: "Khách hàng",
             key: "user",
-            render: (_, record) => (
-                <div>
-                    <div className="text-sm font-medium">{record.user_name ?? "—"}</div>
-                    <div className="text-xs text-gray-500">{record.user_email ?? record.user_id?.substring(0, 8)}</div>
-                </div>
-            ),
+            render: (_, record) => {
+                const username = record.user_email?.split("@")[0] ?? record.user_id?.substring(0, 8) ?? "—";
+                return (
+                    <div>
+                        <div className="text-sm font-medium">{username}</div>
+                        <div className="text-xs text-gray-500">{record.user_email ?? "—"}</div>
+                    </div>
+                );
+            },
         },
         {
             title: "Gói",

@@ -1,11 +1,13 @@
 import { createClient } from "~supabase/client";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { isAdminRole } from "~lib/parseRoles";
 
 /**
  * Auth callback page for Google OAuth redirect.
  * Supabase handles the token exchange automatically;
- * we just listen for the SIGNED_IN event and redirect.
+ * we listen for the SIGNED_IN event, ensure a public.users profile exists,
+ * then redirect the user.
  */
 export default function AuthCallback() {
     const router = useRouter();
@@ -14,12 +16,52 @@ export default function AuthCallback() {
         const supabase = createClient();
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((event) => {
-            if (event === "SIGNED_IN") {
-                // Use full page navigation so Supabase cookies are sent to SSR
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === "SIGNED_IN" && session?.user) {
+                const user = session.user;
+
+                // Ensure public.users profile exists (fallback for Google OAuth)
+                const { data: existingProfile } = await supabase
+                    .from("users")
+                    .select("id")
+                    .eq("id", user.id)
+                    .single();
+
+                if (!existingProfile) {
+                    // Create profile from Google user metadata
+                    const meta = user.user_metadata || {};
+                    await supabase.from("users").insert({
+                        id: user.id,
+                        email: user.email || "",
+                        name:
+                            meta.full_name ||
+                            meta.name ||
+                            (user.email ? user.email.split("@")[0] : ""),
+                        avatar_url: meta.avatar_url || meta.picture || null,
+                    });
+                }
+
+                // Check admin role for smart redirect
+                const { data: profile } = await supabase
+                    .from("users")
+                    .select("roles")
+                    .eq("id", user.id)
+                    .single();
+
+                const isAdmin = isAdminRole(profile?.roles);
+
+                // Determine redirect destination
                 const params = new URLSearchParams(window.location.search);
-                const redirectTo = params.get("redirect") || "/";
-                window.location.href = redirectTo;
+                const explicitRedirect = params.get("redirect") || "/";
+
+                if (isAdmin) {
+                    window.location.href =
+                        explicitRedirect.startsWith("/admin")
+                            ? explicitRedirect
+                            : "/admin";
+                } else {
+                    window.location.href = explicitRedirect;
+                }
             }
         });
 

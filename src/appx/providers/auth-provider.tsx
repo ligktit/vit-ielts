@@ -108,8 +108,9 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
+    const isOnAdminPage = window.location.pathname.startsWith("/admin");
     await supabase.auth.signOut();
-    window.location.href = "/account/login";
+    window.location.href = isOnAdminPage ? "/admin/login" : "/account/login";
   };
 
   return {

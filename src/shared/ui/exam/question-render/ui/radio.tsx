@@ -95,11 +95,11 @@ export const Radio = ({
               render={({ field }) => {
                 const userAnswerIndex = field.value;
                 const userDidAnswer =
-                  userAnswerIndex !== null && userAnswerIndex !== undefined;
+                  userAnswerIndex !== null && userAnswerIndex !== undefined && userAnswerIndex !== "";
                 const isUserCorrect =
                   userDidAnswer && Number(userAnswerIndex) === correctAnswerIndex;
 
-                const groupValue = readOnly ? correctAnswerIndex : userAnswerIndex;
+                const groupValue = readOnly ? correctAnswerIndex : (userDidAnswer ? Number(userAnswerIndex) : undefined);
 
                 return (
                   <AntRadio.Group
@@ -151,7 +151,7 @@ export const Radio = ({
                             }
                           }
                         } else {
-                          const isSelected = Number(field.value) === optIndex;
+                          const isSelected = userDidAnswer && Number(field.value) === optIndex;
                           optionBgClass = isSelected
                             ? "bg-[#bbd8f0]"
                             : "hover:bg-[#e4e4e4]";

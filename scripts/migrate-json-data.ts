@@ -37,6 +37,57 @@ function readJsonFile<T>(filename: string): T[] {
 // ---------------------------------------------------------------------------
 // 1. Orders
 // ---------------------------------------------------------------------------
+
+/**
+ * Decode WP base64 userId (e.g. "dXNlcjo4NDQ=" → "user:844" → 844)
+ */
+function decodeWpUserId(base64Id: string): number | null {
+    try {
+        const decoded = Buffer.from(base64Id, "base64").toString("utf-8");
+        // Format: "user:844"
+        const match = decoded.match(/^user:(\d+)$/);
+        return match ? parseInt(match[1], 10) : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Build a mapping of WP user IDs → Supabase UUIDs.
+ *
+ * Strategy (in order):
+ * 1. Check for migration placeholder emails: wp_user_{wpId}@migration.pending
+ * 2. Check for users whose email matches the WP "edit context" data
+ *    (if available from the WP REST API migration)
+ *
+ * Since the WP migration script uses placeholder emails like
+ * "wp_user_{wpId}@migration.pending", we use that pattern.
+ * If create-auth-users.ts ran afterwards, those users got real auth IDs
+ * but the email stayed the same (unless manually updated).
+ */
+async function buildWpUserIdMap(): Promise<Map<number, string>> {
+    const mapping = new Map<number, string>();
+
+    // Fetch all users — they may have any email format
+    // First try placeholder pattern
+    const { data: placeholderUsers } = await supabase
+        .from("users")
+        .select("id, email")
+        .like("email", "wp_user_%@migration.pending");
+
+    if (placeholderUsers && placeholderUsers.length > 0) {
+        for (const u of placeholderUsers) {
+            const match = u.email.match(/^wp_user_(\d+)@migration\.pending$/);
+            if (match) {
+                mapping.set(parseInt(match[1], 10), u.id);
+            }
+        }
+    }
+
+    console.log(`  📋 WP User ID mapping: ${mapping.size} entries from placeholder emails`);
+    return mapping;
+}
+
 async function migrateOrders() {
     interface OrderJson {
         id: string;
@@ -62,26 +113,50 @@ async function migrateOrders() {
         return 0;
     }
 
-    const rows = orders.map((o) => ({
-        order_id: o.orderId,
-        // user_id left as null — requires user mapping from WP migration
-        package_type: o.packageType || null,
-        duration: o.duration,
-        skill_type: o.skillType || null,
-        amount: o.amount,
-        original_amount: o.originalAmount || o.amount,
-        discount_amount: o.discountAmount || 0,
-        coupon_code: o.couponCode || null,
-        status: o.status,
-        payment_method: o.paymentMethod || null,
-        transfer_content: o.transferContent || null,
-        affiliate_ref: o.affiliateRef || null,
-        created_at: o.createdAt,
-    }));
+    // Build WP userId → Supabase UUID mapping
+    const wpUserMap = await buildWpUserIdMap();
+
+    // Collect unique WP user IDs for logging
+    const unmappedWpIds = new Set<number>();
+
+    const rows = orders.map((o) => {
+        // Decode WP base64 userId → numeric ID → Supabase UUID
+        const wpNumericId = decodeWpUserId(o.userId);
+        let supabaseUserId: string | null = null;
+
+        if (wpNumericId !== null) {
+            supabaseUserId = wpUserMap.get(wpNumericId) ?? null;
+            if (!supabaseUserId) {
+                unmappedWpIds.add(wpNumericId);
+            }
+        }
+
+        return {
+            order_id: o.orderId,
+            user_id: supabaseUserId,
+            package_type: o.packageType || null,
+            duration: o.duration,
+            skill_type: o.skillType || null,
+            amount: o.amount,
+            original_amount: o.originalAmount || o.amount,
+            discount_amount: o.discountAmount || 0,
+            coupon_code: o.couponCode || null,
+            status: o.status,
+            payment_method: o.paymentMethod || null,
+            transfer_content: o.transferContent || null,
+            affiliate_ref: o.affiliateRef || null,
+            created_at: o.createdAt,
+        };
+    });
+
+    if (unmappedWpIds.size > 0) {
+        console.warn(`  ⚠️  ${unmappedWpIds.size} WP user(s) could not be mapped: [${[...unmappedWpIds].join(", ")}]`);
+        console.warn(`     These orders will have user_id = NULL. Run fix-order-user-ids script to correct.`);
+    }
 
     const { error } = await supabase
         .from("orders")
-        .upsert(rows, { onConflict: "order_id", ignoreDuplicates: true });
+        .upsert(rows, { onConflict: "order_id", ignoreDuplicates: false });
 
     if (error) throw new Error(`Orders migration failed: ${error.message}`);
     console.log(`✅ Orders: ${rows.length} records migrated`);

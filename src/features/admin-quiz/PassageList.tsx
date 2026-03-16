@@ -1,6 +1,9 @@
 import { useMemo } from "react";
-import { Card, Collapse, Space, Button, Popconfirm } from "antd";
-import { PlusOutlined, DeleteOutlined, HolderOutlined } from "@ant-design/icons";
+import { Collapse, Space, Button, Popconfirm, Badge, Tag, Empty, Tooltip } from "antd";
+import {
+    PlusOutlined, DeleteOutlined, HolderOutlined,
+    FileTextOutlined,
+} from "@ant-design/icons";
 import {
     DndContext,
     closestCenter,
@@ -37,6 +40,7 @@ type PassageListProps = {
 function SortablePassagePanel({
     passage,
     pIdx,
+    totalPassages,
     onRemove,
     onUpdatePassage,
     onAddQuestion,
@@ -46,6 +50,7 @@ function SortablePassagePanel({
 }: {
     passage: PassageData;
     pIdx: number;
+    totalPassages: number;
     onRemove: () => void;
     onUpdatePassage: (field: string, value: unknown) => void;
     onAddQuestion: () => void;
@@ -55,6 +60,14 @@ function SortablePassagePanel({
 }) {
     const sortableId = passage.id || `p-${pIdx}`;
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sortableId });
+    const qCount = Array.isArray(passage.questions) ? passage.questions.length : 0;
+
+    // Get unique question types in this passage
+    const questionTypes = useMemo(() => {
+        if (!Array.isArray(passage.questions)) return [];
+        const types = new Set(passage.questions.map(q => q.type));
+        return Array.from(types);
+    }, [passage.questions]);
 
     const style: React.CSSProperties = {
         transform: CSS.Transform.toString(transform),
@@ -62,41 +75,186 @@ function SortablePassagePanel({
         opacity: isDragging ? 0.5 : 1,
     };
 
+    const typeColors: Record<string, string> = {
+        radio: "#1890ff", select: "#13c2c2", fillup: "#52c41a",
+        checkbox: "#fa8c16", matching: "#722ed1", matrix: "#eb2f96",
+    };
+
     return (
         <div ref={setNodeRef} style={style} {...attributes}>
-            <Collapse accordion className="mb-2">
-                <Panel
-                    key={sortableId}
-                    header={
-                        <Space>
-                            <span {...listeners} style={{ cursor: "grab" }} onClick={(e) => e.stopPropagation()}>
-                                <HolderOutlined />
-                            </span>
-                            <span>Passage {pIdx + 1}: {passage.title || "(Chưa đặt tên)"}</span>
-                            <span className="text-gray-400 text-xs">
-                                ({(Array.isArray(passage.questions) ? passage.questions : []).length} questions)
-                            </span>
-                        </Space>
-                    }
-                    extra={
-                        <Space onClick={(e) => e.stopPropagation()}>
-                            <Popconfirm title="Xóa passage?" onConfirm={onRemove} okText="Xóa" cancelText="Hủy">
-                                <Button size="small" danger icon={<DeleteOutlined />} />
-                            </Popconfirm>
-                        </Space>
-                    }
-                >
-                    <PassageEditor
-                        passage={passage}
-                        pIdx={pIdx}
-                        onUpdatePassage={onUpdatePassage}
-                        onAddQuestion={onAddQuestion}
-                        onRemoveQuestion={onRemoveQuestion}
-                        onUpdateQuestion={onUpdateQuestion}
-                        onReorderQuestions={onReorderQuestions}
-                    />
-                </Panel>
-            </Collapse>
+            <div className="passage-panel-wrapper">
+                <Collapse
+                    className="passage-collapse"
+                    items={[{
+                        key: sortableId,
+                        label: (
+                            <div className="passage-header">
+                                <span
+                                    {...listeners}
+                                    className="passage-drag-handle"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <HolderOutlined />
+                                </span>
+                                <div className="passage-header-info">
+                                    <div className="passage-header-title">
+                                        <span className="passage-number">
+                                            Passage {pIdx + 1}
+                                        </span>
+                                        <span className="passage-name">
+                                            {passage.title || "(Chưa đặt tên)"}
+                                        </span>
+                                    </div>
+                                    <div className="passage-header-badges">
+                                        <Badge
+                                            count={qCount}
+                                            showZero
+                                            style={{
+                                                backgroundColor: qCount > 0 ? '#1890ff' : '#d9d9d9',
+                                                fontSize: 11,
+                                            }}
+                                        />
+                                        <span className="passage-header-badge-label">câu hỏi</span>
+                                        {questionTypes.length > 0 && (
+                                            <div className="passage-type-dots">
+                                                {questionTypes.map(t => (
+                                                    <Tooltip key={t} title={t}>
+                                                        <span
+                                                            className="passage-type-dot"
+                                                            style={{ backgroundColor: typeColors[t] || '#8c8c8c' }}
+                                                        />
+                                                    </Tooltip>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ),
+                        extra: (
+                            <Space onClick={(e) => e.stopPropagation()} size={4}>
+                                {totalPassages > 1 && (
+                                    <Popconfirm
+                                        title="Xóa passage này?"
+                                        description={`Passage "${passage.title || pIdx + 1}" và ${qCount} câu hỏi sẽ bị xóa.`}
+                                        onConfirm={onRemove}
+                                        okText="Xóa"
+                                        cancelText="Hủy"
+                                        okButtonProps={{ danger: true }}
+                                    >
+                                        <Button
+                                            size="small"
+                                            danger
+                                            icon={<DeleteOutlined />}
+                                            type="text"
+                                        />
+                                    </Popconfirm>
+                                )}
+                            </Space>
+                        ),
+                        children: (
+                            <PassageEditor
+                                passage={passage}
+                                pIdx={pIdx}
+                                onUpdatePassage={onUpdatePassage}
+                                onAddQuestion={onAddQuestion}
+                                onRemoveQuestion={onRemoveQuestion}
+                                onUpdateQuestion={onUpdateQuestion}
+                                onReorderQuestions={onReorderQuestions}
+                            />
+                        ),
+                    }]}
+                />
+            </div>
+
+            <style jsx>{`
+                .passage-panel-wrapper {
+                    margin-bottom: 10px;
+                }
+
+                .passage-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    width: 100%;
+                }
+
+                .passage-drag-handle {
+                    cursor: grab;
+                    color: #bbb;
+                    font-size: 16px;
+                    padding: 4px;
+                    border-radius: 4px;
+                    transition: all 0.15s;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .passage-drag-handle:hover {
+                    color: #1890ff;
+                    background: #e6f7ff;
+                }
+
+                .passage-header-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex: 1;
+                    min-width: 0;
+                    gap: 12px;
+                }
+
+                .passage-header-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    min-width: 0;
+                }
+
+                .passage-number {
+                    font-weight: 600;
+                    color: #1890ff;
+                    font-size: 13px;
+                    white-space: nowrap;
+                    background: #e6f7ff;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                }
+
+                .passage-name {
+                    font-size: 14px;
+                    color: #333;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .passage-header-badges {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    flex-shrink: 0;
+                }
+
+                .passage-header-badge-label {
+                    font-size: 12px;
+                    color: #999;
+                }
+
+                .passage-type-dots {
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    margin-left: 4px;
+                }
+
+                .passage-type-dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    display: inline-block;
+                }
+            `}</style>
         </div>
     );
 }
@@ -122,6 +280,11 @@ export default function PassageList({
         [passages],
     );
 
+    const totalQuestions = useMemo(
+        () => passages.reduce((sum, p) => sum + (Array.isArray(p.questions) ? p.questions.length : 0), 0),
+        [passages],
+    );
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over || active.id === over.id) return;
@@ -133,28 +296,131 @@ export default function PassageList({
     };
 
     return (
-        <Card
-            title={`Passages (${passages.length})`}
-            className="mb-4"
-            extra={<Button icon={<PlusOutlined />} onClick={onAdd}>Thêm Passage</Button>}
-        >
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
-                    {passages.map((passage, pIdx) => (
-                        <SortablePassagePanel
-                            key={passage.id || `p-${pIdx}`}
-                            passage={passage}
-                            pIdx={pIdx}
-                            onRemove={() => onRemove(pIdx)}
-                            onUpdatePassage={(field, value) => onUpdatePassage(pIdx, field, value)}
-                            onAddQuestion={() => onAddQuestion(pIdx)}
-                            onRemoveQuestion={(qIdx) => onRemoveQuestion(pIdx, qIdx)}
-                            onUpdateQuestion={(qIdx, field, value) => onUpdateQuestion(pIdx, qIdx, field, value)}
-                            onReorderQuestions={(oldIndex, newIndex) => onReorderQuestions(pIdx, oldIndex, newIndex)}
-                        />
-                    ))}
-                </SortableContext>
-            </DndContext>
-        </Card>
+        <div className="passage-list-container">
+            {/* Header */}
+            <div className="passage-list-header">
+                <div className="passage-list-header-left">
+                    <FileTextOutlined style={{ fontSize: 18, color: '#1890ff' }} />
+                    <span className="passage-list-title">
+                        Passages
+                        <Tag style={{ marginLeft: 8 }}>{passages.length}</Tag>
+                    </span>
+                    <span className="passage-list-subtitle">
+                        · {totalQuestions} câu hỏi
+                    </span>
+                </div>
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={onAdd}
+                >
+                    Thêm Passage
+                </Button>
+            </div>
+
+            {/* Passage list */}
+            {passages.length === 0 ? (
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="Chưa có passage nào"
+                >
+                    <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+                        Thêm Passage đầu tiên
+                    </Button>
+                </Empty>
+            ) : (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={sortableIds} strategy={verticalListSortingStrategy}>
+                        {passages.map((passage, pIdx) => (
+                            <SortablePassagePanel
+                                key={passage.id || `p-${pIdx}`}
+                                passage={passage}
+                                pIdx={pIdx}
+                                totalPassages={passages.length}
+                                onRemove={() => onRemove(pIdx)}
+                                onUpdatePassage={(field, value) => onUpdatePassage(pIdx, field, value)}
+                                onAddQuestion={() => onAddQuestion(pIdx)}
+                                onRemoveQuestion={(qIdx) => onRemoveQuestion(pIdx, qIdx)}
+                                onUpdateQuestion={(qIdx, field, value) => onUpdateQuestion(pIdx, qIdx, field, value)}
+                                onReorderQuestions={(oldIndex, newIndex) => onReorderQuestions(pIdx, oldIndex, newIndex)}
+                            />
+                        ))}
+                    </SortableContext>
+                </DndContext>
+            )}
+
+            <style jsx>{`
+                .passage-list-container {
+                    border: 1px solid #f0f0f0;
+                    border-radius: 8px;
+                    background: #fff;
+                    overflow: hidden;
+                }
+
+                .passage-list-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 14px 20px;
+                    border-bottom: 1px solid #f0f0f0;
+                    background: #fafafa;
+                }
+
+                .passage-list-header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .passage-list-title {
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: #1a1a2e;
+                }
+
+                .passage-list-subtitle {
+                    font-size: 13px;
+                    color: #999;
+                }
+            `}</style>
+
+            <style jsx global>{`
+                .passage-collapse {
+                    border: none !important;
+                    background: transparent !important;
+                    border-radius: 0 !important;
+                }
+
+                .passage-collapse .ant-collapse-item {
+                    border: none !important;
+                    border-bottom: 1px solid #f5f5f5 !important;
+                    border-radius: 0 !important;
+                }
+
+                .passage-collapse .ant-collapse-item:last-child {
+                    border-bottom: none !important;
+                }
+
+                .passage-collapse .ant-collapse-header {
+                    padding: 12px 20px !important;
+                    align-items: center !important;
+                    background: #fff !important;
+                    transition: background 0.15s !important;
+                }
+
+                .passage-collapse .ant-collapse-header:hover {
+                    background: #f9f9ff !important;
+                }
+
+                .passage-collapse .ant-collapse-content {
+                    border-top: 1px solid #f0f0f0 !important;
+                }
+
+                .passage-collapse .ant-collapse-content-box {
+                    padding: 20px !important;
+                    background: #fafbfc !important;
+                }
+            `}</style>
+        </div>
     );
 }

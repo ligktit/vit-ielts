@@ -1,0 +1,20 @@
+=== WordPress User IDs in orders.json ===
+  dXNlcjo4NDQ= => user:844
+
+=== Looking for WP user 844 in Supabase ===
+  No placeholder user found for wp_user_844
+
+=== Migration placeholder users (wp_user_*) ===
+  Found 0 migration placeholder users
+
+=== Real users (non-placeholder, first 10) ===
+  - 6d1da1c1-0242-460e-a2e9-367ac9897643 | admin-test@gmail.com | name=admin2
+  - 9d604f97-1277-494d-a213-385dde2ec5e6 | phatbo999@gmail.com | name=Phat
+  - e647fa6b-6025-4da4-9cc8-355096179689 | te2222st@gmail.com | name=test
+  - 4e3b954c-4cb6-4dab-a350-a9d2d6a90d70 | test1@gmail.com | name=Nguyễn Thịnh
+  - 62c03db6-6c69-465e-890b-205379fe3786 | bachnt21097@gmail.com | name=bách
+  - 28021932-6000-4a33-96da-97bd9f94110c | bachnt2101997@gmail.com | name=bách
+  - e602e3f9-6e98-49f0-aeed-a5dc528df199 | hieuminh129537@gmail.com | name=Hieu Minh
+  - 3d2a3784-2310-4a16-8ecb-a16212a05d80 | bachfindme@gmail.com | name=Bách Nguyễn
+  - e17a2e97-9757-4a44-bb91-063a341134f5 | tranphantienphat1904@gmail.com | name=Phát Trần
+  - 1fafa0af-3887-4a2d-978e-ff41ea21f686 | ieltsprediction9@gmail.com | name=IELTS Prediction

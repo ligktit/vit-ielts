@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Form, Space, Button, Spin, Typography, message, Tag, Alert,
+    Card, Select, Switch, Tabs, Badge, Tooltip, Divider,
 } from "antd";
 import {
     ArrowLeftOutlined, SaveOutlined, CheckCircleOutlined,
+    EyeOutlined, FileTextOutlined, SettingOutlined,
+    CloudUploadOutlined, WarningOutlined, BookOutlined,
+    QuestionCircleOutlined, ClockCircleOutlined,
 } from "@ant-design/icons";
 import { arrayMove } from "@dnd-kit/sortable";
 import AdminLayout from "../_layout";
@@ -33,11 +37,12 @@ function QuizEditor({ quizId }: { quizId?: string }) {
     const [passages, setPassages] = useState<PassageData[]>([{ ...DEFAULT_PASSAGE, sort_order: 0, questions: [] }]);
     const isNew = !quizId;
 
-    // ── UX State ──────────────────────────────────────────────────────────
+    // ── UX State ──
     const [isDirty, setIsDirty] = useState(false);
     const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+    const [activeTab, setActiveTab] = useState("content");
     const isDirtyRef = useRef(false);
     isDirtyRef.current = isDirty;
 
@@ -48,20 +53,40 @@ function QuizEditor({ quizId }: { quizId?: string }) {
         if (initialLoadDone.current) setIsDirty(true);
     }, []);
 
-    // Mark form dirty from QuizEditorForm onValuesChange
+    // Mark form dirty
     const markDirty = useCallback(() => {
         if (initialLoadDone.current) setIsDirty(true);
     }, []);
 
+    // ── Stats ──
+    const totalQuestions = useMemo(() => {
+        return passages.reduce((sum, p) => sum + (Array.isArray(p.questions) ? p.questions.length : 0), 0);
+    }, [passages]);
+
+    const questionTypeCounts = useMemo(() => {
+        const counts: Record<string, number> = {};
+        passages.forEach(p => {
+            (Array.isArray(p.questions) ? p.questions : []).forEach(q => {
+                counts[q.type] = (counts[q.type] || 0) + 1;
+            });
+        });
+        return counts;
+    }, [passages]);
+
+    // Watch form values for sidebar
+    const currentStatus = Form.useWatch("status", form);
+    const currentSkill = Form.useWatch("skill", form);
+    const currentType = Form.useWatch("type", form);
+    const currentSlug = Form.useWatch("slug", form);
+
     useEffect(() => {
         if (quizId) fetchQuiz();
         else {
-            // New quiz: mark initialLoadDone so future changes are tracked
             initialLoadDone.current = true;
         }
     }, [quizId]);
 
-    // ── Unsaved changes: beforeunload ─────────────────────────────────────
+    // ── Unsaved changes: beforeunload ──
     useEffect(() => {
         const handler = (e: BeforeUnloadEvent) => {
             if (!isDirtyRef.current) return;
@@ -72,7 +97,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
         return () => window.removeEventListener('beforeunload', handler);
     }, []);
 
-    // ── Unsaved changes: Next.js route change ────────────────────────────
+    // ── Unsaved changes: Next.js route change ──
     useEffect(() => {
         const handler = () => {
             if (isDirtyRef.current && !window.confirm('Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời trang?')) {
@@ -84,7 +109,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
         return () => router.events.off('routeChangeStart', handler);
     }, [router]);
 
-    // ── Keyboard shortcuts ───────────────────────────────────────────────
+    // ── Keyboard shortcuts ──
     const handleSaveRef = useRef(handleSave);
     handleSaveRef.current = handleSave;
 
@@ -103,7 +128,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
         return () => window.removeEventListener('keydown', handler);
     }, []);
 
-    // ── Data fetching ────────────────────────────────────────────────────
+    // ── Data fetching ──
     async function fetchQuiz() {
         try {
             setLoading(true);
@@ -126,9 +151,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                         questions: (p.questions ?? []).map((q: QuestionData, qIdx: number) => ({ ...q, sort_order: qIdx })),
                     })) ?? [{ ...DEFAULT_PASSAGE, sort_order: 0, questions: [] }]
                 );
-                // If slug was already set, mark as manually edited
                 if (quiz.slug) setSlugManuallyEdited(true);
-                // Reset dirty state after load
                 setIsDirty(false);
                 setSaveError(null);
                 setTimeout(() => { initialLoadDone.current = true; }, 0);
@@ -140,7 +163,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
         }
     }
 
-    // ── Save handler ─────────────────────────────────────────────────────
+    // ── Save handler ──
     async function handleSave(status?: string) {
         try {
             const values = await form.validateFields();
@@ -192,6 +215,8 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                 const details = fieldErr.errorFields.map(f => `${f.name.join('.')}: ${f.errors.join(', ')}`).join(' | ');
                 setSaveError(`Thiếu thông tin: ${details}`);
                 message.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+                // Switch to settings tab if there are form validation errors
+                setActiveTab("settings");
             } else {
                 setSaveError("Lỗi không xác định khi lưu quiz");
                 message.error("Error saving quiz");
@@ -243,18 +268,70 @@ function QuizEditor({ quizId }: { quizId?: string }) {
 
     return (
         <AdminLayout>
-            <div>
-                {/* Header bar */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <Space>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push("/admin/quizzes")}>Quay lại</Button>
-                        <Title level={3} style={{ margin: 0 }}>{isNew ? "Tạo Quiz mới" : "Chỉnh sửa Quiz"}</Title>
-                        {isDirty && <Tag color="orange">Chưa lưu</Tag>}
-                        {lastSavedAt && !isDirty && <Tag icon={<CheckCircleOutlined />} color="green">Đã lưu lúc {lastSavedAt}</Tag>}
-                    </Space>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                        Ctrl+S: Lưu nháp &bull; Ctrl+Shift+S: Xuất bản
-                    </Text>
+            <div className="quiz-editor-page">
+                {/* ═══ STICKY TOP BAR ═══ */}
+                <div className="quiz-editor-topbar">
+                    <div className="quiz-editor-topbar-left">
+                        <Button
+                            icon={<ArrowLeftOutlined />}
+                            onClick={() => router.push("/admin/quizzes")}
+                            type="text"
+                            className="quiz-editor-back-btn"
+                        />
+                        <div className="quiz-editor-topbar-title">
+                            <Title level={4} style={{ margin: 0, fontSize: 18 }}>
+                                {isNew ? "Tạo Quiz mới" : "Chỉnh sửa Quiz"}
+                            </Title>
+                            <div className="quiz-editor-topbar-meta">
+                                {currentStatus === "published" ? (
+                                    <Tag color="green" icon={<CheckCircleOutlined />}>Đã xuất bản</Tag>
+                                ) : (
+                                    <Tag color="default">Bản nháp</Tag>
+                                )}
+                                {isDirty && <Tag color="orange" icon={<WarningOutlined />}>Chưa lưu</Tag>}
+                                {lastSavedAt && !isDirty && (
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                        <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 4 }} />
+                                        Lưu lúc {lastSavedAt}
+                                    </Text>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="quiz-editor-topbar-actions">
+                        <Tooltip title="Ctrl+S">
+                            <Button
+                                icon={<SaveOutlined />}
+                                loading={saving}
+                                disabled={saving}
+                                onClick={() => handleSave("draft")}
+                            >
+                                Lưu nháp
+                            </Button>
+                        </Tooltip>
+                        <Tooltip title="Ctrl+Shift+S">
+                            <Button
+                                type="primary"
+                                icon={<CloudUploadOutlined />}
+                                loading={saving}
+                                disabled={saving}
+                                onClick={() => handleSave("published")}
+                                style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                            >
+                                Xuất bản
+                            </Button>
+                        </Tooltip>
+                        {!isNew && currentSlug && currentStatus === "published" && (
+                            <Tooltip title="Xem trước">
+                                <Button
+                                    icon={<EyeOutlined />}
+                                    href={`/ielts-practice/${currentSlug}`}
+                                    target="_blank"
+                                />
+                            </Tooltip>
+                        )}
+                    </div>
                 </div>
 
                 {/* Error banner */}
@@ -270,43 +347,415 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                     />
                 )}
 
-                <QuizEditorForm
-                    form={form}
-                    saving={saving}
-                    isNew={isNew}
-                    onValuesChange={markDirty}
-                    slugManuallyEdited={slugManuallyEdited}
-                    onSlugManuallyEdited={setSlugManuallyEdited}
-                />
+                {/* ═══ TWO-COLUMN LAYOUT ═══ */}
+                <div className="quiz-editor-layout">
+                    {/* ── MAIN CONTENT (LEFT) ── */}
+                    <div className="quiz-editor-main">
+                        <Tabs
+                            activeKey={activeTab}
+                            onChange={setActiveTab}
+                            type="card"
+                            size="large"
+                            items={[
+                                {
+                                    key: "content",
+                                    label: (
+                                        <span>
+                                            <BookOutlined /> Nội dung
+                                            <Badge
+                                                count={totalQuestions}
+                                                style={{ marginLeft: 8, backgroundColor: '#1890ff' }}
+                                                overflowCount={999}
+                                                showZero
+                                            />
+                                        </span>
+                                    ),
+                                    children: (
+                                        <div className="quiz-editor-tab-content">
+                                            <PassageList
+                                                passages={passages}
+                                                onAdd={addPassage}
+                                                onRemove={removePassage}
+                                                onReorder={reorderPassages}
+                                                onUpdatePassage={updatePassage}
+                                                onAddQuestion={addQuestion}
+                                                onRemoveQuestion={removeQuestion}
+                                                onUpdateQuestion={updateQuestion}
+                                                onReorderQuestions={reorderQuestions}
+                                            />
+                                        </div>
+                                    ),
+                                },
+                                {
+                                    key: "settings",
+                                    label: (
+                                        <span>
+                                            <SettingOutlined /> Cài đặt
+                                        </span>
+                                    ),
+                                    children: (
+                                        <div className="quiz-editor-tab-content">
+                                            <QuizEditorForm
+                                                form={form}
+                                                saving={saving}
+                                                isNew={isNew}
+                                                onValuesChange={markDirty}
+                                                slugManuallyEdited={slugManuallyEdited}
+                                                onSlugManuallyEdited={setSlugManuallyEdited}
+                                            />
+                                        </div>
+                                    ),
+                                },
+                            ]}
+                        />
+                    </div>
 
-                <PassageList
-                    passages={passages}
-                    onAdd={addPassage}
-                    onRemove={removePassage}
-                    onReorder={reorderPassages}
-                    onUpdatePassage={updatePassage}
-                    onAddQuestion={addQuestion}
-                    onRemoveQuestion={removeQuestion}
-                    onUpdateQuestion={updateQuestion}
-                    onReorderQuestions={reorderQuestions}
-                />
+                    {/* ── SIDEBAR (RIGHT) ── */}
+                    <div className="quiz-editor-sidebar">
+                        {/* Publish box */}
+                        <Card
+                            size="small"
+                            title={
+                                <span style={{ fontWeight: 600 }}>
+                                    <CloudUploadOutlined style={{ marginRight: 6 }} />
+                                    Xuất bản
+                                </span>
+                            }
+                            className="quiz-editor-sidebar-card"
+                        >
+                            <div className="quiz-sidebar-field">
+                                <Text type="secondary" className="quiz-sidebar-label">Trạng thái</Text>
+                                <Form form={form}>
+                                    <Form.Item name="status" noStyle>
+                                        <Select
+                                            style={{ width: "100%" }}
+                                            disabled={saving}
+                                            options={[
+                                                { value: "draft", label: "📝 Bản nháp" },
+                                                { value: "published", label: "✅ Đã xuất bản" },
+                                            ]}
+                                            onChange={() => markDirty()}
+                                        />
+                                    </Form.Item>
+                                </Form>
+                            </div>
+                            <Divider style={{ margin: "12px 0" }} />
+                            <Space direction="vertical" style={{ width: "100%" }}>
+                                <Button
+                                    block
+                                    type="primary"
+                                    icon={<CloudUploadOutlined />}
+                                    loading={saving}
+                                    onClick={() => handleSave("published")}
+                                    style={{ backgroundColor: "#52c41a", borderColor: "#52c41a" }}
+                                >
+                                    Xuất bản
+                                </Button>
+                                <Button
+                                    block
+                                    icon={<SaveOutlined />}
+                                    loading={saving}
+                                    onClick={() => handleSave("draft")}
+                                >
+                                    Lưu bản nháp
+                                </Button>
+                            </Space>
+                        </Card>
 
-                {/* Actions */}
-                <Space className="mb-8">
-                    <Button type="primary" icon={<SaveOutlined />} loading={saving} disabled={saving} onClick={() => handleSave("draft")}>
-                        Lưu nháp
-                    </Button>
-                    <Button type="primary" style={{ backgroundColor: "#52c41a" }} loading={saving} disabled={saving} onClick={() => handleSave("published")}>
-                        Xuất bản
-                    </Button>
-                    {lastSavedAt && !isDirty && (
-                        <Text type="secondary">
-                            <CheckCircleOutlined style={{ color: '#52c41a', marginRight: 4 }} />
-                            Đã lưu lúc {lastSavedAt}
-                        </Text>
-                    )}
-                </Space>
+                        {/* Quiz Info summary */}
+                        <Card
+                            size="small"
+                            title={
+                                <span style={{ fontWeight: 600 }}>
+                                    <FileTextOutlined style={{ marginRight: 6 }} />
+                                    Thông tin Quiz
+                                </span>
+                            }
+                            className="quiz-editor-sidebar-card"
+                        >
+                            <div className="quiz-sidebar-info">
+                                <div className="quiz-sidebar-info-row">
+                                    <Text type="secondary">Skill</Text>
+                                    <Tag color={currentSkill === "reading" ? "blue" : "purple"}>
+                                        {currentSkill === "reading" ? "📖 Reading" : "🎧 Listening"}
+                                    </Tag>
+                                </div>
+                                <div className="quiz-sidebar-info-row">
+                                    <Text type="secondary">Type</Text>
+                                    <Tag color={currentType === "exam" ? "red" : "cyan"}>
+                                        {currentType === "exam" ? "📋 Exam" : "✏️ Practice"}
+                                    </Tag>
+                                </div>
+                                <div className="quiz-sidebar-info-row">
+                                    <Text type="secondary">Passages</Text>
+                                    <Text strong>{passages.length}</Text>
+                                </div>
+                                <div className="quiz-sidebar-info-row">
+                                    <Text type="secondary">Tổng câu hỏi</Text>
+                                    <Text strong>{totalQuestions}</Text>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* Question breakdown */}
+                        {totalQuestions > 0 && (
+                            <Card
+                                size="small"
+                                title={
+                                    <span style={{ fontWeight: 600 }}>
+                                        <QuestionCircleOutlined style={{ marginRight: 6 }} />
+                                        Phân loại câu hỏi
+                                    </span>
+                                }
+                                className="quiz-editor-sidebar-card"
+                            >
+                                <div className="quiz-sidebar-question-types">
+                                    {Object.entries(questionTypeCounts).map(([type, count]) => {
+                                        const colors: Record<string, string> = {
+                                            radio: "blue", select: "cyan", fillup: "green",
+                                            checkbox: "orange", matching: "purple", matrix: "magenta",
+                                        };
+                                        return (
+                                            <div key={type} className="quiz-sidebar-qtype-row">
+                                                <Tag color={colors[type] || "default"}>{type}</Tag>
+                                                <Text strong>{count}</Text>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </Card>
+                        )}
+
+                        {/* Keyboard shortcuts */}
+                        <Card
+                            size="small"
+                            title={
+                                <span style={{ fontWeight: 600 }}>
+                                    <ClockCircleOutlined style={{ marginRight: 6 }} />
+                                    Phím tắt
+                                </span>
+                            }
+                            className="quiz-editor-sidebar-card"
+                        >
+                            <div className="quiz-sidebar-shortcuts">
+                                <div className="quiz-sidebar-shortcut-row">
+                                    <kbd>Ctrl</kbd> + <kbd>S</kbd>
+                                    <Text type="secondary">Lưu nháp</Text>
+                                </div>
+                                <div className="quiz-sidebar-shortcut-row">
+                                    <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>S</kbd>
+                                    <Text type="secondary">Xuất bản</Text>
+                                </div>
+                            </div>
+                        </Card>
+                    </div>
+                </div>
             </div>
+
+            <style jsx>{`
+                .quiz-editor-page {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                    margin: -24px -24px 0;
+                    padding: 0;
+                }
+
+                /* ── Top bar ── */
+                .quiz-editor-topbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 12px 24px;
+                    background: #fff;
+                    border-bottom: 1px solid #f0f0f0;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                    gap: 16px;
+                }
+
+                .quiz-editor-topbar-left {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 0;
+                }
+
+                .quiz-editor-topbar-title {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                    min-width: 0;
+                }
+
+                .quiz-editor-topbar-meta {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    flex-wrap: wrap;
+                }
+
+                .quiz-editor-topbar-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+
+                /* ── Two-column layout ── */
+                .quiz-editor-layout {
+                    display: flex;
+                    gap: 20px;
+                    padding: 20px 24px;
+                    align-items: flex-start;
+                }
+
+                .quiz-editor-main {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                .quiz-editor-tab-content {
+                    padding-top: 4px;
+                }
+
+                /* ── Sidebar ── */
+                .quiz-editor-sidebar {
+                    width: 280px;
+                    flex-shrink: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    position: sticky;
+                    top: 80px;
+                }
+
+                .quiz-sidebar-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                }
+
+                .quiz-sidebar-label {
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
+                }
+
+                .quiz-sidebar-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .quiz-sidebar-info-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+
+                .quiz-sidebar-question-types {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .quiz-sidebar-qtype-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+
+                .quiz-sidebar-shortcuts {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .quiz-sidebar-shortcut-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 12px;
+                }
+
+                .quiz-sidebar-shortcut-row kbd {
+                    background: #f5f5f5;
+                    border: 1px solid #d9d9d9;
+                    border-radius: 4px;
+                    padding: 1px 6px;
+                    font-family: monospace;
+                    font-size: 11px;
+                    color: #333;
+                    box-shadow: 0 1px 1px rgba(0,0,0,0.06);
+                }
+
+                @media (max-width: 1024px) {
+                    .quiz-editor-layout {
+                        flex-direction: column;
+                    }
+
+                    .quiz-editor-sidebar {
+                        width: 100%;
+                        position: static;
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                    }
+                }
+
+                @media (max-width: 768px) {
+                    .quiz-editor-topbar {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 12px;
+                    }
+
+                    .quiz-editor-topbar-actions {
+                        width: 100%;
+                        justify-content: flex-end;
+                    }
+                }
+            `}</style>
+
+            <style jsx global>{`
+                .quiz-editor-sidebar-card {
+                    border-radius: 8px !important;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+                }
+
+                .quiz-editor-sidebar-card .ant-card-head {
+                    min-height: auto !important;
+                    padding: 10px 16px !important;
+                    background: #fafafa !important;
+                    border-radius: 8px 8px 0 0 !important;
+                }
+
+                .quiz-editor-sidebar-card .ant-card-head-title {
+                    padding: 0 !important;
+                    font-size: 13px !important;
+                }
+
+                .quiz-editor-sidebar-card .ant-card-body {
+                    padding: 14px 16px !important;
+                }
+
+                .quiz-editor-back-btn:hover {
+                    background: #f5f5f5 !important;
+                }
+
+                /* Tab card styling */
+                .quiz-editor-main .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {
+                    border-radius: 8px 8px 0 0 !important;
+                    padding: 8px 20px !important;
+                    font-weight: 500 !important;
+                }
+
+                .quiz-editor-main .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active {
+                    border-bottom-color: #fff !important;
+                    font-weight: 600 !important;
+                }
+            `}</style>
         </AdminLayout>
     );
 }

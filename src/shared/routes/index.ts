@@ -7,6 +7,7 @@ export const ROUTES = {
   FORGOT_PASSWORD: "/account/forgot-password",
 
   ADMIN: {
+    LOGIN: "/admin/login",
     DASHBOARD: "/admin",
   },
 

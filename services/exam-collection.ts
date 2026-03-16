@@ -24,9 +24,9 @@ import type {
 // Constants
 // ============================================================================
 
-/** Select columns for quiz summary (lightweight, no nested data) */
+/** Select columns for quiz summary — includes passages+questions for modal UI */
 const QUIZ_SUMMARY_SELECT =
-    "id, title, slug, skill, featured_image, pro_user_only, tests_taken, time_minutes, question_form, source, year";
+    "id, title, slug, skill, featured_image, pro_user_only, tests_taken, time_minutes, question_form, source, year, passages(id, sort_order, questions(id, explanations, sort_order))";
 
 // ============================================================================
 // Public Functions
@@ -160,7 +160,7 @@ export async function getExamCollections(
     }
 
     // Batch-fetch quiz summaries
-    const quizMap = new Map<string, ExamCollectionItem>();
+    const quizMap = new Map<string, any>();
     // Filter out any null/undefined values that may have slipped in
     const validQuizIds = [...allQuizIdsToFetch].filter(id => id && id !== 'null');
 
@@ -273,7 +273,7 @@ export async function getCollectionDetail(
     }
 
     // 4. Batch-fetch quiz summaries
-    const quizMap = new Map<string, ExamCollectionItem>();
+    const quizMap = new Map<string, any>();
     if (allQuizIds.size > 0) {
         const { data: quizDetails, error: qError } = await supabase
             .from("quizzes")
@@ -329,8 +329,20 @@ export async function getCollectionDetail(
 /**
  * Map flat Supabase ExamCollectionItem → legacy shape with quizFields.
  * This ensures UI components can access quiz.quizFields.time etc. consistently.
+ * Passages are mapped with questions containing explanations for question counting.
  */
-function toExamItemWithQuizFields(item: ExamCollectionItem) {
+function toExamItemWithQuizFields(item: any) {
+    // Sort and map passages + questions to legacy shape expected by ExamModeModal
+    const passages = (item.passages ?? [])
+        .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map((p: any) => ({
+            questions: (p.questions ?? [])
+                .sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+                .map((q: any) => ({
+                    explanations: Array.isArray(q.explanations) ? q.explanations : [],
+                })),
+        }));
+
     return {
         id: item.id,
         title: item.title,
@@ -343,7 +355,7 @@ function toExamItemWithQuizFields(item: ExamCollectionItem) {
             skill: [item.skill, item.skill],
             type: ["exam", "exam"],
             time: item.time_minutes,
-            passages: [],
+            passages,
         },
     };
 }

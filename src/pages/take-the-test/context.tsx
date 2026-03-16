@@ -21,7 +21,7 @@ import { UniqueIdentifier } from "@dnd-kit/core";
 import { notification } from "antd";
 
 export type AnswerFormValues = {
-  answers: (string | number[] | object)[];
+  answers: (string | number | number[] | object | null)[];
 };
 
 export interface HighlightItem {

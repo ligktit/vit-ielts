@@ -7,6 +7,7 @@ import { useAuth } from "@/appx/providers";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { calculateScore } from "@/shared/lib";
+import type { ScoreResult } from "@/shared/lib/calculateScore";
 import Link from "next/link";
 import { ROUTES } from "@/shared/routes";
 import { createClient } from "~supabase/client";
@@ -36,6 +37,9 @@ const calcTimeTaken = (testTime: string, timeLeft: string) => {
     percent,
   };
 };
+
+type NodeType = GetPracticeHistory["testResults"]["edges"][number]["node"];
+type NodeWithScore = NodeType & { key: number; _scoreResult?: ScoreResult };
 
 export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
   const { currentUser } = useAuth();
@@ -114,9 +118,7 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
     }
   }, [skill]);
 
-  const columns: TableProps<
-    GetPracticeHistory["testResults"]["edges"][number]["node"]
-  >["columns"] = [
+  const columns: TableProps<NodeWithScore>["columns"] = [
       {
         title: "Quiz",
         dataIndex: ["testResultFields", "quiz", "node", "title"],
@@ -168,42 +170,23 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
       {
         title: "Correct",
         key: "correctAnswers",
-        render: (_, record) =>
-          calculateScore(
-            JSON.parse(record.testResultFields.answers).answers,
-            record.testResultFields.quiz.node,
-            JSON.parse(record.testResultFields.testPart)
-          ).correctAns,
+        render: (_, record) => (record as NodeWithScore)._scoreResult?.correctAns ?? 0,
       },
       {
         title: "Incorrect",
         key: "incorrectAnswers",
-        render: (_, record) =>
-          calculateScore(
-            JSON.parse(record.testResultFields.answers).answers,
-            record.testResultFields.quiz.node,
-            JSON.parse(record.testResultFields.testPart)
-          ).incorrect,
+        render: (_, record) => (record as NodeWithScore)._scoreResult?.incorrect ?? 0,
       },
       {
         title: "Missed",
         key: "missedAnswers",
-        render: (_, record) =>
-          calculateScore(
-            JSON.parse(record.testResultFields.answers).answers,
-            record.testResultFields.quiz.node,
-            JSON.parse(record.testResultFields.testPart)
-          ).missed,
+        render: (_, record) => (record as NodeWithScore)._scoreResult?.missed ?? 0,
       },
       {
         title: "Correct Percent",
         key: "correctPercent",
         render: (_, record) => {
-          const percent = calculateScore(
-            JSON.parse(record.testResultFields.answers).answers,
-            record.testResultFields.quiz.node,
-            JSON.parse(record.testResultFields.testPart)
-          ).correctPercent;
+          const percent = (record as NodeWithScore)._scoreResult?.correctPercent ?? 0;
 
           return (
             <>
@@ -224,16 +207,26 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
   // Filter để chỉ hiển thị bài làm trong 60 ngày gần nhất và paginate client-side
   const { filteredDataSource, paginatedDataSource } = useMemo(() => {
     if (data) {
-      // Debug: Log dữ liệu để kiểm tra
-
-
       const sixtyDaysAgo = dayjs().subtract(60, "days").unix();
       const filtered = data.testResults.edges
         .map((item, idx) => {
+          // Pre-compute score once per row
+          let scoreResult: ScoreResult | undefined;
+          try {
+            scoreResult = calculateScore(
+              JSON.parse(item.node.testResultFields.answers).answers,
+              item.node.testResultFields.quiz.node,
+              JSON.parse(item.node.testResultFields.testPart)
+            );
+          } catch {
+            scoreResult = undefined;
+          }
+
           return {
             ...item.node,
             key: idx,
-          };
+            _scoreResult: scoreResult,
+          } as NodeWithScore;
         })
         .filter((item) => {
           // Check if we have a valid date to check against, or if the status is explicitly publish
@@ -241,9 +234,7 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
             return false;
           }
 
-          // Filter by skill (since we removed backend filtering)
-          // We check equality with the skill prop. Note: skill array usually has values like ["reading", "Reading"]
-          // so we check if the first element matches or if the array includes it.
+          // Filter by skill
           const itemSkill = item.testResultFields.quiz.node.quizFields.skill?.[0]?.toLowerCase();
           if (itemSkill !== skill.toLowerCase()) {
             return false;
@@ -291,9 +282,7 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
     }
   }, [currentUser, getData, skill]);
 
-  const handleTableChange: TableProps<
-    GetPracticeHistory["testResults"]["edges"][number]["node"]
-  >["onChange"] = (pagination) => {
+  const handleTableChange: TableProps<NodeWithScore>["onChange"] = (pagination) => {
     const current = pagination.current || 1;
     const newPageSize = pagination.pageSize || 10;
 
@@ -302,7 +291,7 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
   };
 
   return (
-    <Table<GetPracticeHistory["testResults"]["edges"][number]["node"]>
+    <Table<NodeWithScore>
       columns={columns}
       dataSource={paginatedDataSource}
       scroll={{ x: 768 }}
@@ -320,3 +309,4 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
     />
   );
 };
+
