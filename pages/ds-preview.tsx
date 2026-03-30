@@ -157,28 +157,93 @@ export default function DSPreview() {
         <h2 style={s.title}>3. Atoms</h2>
         <p style={s.sub}>Smallest independent UI elements</p>
 
+        {/* Button1 — Primary */}
         <div style={s.group}>
-          <div style={s.label}>DSButton — Variants</div>
+          <div style={s.label}>Button1 — Primary (Solid #D94A56)</div>
           <div style={s.row}>
-            <DSButton variant="primary">Primary</DSButton>
-            <DSButton variant="secondary">Secondary</DSButton>
-            <DSButton variant="ghost">Ghost</DSButton>
-            <DSButton variant="link">Link</DSButton>
-            <DSButton variant="danger">Danger</DSButton>
+            <DSButton variant="primary" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Texts</DSButton>
+            <DSButton variant="primary" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="sm">Small</DSButton>
+            <DSButton variant="primary" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="lg">Large</DSButton>
           </div>
-          <div style={s.label}>DSButton — Sizes</div>
           <div style={s.row}>
-            <DSButton size="sm">Small</DSButton>
-            <DSButton size="md">Medium</DSButton>
-            <DSButton size="lg">Large</DSButton>
+            <DSButton variant="primary" loading>Loading</DSButton>
+            <DSButton variant="primary" disabled leftIcon={<span>＋</span>}>Disabled</DSButton>
           </div>
-          <div style={s.label}>DSButton — States</div>
+        </div>
+
+        {/* Button2 — Outlined (White → Red on hover) */}
+        <div style={s.group}>
+          <div style={s.label}>Button2 — Outlined (fills red on hover)</div>
           <div style={s.row}>
-            <DSButton loading>Loading</DSButton>
-            <DSButton disabled>Disabled</DSButton>
+            <DSButton variant="outlined" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Texts</DSButton>
+            <DSButton variant="outlined" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="sm">Small</DSButton>
+            <DSButton variant="outlined" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="lg">Large</DSButton>
           </div>
-          <div style={{ maxWidth: 400 }}>
-            <DSButton variant="primary" fullWidth>Full Width Primary</DSButton>
+          <div style={s.row}>
+            <DSButton variant="outlined" disabled leftIcon={<span>＋</span>}>Disabled</DSButton>
+          </div>
+        </div>
+
+        {/* Button3 — Ghost (dark text, transparent) */}
+        <div style={s.group}>
+          <div style={s.label}>Button3 — Ghost (transparent, dark text)</div>
+          <div style={s.row}>
+            <DSButton variant="ghost" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Text</DSButton>
+            <DSButton variant="ghost" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="sm">Small</DSButton>
+            <DSButton variant="ghost" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="lg">Large</DSButton>
+          </div>
+        </div>
+
+        {/* Button4 — Ghost Dark (for dark/colored backgrounds) */}
+        <div style={s.group}>
+          <div style={s.label}>Button4 — Ghost Dark (on colored background)</div>
+          <div style={{ ...s.row, background: '#242938', padding: '16px', borderRadius: 12 }}>
+            <DSButton variant="ghost-dark" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Texts</DSButton>
+            <DSButton variant="ghost-dark" size="sm" leftIcon={<span>＋</span>}>Small</DSButton>
+          </div>
+          <div style={{ ...s.row, background: '#D94A56', padding: '16px', borderRadius: 12, marginTop: 8 }}>
+            <DSButton variant="ghost-dark" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Texts</DSButton>
+          </div>
+        </div>
+
+        {/* Button5 — Accent Outline (red icon/text, fills red on hover) */}
+        <div style={s.group}>
+          <div style={s.label}>Button5 — Accent Outlined (bold red text/icon → fills on hover)</div>
+          <div style={s.row}>
+            <DSButton variant="accent" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>}>Texts</DSButton>
+            <DSButton variant="accent" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="sm">Small</DSButton>
+            <DSButton variant="accent" leftIcon={<span>＋</span>} rightIcon={<span>＋</span>} size="lg">Large</DSButton>
+          </div>
+        </div>
+
+        {/* Icon Circle buttons */}
+        <div style={s.group}>
+          <div style={s.label}>Icon Circle — Next/Prev Slide buttons</div>
+          <div style={s.row}>
+            <DSButton variant="icon-circle" size="sm" icon={<span>›</span>} aria-label="Next" />
+            <DSButton variant="icon-circle" size="md" icon={<span>›</span>} aria-label="Next" />
+            <DSButton variant="icon-circle" size="lg" icon={<span>›</span>} aria-label="Next" />
+            <DSButton variant="icon-circle" size="sm" icon={<span>‹</span>} aria-label="Previous" />
+            <DSButton variant="icon-circle" size="md" icon={<span>‹</span>} aria-label="Previous" />
+            <DSButton variant="icon-circle" size="lg" icon={<span>‹</span>} aria-label="Previous" />
+          </div>
+          <div style={s.row}>
+            <DSButton variant="icon-circle-outline" size="sm" icon={<span>›</span>} aria-label="Next outline" />
+            <DSButton variant="icon-circle-outline" size="md" icon={<span>›</span>} aria-label="Next outline" />
+            <DSButton variant="icon-circle-outline" size="lg" icon={<span>›</span>} aria-label="Next outline" />
+          </div>
+        </div>
+
+        {/* Other variants */}
+        <div style={s.group}>
+          <div style={s.label}>Other — Link, Danger, Full Width</div>
+          <div style={s.row}>
+            <DSButton variant="link">Link button</DSButton>
+            <DSButton variant="danger" leftIcon={<span>⚠</span>}>Danger</DSButton>
+          </div>
+          <div style={{ maxWidth: 400, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <DSButton variant="primary" fullWidth leftIcon={<span>＋</span>}>Full Width Primary</DSButton>
+            <DSButton variant="outlined" fullWidth leftIcon={<span>＋</span>}>Full Width Outlined</DSButton>
           </div>
         </div>
 
