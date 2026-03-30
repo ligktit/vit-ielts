@@ -1,0 +1,158 @@
+/* ═══ DSButton ═══ */
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  border: 1px solid transparent;
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-primary);
+  font-weight: var(--ds-font-semibold);
+  cursor: pointer;
+  transition:
+    background var(--ds-duration-fast) var(--ds-ease-default),
+    color var(--ds-duration-fast) var(--ds-ease-default),
+    border-color var(--ds-duration-fast) var(--ds-ease-default),
+    box-shadow var(--ds-duration-fast) var(--ds-ease-default),
+    transform var(--ds-duration-fast) var(--ds-ease-default);
+  white-space: nowrap;
+  user-select: none;
+  line-height: var(--ds-leading-tight);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.ds-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.ds-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Sizes ─── */
+.ds-btn--sm {
+  height: 32px;
+  padding: 0 var(--ds-space-3);
+  font-size: var(--ds-text-xs);
+}
+
+.ds-btn--md {
+  height: 40px;
+  padding: 0 var(--ds-space-5);
+  font-size: var(--ds-text-sm);
+}
+
+.ds-btn--lg {
+  height: 48px;
+  padding: 0 var(--ds-space-8);
+  font-size: var(--ds-text-base);
+}
+
+/* ─── Primary (Gradient) ─── */
+.ds-btn--primary {
+  background: var(--ds-bg-brand);
+  color: var(--ds-text-inverse);
+  border-color: transparent;
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.ds-btn--primary:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(235, 87, 87, 0.35);
+  filter: brightness(1.05);
+}
+
+.ds-btn--primary:focus-visible {
+  outline: 2px solid var(--ds-color-primary-300);
+  outline-offset: 2px;
+}
+
+/* ─── Secondary (Outline) ─── */
+.ds-btn--secondary {
+  background: transparent;
+  color: var(--ds-color-primary-500);
+  border-color: var(--ds-color-primary-500);
+}
+
+.ds-btn--secondary:hover:not(:disabled) {
+  background: var(--ds-color-primary-50);
+  border-color: var(--ds-color-primary-600);
+  color: var(--ds-color-primary-600);
+}
+
+.ds-btn--secondary:focus-visible {
+  outline: 2px solid var(--ds-color-primary-300);
+  outline-offset: 2px;
+}
+
+/* ─── Ghost ─── */
+.ds-btn--ghost {
+  background: transparent;
+  color: var(--ds-text-secondary);
+  border-color: transparent;
+}
+
+.ds-btn--ghost:hover:not(:disabled) {
+  background: var(--ds-color-neutral-100);
+  color: var(--ds-text-primary);
+}
+
+/* ─── Link ─── */
+.ds-btn--link {
+  background: transparent;
+  color: var(--ds-text-link);
+  border-color: transparent;
+  padding: 0;
+  height: auto;
+  font-weight: var(--ds-font-medium);
+}
+
+.ds-btn--link:hover:not(:disabled) {
+  color: var(--ds-text-link-hover);
+  text-decoration: underline;
+}
+
+/* ─── Danger ─── */
+.ds-btn--danger {
+  background: var(--ds-color-error);
+  color: var(--ds-text-inverse);
+  border-color: transparent;
+}
+
+.ds-btn--danger:hover:not(:disabled) {
+  background: var(--ds-color-error-dark);
+}
+
+/* ─── Modifiers ─── */
+.ds-btn--full {
+  width: 100%;
+}
+
+.ds-btn--loading {
+  pointer-events: none;
+}
+
+/* ─── Spinner ─── */
+.ds-btn__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ds-btn-spin 0.6s linear infinite;
+}
+
+@keyframes ds-btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Icon ─── */
+.ds-btn__icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 1.15em;
+}
