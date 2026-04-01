@@ -27,6 +27,6 @@
 @import "./molecules/pricing-card/pricing-card.css";
 
 /* ─── Organisms ─── */
-@import "./organisms/header/header.css";
+/* header.css removed — Header now uses Tailwind-only */
 @import "./organisms/footer/footer.css";
 @import "./organisms/cta-banner/cta-banner.css";

@@ -1,4 +1,5 @@
 import { Container } from "@/shared/ui";
+import { Button } from "@/shared/ui/ds/atoms/button";
 import Image from "next/image";
 import Link from "next/link";
 import type { TestimonialsConfig } from "./types";
@@ -108,21 +109,15 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
               {description}
             </p>
             <Link href={button.link} className="inline-block w-full sm:w-auto">
-              <button
-                className="px-4 sm:px-6 py-3 rounded-lg text-sm sm:text-base text-white font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto"
-                style={{
-                  backgroundColor: "#d94a56",
-                }}
+              <Button
+                variant="primary"
+                className="w-full sm:w-auto px-4 sm:px-6 py-3 text-sm sm:text-base rounded-lg"
+                rightIcon={<span className="material-symbols-rounded shrink-0 text-xl">arrow_forward</span>}
               >
-                <span className="flex items-center gap-2 justify-center">
-                  <span className="truncate max-w-[200px] sm:max-w-none">
-                    {button.text}
-                  </span>
-                  <span className="material-symbols-rounded shrink-0">
-                    arrow_forward
-                  </span>
+                <span className="truncate max-w-[200px] sm:max-w-none">
+                  {button.text}
                 </span>
-              </button>
+              </Button>
             </Link>
           </div>
 

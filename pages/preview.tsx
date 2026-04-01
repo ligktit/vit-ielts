@@ -3,6 +3,7 @@
 import { Button } from '@/shared/ui/ds/atoms/button';
 import { Input } from '@/shared/ui/ds/atoms/input';
 import { Badge } from '@/shared/ui/ds/atoms/badge';
+import { ProBadge } from '@/shared/ui/pro-badge';
 import { Avatar } from '@/shared/ui/ds/atoms/avatar';
 import { Tag } from '@/shared/ui/ds/atoms/tag';
 import { PartTag } from '@/shared/ui/ds/atoms/part-tag';
@@ -280,6 +281,13 @@ export default function Preview() {
         </div>
 
         <div style={s.group}>
+          <div style={s.label}>Pro Badge</div>
+          <div style={s.row}>
+            <ProBadge />
+          </div>
+        </div>
+
+        <div style={s.group}>
           <div style={s.label}>Avatar</div>
           <div style={s.row}>
             <Avatar size="xs" name="AB" />
@@ -362,7 +370,7 @@ export default function Preview() {
         <div style={s.group}>
           <div style={s.label}>TestCard</div>
           <div style={s.grid}>
-            <TestCard image="https://picsum.photos/400/250?random=1" title="[COM] Bridge to Brisbane Fun Run" subtitle="IELTS Reading Practice" skill="reading" author="Admin Tea" views={5200} />
+            <TestCard image="https://picsum.photos/400/250?random=1" title="[COM] Bridge to Brisbane Fun Run" attempts={1195} part={1} isPro={true} actionText="Kiểm Tra" score="9,0" author="Admin Tea" views={5200} />
             <TestCard image="https://picsum.photos/400/250?random=2" title="IELTS Listening Practice Test 1" subtitle="Full Listening Test" skill="listening" author="Admin Tea" views={3800} />
             <TestCard image="https://picsum.photos/400/250?random=3" title="IELTS Full Test — Academic" subtitle="Complete Practice" skill="writing" author="Admin Tea" views={7100} />
           </div>

@@ -3,7 +3,7 @@ import { IeltsTestPlatformIntro } from "./ielts-test-platform-intro";
 import { HeroBanner } from "./hero-banner";
 import { WhyChooseUs } from "./why-choose-us";
 import { Testimonials } from "./testimonials";
-import { FullTestCarousel, PracticeTest, SampleEssaysSlider } from "@/widgets/blocks";
+import { PracticeSection } from "./practice-section";
 import { useAuth } from "@/appx/providers";
 import { PracticeHistory, TargetScore } from "@/widgets";
 import { ROUTES } from "@/shared/routes";
@@ -52,39 +52,28 @@ export const PageHome = ({
           )}
         </Container>
       </div>
-      {/* Section với background gradient đỏ và cam */}
-      <div
-        className="w-full py-10"
-        style={{
-          background: practiceSectionConfig?.backgroundGradient ?? undefined,
-        }}
-      >
-        <Container className="space-y-16">
-          <FullTestCarousel
-            title="IELTS Online Test"
-            view_more_link={ROUTES.EXAM.ARCHIVE}
-          />
-          <PracticeTest
-            skill="listening"
-            title="IELTS Listening Practice"
-            view_more_link={ROUTES.PRACTICE.ARCHIVE_LISTENING}
-          />
-          <PracticeTest
-            skill="reading"
-            title="IELTS Reading Practice"
-            view_more_link={ROUTES.PRACTICE.ARCHIVE_READING}
-          />
-          <SampleEssaysSlider
-            view_more_link={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}
-            skill="writing"
-            title="IELTS Writing Sample"
-          />
-          <SampleEssaysSlider
-            view_more_link={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING}
-            skill="speaking"
-            title="IELTS Speaking Sample"
-          />
-        </Container>
+      {/* Section Practice Tests */}
+      <div className="w-full bg-white flex flex-col gap-8 pb-10 pt-4">
+        <PracticeSection
+          title="IELTS Online Test"
+          viewMoreLink={ROUTES.EXAM.ARCHIVE}
+        />
+        <PracticeSection
+          title="IELTS Listening Practice"
+          viewMoreLink={ROUTES.PRACTICE.ARCHIVE_LISTENING}
+        />
+        <PracticeSection
+          title="IELTS Reading Practice"
+          viewMoreLink={ROUTES.PRACTICE.ARCHIVE_READING}
+        />
+        <PracticeSection
+          title="IELTS Reading Sample"
+          viewMoreLink={ROUTES.EXAM.ARCHIVE}
+        />
+        <PracticeSection
+          title="IELTS Speaking Sample"
+          viewMoreLink={ROUTES.EXAM.ARCHIVE}
+        />
       </div>
       {whyChooseUsConfig?.badge && (
         <WhyChooseUs config={whyChooseUsConfig} />

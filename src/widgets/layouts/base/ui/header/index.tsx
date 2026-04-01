@@ -11,6 +11,7 @@ import { Avatar } from "@/entities";
 import { MasterData, MenuItem, useAppContext, useAuth } from "@/appx/providers";
 import { ItemType } from "antd/es/menu/interface";
 import _ from "lodash";
+import { Header as DSHeader, type HeaderNavItem } from "@/shared/ui/ds";
 import { FacebookRoundedIcon, ZaloIcon } from "@/shared/ui/icons";
 import type { TopBarConfig } from "./types";
 
@@ -271,16 +272,34 @@ export const Header = () => {
     },
   ].filter((item) => Boolean(item.url));
 
+  const dsNavItems: HeaderNavItem[] = useMemo(() => {
+    if (!masterData?.menuData["main-menu"]) return [];
+    const cmsItems = masterData.menuData["main-menu"].map((item) => {
+      const resolvedHref = resolveMenuUri(item);
+      const isSubUrl = (uri: string) => {
+         try {
+           const itemUrl = new URL(uri, window.location.origin);
+           return itemUrl.pathname === router.pathname;
+         } catch { return false; }
+      }
+      return {
+        label: (item.label || "").toString(),
+        href: resolvedHref,
+        active: activeKey === (item.key ?? resolvedHref ?? "").toString() || isSubUrl(resolvedHref),
+        children: item.children?.map(child => ({
+           label: (child.label || "").toString(),
+           href: resolveMenuUri(child)
+        }))
+      };
+    });
+    return [...cmsItems, { label: "Subscription", href: ROUTES.SUBSCRIPTION }];
+  }, [masterData.menuData, activeKey, router.pathname]);
+
   return (
-    <header className="bg-white">
-      {/* Top Bar */}
-      <div
-        className="bg-[#192335] text-white text-sm hidden md:block"
-        style={{ backgroundColor: "#192335" }}
-      >
+    <>
+      <div className="bg-[#192335] text-white text-sm hidden md:block" style={{ backgroundColor: "#192335" }}>
         <Container className="py-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
-            {/* Left Side - Contact & Social Stats */}
             <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
               {facebook && topBarConfig && (
                 <div className="flex items-center gap-2 shrink-0">
@@ -292,50 +311,27 @@ export const Header = () => {
               )}
               {(topBarConfig?.phoneNumber || phoneNumber) && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="material-symbols-rounded text-[17px]! shrink-0">
-                    phone
-                  </span>
+                  <span className="material-symbols-rounded text-[17px]! shrink-0">phone</span>
                   <span className="text-xs wrap-break-word line-clamp-1 max-w-[150px]">
                     {topBarConfig?.phoneNumber || phoneNumber}
                   </span>
                 </div>
               )}
             </div>
-
-            {/* Middle Section - Promotional Banner */}
             {topBarConfig && (
               <div className="flex items-center gap-2 flex-wrap justify-center min-w-0 flex-1">
-                <Button
-                  className="bg-[#2563eb] border-none text-white rounded-md h-6 px-2 text-xs font-bold shrink-0"
-                  style={{ backgroundColor: "#2563eb" }}
-                >
-                  <span className="truncate max-w-[80px]">
-                    {topBarConfig.promotionalBanner.buttonText}
-                  </span>
+                <Button className="bg-[#2563eb] border-none text-white rounded-md h-6 px-2 text-xs font-bold shrink-0" style={{ backgroundColor: "#2563eb" }}>
+                  <span className="truncate max-w-[80px]">{topBarConfig.promotionalBanner.buttonText}</span>
                 </Button>
-                <span className="text-xl shrink-0">
-                  {topBarConfig.promotionalBanner.emoji}
-                </span>
+                <span className="text-xl shrink-0">{topBarConfig.promotionalBanner.emoji}</span>
                 <span className="text-xs wrap-break-word line-clamp-1 min-w-0 flex-1 max-w-[300px]">
-                  {topBarConfig.promotionalBanner.text.replace(
-                    "{siteName}",
-                    generalSettingsTitle || "Histudy"
-                  )}
+                  {topBarConfig.promotionalBanner.text.replace("{siteName}", generalSettingsTitle || "Histudy")}
                 </span>
               </div>
             )}
-
-            {/* Right Side - Social Links */}
             <div className="flex items-center gap-3">
               {topBarSocialLinks.map((social, index) => (
-                <Link
-                  key={index}
-                  href={social.url || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-gray-300 transition-colors"
-                  title={social.name}
-                >
+                <Link key={index} href={social.url || "#"} target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300 transition-colors" title={social.name}>
                   {social.icon}
                 </Link>
               ))}
@@ -344,225 +340,18 @@ export const Header = () => {
         </Container>
       </div>
 
-      {/* Main Navigation Bar */}
-      <Container className="py-4">
-        <div className="flex items-center justify-between">
-          {/* Left Side - Logo */}
-          <div className="flex items-center gap-4">
-            <Link
-              title="Home"
-              href={ROUTES.HOME}
-              className="h-12 max-h-12 w-auto relative flex items-center overflow-hidden"
-            >
-              {logo?.node?.sourceUrl ? (
-                <div className="relative h-12 max-h-12 w-auto max-w-[200px] flex items-center">
-                  <Image
-                    src={logo.node.sourceUrl}
-                    alt={generalSettingsTitle || "Logo"}
-                    width={120}
-                    height={48}
-                    className="object-contain max-h-full max-w-full"
-                    style={{ maxHeight: "48px", maxWidth: "200px" }}
-                  />
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-lg shrink-0"
-                    style={{ backgroundColor: "#d94a56" }}
-                  >
-                    {generalSettingsTitle?.charAt(0) || "L"}
-                  </div>
-                  <span
-                    className="font-bold text-xl whitespace-nowrap"
-                    style={{ color: "#d94a56" }}
-                  >
-                    {generalSettingsTitle || "Logo"}
-                  </span>
-                </div>
-              )}
-            </Link>
-          </div>
-
-          {/* Middle Section - Navigation Links */}
-          <div className="hidden lg:flex items-center">
-            <HeaderNavMain />
-          </div>
-
-          {/* Right Side - User Actions */}
-          <div className="flex items-center gap-4">
-            <div className="hidden lg:block h-6 w-[2px] bg-gray-300"></div>
-            {isSignedIn ? (
-              <div className="hidden lg:block">
-                <Dropdown
-                  placement="bottomRight"
-                  trigger={["hover", "click"]}
-                  dropdownRender={() => (
-                    <div className="bg-white rounded-lg shadow-lg min-w-[220px] py-2">
-                      {/* User Info Section */}
-                      <div className="flex items-center gap-3 px-4 py-3">
-                        <Avatar currentUser={currentUser} size={40} />
-                        <div>
-                          <p className="font-semibold text-gray-900 text-sm">
-                            {currentUser?.name || "User"}
-                            {currentUser?.userData.isPro && (
-                              <span className="ml-2 rounded py-px px-1.5 font-semibold text-white text-xs shadow bg-[#d94a56]">
-                                Pro
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {currentTime} (GMT+07:00)
-                          </p>
-                        </div>
-                      </div>
-                      <Divider className="my-0" />
-                      {/* Menu Items */}
-                      <div className="py-1">
-                        <Link href={ROUTES.ACCOUNT.DASHBOARD}>
-                          <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                            My Dashboard
-                          </div>
-                        </Link>
-                        <Link href={ROUTES.ACCOUNT.MY_PROFILE}>
-                          <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                            My Profile
-                          </div>
-                        </Link>
-                        <Link href={ROUTES.ACCOUNT.ORDER_HISTORY}>
-                          <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-                            Payment History
-                          </div>
-                        </Link>
-                        {currentUser?.roles?.nodes?.[0]?.name ===
-                          "administrator" && (
-                            <>
-                              <Divider className="my-1" />
-                              <Link href={ROUTES.ADMIN.DASHBOARD}>
-                                <div className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer flex items-center gap-2">
-                                  <span className="material-symbols-rounded text-base">
-                                    home
-                                  </span>
-                                  <span>Admin Dashboard</span>
-                                </div>
-                              </Link>
-                            </>
-                          )}
-                        <Divider className="my-1" />
-                        <div
-                          className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer flex items-center gap-2"
-                          onClick={signOut}
-                        >
-                          <span className="material-symbols-rounded text-base">
-                            logout
-                          </span>
-                          <span>Logout</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                >
-                  <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-                    <Avatar currentUser={currentUser} size={32} />
-                    <span className="text-sm font-medium text-gray-700">
-                      {currentUser?.name || "User"}
-                      {currentUser?.userData.isPro && (
-                        <span className="ml-2 rounded py-px px-1.5 font-semibold text-white text-xs shadow bg-[#d94a56]">
-                          Pro
-                        </span>
-                      )}
-                    </span>
-                    <span className="material-symbols-rounded text-lg text-gray-500">
-                      keyboard_arrow_down
-                    </span>
-                  </div>
-                </Dropdown>
-              </div>
-            ) : (
-              <div className="hidden lg:flex items-center gap-3">
-                <Link
-                  href={ROUTES.REGISTER}
-                  className="text-sm font-semibold text-gray-700 hover:text-[#d94a56] transition-colors"
-                >
-                  Sign Up
-                </Link>
-                <Link
-                  href={ROUTES.LOGIN()}
-                  className="text-sm font-semibold text-gray-700 hover:text-[#d94a56] transition-colors"
-                >
-                  Login
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="lg:hidden">
-            <button
-              type="button"
-              className="block"
-              onClick={showDrawer}
-              title="Menu"
-            >
-              <span className="material-symbols-rounded text-2xl">menu</span>
-            </button>
-          </div>
-        </div>
-      </Container>
-
-      <Drawer
-        classNames={{
-          header: "!py-2",
-          body: "!px-1 !py-2",
-        }}
-        title={
-          <ul>
-            {isSignedIn && (
-              <li>
-                <div
-                  className="flex items-center gap-2 text-sm cursor-pointer"
-                  title={currentUser?.name}
-                >
-                  <Avatar currentUser={currentUser} size={36} />
-                  <div>
-                    <p className="font-bold space-x-2">
-                      <span>{currentUser?.name}</span>
-                      {currentUser?.userData.isPro && (
-                        <span
-                          className="rounded py-px px-1 font-semibold text-white text-xs shadow"
-                          style={{ backgroundColor: "#d94a56" }}
-                        >
-                          PRO
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-              </li>
-            )}
-          </ul>
-        }
-        closable={false}
-        onClose={onClose}
-        open={open}
-        extra={
-          <Button
-            variant="text"
-            color="default"
-            shape="circle"
-            onClick={onClose}
-          >
-            <span className="material-symbols-rounded">close</span>
-          </Button>
-        }
-      >
-        <Menu
-          mode="inline"
-          items={menuDataMapped}
-          selectable={false}
-          selectedKeys={[activeKey]}
-        />
-      </Drawer>
-    </header>
+      <DSHeader
+        logoSrc={logo?.node?.sourceUrl || "/assets/figma/logos/logo-color.png"}
+        logoAlt={generalSettingsTitle || "IELTS Prediction"}
+        navItems={dsNavItems}
+        isAuthenticated={isSignedIn}
+        userName={currentUser?.name || "User"}
+        userAvatar={(currentUser?.userData?.avatar?.node as any)?.srcSet}
+        onLogin={() => router.push(ROUTES.LOGIN(router.asPath))}
+        onSignup={() => router.push(ROUTES.REGISTER)}
+        onLogout={signOut}
+        onLogoClick={() => router.push(ROUTES.HOME)}
+      />
+    </>
   );
 };

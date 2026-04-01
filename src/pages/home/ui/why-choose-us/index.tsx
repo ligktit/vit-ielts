@@ -15,11 +15,7 @@ export const WhyChooseUs = ({ config }: WhyChooseUsProps) => {
           {/* Subtitle */}
           <div className="flex justify-center mb-4">
             <span
-              className="inline-block px-4 py-2 rounded-full text-xs font-semibold uppercase wrap-break-word max-w-full"
-              style={{
-                backgroundColor: "rgba(37, 99, 235, 0.1)",
-                color: "#2563eb",
-              }}
+              className="inline-block px-4 py-2 rounded-full text-xs font-semibold uppercase wrap-break-word max-w-full bg-blue-600/10 text-blue-600"
             >
               {badge.text}
             </span>
@@ -39,27 +35,27 @@ export const WhyChooseUs = ({ config }: WhyChooseUsProps) => {
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {statistics.map((stat, index) => {
-            // Màu sắc mặc định cho từng card (không quản lý qua config)
+            // Tailwind class-based colors instead of inline styles
             const colors = [
               {
-                bgColor: "rgba(37, 99, 235, 0.1)",
-                borderColor: "rgba(37, 99, 235, 0.2)",
-                iconColor: "#2563eb",
+                bgColor: "bg-blue-600/10",
+                borderColor: "border-blue-600/20",
+                iconColor: "text-blue-600",
               },
               {
-                bgColor: "rgba(236, 72, 153, 0.1)",
-                borderColor: "rgba(236, 72, 153, 0.2)",
-                iconColor: "#ec4899",
+                bgColor: "bg-pink-500/10",
+                borderColor: "border-pink-500/20",
+                iconColor: "text-pink-500",
               },
               {
-                bgColor: "rgba(167, 85, 247, 0.1)",
-                borderColor: "rgba(167, 85, 247, 0.2)",
-                iconColor: "#a855f7",
+                bgColor: "bg-purple-500/10",
+                borderColor: "border-purple-500/20",
+                iconColor: "text-purple-500",
               },
               {
-                bgColor: "rgba(192, 38, 211, 0.1)",
-                borderColor: "rgba(192, 38, 211, 0.2)",
-                iconColor: "#c026d3",
+                bgColor: "bg-fuchsia-600/10",
+                borderColor: "border-fuchsia-600/20",
+                iconColor: "text-fuchsia-600",
               },
             ];
             const color = colors[index % colors.length];
@@ -67,20 +63,16 @@ export const WhyChooseUs = ({ config }: WhyChooseUsProps) => {
             return (
               <div
                 key={index}
-                className={`bg-white rounded-lg shadow-md px-6 py-10 text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center justify-start ${index === 1 || index === 3 ? "md:mt-10" : ""
-                  }`}
+                className={`bg-white rounded-lg shadow-md px-6 py-10 text-center hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center justify-start ${
+                  index === 1 || index === 3 ? "md:mt-10" : ""
+                }`}
               >
                 {/* Icon Circle */}
                 <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 shrink-0"
-                  style={{
-                    backgroundColor: color.bgColor,
-                    borderColor: color.borderColor,
-                  }}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 shrink-0 ${color.bgColor} ${color.borderColor}`}
                 >
                   <span
-                    className="material-symbols-rounded !text-[32px]"
-                    style={{ color: color.iconColor }}
+                    className={`material-symbols-rounded !text-[32px] ${color.iconColor}`}
                   >
                     {stat.icon}
                   </span>
