@@ -51,7 +51,11 @@ export const Header = ({
   return (
     <header className={`sticky top-5 z-50 bg-transparent pointer-events-none px-5 font-[var(--font-primary)] ${className}`}>
       {/* Glassmorphism Pill Container */}
-      <div className="flex items-center justify-between max-w-[1597px] mx-auto px-[50px] py-[15px] h-20 bg-white/50 shadow-[0px_4px_10px_rgba(0,0,0,0.25)] backdrop-blur-[7.5px] rounded-[60px] pointer-events-auto">
+      <div 
+        id="navbar-container"
+        data-component-name="NavbarContainer"
+        className="flex items-center justify-between max-w-[1597px] mx-auto px-4 md:px-[50px] py-3 md:py-[15px] rounded-full bg-white/50 shadow-[0_4px_10px_rgba(0,0,0,0.25)] backdrop-blur-[7.5px] pointer-events-auto"
+      >
         
         {/* Logo */}
         <a href="/" className="flex items-center shrink-0 no-underline" onClick={onLogoClick}>
@@ -59,27 +63,24 @@ export const Header = ({
         </a>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 flex-1 justify-center">
-          {navItems.map((item) => (
-            <div key={item.href} className={`relative ${item.children ? 'group' : ''}`}>
-              <a
-                href={item.href}
-                className={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium no-underline rounded-md whitespace-nowrap transition-colors duration-150
-                  ${item.active
-                    ? 'text-[var(--color-primary-500)] font-semibold'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--color-neutral-50)]'
+        <nav 
+          id="main-desktop-navbar"
+          data-component-name="DesktopNavbar"
+          className="hidden md:flex flex-1 justify-center"
+        >
+          <ul className="flex justify-center items-center m-0 list-none px-5 py-[15px] gap-4">
+            {navItems.map((item) => (
+              <li key={item.href} className={`relative ${item.children ? 'group' : ''}`}>
+                <a
+                  href={item.href}
+                  className={`inline-flex items-center no-underline transition-colors duration-150 gap-[6px] text-center font-['Noto_Sans',sans-serif] text-[14px] font-bold ${
+                    item.active ? 'text-[var(--color-primary-500)]' : 'text-[#191D24] hover:text-[var(--color-primary-500)]'
                   }`}
-              >
-                {item.label}
+                >
+                  {item.label}
+                  <img src="/assets/figma/icons/Arrow1.svg" alt="" aria-hidden="true" className={`w-3 h-3 ${item.children ? 'group-hover:rotate-90 transition-transform duration-150' : ''}`} />
+                </a>
                 {item.children && (
-                  <span className="transition-transform duration-150 text-[1.1em] group-hover:rotate-90">
-                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                )}
-              </a>
-              {item.children && (
                 <div className="absolute top-full left-0 min-w-[200px] bg-white border border-[var(--border-default)] rounded-md shadow-lg p-2 opacity-0 invisible translate-y-2 transition-all duration-150 z-[var(--z-dropdown)] group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
                   {item.children.map((child) => (
                     <a
@@ -92,8 +93,9 @@ export const Header = ({
                   ))}
                 </div>
               )}
-            </div>
-          ))}
+              </li>
+            ))}
+          </ul>
         </nav>
 
         {/* Auth Actions */}

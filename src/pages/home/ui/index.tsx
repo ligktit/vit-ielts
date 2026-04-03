@@ -78,13 +78,13 @@ export const PageHome = ({
           viewMoreLink={ROUTES.EXAM.ARCHIVE}
         />
       </div>
-      {/* === SECTION: Why Choose Us (Statistics) === */}
-      {whyChooseUsConfig?.badge && (
-        <WhyChooseUs config={whyChooseUsConfig} />
-      )}
       {/* === SECTION: Testimonials (Marquee) === */}
       {testimonialsConfig?.testimonials && (
         <Testimonials config={testimonialsConfig} />
+      )}
+      {/* === SECTION: Why Choose Us (Statistics) === */}
+      {whyChooseUsConfig?.badge && (
+        <WhyChooseUs config={whyChooseUsConfig} />
       )}
     </>
   );

@@ -121,6 +121,7 @@ import { Button, Input, Badge } from '@/shared/ui/ds';
 | `link` | Transparent | — | `#D94A56` | — |
 | `danger` | `#EF4444` | `#DC2626` | White | — |
 | `icon-circle` | `#D94A56` | `#EA8D95` | White | — |
+| `white` | `#FFFFFF` | `#E3636E` | `#D94A56` → White | `#FFFFFF` |
 
 **⚠️ `icon-circle` special behavior:**
 - Default: `position: absolute; top: 20px; right: 20px; width: 28px; height: 28px;`

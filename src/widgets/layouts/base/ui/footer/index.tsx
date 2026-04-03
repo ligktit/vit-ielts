@@ -7,6 +7,7 @@ import { ROUTES } from "@/shared/routes";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import type { FooterCtaBannerConfig } from "./types";
+import { CTABanner } from "@/shared/ui/ds/organisms/cta-banner";
 
 export const Footer = () => {
   const {
@@ -117,71 +118,15 @@ export const Footer = () => {
   return (
     <footer data-section="footer" className="bg-gray-100">
       {/* === SECTION: Footer CTA Banner === */}
-      <div
-        data-section="footer-cta-banner"
-        className="relative py-15 overflow-hidden"
-        style={{
-          background:
-            ctaBannerConfig?.backgroundGradient ||
-            "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-        }}
-      >
-        <Container>
-          <div className="relative bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 md:py-14 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-            {/* Left Side - Text Content */}
-            <div className="flex-1 min-w-0 w-full md:w-auto">
-              <h2
-                className="text-xl sm:text-2xl md:text-3xl font-bold mb-2 wrap-break-word"
-                style={{ color: "#000" }}
-              >
-                {ctaBannerConfig?.title ||
-                  "Ready to start creating a standard website?"}
-              </h2>
-              <p className="text-gray-600 text-sm sm:text-base wrap-break-word font-bold">
-                {ctaBannerConfig?.description ||
-                  "Finest choice for your home & office"}
-              </p>
-            </div>
-
-            {/* Right Side - Button */}
-            <div className="shrink-0 w-full md:w-auto">
-              {ctaBannerConfig?.button.link || buyProLink ? (
-                <Link
-                  href={ctaBannerConfig?.button.link || buyProLink || "#"}
-                  className="block w-full md:w-auto"
-                >
-                  <Button
-                    type="primary"
-                    size="large"
-                    className="rounded-lg px-4 sm:px-8 h-12 text-sm sm:text-base font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg w-full md:w-auto"
-                    style={{
-                      background: "#d94a56",
-                      borderColor: "#d94a56",
-                    }}
-                  >
-                    <span className="truncate max-w-[200px] sm:max-w-none inline-block">
-                      {ctaBannerConfig?.button.text || "Purchase Histudy"}
-                    </span>
-                  </Button>
-                </Link>
-              ) : (
-                <Button
-                  type="primary"
-                  size="large"
-                  className="rounded-lg px-4 sm:px-8 h-12 text-sm sm:text-base font-medium w-full md:w-auto"
-                  style={{
-                    background: "#d94a56",
-                    borderColor: "#d94a56",
-                  }}
-                  disabled
-                >
-                  {ctaBannerConfig?.button.text ||
-                    `Purchase ${generalSettingsTitle || "Histudy"}`}
-                </Button>
-              )}
-            </div>
-          </div>
-        </Container>
+      <div data-section="footer-cta-banner" className="pt-16 pb-8 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <CTABanner
+            title={ctaBannerConfig?.title || "Sẵn sàng cho kì thi IELTS máy?"}
+            subtitle={ctaBannerConfig?.description || "Ôn luyện trên các bài thi sát thực đề, xem giải thích chi tiết trước khi bước vào phòng thi!"}
+            ctaText={ctaBannerConfig?.button?.text || "Bắt đầu luyện thi"}
+            ctaHref={ctaBannerConfig?.button?.link || buyProLink || ROUTES.LOGIN()}
+          />
+        </div>
       </div>
 
       {/* === SECTION: Footer Main Content (Links + Newsletter) === */}

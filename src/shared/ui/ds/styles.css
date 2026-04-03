@@ -8,7 +8,7 @@
 @import "./design-tokens.css";
 
 /* ─── Atoms ─── */
-@import "./atoms/button/button.css";
+/* button.css removed — component uses Tailwind-only */
 @import "./atoms/input/input.css";
 @import "./atoms/badge/badge.css";
 @import "./atoms/avatar/avatar.css";
@@ -21,7 +21,7 @@
 @import "./molecules/form-field/form-field.css";
 @import "./molecules/nav-link/nav-link.css";
 @import "./molecules/breadcrumb/breadcrumb.css";
-@import "./molecules/test-card/test-card.css";
+/* test-card.css removed — component uses Tailwind-only */
 @import "./molecules/blog-card/blog-card.css";
 @import "./molecules/stat-card/stat-card.css";
 @import "./molecules/pricing-card/pricing-card.css";
@@ -29,4 +29,4 @@
 /* ─── Organisms ─── */
 /* header.css removed — Header now uses Tailwind-only */
 @import "./organisms/footer/footer.css";
-@import "./organisms/cta-banner/cta-banner.css";
+/* cta-banner.css removed — component uses Tailwind-only */

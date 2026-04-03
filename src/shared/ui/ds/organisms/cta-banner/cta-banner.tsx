@@ -1,21 +1,4 @@
-// CSS loaded via styles.css → _app.tsx (Pages Router)
-
-/**
- * Design System CTA Banner
- *
- * @figma Node 412:6730 — "CTA" component (1920×359)
- *
- * Structure (from Figma API):
- *   [COMPONENT] "CTA" 1920×359 — transparent wrapper
- *     [FRAME] "Frame 48" 1600×250 — red pill (#D94A56 + dot pattern), r:150
- *       [FRAME] "Frame 54" 716×185 — text group (vertical, gap:32)
- *         [TEXT] title — white, bold, 46px/63px
- *         [TEXT] subtitle — white, 500, 20px/27px
- *         [INSTANCE] "Button2" 232×57 — white bg, r:25, text #D94A56
- *       [INSTANCE] "Component 1" 500×421 — mascot (overflows top)
- *         [RECT] gradient backdrop
- *         [RECT] mascot image 450×379, drop-shadow(4,0,4)
- */
+import Image from "next/image";
 
 export type CTABannerProps = {
   /** Main heading text */
@@ -44,46 +27,66 @@ export const CTABanner = ({
   className = '',
 }: CTABannerProps) => {
   const buttonContent = (
-    <span className="cta-banner__btn-label">{ctaText}</span>
+    <span className="font-noto-sans font-bold text-[#D94A56] text-[1.25cqi] whitespace-nowrap">
+      {ctaText}
+    </span>
   );
 
   return (
-    <section className={`cta-banner ${className}`.trim()}>
-      {/* Layer 2: Red pill shape with dot-pattern overlay */}
-      <div className="cta-banner__pill">
-        {/* Layer 3a: Text content group — Figma "Frame 54" */}
-        <div className="cta-banner__content">
-          <div className="cta-banner__text-group">
-            <h2 className="cta-banner__title">{title}</h2>
+    <section className={`relative w-full overflow-visible flex justify-center ${className}`.trim()}>
+      {/* Red pill shape wrapper (@container for cqi sizing) */}
+      <div className="@container relative w-full max-w-[1600px] aspect-[1600/250] bg-[#D94A56] rounded-[999px] overflow-visible">
+        {/* Dot pattern overlay */}
+        <div 
+          className="absolute inset-0 rounded-[999px] pointer-events-none z-[1]"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(255, 255, 255, 0.25) 4px, transparent 4.5px)",
+            backgroundSize: "24px 24px"
+          }}
+        />
+
+        {/* Text content group */}
+        <div className="relative flex flex-col justify-center items-start gap-[2cqi] max-w-[55%] ml-[12.625cqi] py-[32px] z-[2]">
+          <div className="flex flex-col gap-[0.375cqi]">
+            <h2 className="font-noto-sans font-extrabold text-white text-[2.875cqi] leading-[1.37] m-0">
+              {title}
+            </h2>
             {subtitle && (
-              <p className="cta-banner__subtitle">{subtitle}</p>
+              <p className="font-noto-sans font-medium text-white text-[1.25cqi] leading-[1.35] m-0">
+                {subtitle}
+              </p>
             )}
           </div>
 
-          {/* Button — Figma "Button2" */}
+          {/* Button */}
           {ctaHref ? (
-            <a href={ctaHref} className="cta-banner__btn">
+            <a 
+              href={ctaHref} 
+              className="inline-flex items-center justify-center min-w-[14.5cqi] h-[3.5625cqi] px-[1.25cqi] bg-white border-none rounded-[1.5625cqi] cursor-pointer no-underline transition-all duration-150 ease-out hover:bg-[#F8F9FA] hover:shadow-[0_4px_6px_rgba(0,0,0,0.07)] hover:-translate-y-[1px] active:scale-[0.98]"
+            >
               {buttonContent}
             </a>
           ) : (
             <button
               type="button"
-              className="cta-banner__btn"
               onClick={onCtaClick}
+              className="inline-flex items-center justify-center min-w-[14.5cqi] h-[3.5625cqi] px-[1.25cqi] bg-white border-none rounded-[1.5625cqi] cursor-pointer transition-all duration-150 ease-out hover:bg-[#F8F9FA] hover:shadow-[0_4px_6px_rgba(0,0,0,0.07)] hover:-translate-y-[1px] active:scale-[0.98]"
             >
               {buttonContent}
             </button>
           )}
         </div>
 
-        {/* Layer 3b: Mascot — Figma "Component 1" */}
+        {/* Mascot area */}
         {mascotSrc && (
-          <div className="cta-banner__mascot-area">
-            <img
+          <div className="absolute right-[5cqi] bottom-0 w-[32cqi] h-[32cqi] z-[3] pointer-events-none">
+            <Image
               src={mascotSrc}
               alt="IELTS Prediction Mascot"
-              className="cta-banner__mascot"
-              loading="lazy"
+              className="absolute bottom-0 left-1/2 w-[30cqi] min-h-[400px] h-auto object-cover drop-shadow-[4px_0px_4px_rgba(0,0,0,0.25)] pointer-events-auto origin-bottom transition-transform duration-500 ease-out hover:scale-[1.2] hover:rotate-4 hover:drop-shadow-[6px_4px_8px_rgba(0,0,0,0.2)] -translate-x-1/2"
+              width={450}
+              height={380}
+              unoptimized
             />
           </div>
         )}
