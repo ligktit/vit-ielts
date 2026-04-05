@@ -27,7 +27,7 @@ function TestPlatformIntroPage() {
       
       // Chỉ set form values lần đầu tiên khi load
       if (!isFormInitialized) {
-        form.setFielValue(data);
+        form.setFieldsValue(data);
         setIsFormInitialized(true);
       }
     } catch {

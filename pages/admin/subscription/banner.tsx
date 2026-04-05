@@ -29,7 +29,7 @@ function SubscriptionBannerPage() {
   // Cập nhật form khi config thay đổi
   useEffect(() => {
     if (config) {
-      form.setFielValue(config);
+      form.setFieldsValue(config);
     }
   }, [config, form]);
 

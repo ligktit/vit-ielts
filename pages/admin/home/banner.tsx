@@ -48,7 +48,7 @@ function HeroBannerPage() {
       // Set values với delay để đảm bảo Form.List được mount
       setTimeout(() => {
         // Set toàn bộ config vào form
-        form.setFielValue(normalizedConfig);
+        form.setFieldsValue(normalizedConfig);
         
         // Verify form values sau khi set
         setTimeout(() => {
@@ -416,7 +416,7 @@ function HeroBannerPage() {
                                       ...updatedFeatureCards[index],
                                       avatars: initialAvatars
                                     };
-                                    form.setFielValue({
+                                    form.setFieldsValue({
                                       featureCards: updatedFeatureCards
                                     });
 
