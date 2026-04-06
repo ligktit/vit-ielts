@@ -8,6 +8,7 @@ import { decode } from "html-entities";
 import Image from "next/image";
 import Link from "next/link";
 import { IPracticeSingle } from "../api";
+import { PracticeHistoryWidget } from "./practice-history";
 
 export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
   const { currentUser } = useAuth();
@@ -161,21 +162,7 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
                     Lịch sử làm bài
                   </h3>
                 </div>
-                <div className="space-y-3 bg-[#E5E5E5]/40 rounded-[12px] p-4">
-                  {[1, 2, 3, 4, 5].map((item) => (
-                    <div
-                      key={item}
-                      className="flex justify-between items-center bg-white rounded-lg p-4 shadow-sm border border-[rgba(0,0,0,0.02)]"
-                    >
-                      <span className="text-sm text-[#6A7282]">
-                        09/12/2025 - 08:55
-                      </span>
-                      <span className="text-sm font-bold text-[#27AE60]">
-                        5/10
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                <PracticeHistoryWidget post={post} />
               </div>
 
               {/* Action Buttons */}

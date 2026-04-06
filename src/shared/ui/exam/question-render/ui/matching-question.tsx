@@ -76,13 +76,13 @@ export const DraggableOption = ({
       {...attributes}
       {...listeners}
       className={twMerge(
-        "block rounded-sm touch-none select-none w-fit",
+        "block rounded-sm touch-none select-none",
         "text-sm",
         bold ? "font-bold" : "font-normal",
         isDropped ? "bg-transparent" : "bg-white",
         isOverlay
-          ? "cursor-grabbing border-2 border-blue-500 shadow-md px-3 py-0.5"
-          : "cursor-grab",
+          ? "cursor-grabbing border-2 border-blue-500 shadow-md px-3 py-0.5 w-max max-w-[400px] break-words"
+          : "cursor-grab w-fit max-w-full",
         !isDropped && "px-3 py-0.5 shadow-sm", // Removed border border-gray-200
         isDragging && "opacity-30",
         className

@@ -219,21 +219,117 @@ export const Select = ({
   }), [methods, readOnly, realStartIndex, token.fontSize, question.list_of_options, activeIndex, setActiveQuestionIndex]);
 
   const numberOfGaps = questionData.questions.length;
+  const subQuestions = question.list_of_questions || [];
+  const useSubQuestions = numberOfGaps === 0 && subQuestions.length > 0;
+  
   // Tính toán hiển thị range câu hỏi
   const displayStart = realStartIndex + 1;
-  const displayEnd = realStartIndex + numberOfGaps;
+  const displayEnd = realStartIndex + (useSubQuestions ? subQuestions.length : numberOfGaps);
+  const questionRange = (useSubQuestions ? subQuestions.length : numberOfGaps) > 1 
+    ? ` - ${displayEnd}` 
+    : ``;
 
   return (
-    <>
-      <p className="text-lg font-bold">
-        Question {displayStart} - {displayEnd}
-      </p>
+    <div className="space-y-4" id={`question-block-${realStartIndex + 1}`}>
+      <h3 className="text-lg font-bold">
+        Question {displayStart}{questionRange}
+      </h3>
+      
       <div className="leading-[2] prose prose-sm max-w-none">
         <TextSelectionWrapper>
           {parse(questionData.content, options)}
         </TextSelectionWrapper>
       </div>
-      {readOnly && (
+
+      {useSubQuestions && subQuestions.map((subQ, index) => {
+        const questionIndex = realStartIndex + index;
+        const correctAnswerIndex = subQ.correct ?? 0;
+        const fieldName = `answers.${questionIndex}`;
+        const inputId = `#question-no-${questionIndex + 1}`;
+
+        return (
+          <div
+            key={questionIndex}
+            className="space-y-2 pb-[10px]"
+            id={inputId}
+          >
+            <div
+              className={twMerge(
+                "flex items-center text-[16px]",
+                activeIndex === index && "active-quizz"
+              )}
+            >
+              <span className="w-[28px] h-[27px] flex items-center justify-center stt mr-[5px] font-bold">
+                {questionIndex + 1}
+              </span>
+              <TextSelectionWrapper>{parse(subQ.question || "")}</TextSelectionWrapper>
+              
+              <div className="ml-2 inline-block">
+                <Controller
+                  key={questionIndex}
+                  control={methods.control}
+                  name={fieldName as `answers.${number}`}
+                  render={({ field }) => {
+                    const userAnswerIndex = field.value;
+                    const userDidAnswer = userAnswerIndex !== null && userAnswerIndex !== undefined && userAnswerIndex !== "";
+                    const isUserCorrect = userDidAnswer && Number(userAnswerIndex) === correctAnswerIndex;
+                    
+                    const dropdownValue = readOnly ? (userDidAnswer ? Number(userAnswerIndex) : undefined) : (field.value !== "" && field.value !== null && field.value !== undefined ? Number(field.value) : undefined);
+                    
+                    return (
+                      <span className="inline-flex items-center gap-2">
+                        <SelectAnt
+                          {...field}
+                          value={dropdownValue}
+                          disabled={readOnly}
+                          tagRender={(props) => <div>{props.value}</div>}
+                          size="small"
+                          placeholder="--"
+                          style={{ minWidth: 120 }}
+                          className={readOnly ? (isUserCorrect ? "[&_.ant-select-selector]:bg-[#d9ead3] [&_.ant-select-selector]:!text-green-600" : (userDidAnswer ? "[&_.ant-select-selector]:bg-[#d3e3fd] [&_.ant-select-selector]:!text-red-500" : "")) : ""}
+                          options={(subQ.options || [])
+                            .map((o, i) => ({
+                              label: parse(o.content || ""),
+                              value: i,
+                            }))}
+                          onFocus={() => {
+                            if (!readOnly) {
+                              setActiveIndex(index); 
+                              setActiveQuestionIndex(questionIndex);
+                            }
+                          }}
+                          onBlur={() => setActiveIndex(null)}
+                          onChange={(val) => {
+                            field.onChange(val);
+                            if (!readOnly) {
+                               setActiveIndex(index);
+                               setActiveQuestionIndex(questionIndex);
+                            }
+                          }}
+                        />
+                        {readOnly && (
+                          <>
+                           {isUserCorrect ? (
+                             <span className="material-symbols-rounded text-green-600 text-lg">check_circle</span>
+                           ) : userDidAnswer ? (
+                             <span className="material-symbols-rounded text-red-600 text-lg">cancel</span>
+                           ) : null}
+                           {readOnly && !isUserCorrect && (
+                             <span className="text-green-600 font-semibold ml-2">({subQ.options?.[correctAnswerIndex]?.content?.replace(/<[^>]+>/g, '')})</span>
+                           )}
+                          </>
+                        )}
+                      </span>
+                    )
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {readOnly && !useSubQuestions && (
         <div className="space-y-4">
           {(question.explanations || []).map((explanation, index) => (
             <Fragment key={index}>
@@ -243,7 +339,7 @@ export const Select = ({
                 </span>
                 <span>Answer:</span>
                 <span className="text-red-500 font-semibold">
-                  {questionData.questions[index].answers.join(", ")}
+                  {questionData.questions[index]?.answers?.join(", ")}
                 </span>
               </p>
               <Collapse
@@ -264,6 +360,20 @@ export const Select = ({
           ))}
         </div>
       )}
-    </>
+      {readOnly && useSubQuestions && question.explanations && question.explanations.length > 0 && (
+        <Collapse
+          size="small"
+          items={question.explanations.map((exp, index) => ({
+            key: index,
+            label: `Explanation`,
+            children: (
+              <div className="prose prose-sm max-w-none">
+                {parse(exp.content || "")}
+              </div>
+            ),
+          }))}
+        />
+      )}
+    </div>
   );
 };

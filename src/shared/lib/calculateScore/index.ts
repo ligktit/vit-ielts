@@ -256,7 +256,33 @@ const processSelectQuestion = (
   const total = correctAnswersFromText.length;
   const optionsList = question.list_of_options || [];
 
-  if (total === 0) {
+  if (total === 0 && question.list_of_questions && question.list_of_questions.length > 0) {
+    // FALLBACK: Use list_of_questions exactly like Radio
+    const subQuestions = question.list_of_questions;
+    subQuestions.forEach(subQ => {
+      if (currentAnswerIndex >= answers.length) {
+        console.warn(`>>> [Select] Cảnh báo: Thiếu câu trả lời cho sub-question tại index ${currentAnswerIndex}`);
+        details.push({ correct: false, userAnswer: null, answer: subQ.options?.[subQ.correct ?? 0]?.content ?? 'N/A' });
+        currentAnswerIndex++;
+        return;
+      }
+
+      const userAnswer = answers[currentAnswerIndex] as number;
+      const correctAnswer = subQ.correct ?? 0;
+      const isCorrect = userAnswer === correctAnswer;
+
+      if (isCorrect) correctCount++;
+      else if (userAnswer !== undefined && userAnswer !== null) incorrectCount++;
+
+      details.push({
+        correct: isCorrect,
+        userAnswer: subQ.options?.[userAnswer]?.content ?? null,
+        answer: subQ.options?.[correctAnswer]?.content ?? 'N/A',
+      });
+      currentAnswerIndex++;
+    });
+    return { details, correct: correctCount, incorrect: incorrectCount, total: subQuestions.length, questionIndex: currentAnswerIndex };
+  } else if (total === 0) {
     console.warn(`>>> [Select] Cảnh báo: Không tìm thấy đáp án đúng dạng {} trong text câu hỏi.`);
   }
 

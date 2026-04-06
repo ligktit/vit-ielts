@@ -171,7 +171,7 @@ export function PageTestResult({
             </div>
             
             {/* Mascot Image */}
-            <div className="w-40 h-40 md:w-56 md:h-56 relative shrink-0 z-0 hidden sm:block">
+            <div className="w-40 h-40 md:w-56 md:h-[260px] relative shrink-0 z-0 hidden sm:block self-end -mb-6 md:-mb-8">
               <Image 
                 src={scorePercent < 50 ? "/assets/figma/icons/fail.png" : "/assets/figma/icons/pass.png"} 
                 alt="IELTS Prediction Mascot Status" 
@@ -182,35 +182,35 @@ export function PageTestResult({
           </div>
 
           {/* Correct/Wrong/Skip Stats Box */}
-          <div className="w-full lg:w-[40%] bg-white rounded-[24px] shadow-sm border-b-[6px] border-primary-500 p-6 md:p-8 flex items-center justify-evenly">
+          <div className="w-full lg:w-[40%] bg-white rounded-[24px] shadow-sm border-b-[6px] border-primary-500 p-6 md:p-10 flex items-center justify-evenly">
             {/* Correct */}
-            <div className="flex flex-col h-[120px] p-[20px] md:p-[30px] justify-center items-center self-stretch aspect-square space-y-3">
-              <div className="w-16 h-16 rounded-full bg-[#1B8C40] flex items-center justify-center text-white shadow-sm shrink-0">
-                <span className="material-symbols-rounded text-3xl font-bold">check</span>
+            <div className="flex flex-col justify-center items-center space-y-4 md:space-y-6">
+              <div className="w-20 h-20 md:w-[110px] md:h-[110px] rounded-full bg-[#1B8C40] flex items-center justify-center text-white shadow-sm shrink-0">
+                <Image src="/assets/figma/icons/check.svg" alt="Correct" width={50} height={50} className="w-[40px] h-[40px] md:w-[50px] md:h-[50px] brightness-0 invert" />
               </div>
-              <div className="text-center">
-                <p className="font-bold text-[#1B8C40] text-lg">Đúng</p>
-                <p className="font-black text-[#2D3142] text-xl">{scoreData.correctAns}</p>
+              <div className="text-center space-y-1 md:space-y-2">
+                <p className="font-bold text-[#1B8C40] text-lg md:text-[22px]">Đúng</p>
+                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{scoreData.correctAns}</p>
               </div>
             </div>
             {/* Wrong */}
-            <div className="flex flex-col h-[120px] p-[20px] md:p-[30px] justify-center items-center self-stretch aspect-square space-y-3">
-              <div className="w-16 h-16 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-sm shrink-0">
-                <span className="material-symbols-rounded text-3xl font-bold">close</span>
+            <div className="flex flex-col justify-center items-center space-y-4 md:space-y-6">
+              <div className="w-20 h-20 md:w-[110px] md:h-[110px] rounded-full bg-primary-500 flex items-center justify-center text-white shadow-sm shrink-0">
+                <Image src="/assets/figma/icons/Cross.svg" alt="Wrong" width={50} height={50} className="w-[40px] h-[40px] md:w-[50px] md:h-[50px]" />
               </div>
-              <div className="text-center">
-                <p className="font-bold text-primary-500 text-lg">Sai</p>
-                <p className="font-black text-[#2D3142] text-xl">{scoreData.total_questions - scoreData.correctAns - (scoreData as any).skipped || Math.max(0, scoreData.total_questions - scoreData.correctAns)}</p>
+              <div className="text-center space-y-1 md:space-y-2">
+                <p className="font-bold text-primary-500 text-lg md:text-[22px]">Sai</p>
+                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{scoreData.total_questions - scoreData.correctAns - ((scoreData as any).skipped || 0) || Math.max(0, scoreData.total_questions - scoreData.correctAns)}</p>
               </div>
             </div>
             {/* Skipped */}
-            <div className="flex flex-col h-[120px] p-[20px] md:p-[30px] justify-center items-center self-stretch aspect-square space-y-3">
-              <div className="w-16 h-16 rounded-full bg-[#F2994A] flex items-center justify-center text-white shadow-sm shrink-0">
-                <span className="material-symbols-rounded text-3xl font-bold">skip_next</span>
+            <div className="flex flex-col justify-center items-center space-y-4 md:space-y-6">
+              <div className="w-20 h-20 md:w-[110px] md:h-[110px] rounded-full bg-[#F2994A] flex items-center justify-center text-white shadow-sm shrink-0">
+                <Image src="/assets/figma/icons/skip.svg" alt="Skipped" width={50} height={50} className="w-[40px] h-[40px] md:w-[50px] md:h-[50px] ml-1 md:ml-1.5" />
               </div>
-              <div className="text-center">
-                <p className="font-bold text-[#F2994A] text-lg">Bỏ qua</p>
-                <p className="font-black text-[#2D3142] text-xl">{(scoreData as any).skipped || 0}</p>
+              <div className="text-center space-y-1 md:space-y-2">
+                <p className="font-bold text-[#F2994A] text-lg md:text-[22px]">Bỏ qua</p>
+                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{(scoreData as any).skipped || 0}</p>
               </div>
             </div>
           </div>
@@ -222,8 +222,8 @@ export function PageTestResult({
           <div className="bg-white rounded-[24px] p-8 shadow-sm flex flex-col space-y-4">
             <h3 className="text-2xl font-black text-[#2D3142] pb-4 border-b border-gray-200">Kĩ năng</h3>
             <div className="flex items-center space-x-6 pt-2">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
-                <span className="material-symbols-rounded text-3xl">headphones</span>
+              <div className="w-[120px] h-[120px] rounded-full bg-[#EAEEF6] flex items-center justify-center shrink-0">
+                <Image src={skill === "listening" ? "/assets/figma/icons/listen 1.svg" : "/assets/figma/icons/reading-book 1.svg"} alt={skill} width={60} height={60} className="w-[60px] h-[60px]" />
               </div>
               <div>
                 <p className="text-xl font-extrabold text-[#2D3142] capitalize">{skill === "listening" ? "Nghe" : skill === "reading" ? "Đọc" : skill}</p>
@@ -236,8 +236,8 @@ export function PageTestResult({
           <div className="bg-white rounded-[24px] p-8 shadow-sm flex flex-col space-y-4">
             <h3 className="text-2xl font-black text-[#2D3142] pb-4 border-b border-gray-200">Kết quả</h3>
             <div className="flex items-center space-x-6 pt-2">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
-                <span className="material-symbols-rounded text-3xl">check</span>
+              <div className="w-[120px] h-[120px] rounded-full bg-[#EAEEF6] flex items-center justify-center shrink-0">
+                <Image src="/assets/figma/icons/check.svg" alt="Câu đúng" width={60} height={60} className="w-[60px] h-[60px]" />
               </div>
               <div>
                 <p className="text-xl font-extrabold text-[#2D3142]">Câu đúng</p>
@@ -250,8 +250,8 @@ export function PageTestResult({
           <div className="bg-white rounded-[24px] p-8 shadow-sm flex flex-col space-y-4">
             <h3 className="text-2xl font-black text-[#2D3142] pb-4 border-b border-gray-200">Thời gian</h3>
             <div className="flex items-center space-x-6 pt-2">
-              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-700">
-                <span className="material-symbols-rounded text-3xl">schedule</span>
+              <div className="w-[120px] h-[120px] rounded-full bg-[#EAEEF6] flex items-center justify-center shrink-0">
+                <Image src="/assets/figma/icons/count.svg" alt="Thời gian" width={60} height={60} className="w-[60px] h-[60px]" />
               </div>
               <div>
                 <p className="text-xl font-extrabold text-[#2D3142]">{timeSpent.spent}</p>

@@ -92,8 +92,15 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
                       skill: [(quiz as any).skill || skill, (quiz as any).skill || skill],
                       type: [(quiz as any).type || "practice"],
                       passages: ((quiz as any).passages || []).map((p: any) => ({
+                        passage_content: p.content,
                         questions: (p.questions || []).map((q: any) => ({
-                          explanations: q.answers || [],
+                          type: [q.type, q.type],
+                          list_of_questions: q.list_of_questions,
+                          list_of_options: q.list_of_options,
+                          matchingQuestion: q.matching_question,
+                          matrixQuestion: q.matrix_question,
+                          question: q.question_text,
+                          explanations: q.explanations || [],
                         })),
                       })),
                     },
@@ -192,8 +199,16 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
           const missed = scoreResult?.missed ?? 0;
           const total = correct + incorrect + missed;
 
+          if (total === 0) return <span className="font-medium">0/10</span>;
+
+          const score10 = (correct / total) * 10;
+          const displayScore = Number.isInteger(score10) ? score10.toString() : score10.toFixed(1);
+          const isPass = score10 >= 5;
+
           return (
-            <span className="font-medium">{correct}/{total}</span>
+            <span className={`font-bold ${isPass ? "text-[#1B8C40]" : "text-primary-500"}`}>
+              {displayScore}/10
+            </span>
           );
         },
       },
@@ -258,21 +273,14 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
           return dateB - dateA;
         });
 
-      // Paginate client-side
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginated = filtered.slice(startIndex, endIndex);
-
       return {
         filteredDataSource: filtered,
-        paginatedDataSource: paginated,
       };
     }
     return {
       filteredDataSource: [],
-      paginatedDataSource: [],
     };
-  }, [data, currentPage, pageSize]);
+  }, [data]);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -294,7 +302,7 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
   return (
     <Table<NodeWithScore>
       columns={columns}
-      dataSource={paginatedDataSource}
+      dataSource={filteredDataSource}
       scroll={{ x: 768 }}
       loading={loading}
       size="small"

@@ -61,9 +61,11 @@ export const Checkbox = ({
   }, [question, getQuestionStartIndex, propStartIndex, readOnly]);
 
   // Logic tính toán option
-  const maxSelectableOptions = Number(question.optionChoose) || 1;
-  // @ts-ignore
-  const totalSubQuestions = question.list_of_options?.filter((o: any) => o.correct).length || maxSelectableOptions || 1;
+  const listCorrectLen = question.list_of_options?.filter((o: any) => o.correct)?.length || 0;
+  const parsedMaxOptions = parseMaxOptionsFromText(question.question || question.instructions);
+  // Ưu tiên optionChoose > parsed > listCorrectLen > 1
+  const maxSelectableOptions = Number(question.optionChoose) || (parsedMaxOptions > 1 ? parsedMaxOptions : 0) || listCorrectLen || 1;
+  const totalSubQuestions = listCorrectLen || maxSelectableOptions || 1;
 
   // Hiển thị dải câu hỏi (VD: Questions 21-22)
   const displayStart = realStartIndex + 1;
@@ -100,6 +102,7 @@ export const Checkbox = ({
 
             const currentValues = Array.isArray(field.value) ? field.value : [];
             const isLimitReached = currentValues.length >= maxSelectableOptions;
+            const shouldDisableOthers = isLimitReached && maxSelectableOptions > 1;
 
             return (
               <AntCheckbox.Group
@@ -111,14 +114,13 @@ export const Checkbox = ({
                 value={currentValues}
                 onChange={(checkedValues) => {
                   let finalValues = checkedValues;
-                  const oldValue = Array.isArray(field.value) ? field.value : [];
 
                   if (maxSelectableOptions === 1) {
                     if (checkedValues.length > 1) {
+                      // Thay vì disable, nếu max=1 ta sẽ thay thế đáp án cũ bằng đáp án mới chọn
                       finalValues = [checkedValues[checkedValues.length - 1]];
-                    } else if (checkedValues.length === 0 && oldValue.length === 1) {
-                      finalValues = oldValue;
                     }
+                    // BỎ LOGIC chặn ẩn check (người dùng hoàn toàn CÓ THỂ uncheck câu trả lời)
                   }
 
                   // Sort để lưu dữ liệu đẹp hơn (VD: [0, 2])
@@ -133,7 +135,7 @@ export const Checkbox = ({
                     <AntCheckbox
                       key={index}
                       value={index}
-                      disabled={readOnly || (isLimitReached && !isSelected)}
+                      disabled={readOnly || (shouldDisableOthers && !isSelected)}
                       onFocus={(e) => {
                         setIsFocused(true);
 
