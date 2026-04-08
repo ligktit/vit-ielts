@@ -1,2 +1,4 @@
 export * from "./api";
-export * from "./ui";
+export { useLatestTestScore } from "./hooks/useLatestTestScore";
+export { TestCardWithScore } from "./ui/test-card-with-score";
+export { TestHistoryModal } from "./ui/test-history-modal";

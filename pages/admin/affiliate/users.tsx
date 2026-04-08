@@ -31,7 +31,7 @@ import { formatPrice } from "@/pages/subscription/ui/subscription-plans/pricing"
 import { withAdmin } from "@/shared/hoc/withAdmin";
 import { GetServerSideProps } from "next";
 
-const GET_USER_EMAIL = "";
+
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -39,6 +39,7 @@ const { Option } = Select;
 interface AffiliateUser {
   id: string;
   userId: string;
+  user_id?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   approvedAt?: string;
@@ -112,8 +113,6 @@ export default function AffiliateUsersPage() {
     setFilteredAffiliates(filtered);
   };
 
-  const client = null as any;
-
   const fetchAffiliates = async () => {
     try {
       setLoading(true);
@@ -121,35 +120,16 @@ export default function AffiliateUsersPage() {
       const data = await res.json();
 
       if (data.success) {
-        let affiliatesData = data.affiliates as AffiliateUser[];
+        const affiliatesData = data.affiliates as AffiliateUser[];
 
-        // Fetch user emails from GraphQL
-        const enrichedAffiliates = await Promise.all(
-          affiliatesData.map(async (affiliate) => {
-            try {
-              // Try to fetch user data
-              // userId is Base64 ID (e.g. "dXNlcjo0ODQ=")
-              const { data: userData } = await client.query({
-                query: GET_USER_EMAIL,
-                variables: { id: affiliate.userId, idType: "GLOBAL_ID" },
-                errorPolicy: 'ignore', // Ignore errors if user not found
-                fetchPolicy: 'network-only' // Ensure freshness
-              });
-
-              if (userData?.user?.email) {
-                return {
-                  ...affiliate,
-                  email: userData.user.email,
-                  name: userData.user.name,
-                };
-              }
-              return affiliate;
-            } catch (err) {
-              console.warn(`Failed to fetch info for user ${affiliate.userId}`, err);
-              return affiliate;
-            }
-          })
-        );
+        const enrichedAffiliates = affiliatesData.map((affiliate) => {
+          return {
+            ...affiliate,
+            userId: affiliate.userId || (affiliate as any).user_id,
+            email: affiliate.email || (affiliate as any).user_email,
+            name: affiliate.name || (affiliate as any).user_name,
+          };
+        });
 
         setAffiliates(enrichedAffiliates);
         setFilteredAffiliates(enrichedAffiliates);
@@ -190,6 +170,7 @@ export default function AffiliateUsersPage() {
         setAffiliateDetail({
           affiliate: {
             ...data.affiliate,
+            userId: data.affiliate.userId || data.affiliate.user_id,
             email,
             name,
           },
@@ -303,20 +284,24 @@ export default function AffiliateUsersPage() {
 
   const columns: ColumnsType<AffiliateUser> = [
     {
-      title: "User ID / Email",
+      title: "Thông tin Affiliate",
       dataIndex: "userId",
       key: "userId",
-      width: 200,
-      render: (userId: string, record: AffiliateUser) => (
-        <div className="flex flex-col">
-          <Tooltip title={userId}>
-            <span className="font-mono text-xs text-gray-500">{userId?.substring(0, 12)}...</span>
-          </Tooltip>
-          {record.email && (
-            <span className="text-xs font-semibold text-blue-600">{record.email}</span>
-          )}
-        </div>
-      ),
+      width: 250,
+      render: (userId: string, record: AffiliateUser) => {
+        const idToDisplay = userId || record.user_id;
+        return (
+          <div className="flex flex-col">
+            <div className="font-semibold text-gray-900">{record.name || "N/A"}</div>
+            {record.email && (
+              <span className="text-xs font-semibold text-blue-600">{record.email}</span>
+            )}
+            <Tooltip title={idToDisplay}>
+              <span className="font-mono text-xs text-gray-400 mt-1">ID: {idToDisplay?.substring(0, 12)}...</span>
+            </Tooltip>
+          </div>
+        );
+      },
     },
     {
       title: "Trạng thái",

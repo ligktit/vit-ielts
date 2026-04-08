@@ -50,30 +50,20 @@ export const getServerSidePropsArchive = async (
 
   const defaultBannerConfig: SampleEssayBannerConfig = {
     writing: {
-      title: {
-        line1: "DOL IELTS Writing",
-        line2Highlighted: "Task 1 Academic",
-        line2After: "Sample",
-      },
+      title: "DOL IELTS Writing Task 1 Academic Sample",
       description: {
         line1: "Tổng hợp bài mẫu IELTS Exam Writing Task 1 và hướng dẫn cách làm bài,",
         line2: "từ vựng chi tiết theo chủ đề.",
       },
       backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-      button: { text: "Tìm hiểu khóa học", link: "#" },
     },
     speaking: {
-      title: {
-        line1: "DOL IELTS Speaking",
-        line2Highlighted: "Task 1 Academic",
-        line2After: "Sample",
-      },
+      title: "DOL IELTS Speaking Sample",
       description: {
         line1: "Tổng hợp bài mẫu IELTS Exam Speaking Task 1 và hướng dẫn cách làm bài,",
         line2: "từ vựng chi tiết theo chủ đề.",
       },
       backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-      button: { text: "Tìm hiểu khóa học", link: "#" },
     },
   };
 

@@ -4,8 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { ProLink } from "@/shared/ui/pro-link";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 
 export const DefaultView = ({ post }: { post: IPost }) => {
+  const fallbackImage = useContentImageFallback();
+
   return (
     <article className="p-4 rounded-2xl shadow-primary bg-white h-full">
       <ProLink
@@ -27,10 +30,7 @@ export const DefaultView = ({ post }: { post: IPost }) => {
             </div>
           )}
           <Image
-            src={
-              post.featuredImage?.node.sourceUrl ||
-              "https://placehold.co/600x400"
-            }
+            src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
             alt={post.featuredImage?.node.altText || post.title}
             fill
             className="object-cover"

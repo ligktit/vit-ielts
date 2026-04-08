@@ -2,6 +2,7 @@ import Image from "next/image";
 import { SampleEssayProps } from "../..";
 import { ROUTES } from "@/shared/routes";
 import { TestCard } from "@/shared/ui/ds";
+import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
 
 export const HorizontalItem = ({
   post: { node: post },
@@ -58,11 +59,8 @@ export const HorizontalItem = ({
       ? `[Quý ${quarter}/${year}] Đề thi thật IELTS Writing Task 1 - Dạng ${topicTypeName}, chủ đề ${topicName} kèm bài mẫu band 8.5+, dàn ý chi tiết, từ vựng và bài tập ôn luyện.`
       : post.title;
   } else if (skill === "speaking") {
-    const part = post.part || post.speakingSampleEssayFields?.part?.[1] || "Part";
-    topicTypeName = `Part ${part.replace('Part ', '')}`;
-    if (topicTypeName === "Part ") {
-        topicTypeName = "Part";
-    }
+    const partRaw = post.part || post.speakingSampleEssayFields?.part?.[0] || "1";
+    topicTypeName = `Part ${partRaw}`;
 
     // Build description for speaking
     let topicName = "";
@@ -81,7 +79,7 @@ export const HorizontalItem = ({
       image={post.featured_image || post.featuredImage?.node?.sourceUrl}
       title={post.title}
       skill={skill as 'reading' | 'listening' | 'speaking' | 'writing'}
-      part={topicTypeName}
+      part={normalizeSectionBadge(skill, skill === 'writing' ? post.writingSampleEssayFields?.task?.[0] || post.task : post.speakingSampleEssayFields?.part?.[0] || post.part).label}
       isPro={post.pro_user_only ?? post.postMeta?.proUserOnly ?? false}
       href={ROUTES.SAMPLE_ESSAY.SINGLE(post.slug)}
       isLocked={post.pro_user_only ?? post.postMeta?.proUserOnly ?? false}

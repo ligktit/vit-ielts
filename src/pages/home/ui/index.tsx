@@ -11,7 +11,7 @@ import type { HeroBannerConfig } from "./hero-banner/types";
 import type { TestPlatformIntroConfig } from "./ielts-test-platform-intro/types";
 import type { WhyChooseUsConfig } from "./why-choose-us/types";
 import type { TestimonialsConfig } from "./testimonials/types";
-import type { Quiz } from "~services/types/database";
+import type { Quiz, SampleEssay } from "~services/types/database";
 
 interface PageHomeProps {
   heroBannerConfig?: HeroBannerConfig;
@@ -21,6 +21,8 @@ interface PageHomeProps {
   examQuizzes: Quiz[];
   listeningQuizzes: Quiz[];
   readingQuizzes: Quiz[];
+  writingSamples: SampleEssay[];
+  speakingSamples: SampleEssay[];
 }
 
 export const PageHome = ({
@@ -31,6 +33,8 @@ export const PageHome = ({
   examQuizzes,
   listeningQuizzes,
   readingQuizzes,
+  writingSamples,
+  speakingSamples,
 }: PageHomeProps) => {
   const { isSignedIn } = useAuth();
   return (
@@ -39,24 +43,7 @@ export const PageHome = ({
       <HeroBanner config={heroBannerConfig} />
       {/* === SECTION: Platform Intro (Category Cards) === */}
       <IeltsTestPlatformIntro config={testPlatformIntroConfig} />
-      {/* === SECTION: User Dashboard (Target Score + Practice History) === */}
-      <div data-section="user-dashboard" className="py-10">
-        <Container className="space-y-16">
-          {isSignedIn && (
-            <>
-              <div>
-                <TargetScore />
-              </div>
-              <section className="space-y-6">
-                <h3 className="text-2xl md:text-3xl font-extrabold">
-                  Practice History
-                </h3>
-                <PracticeHistory />
-              </section>
-            </>
-          )}
-        </Container>
-      </div>
+
       {/* === SECTION: Practice Tests Carousel === */}
       <div data-section="practice-tests" className="w-full bg-white flex flex-col gap-8 pb-10 pt-4">
         <PracticeSection
@@ -73,6 +60,20 @@ export const PageHome = ({
           title="IELTS Reading Practice"
           viewMoreLink={ROUTES.PRACTICE.ARCHIVE_READING}
           items={readingQuizzes}
+        />
+        {/* === SECTION: Writing Sample Carousel === */}
+        <PracticeSection
+          title="IELTS Writing Sample"
+          viewMoreLink={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}
+          items={writingSamples as unknown as Quiz[]}
+          getItemHref={(item) => ROUTES.SAMPLE_ESSAY.SINGLE(item.slug)}
+        />
+        {/* === SECTION: Speaking Sample Carousel === */}
+        <PracticeSection
+          title="IELTS Speaking Sample"
+          viewMoreLink={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING}
+          items={speakingSamples as unknown as Quiz[]}
+          getItemHref={(item) => ROUTES.SAMPLE_ESSAY.SINGLE(item.slug)}
         />
       </div>
       {/* === SECTION: Testimonials (Marquee) === */}

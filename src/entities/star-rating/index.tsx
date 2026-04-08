@@ -8,7 +8,7 @@ import { createClient } from "~supabase/client";
 import { ratePost } from "~services/post";
 
 export const StarRating = ({ post }: { post: IPost }) => {
-  const [ratingData, setRatingData] = useState(post.rating);
+  const [ratingData, setRatingData] = useState(post?.rating || { rate: 0, count: 0, voted: false });
   const router = useRouter();
   const { currentUser } = useAuth();
   const [percent, setPercent] = useState(0);

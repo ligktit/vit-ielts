@@ -3,6 +3,7 @@ import { Card, Tabs, Form, Input, Button, message, Spin, Switch, InputNumber, Ro
 import { SaveOutlined, SettingOutlined } from "@ant-design/icons";
 import AdminLayout from "../_layout";
 import { withAdmin } from "@/shared/hoc/withAdmin";
+import { ImageUpload } from "@/shared/ui/image-upload";
 import { AdminPageHeader } from "@/widgets/admin";
 
 const { TextArea } = Input;
@@ -28,7 +29,7 @@ export default function AdminSettingsPage() {
             const json = await res.json();
             if (json.success) {
                 setSettings(json.data);
-                generalForm.setFieldsValue(json.data.general || {});
+                generalForm.setFieldsValue(json.data.general_settings || json.data.general || {});
                 emailForm.setFieldsValue(json.data.email || {});
                 paymentForm.setFieldsValue(json.data.payment || {});
                 authForm.setFieldsValue(json.data.auth || {});
@@ -75,9 +76,12 @@ export default function AdminSettingsPage() {
                                         <Col span={12}><Form.Item name="logo_url" label="Logo URL"><Input /></Form.Item></Col>
                                         <Col span={12}><Form.Item name="favicon_url" label="Favicon URL"><Input /></Form.Item></Col>
                                     </Row>
+                                    <Form.Item name="defaultContentImage" label="Ảnh đại diện mặc định cho bài viết/bộ đề/blog">
+                                        <ImageUpload label="" />
+                                    </Form.Item>
                                     <Form.Item name="seo_title" label="SEO Title mặc định"><Input /></Form.Item>
                                     <Form.Item name="seo_description" label="SEO Description mặc định"><TextArea rows={2} /></Form.Item>
-                                    <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => saveSetting("general", generalForm)}>Lưu</Button>
+                                    <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={() => saveSetting("general_settings", generalForm)}>Lưu</Button>
                                 </Form>
                             </Card>
                         ),

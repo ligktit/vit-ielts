@@ -1,6 +1,7 @@
 import { Badge } from '../../atoms/badge';
 import { PartTag } from '../../atoms/part-tag';
 import { ProBadge } from '../../../pro-badge';
+import { resolveContentImage, useContentImageFallback } from '@/shared/lib/content-image';
 
 export type TestCardProps = {
   image?: string;
@@ -18,6 +19,7 @@ export type TestCardProps = {
   actionText?: string;
   href?: string;
   onClick?: () => void;
+  onScoreClick?: (e: React.MouseEvent) => void;
   className?: string;
 };
 
@@ -39,8 +41,13 @@ export const TestCard = ({
   actionText = "Kiểm Tra", // default action
   href,
   onClick,
+  onScoreClick,
   className = '',
 }: TestCardProps) => {
+  const fallbackImage = useContentImageFallback();
+  const imageSrc = resolveContentImage(image, fallbackImage);
+  const isLogoFallback = !image && imageSrc.includes('logo.png');
+
   const Tag = href ? 'a' : 'div';
   const linkProps = href ? { href } : {};
 
@@ -52,16 +59,16 @@ export const TestCard = ({
     >
       {/* Upper Image Section — Figma spec: 356×220 */}
       <div className="relative h-[220px] shrink-0 overflow-hidden bg-secondary-50 rounded-t-[30px] rounded-b-[15px]">
-        {image ? (
-          <img
-            src={image}
-            alt={title}
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-          />
-        ) : (
+        {/* Maintain nice gradient background if falling back to transparent logo */}
+        {isLogoFallback && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--color-secondary-200),_white_55%,_var(--color-primary-50))]" />
         )}
+        <img
+          src={imageSrc}
+          alt={title}
+          className={`absolute inset-0 w-full h-full ${isLogoFallback ? 'object-contain p-12 opacity-30 mix-blend-multiply' : 'object-cover'}`}
+          loading="lazy"
+        />
 
         {/* Overlays: Part tag (left), PRO tag (right) */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start gap-2">
@@ -120,7 +127,16 @@ export const TestCard = ({
             )}
 
             {score !== undefined && (
-              <div className="flex h-[60px] w-[60px] flex-col items-center justify-center p-[10px] rounded-full border border-[rgba(128,128,128,0.55)] bg-white flex-shrink-0">
+              <div 
+                className={`flex h-[60px] w-[60px] flex-col items-center justify-center p-[10px] rounded-full border border-[rgba(128,128,128,0.55)] bg-white flex-shrink-0 ${onScoreClick ? 'cursor-pointer hover:border-primary-500 hover:text-primary-500 transition-colors' : ''}`}
+                onClick={(e) => {
+                  if (onScoreClick) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onScoreClick(e);
+                  }
+                }}
+              >
                 <span className="text-primary-500 font-['Noto_Sans'] text-[18px] font-bold leading-none">{score}</span>
               </div>
             )}

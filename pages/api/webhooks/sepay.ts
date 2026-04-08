@@ -9,6 +9,7 @@ import { activateProAccount, getUserProfile } from "~services/user";
 import {
   sendOrderConfirmEmail,
   sendAdminNotificationEmail,
+  sendExpiredOrderPaymentAlert,
 } from "~services/email";
 import { resolveAffiliateRef, createCommissionWithWaiting } from "~services/affiliate";
 import { completePayoutFromWebhook } from "~services/payout";
@@ -237,11 +238,37 @@ export default async function handler(
     }
 
     // ── Blocker #2: Atomically mark order as completed FIRST ──
-    const { updated } = await completeOrder(supabaseAdmin, order.order_id);
+    const { updated, currentStatus } = await completeOrder(supabaseAdmin, order.order_id);
 
     if (!updated) {
+      // Handle expired orders: send admin alert instead of auto-completing
+      if (currentStatus === "expired") {
+        log.warn(
+          `[Sepay Webhook] ⚠ Payment received for EXPIRED order: ${order.order_id}`,
+        );
+
+        try {
+          await sendExpiredOrderPaymentAlert(
+            order.order_id,
+            amount,
+            order.amount,
+            payload.transactionDate || new Date().toISOString(),
+          );
+          log(`[Sepay Webhook] ✔ Expired order alert email sent to admin`);
+        } catch (emailErr) {
+          log.error(`[Sepay Webhook] ✗ Error sending expired order alert:`, emailErr);
+        }
+
+        return res.status(200).json({
+          success: true,
+          message: "Order expired — admin notified for manual review",
+          orderId: order.order_id,
+          status: "expired",
+        });
+      }
+
       log(
-        `[Sepay Webhook] Order already processed (not pending): ${order.order_id}`,
+        `[Sepay Webhook] Order already processed (status: ${currentStatus}): ${order.order_id}`,
       );
       return res.status(200).json({
         success: true,

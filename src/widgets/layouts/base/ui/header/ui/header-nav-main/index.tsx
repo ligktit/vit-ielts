@@ -24,7 +24,6 @@ const MENU_LABEL_TO_ROUTE: Record<string, string> = {
   "ielts prediction": "/ielts-prediction",
   "subscription": ROUTES.SUBSCRIPTION,
   "contact": "/contact",
-  "about us": ROUTES.ABOUT_US,
 };
 
 /** Resolve a menu item URI: use DB value if valid, otherwise fall back to label mapping */

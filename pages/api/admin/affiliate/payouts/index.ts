@@ -63,6 +63,7 @@ export default async function handler(
           affiliate_custom_link: affiliate?.custom_link ?? null,
           user_name: userName,
           user_email: userEmail,
+          user_id: affiliate?.user_id ?? null,
         };
       }),
     );

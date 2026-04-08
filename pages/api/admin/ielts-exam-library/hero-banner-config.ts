@@ -28,7 +28,6 @@ export default async function handler(
     // Trả về config mặc định nếu file không tồn tại
     const defaultConfig: ExamLibraryHeroConfig = {
       title: "IELTS Exam Library",
-      backgroundColor: "linear-gradient(rgb(255, 255, 255) 0%, rgb(239, 241, 255) 100%)",
       breadcrumb: {
         homeLabel: "Home",
         currentLabel: "IELTS Exam Library",

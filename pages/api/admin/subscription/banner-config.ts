@@ -17,23 +17,15 @@ export default async function handler(
 
   try {
     const config = await readConfig<SubscriptionBannerConfig>(supabaseAdmin, "subscription/banner");
-    // Validate config có đầy đủ properties
-    if (!config || !config.backgroundImage || !config.title) {
+    if (!config || !config.title) {
       throw new Error("Invalid config structure");
     }
     return res.status(200).json(config);
   } catch {
     // Trả về config mặc định nếu file không tồn tại
     const defaultConfig: SubscriptionBannerConfig = {
-      backgroundImage: "/img-admin/bg-image-11.jpg",
-      subtitle: {
-        text: "Choose Your Plan",
-      },
-      title: "Upgrade to Pro Account",
-      description:
-        "Unlock premium features and access to exclusive IELTS practice materials. Get the most out of your IELTS preparation journey.",
+      title: "Subscription",
     };
     return res.status(200).json(defaultConfig);
   }
 }
-

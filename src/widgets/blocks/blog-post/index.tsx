@@ -7,6 +7,7 @@ import _ from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "~supabase/client";
 import { getPosts } from "~services/post";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 
 type Props = {
   title: string;
@@ -48,6 +49,7 @@ export const BlogPost = ({
   limit = 4,
   sliderOptions: inputSliderOptions = {},
 }: Props) => {
+  const fallbackImage = useContentImageFallback();
   const sliderOptions = useMemo(
     () => _.merge(defaultSliderOptions, inputSliderOptions),
     [inputSliderOptions]
@@ -129,10 +131,7 @@ export const BlogPost = ({
                     <Link href={item.link} title={item.title} className="block">
                       <div className="relative overflow-hidden aspect-[3/2] bg-gray-200 rounded-lg">
                         <Image
-                          src={
-                            item.featuredImage?.node.sourceUrl ||
-                            "https://placehold.co/600x400"
-                          }
+                          src={resolveContentImage(item.featuredImage?.node.sourceUrl, fallbackImage)}
                           alt={item.featuredImage?.node.altText || item.title}
                           fill
                           className="object-cover"

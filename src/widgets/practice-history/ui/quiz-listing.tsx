@@ -202,7 +202,9 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
           if (total === 0) return <span className="font-medium">0/10</span>;
 
           const score10 = (correct / total) * 10;
-          const displayScore = Number.isInteger(score10) ? score10.toString() : score10.toFixed(1);
+          const displayScore = Number.isInteger(score10) 
+            ? score10.toString() 
+            : score10.toFixed(1).replace('.', ',');
           const isPass = score10 >= 5;
 
           return (

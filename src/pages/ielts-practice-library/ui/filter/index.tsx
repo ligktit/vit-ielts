@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useRouter } from "next/router";
-import { QUESTION_FORMS } from "@/shared/constants";
+import { LISTENING_QUESTION_FORMS, READING_QUESTION_FORMS } from "@/shared/constants";
 import type { FilterFormValues } from "..";
 
 type FilterProps = {
@@ -22,9 +22,10 @@ const FILTER_CONFIGS = {
     { slug: "3", name: "Part 4" },
   ],
   reading: [
-    { slug: "0", name: "Passage 1" },
-    { slug: "1", name: "Passage 2" },
-    { slug: "2", name: "Passage 3" },
+    { slug: "0", name: "Part 1" },
+    { slug: "1", name: "Part 2" },
+    { slug: "2", name: "Part 3" },
+    { slug: "3", name: "Part 4" },
   ],
   status: [
     { value: "pending", label: "Pending" },
@@ -209,7 +210,7 @@ export const Filter = ({ filterData, mobile = false, onClose }: FilterProps) => 
 
       <FilterSection title="Loại câu hỏi">
         <div className="flex flex-col gap-[18px]">
-          {QUESTION_FORMS.map((item) => (
+          {(skill === "listening" ? LISTENING_QUESTION_FORMS : READING_QUESTION_FORMS).map((item) => (
             <FilterCheckbox
               key={item.value}
               checked={(values.question_form || []).includes(item.value)}

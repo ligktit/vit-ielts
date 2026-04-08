@@ -2,41 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
-
-export interface SampleEssayBannerConfig {
-  writing: {
-    title: {
-      line1: string;
-      line2Highlighted: string;
-      line2After: string;
-    };
-    description: {
-      line1: string;
-      line2: string;
-    };
-    backgroundColor: string;
-    button: {
-      text: string;
-      link: string;
-    };
-  };
-  speaking: {
-    title: {
-      line1: string;
-      line2Highlighted: string;
-      line2After: string;
-    };
-    description: {
-      line1: string;
-      line2: string;
-    };
-    backgroundColor: string;
-    button: {
-      text: string;
-      link: string;
-    };
-  };
-}
+import type { SampleEssayBannerConfig } from "@/shared/types/admin-config";
 
 export default async function handler(
   req: NextApiRequest,
@@ -74,4 +40,3 @@ export default async function handler(
 
   return res.status(405).json({ message: "Method not allowed" });
 }
-

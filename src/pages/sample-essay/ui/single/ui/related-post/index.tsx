@@ -7,8 +7,10 @@ import { ProLink } from "@/shared/ui";
 import { useEffect, useState } from "react";
 import { createClient } from "~supabase/client";
 import { getPosts } from "~services/post";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 
 function RelatedPost({ post }: { post: IPost }) {
+  const fallbackImage = useContentImageFallback();
   const [relatedPosts, setRelatedPosts] = useState<IPost[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,10 +72,7 @@ function RelatedPost({ post }: { post: IPost }) {
                       >
                         <div className="relative aspect-[4/3] md:aspect-square max-w-full min-h-full">
                           <Image
-                            src={
-                              post.featuredImage?.node.sourceUrl ||
-                              "https://placehold.co/600x400"
-                            }
+                            src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
                             alt={post.featuredImage?.node.altText || post.title}
                             fill
                             className="object-cover"

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { createApiSupabase } from "~supabase/server";
-import { createOrder } from "~services/order";
+import { createOrder, findExistingPendingOrder } from "~services/order";
 import { CreateOrderSchema } from "~services/lib/validation";
 import { readConfig } from "~services/cms-config";
 import { validateCoupon } from "~services/coupon";
@@ -114,6 +114,35 @@ export default async function handler(
 
     // Affiliate ref từ cookie
     const affiliateRef = req.cookies[AFFILIATE_COOKIE_NAME];
+
+    // ─── DEDUP: Reuse existing pending order if same params ─────────────
+    const existingOrder = await findExistingPendingOrder(
+      supabaseAdmin,
+      finalUserId,
+      packageType,
+      duration,
+    );
+
+    if (existingOrder) {
+      return res.status(200).json({
+        success: true,
+        order: {
+          id: existingOrder.id,
+          orderId: existingOrder.order_id,
+          reused: true,
+          orderFields: {
+            packageType: existingOrder.package_type,
+            duration: existingOrder.duration,
+            skillType: existingOrder.skill_type,
+            amount: existingOrder.amount,
+            status: existingOrder.status,
+            paymentMethod: existingOrder.payment_method,
+            transferContent: existingOrder.transfer_content,
+            createdAt: existingOrder.created_at,
+          },
+        },
+      });
+    }
 
     // Tạo order qua service (bao gồm coupon usage increment)
     const order = await createOrder(supabaseAdmin, {

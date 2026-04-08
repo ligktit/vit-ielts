@@ -7,6 +7,8 @@ import type { TestimonialsConfig } from "./ui/testimonials/types";
 import { createServerSupabase } from "~supabase/server";
 import { readConfig } from "~services/cms-config";
 import { getQuizzes } from "~services/quiz";
+import { getSampleEssays } from "~services/sample-essay";
+import type { SampleEssay } from "~services/types/database";
 import type { Quiz } from "~services/types/database";
 
 export { PageHome } from "./ui";
@@ -28,6 +30,8 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       examQuizzes,
       listeningQuizzes,
       readingQuizzes,
+      writingSamples,
+      speakingSamples,
     ] = await Promise.all([
       readConfig<HeroBannerConfig>(supabase, "home/hero-banner").catch(() => null),
       readConfig<TestPlatformIntroConfig>(supabase, "home/test-platform-intro").catch(() => null),
@@ -36,6 +40,8 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       getQuizzes(supabase, { type: "exam", pageSize: 8 }).catch(() => ({ data: [] as Quiz[] })),
       getQuizzes(supabase, { skill: "listening", type: "practice", pageSize: 8 }).catch(() => ({ data: [] as Quiz[] })),
       getQuizzes(supabase, { skill: "reading", type: "practice", pageSize: 8 }).catch(() => ({ data: [] as Quiz[] })),
+      getSampleEssays(supabase, { skill: "writing", pageSize: 8 }).catch(() => ({ data: [] as SampleEssay[] })),
+      getSampleEssays(supabase, { skill: "speaking", pageSize: 8 }).catch(() => ({ data: [] as SampleEssay[] })),
     ]);
 
     return {
@@ -47,6 +53,8 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         examQuizzes: examQuizzes.data,
         listeningQuizzes: listeningQuizzes.data,
         readingQuizzes: readingQuizzes.data,
+        writingSamples: writingSamples.data,
+        speakingSamples: speakingSamples.data,
       },
     };
   }

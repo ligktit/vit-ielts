@@ -96,7 +96,6 @@ export const Footer = () => {
   ];
 
   const companyLinks = [
-    { label: "About Us", href: ROUTES.ABOUT_US },
     { label: "Contact Us", href: "/contact" },
     { label: "My Dashboard", href: ROUTES.ACCOUNT.DASHBOARD },
     { label: "My Profile", href: ROUTES.ACCOUNT.MY_PROFILE },

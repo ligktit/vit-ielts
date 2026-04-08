@@ -27,33 +27,9 @@ export default async function handler(
     const defaultConfig: PracticeLibraryBannerConfig = {
       listening: {
         title: "IELTS Listening Practice Tests",
-        description: {
-          line1:
-          "IELTS Listening Practice Tests Online miễn phí tại IELTS PREDICTION với đề",
-          line2:
-          "thi, audio, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
-        },
-        backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-        button: {
-          text: "Tìm hiểu khóa học",
-          link: "#",
-        },
       },
       reading: {
         title: "IELTS Reading Practice Tests",
-        description: {
-          line1:
-          "IELTS Reading Practice Tests Online miễn phí tại DOL Academy với đề",
-          line2:
-          "thi, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
-        },
-        backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-        button: {
-          text: "Tìm hiểu khóa học",
-          link: "#",
-        },
       },
     };
     return res.status(200).json(defaultConfig);

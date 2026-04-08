@@ -6,7 +6,7 @@ import { withAdmin } from "@/shared/hoc/withAdmin";
 
 const { Panel } = Collapse;
 
-function ExamLibraryHeroBannerPage() {
+function ExamLibraryPageHeaderPage() {
   const [config, setConfig] = useState<ExamLibraryHeroConfig | null>(null);
   const [saving, setSaving] = useState(false);
   const [form] = Form.useForm();
@@ -66,14 +66,14 @@ function ExamLibraryHeroBannerPage() {
         title={
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold m-0">
-              Manage IELTS Exam Library Hero
+              Manage Exam Library Page Header
             </h1>
           </div>
         }
       >
         <Form form={form} layout="vertical" initialValues={config}>
-          <Collapse defaultActiveKey={["hero", "background"]}>
-            <Panel header="Hero Banner" key="hero">
+          <Collapse defaultActiveKey={["header"]}>
+            <Panel header="Page Header" key="header">
               <Form.Item
                 name="title"
                 label="Title"
@@ -103,18 +103,6 @@ function ExamLibraryHeroBannerPage() {
                 <Input placeholder="IELTS Exam Library" />
               </Form.Item>
             </Panel>
-            <Panel header="Background" key="background">
-              <Form.Item
-                name="backgroundColor"
-                label="Background Color/Gradient"
-                rules={[
-                  { required: true, message: "Please enter background color" },
-                ]}
-                extra="Ví dụ: linear-gradient(rgb(255, 255, 255) 0%, rgb(239, 241, 255) 100%) hoặc #ffffff"
-              >
-                <Input placeholder="linear-gradient(rgb(255, 255, 255) 0%, rgb(239, 241, 255) 100%)" />
-              </Form.Item>
-            </Panel>
           </Collapse>
 
           <Space className="mt-6 w-full justify-end">
@@ -133,8 +121,6 @@ function ExamLibraryHeroBannerPage() {
   );
 }
 
-export default ExamLibraryHeroBannerPage;
+export default ExamLibraryPageHeaderPage;
 
 export const getServerSideProps = withAdmin;
-
-

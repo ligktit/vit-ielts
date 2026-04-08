@@ -21,6 +21,11 @@ export type MasterData = {
             sourceUrl: string;
           };
         };
+        defaultContentImage: {
+          node: {
+            sourceUrl: string;
+          };
+        };
         facebook: string;
         email: string;
         zalo: string;
@@ -75,6 +80,7 @@ const defaultMasterData: MasterData = {
       generalSettings: {
         favicon: { node: { sourceUrl: "" } },
         logo: { node: { sourceUrl: "" } },
+        defaultContentImage: { node: { sourceUrl: "" } },
         facebook: "",
         email: "",
         zalo: "",

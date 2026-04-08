@@ -6,8 +6,7 @@ import { FAQ } from "./faq";
 import { HeroBanner } from "@/shared/ui/ds";
 import { ROUTES } from "@/shared/routes";
 import dynamic from "next/dynamic";
-import type { TestimonialsConfig } from "@/pages/home/ui/testimonials/types";
-import type { FAQConfig } from "@/shared/types/admin-config";
+import type { TestimonialsConfig, FAQConfig } from "@/shared/types/admin-config";
 import { useAppContext } from "@/appx/providers";
 import { useMemo } from "react";
 
@@ -56,22 +55,14 @@ export const PageSubscription = ({ testimonialsConfig, faqConfig, bannerConfig }
       </div>
 
       {/* === SECTION: Testimonials === */}
-      <div data-section="subscription-testimonials" className="bg-gray-50 w-full">
-        <div className="testimonials-no-padding">
-          <Testimonials config={testimonialsConfig} />
-        </div>
+      <div data-section="subscription-testimonials" className="w-full bg-gray-50 py-10">
+        <Testimonials config={testimonialsConfig} />
       </div>
 
       {/* === SECTION: FAQ === */}
       <FAQ config={faqConfig} />
 
-      <style jsx global>{`
-        .testimonials-no-padding > div {
-          padding-top: 0 !important;
-          padding-bottom: 0 !important;
-          background-color: rgb(249 250 251) !important; /* bg-gray-50 */
-        }
-      `}</style>
+
     </>
   );
 };

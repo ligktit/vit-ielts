@@ -1,7 +1,8 @@
 import { Container, Empty } from "@/shared/ui";
 import { SEOHeader } from "@/widgets";
 import { CategoryData } from "../api";
-import { Breadcrumb, Pagination } from "antd";
+import { Pagination } from "antd";
+import { HeroBanner } from "@/shared/ui/ds";
 import Link from "next/link";
 import { DefaultView } from "@/shared/ui/post";
 import { useRouter } from "next/router";
@@ -19,24 +20,21 @@ export const PageArchive = ({
   pageSize: number;
 }) => {
   const router = useRouter();
-  const breadcrumbItems = (category.seo?.breadcrumbs || []).map((item, index) => ({
-    title:
-      index === (category.seo?.breadcrumbs?.length ?? 0) - 1 ? (
-        decode(item.text)
-      ) : (
-        <Link href={item.url}>{decode(item.text)}</Link>
-      ),
+  const dsBreadcrumbs = (category.seo?.breadcrumbs || []).map((item) => ({
+    label: decode(item.text),
+    href: item.url,
   }));
 
   return (
     <>
       <SEOHeader fullHead={category.seo?.fullHead} title={category.seo?.title} />
+      <HeroBanner 
+        title={category.name || "Blog"} 
+        breadcrumbs={dsBreadcrumbs} 
+      />
       <Container>
-        <div className="flex -m-4 flex-wrap">
+        <div className="flex -m-4 flex-wrap mt-2">
           <div className="p-4 w-full">
-            <div className="py-5">
-              <Breadcrumb items={breadcrumbItems} />
-            </div>
             <div className="pb-5 space-y-4">
               {posts.edges.length > 0 ? (
                 <>

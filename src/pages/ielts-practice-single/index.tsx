@@ -98,7 +98,9 @@ function toIPracticeSingle(
           instructions: q.instructions ?? undefined,
           list_of_questions: Array.isArray(listOfQuestions) ? listOfQuestions.map((lq) => ({
             question: lq.question,
-            correct: typeof lq.correct === "string" ? parseInt(lq.correct, 10) || 0 : Number(lq.correct),
+            correct: lq.correct != null
+              ? (typeof lq.correct === "string" ? (parseInt(lq.correct, 10) || 0) : Number(lq.correct))
+              : 0, // WP ACF migration: null means 0 (first option, lost due to JS falsy)
             options: (Array.isArray(lq.options) ? lq.options : []).map((o: any) => ({
               content: o.option_text ?? o.content ?? "",
             })),

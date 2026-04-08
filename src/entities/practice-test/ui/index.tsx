@@ -9,6 +9,7 @@ import { Button } from "antd";
 // import { twMerge } from "tailwind-merge";
 import { useAuth } from "@/appx/providers";
 import { useProContentModal } from "@/shared/ui/pro-content";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 
 const PART_COLORS = [
   "rgb(255, 164, 27)", // Part 1 / Task 1 / Passage 1
@@ -32,6 +33,7 @@ const FILTER_CONFIGS = {
 };
 
 export const PracticeTestItem = ({ item }: { item: IPracticeTest }) => {
+  const fallbackImage = useContentImageFallback();
   const openProContentModal = useProContentModal((state) => state.open);
   const { currentUser } = useAuth();
   // const [getData, { data, loading }] = useLazyQuery<ITestResultResponses>(
@@ -157,10 +159,7 @@ export const PracticeTestItem = ({ item }: { item: IPracticeTest }) => {
             </span>
           )}
           <Image
-            src={
-              item.featuredImage?.node.sourceUrl ||
-              "https://placehold.co/600x400"
-            }
+            src={resolveContentImage(item.featuredImage?.node.sourceUrl, fallbackImage)}
             alt={item.featuredImage?.node.altText || item.title}
             fill
             className="object-cover"

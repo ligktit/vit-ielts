@@ -16,6 +16,7 @@ import ExamModeModal from "@/pages/ielts-exam-library/ui/exam-mode-modal";
 import { ROUTES } from "@/shared/routes";
 import { useAuth } from "@/appx/providers";
 import { useProContentModal } from "@/shared/ui/pro-content";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 dayjs.extend(duration);
 
 export function PageTestResult({
@@ -29,6 +30,7 @@ export function PageTestResult({
   user: IUser;
   scoreData: ReturnType<typeof calculateScore>;
 }) {
+  const fallbackImage = useContentImageFallback();
   const { currentUser } = useAuth();
   const openProContentModal = useProContentModal((state) => state.open);
 
@@ -118,7 +120,7 @@ export function PageTestResult({
           {/* Thumbnail */}
           <div className="w-full md:w-1/2 h-[200px] md:h-full relative shrink-0">
             <Image
-              src={post.featuredImage?.node.sourceUrl || "https://placehold.co/804x261"}
+              src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
               alt={post.featuredImage?.node.altText || post.title}
               fill
               className="object-cover"

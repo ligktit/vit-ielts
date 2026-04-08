@@ -18,8 +18,6 @@ export const ROUTES = {
     AFFILIATE: "/account/affiliate",
   },
 
-  ABOUT_US: "/about-us",
-
   SUBSCRIPTION: "/subscription",
 
   EXAM: {

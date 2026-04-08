@@ -213,7 +213,7 @@ export const PageArchive = ({
       <div className="min-h-screen bg-white pb-20">
         <SEOHeader fullHead={seo?.fullHead} title={seo?.title} />
 
-        {/* Sample Essay Banner Section */}
+        {/* Sample Essay Page Header Section */}
         {showBanner &&
           (() => {
             const bannerData = isWriting
@@ -223,27 +223,11 @@ export const PageArchive = ({
             return (
               <DSHeroBanner
                 title={bannerData.title}
-                skillLabel={skill === "writing" ? "Writing Samples" : "Speaking Samples"}
-                description={
-                  <div className="text-sm px-4 md:px-0 sm:text-base md:text-lg text-white leading-relaxed max-w-3xl space-y-1 mx-auto w-full">
-                    {bannerData.description.line1 && (
-                      <div className="wrap-break-word">
-                        {bannerData.description.line1}
-                      </div>
-                    )}
-                    {bannerData.description.line2 && (
-                      <div className="wrap-break-word">
-                        {bannerData.description.line2}
-                      </div>
-                    )}
-                  </div>
-                }
                 breadcrumbs={[
                   { label: "Trang chủ", href: "/" },
                   { label: "Thư viện bài thi thử IELTS", href: "/ielts-practice-library" },
                   { label: skill === "writing" ? "Writing Samples" : "Speaking Samples" },
                 ]}
-                background={bannerData.backgroundColor}
               />
             );
           })()}

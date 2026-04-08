@@ -1,17 +1,25 @@
 import { useAuth } from "@/appx/providers";
 import { ROUTES } from "@/shared/routes";
 import { Container } from "@/shared/ui";
-import { Avatar, Breadcrumb, Button, Divider, TestCard } from "@/shared/ui/ds";
+import { Avatar, Breadcrumb, Button, Divider } from "@/shared/ui/ds";
+import { TestCardWithScore } from "@/entities/practice-test";
 import { useProContentModal } from "@/shared/ui/pro-content";
 import { SEOHeader } from "@/widgets";
 import { decode } from "html-entities";
 import Image from "next/image";
 import Link from "next/link";
 import { IPracticeSingle } from "../api";
+import { FormProvider, useForm } from "react-hook-form";
+import { useState } from "react";
+import Passage from "./section/passage";
+import QuestionSection from "./section/question";
+import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
 
 export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
   const { currentUser } = useAuth();
   const openProContentModal = useProContentModal((state) => state.open);
+  const methods = useForm();
+  const [showSolution, setShowSolution] = useState(false);
 
   const actionHref = currentUser
     ? ROUTES.TAKE_THE_TEST(post.slug)
@@ -70,10 +78,12 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
               {post.title}
             </h1>
 
-            <div
-              className="text-[#6A7282] text-sm md:text-base font-noto-sans max-w-full pb-[23px] border-b border-[rgba(0,0,0,0.06)] line-clamp-2"
-              dangerouslySetInnerHTML={{ __html: post.excerpt }}
-            />
+            {post.excerpt && (
+              <div
+                className="text-[#6A7282] text-sm md:text-base font-noto-sans max-w-full pb-[23px] border-b border-[rgba(0,0,0,0.06)] line-clamp-2"
+                dangerouslySetInnerHTML={{ __html: post.excerpt }}
+              />
+            )}
 
             {/* Author info */}
             <div className="flex items-center justify-between pt-[23px]">
@@ -110,14 +120,51 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column: Fixed details */}
             <div className="w-full lg:w-[220px] shrink-0 relative z-10">
-              <h3 className="font-bold text-lg text-[#2D3142] mb-3">
-                IELTS {capitalizedSkill} Practice
-              </h3>
-              <p className="text-sm text-[#6A7282] leading-relaxed">
-                Includes answering questions, reviewing detailed explanations,
-                and building vocabulary through the most popular IELTS{" "}
-                {capitalizedSkill} tests on the market.
-              </p>
+              <div className="sticky top-24 space-y-6">
+                <div>
+                  <h3 className="font-bold text-lg text-[#2D3142] mb-3">
+                    IELTS {capitalizedSkill} Practice
+                  </h3>
+                  <p className="text-sm text-[#6A7282] leading-relaxed">
+                    Includes answering questions, reviewing detailed explanations,
+                    and building vocabulary through the most popular IELTS{" "}
+                    {capitalizedSkill} tests on the market.
+                  </p>
+                </div>
+                
+                <div className="space-y-4 pt-4">
+                  <button 
+                    className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors"
+                    onClick={() => navigator.clipboard.writeText(window.location.href)}
+                  >
+                    <span className="material-symbols-rounded text-lg">content_copy</span>
+                    Copy link
+                  </button>
+                  <button 
+                    className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors"
+                    onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
+                  >
+                    <span className="material-symbols-rounded text-lg">share</span>
+                    Share
+                  </button>
+                  
+                  <div className="pt-2">
+                    <Button
+                      variant="primary"
+                      href={requiresUpgrade ? undefined : actionHref}
+                      onClick={requiresUpgrade ? handleStartPractice : undefined}
+                      className="w-full !rounded-full py-2.5 h-auto text-sm font-semibold shadow-sm"
+                      leftIcon={
+                        <span className="material-symbols-rounded text-[20px]">
+                          play_circle
+                        </span>
+                      }
+                    >
+                      Start Practice
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Middle Column: Main Content */}
@@ -135,21 +182,30 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
                 )}
               </div>
 
-              {/* Overview Box */}
-              <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="material-symbols-rounded text-[#2D3142]">
-                    article
-                  </span>
-                  <h3 className="font-bold text-lg text-[#2D3142]">
-                    Tổng quan
-                  </h3>
+              {/* Test Content Preview Box */}
+              {post.quizFields.passages && post.quizFields.passages.length > 0 && (
+                <div id="preview-box" className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-8">
+                    <span className="material-symbols-rounded text-[#2D3142]">
+                      preview
+                    </span>
+                    <h3 className="font-bold text-lg text-[#2D3142]">
+                      Nội dung bài test (Preview) {showSolution && " + Answers"}
+                    </h3>
+                  </div>
+                  
+                  <FormProvider {...methods}>
+                    <div className="space-y-12">
+                      {post.quizFields.passages.map((passage, index) => (
+                        <div key={index} className="space-y-8 pb-8 border-b border-[rgba(0,0,0,0.06)] last:border-0 last:pb-0">
+                          <Passage passage={passage} quizSkill={skill} />
+                          <QuestionSection passage={passage} showSolution={showSolution} />
+                        </div>
+                      ))}
+                    </div>
+                  </FormProvider>
                 </div>
-                <div
-                  className="text-sm md:text-base text-[#2D3142] leading-relaxed prose prose-sm md:prose-base max-w-none prose-p:!mb-2"
-                  dangerouslySetInnerHTML={{ __html: post.excerpt }}
-                />
-              </div>
+              )}
 
               {/* Mockup History Box */}
               <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
@@ -178,6 +234,37 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
                 </div>
               </div>
 
+              {/* Download PDF Box */}
+              {post.quizFields.pdf?.node?.mediaItemUrl && (
+                <div className="bg-white rounded-[12px] border-2 border-primary-500 p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="material-symbols-rounded text-primary-500 font-bold text-[28px]">
+                      picture_as_pdf
+                    </span>
+                    <h3 className="font-bold text-xl text-[#2D3142]">
+                      Download PDF
+                    </h3>
+                  </div>
+                  <p className="text-[#2D3142] text-sm mb-5 font-medium">
+                    You can download a nice copy of the questions and answers for {post.title} here.
+                  </p>
+                  <a
+                    href={post.quizFields.pdf.node.mediaItemUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex justify-between items-center bg-[#E5E5E5]/40 hover:bg-[#E5E5E5]/80 transition-colors rounded-lg p-4 cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded">PDF</span>
+                      <span className="font-semibold text-[#2D3142] text-sm">{post.title}</span>
+                    </div>
+                    <span className="material-symbols-rounded flex items-center justify-center bg-white shadow-sm p-1 rounded text-[#6A7282] group-hover:text-primary-500 transition-colors">
+                      download
+                    </span>
+                  </a>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="flex flex-wrap justify-center gap-4 pt-4">
                 <Button
@@ -196,13 +283,17 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
 
                 <Button
                   className="min-w-[160px] !rounded-full !bg-[#27AE60] !border-[#27AE60] hover:!bg-[#219653] hover:!border-[#219653] hover:!shadow-[0_0_10px_#27AE60] !text-white px-8 py-3 h-auto text-base font-semibold"
+                  onClick={() => {
+                    setShowSolution(!showSolution);
+                    document.getElementById('preview-box')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
                   leftIcon={
                     <span className="material-symbols-rounded text-[20px]">
-                      grid_view
+                      {showSolution ? "visibility_off" : "grid_view"}
                     </span>
                   }
                 >
-                  View Solution
+                  {showSolution ? "Hide Solution" : "View Solution"}
                 </Button>
               </div>
             </div>
@@ -215,13 +306,14 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
                     <h3 className="font-bold text-lg text-[#2D3142]">
                       Bài test nổi bật
                     </h3>
-                    <TestCard
+                    <TestCardWithScore
+                      quizId={post.relatedPracticeQuizzes[0].id}
                       title={post.relatedPracticeQuizzes[0].title}
                       image={
                         post.relatedPracticeQuizzes[0].featuredImage || undefined
                       }
                       skill={skill}
-                      part="Part 1"
+                      part={normalizeSectionBadge(skill, 1).label}
                       attempts={1195}
                       isPro={post.quizFields.proUserOnly}
                       href={ROUTES.PREDICTION.SINGLE(
@@ -285,15 +377,15 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {post.relatedPracticeQuizzes?.slice(0, 4).map((quiz, i) => (
-              <TestCard
+              <TestCardWithScore
                 key={i}
+                quizId={quiz.id}
                 title={quiz.title}
                 image={quiz.featuredImage || undefined}
                 skill={skill}
-                part={`Part ${i + 1}`}
+                part={normalizeSectionBadge(skill, i + 1).label}
                 attempts={1195}
                 isPro={post.quizFields.proUserOnly}
-                score="9.0"
                 href={ROUTES.PREDICTION.SINGLE(quiz.slug)}
               />
             ))}

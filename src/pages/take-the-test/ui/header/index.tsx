@@ -1,5 +1,5 @@
 import { Container } from "@/shared/ui";
-import { Button, Modal, Tooltip } from "antd";
+import { Button, Modal, Tooltip, notification } from "antd";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
@@ -39,7 +39,7 @@ const OptionItem = ({
 function Header({ post }: { post: IPracticeSingle }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {
-    isReady,
+    testID,
     testResult,
     isFormDisabled,
     handleSubmitAnswer,
@@ -49,12 +49,48 @@ function Header({ post }: { post: IPracticeSingle }) {
     setTimer,
     selectedTextSize,
     setSelectedTextSize,
+    isReady,
   } = useExamContext();
+  const { getValues } = useFormContext<AnswerFormValues>();
   const { handleSubmit } = useFormContext<AnswerFormValues>();
   const router = useRouter();
 
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [optionsView, setOptionsView] = useState("main");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleManualSave = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/test-flow/save-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          testId: testID,
+          answers: JSON.stringify(getValues()),
+          timeLeft: timer?.format("mm:ss") || "00:00",
+        }),
+      });
+      
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || "Lưu thất bại");
+
+      notification.success({
+        message: "Thành công",
+        description: "Đã lưu bản nháp bài làm của bạn.",
+        placement: "topRight",
+      });
+    } catch (error: any) {
+      console.error("Manual Save Error:", error);
+      notification.error({
+        message: "Lỗi",
+        description: error?.message || "Không thể lưu bản nháp. Vui lòng thử lại.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const textSizes = [
     { key: "Regular", name: "Regular" },
@@ -174,6 +210,18 @@ function Header({ post }: { post: IPracticeSingle }) {
                   src="/wifi.png"
                   priority
                 />
+
+                <Tooltip title="Lưu nháp" className="hidden md:block">
+                  <Button
+                    className="p-[0] border-[0] shadow-[0]"
+                    onClick={handleManualSave}
+                    loading={isSaving}
+                  >
+                    <span className="material-symbols-rounded bold block! text-[24px]! text-[#222]">
+                      save
+                    </span>
+                  </Button>
+                </Tooltip>
 
                 <Tooltip title="Open Notes" className="hidden md:block">
                   <Button

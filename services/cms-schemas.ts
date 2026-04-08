@@ -126,19 +126,8 @@ export const FooterCtaBannerSchema = z.object({
     }),
 });
 
-// ─── Practice Library Banner ──────────────────────────────────────────────
 const PracticeLibrarySkillBanner = z.object({
     title: z.string(),
-    description: z.object({
-        line1: z.string(),
-        line2: z.string(),
-        line3: z.string(),
-    }),
-    backgroundColor: z.string(),
-    button: z.object({
-        text: z.string(),
-        link: z.string(),
-    }),
 });
 
 export const PracticeLibraryBannerSchema = z.object({
@@ -146,10 +135,9 @@ export const PracticeLibraryBannerSchema = z.object({
     reading: PracticeLibrarySkillBanner,
 });
 
-// ─── Exam Library Hero ────────────────────────────────────────────────────
+// ─── Exam Library Page Header ─────────────────────────────────────────────
 export const ExamLibraryHeroSchema = z.object({
     title: z.string(),
-    backgroundColor: z.string(),
     breadcrumb: z.object({
         homeLabel: z.string(),
         currentLabel: z.string(),
@@ -218,14 +206,9 @@ export const FAQSchema = z.object({
     ),
 });
 
-// ─── Subscription Banner ──────────────────────────────────────────────────
+// ─── Subscription Page Header ─────────────────────────────────────────────
 export const SubscriptionBannerSchema = z.object({
-    backgroundImage: z.string(),
-    subtitle: z.object({
-        text: z.string(),
-    }),
     title: z.string(),
-    description: z.string(),
 });
 
 // ─── Login Page ───────────────────────────────────────────────────────────
@@ -268,8 +251,65 @@ export const TopBarSchema = z.object({
     visible: z.boolean().optional(),
 }).passthrough(); // Allow additional props from TopBarConfig
 
-// ─── Sample Essay Banner ─────────────────────────────────────────────────
-export const SampleEssayBannerSchema = z.object({}).passthrough();
+// ─── Sample Essay Page Header ────────────────────────────────────────────
+export const SampleEssayBannerSchema = z.object({
+    writing: z.object({
+        title: z.string(),
+        description: z.object({
+            line1: z.string(),
+            line2: z.string(),
+        }),
+        backgroundColor: z.string(),
+    }),
+    speaking: z.object({
+        title: z.string(),
+        description: z.object({
+            line1: z.string(),
+            line2: z.string(),
+        }),
+        backgroundColor: z.string(),
+    }),
+});
+
+// ─── Email Template ──────────────────────────────────────────────────────
+export const EmailTemplateSchema = z.object({
+    brand: z.object({
+        name: z.string(),
+        logoUrl: z.string(),
+        website: z.string(),
+        phone: z.string(),
+        email: z.string(),
+        address: z.string().optional(),
+    }),
+    orderConfirmation: z.object({
+        subject: z.string(),
+        headerTitle: z.string(),
+        greeting: z.string(),
+        bodyHtml: z.string(),
+        orderTableTitle: z.string(),
+        closingHtml: z.string(),
+        ctaButton: z.object({
+            text: z.string(),
+            link: z.string(),
+        }).optional(),
+        footerText: z.string(),
+    }),
+    adminNotification: z.object({
+        subject: z.string(),
+        headerTitle: z.string(),
+        bodyHtml: z.string(),
+    }),
+    style: z.object({
+        headerBgColor: z.string(),
+        headerBgGradient: z.string(),
+        bodyBgColor: z.string(),
+        contentBgColor: z.string(),
+        primaryColor: z.string(),
+        textColor: z.string(),
+        footerBgColor: z.string(),
+        footerTextColor: z.string(),
+    }),
+});
 
 // ═════════════════════════════════════════════════════════════════════════
 // Registry: section_name → Zod schema (for validation in unified API)
@@ -306,6 +346,9 @@ export const CMS_SECTION_SCHEMAS: Record<string, z.ZodType> = {
 
     // Sample Essay
     "sample-essay/banner": SampleEssayBannerSchema,
+
+    // Email Template
+    "email-template": EmailTemplateSchema,
 };
 
 /**

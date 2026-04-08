@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useCallback } from "react";
 import { useAuth } from "@/appx/providers";
 import { useProContentModal } from "@/shared/ui/pro-content";
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 
 function RelatedPosts({
   posts,
@@ -20,6 +21,7 @@ function RelatedPosts({
   quiz_slug: IPracticeSingle["slug"];
   isPro: boolean;
 }) {
+  const fallbackImage = useContentImageFallback();
   const { currentUser } = useAuth();
   const openProContentModal = useProContentModal((state) => state.open);
   const getPostTitle = useCallback(
@@ -127,10 +129,7 @@ function RelatedPosts({
                             >
                               <div className="relative aspect-video rounded overflow-hidden">
                                 <Image
-                                  src={
-                                    post.featuredImage ||
-                                    "https://placehold.co/600x400"
-                                  }
+                                  src={resolveContentImage(post.featuredImage, fallbackImage)}
                                   alt={getPostTitle(post.title)}
                                   className="object-cover"
                                   unoptimized

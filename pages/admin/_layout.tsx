@@ -27,6 +27,7 @@ import {
   MoonOutlined,
   HistoryOutlined,
   PictureOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 import { message, Tooltip, Badge, ConfigProvider, theme as antdTheme } from "antd";
 // ═══ Types ═══
@@ -91,16 +92,16 @@ const MENU_SECTIONS: MenuSection[] = [
       },
       {
         key: "cms-exam-library", icon: <FileTextOutlined />, label: "Exam Library",
-        children: [{ key: "/admin/ielts-exam-library/hero-banner", label: "Hero Banner" }],
+        children: [{ key: "/admin/ielts-exam-library/hero-banner", label: "Page Header" }],
       },
       {
         key: "cms-practice-library", icon: <BookOutlined />, label: "Practice Library",
-        children: [{ key: "/admin/ielts-practice-library/banner", label: "Banner" }],
+        children: [{ key: "/admin/ielts-practice-library/banner", label: "Page Header" }],
       },
       {
         key: "cms-subscription", icon: <CreditCardOutlined />, label: "Subscription",
         children: [
-          { key: "/admin/subscription/banner", label: "Banner" },
+          { key: "/admin/subscription/banner", label: "Page Header" },
           { key: "/admin/subscription/course-packages", label: "Course Packages" },
           { key: "/admin/subscription/coupons", label: "Mã giảm giá (Legacy)" },
           { key: "/admin/subscription/faq", label: "FAQ" },
@@ -108,7 +109,7 @@ const MENU_SECTIONS: MenuSection[] = [
       },
       {
         key: "cms-sample-essay", icon: <FileSearchOutlined />, label: "Sample Essay",
-        children: [{ key: "/admin/sample-essay/banner", label: "Banner" }],
+        children: [{ key: "/admin/sample-essay/banner", label: "Page Header" }],
       },
       {
         key: "cms-header", icon: <MenuOutlined />, label: "Header",
@@ -131,6 +132,14 @@ const MENU_SECTIONS: MenuSection[] = [
           { key: "/admin/terms-of-use", label: "Terms of Service" },
           { key: "/admin/privacy-policy", label: "Privacy Policy" },
         ],
+      },
+      {
+        key: "cms-email", icon: <MailOutlined />, label: "Email Template",
+        children: [{ key: "/admin/email-template", label: "Order Confirmation" }],
+      },
+      {
+        key: "cms-contact", icon: <GlobalOutlined />, label: "Contact Page",
+        children: [{ key: "/admin/contact", label: "Contact Content" }],
       },
     ],
   },
@@ -155,6 +164,8 @@ const BREADCRUMB_MAP: Record<string, string> = {
   "/admin/activity-log": "Activity Log",
   "/admin/seo": "SEO Manager",
   "/admin/media": "Media Library",
+  "/admin/email-template": "Email Template",
+  "/admin/contact": "Contact Config",
 };
 
 // ═══ Helper: resolve breadcrumbs ═══

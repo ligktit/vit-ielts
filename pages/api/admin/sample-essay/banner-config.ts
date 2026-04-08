@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
-import type { SampleEssayBannerConfig } from "./banner";
+import type { SampleEssayBannerConfig } from "@/shared/types/admin-config";
 
 /**
  * API route để đọc sample essay banner config
@@ -26,38 +26,20 @@ export default async function handler(
     // Trả về config mặc định nếu file không tồn tại
     const defaultConfig: SampleEssayBannerConfig = {
       writing: {
-        title: {
-          line1: "DOL IELTS Writing",
-          line2Highlighted: "Task 1 Academic",
-          line2After: "Sample",
-        },
+        title: "DOL IELTS Writing Task 1 Academic Sample",
         description: {
-          line1:
-            "Tổng hợp bài mẫu IELTS Exam Writing Task 1 và hướng dẫn cách làm bài,",
+          line1: "Tổng hợp bài mẫu IELTS Exam Writing Task 1 và hướng dẫn cách làm bài,",
           line2: "từ vựng chi tiết theo chủ đề.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-        button: {
-          text: "Tìm hiểu khóa học",
-          link: "#",
-        },
       },
       speaking: {
-        title: {
-          line1: "DOL IELTS Speaking",
-          line2Highlighted: "Task 1 Academic",
-          line2After: "Sample",
-        },
+        title: "DOL IELTS Speaking Sample",
         description: {
-          line1:
-            "Tổng hợp bài mẫu IELTS Exam Speaking Task 1 và hướng dẫn cách làm bài,",
+          line1: "Tổng hợp bài mẫu IELTS Exam Speaking Task 1 và hướng dẫn cách làm bài,",
           line2: "từ vựng chi tiết theo chủ đề.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
-        button: {
-          text: "Tìm hiểu khóa học",
-          link: "#",
-        },
       },
     };
     return res.status(200).json(defaultConfig);

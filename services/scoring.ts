@@ -78,7 +78,8 @@ function scoreRadioOrSelect(
 
     for (const subQ of subQuestions) {
         const userAnswer = answers[idx];
-        const correctFlag = subQ.correct;
+        // WP ACF migration: null correct means index 0 (first option, lost due to JS falsy)
+        const correctFlag = subQ.correct ?? 0;
 
         // PHP: (string)$user_answer == (string)$correct_flag
         if (userAnswer != null && String(userAnswer) === String(correctFlag)) {

@@ -89,9 +89,25 @@ const CheckoutPage = () => {
 
   const finalPrice = useMemo(() => {
     if (!selection.price) return 0;
-    const discount = appliedCoupon?.discountAmount || 0;
+    if (!appliedCoupon) return selection.price;
+
+    let discount = 0;
+    if (appliedCoupon.type === "percent") {
+      discount = Math.round(selection.price * (appliedCoupon.value / 100));
+    } else {
+      discount = appliedCoupon.value; // It maps to 'value' in the API response now
+    }
+    
     return Math.max(0, selection.price - discount);
   }, [selection.price, appliedCoupon]);
+
+  const discountDisplayAmount = useMemo(() => {
+    if (!appliedCoupon || !selection.price) return 0;
+    if (appliedCoupon.type === "percent") {
+      return Math.round(selection.price * (appliedCoupon.value / 100));
+    }
+    return appliedCoupon.value;
+  }, [appliedCoupon, selection.price]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -255,7 +271,7 @@ const CheckoutPage = () => {
                     {appliedCoupon.code}
                   </p>
                   <p className="text-xs text-green-600 font-medium">
-                    Giảm {formatPrice(appliedCoupon.discountAmount)}
+                    Giảm {appliedCoupon.type === "percent" ? `${appliedCoupon.value}%` : formatPrice(appliedCoupon.value)} ({formatPrice(discountDisplayAmount)})
                   </p>
                 </div>
                 <button
@@ -302,7 +318,7 @@ const CheckoutPage = () => {
             {appliedCoupon && (
               <div className="flex items-center justify-between text-[#27AE60]">
                 <span>Giảm giá ({appliedCoupon.code})</span>
-                <span className="font-bold">-{formatPrice(appliedCoupon.discountAmount)}</span>
+                <span className="font-bold">-{formatPrice(discountDisplayAmount)}</span>
               </div>
             )}
             <div className="flex items-center justify-between">

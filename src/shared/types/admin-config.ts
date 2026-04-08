@@ -19,35 +19,14 @@ export interface FooterCtaBannerConfig {
 export interface PracticeLibraryBannerConfig {
   listening: {
     title: string;
-    description: {
-      line1: string;
-      line2: string;
-      line3: string;
-    };
-    backgroundColor: string;
-    button: {
-      text: string;
-      link: string;
-    };
   };
   reading: {
     title: string;
-    description: {
-      line1: string;
-      line2: string;
-      line3: string;
-    };
-    backgroundColor: string;
-    button: {
-      text: string;
-      link: string;
-    };
   };
 }
 
 export interface ExamLibraryHeroConfig {
   title: string;
-  backgroundColor: string;
   breadcrumb: {
     homeLabel: string;
     currentLabel: string;
@@ -148,6 +127,33 @@ export interface PrivacyPolicyConfig {
   };
 }
 
+export interface ContactPageConfig {
+  banner: {
+    title: string;
+    backgroundImage: string;
+  };
+  form: {
+    nameLabel: string;
+    namePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    subjectLabel: string;
+    subjectPlaceholder: string;
+    messageLabel: string;
+    messagePlaceholder: string;
+    buttonText: string;
+    successMessage: string;
+    errorMessage: string;
+  };
+  socialLinks: Array<{
+    platform: "facebook" | "tiktok" | "youtube" | "zalo" | "instagram" | "other";
+    label: string;
+    username: string;
+    url: string;
+    iconUrl?: string; // Bổ sung field upload icon tuỳ chỉnh
+  }>;
+}
+
 export interface PracticeSectionConfig {
   backgroundGradient: string;
 }
@@ -160,13 +166,12 @@ export interface RegisterPageConfig {
   backgroundColor: string;
 }
 
+export interface DefaultContentImageConfig {
+  defaultContentImage: string;
+}
+
 export interface SubscriptionBannerConfig {
-  backgroundImage: string;
-  subtitle: {
-    text: string;
-  };
   title: string;
-  description: string;
 }
 
 export interface SampleEssayBannerConfig {

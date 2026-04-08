@@ -58,7 +58,7 @@ export default async function handler(
     try {
       const { status } = req.body;
 
-      if (!status || !["pending", "completed", "cancelled"].includes(status)) {
+      if (!status || !["pending", "completed", "cancelled", "expired"].includes(status)) {
         return res.status(400).json({ success: false, error: "Valid status is required" });
       }
 

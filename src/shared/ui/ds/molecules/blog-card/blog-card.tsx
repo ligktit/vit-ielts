@@ -1,4 +1,6 @@
 
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
+
 /**
  * Design System Blog Card
  *
@@ -30,17 +32,15 @@ export const BlogCard = ({
   onClick,
   className = '',
 }: BlogCardProps) => {
+  const fallbackImage = useContentImageFallback();
   const Tag = href ? 'a' : 'div';
   const linkProps = href ? { href } : {};
+  const imageSrc = resolveContentImage(image, fallbackImage);
 
   return (
     <Tag {...linkProps} className={`blog-card ${className}`} onClick={onClick}>
       <div className="blog-card__image-wrapper">
-        {image ? (
-          <img src={image} alt={title} className="blog-card__image" loading="lazy" />
-        ) : (
-          <div className="blog-card__image-placeholder" />
-        )}
+        <img src={imageSrc} alt={title} className="blog-card__image" loading="lazy" />
       </div>
       <div className="blog-card__body">
         {category && <span className="blog-card__category">{category}</span>}

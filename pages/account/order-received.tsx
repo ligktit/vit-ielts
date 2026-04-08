@@ -39,7 +39,7 @@ const OrderReceivedPage = ({ order: initialOrder, error }: OrderReceivedPageProp
 
   // Polling để check order status
   useEffect(() => {
-    if (!order || order.status === "completed" || error) {
+    if (!order || order.status === "completed" || order.status === "expired" || order.status === "cancelled" || error) {
       return;
     }
 
@@ -69,6 +69,17 @@ const OrderReceivedPage = ({ order: initialOrder, error }: OrderReceivedPageProp
                 setIsPolling(false);
 
                 // Dừng polling
+                if (pollingIntervalRef.current) {
+                  clearInterval(pollingIntervalRef.current);
+                  pollingIntervalRef.current = null;
+                }
+              } else if (newStatus === "expired" || newStatus === "cancelled") {
+                // Order expired or cancelled — stop polling and update UI
+                setOrder((prevOrder) => {
+                  if (!prevOrder) return prevOrder;
+                  return { ...prevOrder, status: newStatus };
+                });
+                setIsPolling(false);
                 if (pollingIntervalRef.current) {
                   clearInterval(pollingIntervalRef.current);
                   pollingIntervalRef.current = null;
@@ -130,6 +141,59 @@ const OrderReceivedPage = ({ order: initialOrder, error }: OrderReceivedPageProp
               Trở về trang chủ
             </Link>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Expired / Cancelled State ──
+  if (order.status === "expired" || order.status === "cancelled") {
+    const isExpired = order.status === "expired";
+    return (
+      <div className="flex flex-col items-center pb-12 w-full max-w-[800px] mx-auto space-y-6">
+        <div className="text-center pt-8 pb-4">
+          <div className="flex justify-center mb-4">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              isExpired ? "bg-gray-100" : "bg-red-50"
+            }`}>
+              <span className="text-3xl">{isExpired ? "⏰" : "❌"}</span>
+            </div>
+          </div>
+          <h1 className="text-[28px] font-bold text-[#2D3142] mb-3">
+            {isExpired ? "Đơn hàng đã hết hạn" : "Đơn hàng đã bị hủy"}
+          </h1>
+          <p className="text-[13px] text-gray-500 max-w-[600px] mx-auto leading-relaxed">
+            {isExpired
+              ? "Đơn hàng đã quá thời gian thanh toán (60 phút). Nếu bạn đã chuyển khoản, vui lòng liên hệ hotline để được hỗ trợ."
+              : "Đơn hàng đã bị hủy. Vui lòng tạo đơn hàng mới nếu bạn muốn tiếp tục."}
+          </p>
+        </div>
+
+        {/* Order Summary */}
+        <div className="w-full bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] overflow-hidden border border-gray-100 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InfoRow label="MÃ ĐƠN HÀNG" value={`#${order.orderId}`} />
+            <InfoRow label="SỐ TIỀN" value={formatPrice(order.amount).replace("đ", "₫")} />
+            <InfoRow label="TRẠNG THÁI" value={isExpired ? "⏰ Đã hết hạn" : "❌ Đã hủy"} className="md:col-span-2 font-black" />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3 mt-4">
+          <Link
+            href={ROUTES.SUBSCRIPTION}
+            className="px-6 py-2.5 rounded-lg bg-tertiary-500 hover:bg-[#E08A40] text-white font-bold text-sm transition-colors"
+          >
+            Đặt đơn hàng mới
+          </Link>
+          {isExpired && (
+            <a
+              href="tel:0927090848"
+              className="px-6 py-2.5 rounded-lg border border-gray-200 bg-white text-[#2D3142] hover:bg-gray-50 font-bold text-sm transition-colors"
+            >
+              Liên hệ hỗ trợ: 0927090848
+            </a>
+          )}
         </div>
       </div>
     );

@@ -1,29 +1,27 @@
 
 import { useRef } from "react";
 import { Container } from "@/shared/ui";
-import { TestCard } from "@/shared/ui/ds/molecules/test-card/test-card";
+import { TestCardWithScore } from "@/entities/practice-test";
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css/core";
 import type { Splide as SplideType } from "@splidejs/splide";
 import Link from "next/link";
 import type { Quiz } from "~services/types/database";
 import { ROUTES } from "@/shared/routes";
-
-const PART_LABELS: Record<string, string> = {
-  "0": "Part 1", "1": "Part 2", "2": "Part 3", "3": "Part 4",
-  "passage1": "Part 1", "passage2": "Part 2", "passage3": "Part 3",
-};
+import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
 
 export type PracticeSectionProps = {
   title?: string;
   viewMoreLink?: string;
   items?: Quiz[];
+  getItemHref?: (item: any) => string;
 };
 
 export const PracticeSection = ({
   title = "IELTS Online Test",
   viewMoreLink = "#",
   items = [],
+  getItemHref,
 }: PracticeSectionProps) => {
   const splideRef = useRef<{ splide: SplideType } | null>(null);
 
@@ -97,18 +95,27 @@ export const PracticeSection = ({
             >
               <SplideTrack>
                 {items.map((quiz) => {
-                  const partLabel = quiz.part ? (PART_LABELS[quiz.part] ?? `Part ${quiz.part}`) : undefined;
+                  let partLabel = "Part 1";
+                  if (quiz.type === 'exam') {
+                    partLabel = "Trọn bộ";
+                  } else {
+                    const skillSource = Array.isArray(quiz.skill) ? quiz.skill[0] : quiz.skill;
+                    const skillValue = typeof skillSource === 'string' ? skillSource.toLowerCase() : 'listening';
+                    const rawPart = quiz.part || (quiz as any).task;
+                    partLabel = normalizeSectionBadge(skillValue, rawPart).label;
+                  }
+
                   return (
                     <SplideSlide key={quiz.id} className="pb-8 pt-[14px] px-1">
-                      <TestCard
+                      <TestCardWithScore
+                        quizId={quiz.id}
                         title={quiz.title}
                         image={quiz.featured_image ?? undefined}
-                        skill={quiz.skill}
+                        skill={quiz.skill as any}
                         part={partLabel}
-                        attempts={quiz.tests_taken}
+                        attempts={quiz.tests_taken || (quiz as any).views || 0}
                         isPro={quiz.pro_user_only}
-                        score="9,0"
-                        href={ROUTES.PRACTICE.SINGLE(quiz.slug)}
+                        href={getItemHref ? getItemHref(quiz) : ROUTES.PRACTICE.SINGLE(quiz.slug)}
                       />
                     </SplideSlide>
                   );

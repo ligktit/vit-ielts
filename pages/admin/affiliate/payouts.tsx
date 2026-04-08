@@ -39,6 +39,7 @@ type PayoutRow = {
   user_name: string | null;
   user_email: string | null;
   affiliate_custom_link: string | null;
+  user_id?: string | null;
 };
 
 const STATUS_CONFIG: Record<string, { color: string; label: string }> = {
@@ -143,11 +144,16 @@ const AdminPayoutsPage = () => {
     {
       title: "Affiliate",
       key: "affiliate",
-      width: 200,
+      width: 250,
       render: (_: unknown, record: PayoutRow) => (
         <div>
-          <div className="font-semibold">{record.user_name || "N/A"}</div>
-          <div className="text-xs text-gray-500">{record.user_email || "N/A"}</div>
+          <div className="font-semibold text-gray-900">{record.user_name || "N/A"}</div>
+          {record.user_email && (
+            <div className="text-xs font-semibold text-blue-600">{record.user_email}</div>
+          )}
+          <Tooltip title={record.user_id}>
+            <span className="font-mono text-xs text-gray-400 mt-1 block">ID: {record.user_id?.substring(0, 12) || "N/A"}...</span>
+          </Tooltip>
           {record.affiliate_custom_link && (
             <Tag color="blue" className="mt-1">ref: {record.affiliate_custom_link}</Tag>
           )}

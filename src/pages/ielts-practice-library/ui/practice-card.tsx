@@ -1,28 +1,16 @@
 import { MouseEvent, useMemo } from "react";
 import { useAuth } from "@/appx/providers";
-import { IPracticeTest } from "@/entities/practice-test";
+import { IPracticeTest, useLatestTestScore } from "@/entities/practice-test";
 import { ROUTES } from "@/shared/routes";
 import { useProContentModal } from "@/shared/ui/pro-content";
-import { TestCard } from "@/shared/ui/ds";
+import { TestCardWithScore } from "@/entities/practice-test";
+import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
 
 type PracticeCardProps = {
   item: IPracticeTest;
   priority?: boolean;
 };
 
-const PART_META = {
-  listening: [
-    { slug: "0", label: "Part 1" },
-    { slug: "1", label: "Part 2" },
-    { slug: "2", label: "Part 3" },
-    { slug: "3", label: "Part 4" },
-  ],
-  reading: [
-    { slug: "0", label: "Passage 1" },
-    { slug: "1", label: "Passage 2" },
-    { slug: "2", label: "Passage 3" },
-  ],
-} as const;
 
 export const PracticeCard = ({ item, priority = false }: PracticeCardProps) => {
   const openProContentModal = useProContentModal((state) => state.open);
@@ -30,9 +18,7 @@ export const PracticeCard = ({ item, priority = false }: PracticeCardProps) => {
 
   const skill = item.quizFields.skill[0] === "listening" ? "listening" : "reading";
   const partMeta = useMemo(() => {
-    const group = PART_META[skill];
-    const match = group.find((entry) => entry.slug === String(item.quizFields.part ?? "0"));
-    return match ?? group[0];
+    return normalizeSectionBadge(skill, item.quizFields.part);
   }, [item.quizFields.part, skill]);
 
   const requiresUpgrade = item.quizFields.proUserOnly && !currentUser?.userData.isPro;
@@ -50,7 +36,8 @@ export const PracticeCard = ({ item, priority = false }: PracticeCardProps) => {
   };
 
   return (
-    <TestCard
+    <TestCardWithScore
+      quizId={item.id}
       image={item.featuredImage?.node.sourceUrl}
       title={item.title}
       skill={skill}
@@ -58,7 +45,6 @@ export const PracticeCard = ({ item, priority = false }: PracticeCardProps) => {
       attempts={item.quizFields.testsTaken || 0}
       isPro={item.quizFields.proUserOnly}
       isLocked={requiresUpgrade}
-      score={"9,0"}
       // Card luôn link đến trang detail — từ đó user mới nhấn "Start Practice"
       href={requiresUpgrade ? undefined : detailHref}
       onClick={requiresUpgrade ? handleProtectedAction : undefined}

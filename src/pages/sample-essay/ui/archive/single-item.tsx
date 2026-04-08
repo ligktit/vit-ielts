@@ -3,6 +3,7 @@ import { SampleEssayProps } from "../..";
 import _ from "lodash";
 import { ROUTES } from "@/shared/routes";
 import { TestCard } from "@/shared/ui/ds";
+import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
 
 const PART_COLORS = [
   "rgb(255, 164, 27)", // Part 1 / Task 1 / Passage 1
@@ -11,64 +12,18 @@ const PART_COLORS = [
   "rgb(100, 200, 150)", // Part 4 (for listening)
 ];
 
-const FILTER_CONFIGS = {
-  speakingParts: [
-    { slug: "part-1", name: "Part 1" },
-    { slug: "part-2", name: "Part 2" },
-    { slug: "part-3", name: "Part 3" },
-  ],
-  writingTasks: [
-    { slug: "task-1", name: "Task 1" },
-    { slug: "task-2", name: "Task 2" },
-  ],
-  listeningParts: [
-    { slug: "part-1", name: "Part 1" },
-    { slug: "part-2", name: "Part 2" },
-    { slug: "part-3", name: "Part 3" },
-    { slug: "part-4", name: "Part 4" },
-  ],
-  readingPassages: [
-    { slug: "passage-1", name: "Passage 1" },
-    { slug: "passage-2", name: "Passage 2" },
-    { slug: "passage-3", name: "Passage 3" },
-  ],
-};
-
-export const DefaultView = ({
-  post: { node: post },
-  skill,
-}: {
-  post: SampleEssayProps["sampleEssays"]["edges"][number];
-  skill: SampleEssayProps["skill"];
-}) => {
   const getFieldInfo = () => {
     switch (skill) {
-      case "speaking":
-        const speakingPart = post.speakingSampleEssayFields?.part || [
-          "part-1",
-          "Part 1",
-        ];
-        const speakingIndex = FILTER_CONFIGS.speakingParts.findIndex(
-          (p) => p.slug === speakingPart[0]
-        );
-        return {
-          label: speakingPart[1],
-          colorIndex: speakingIndex >= 0 ? speakingIndex : 0,
-        };
-      case "writing":
-        const task = post.writingSampleEssayFields?.task || [
-          "task-1",
-          "Task 1",
-        ];
-        const taskIndex = FILTER_CONFIGS.writingTasks.findIndex(
-          (t) => t.slug === task[0]
-        );
-        return {
-          label: task[1],
-          colorIndex: taskIndex >= 0 ? taskIndex : 0,
-        };
+      case "speaking": {
+        const speakingPart = post.speakingSampleEssayFields?.part?.[0] || "1";
+        return normalizeSectionBadge("speaking", speakingPart);
+      }
+      case "writing": {
+        const task = post.writingSampleEssayFields?.task?.[0] || "1";
+        return normalizeSectionBadge("writing", task);
+      }
       default:
-        return { label: "", colorIndex: 0 };
+        return { label: "", colorIndex: 1 as const };
     }
   };
 

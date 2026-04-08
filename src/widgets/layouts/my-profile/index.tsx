@@ -4,7 +4,7 @@ import { Footer, Header } from "../base/ui";
 import { Navigation } from "./ui";
 import { ROUTES } from "@/shared/routes";
 import { useRouter } from "next/router";
-import { ComparePlans } from "@/widgets";
+
 import Link from "next/link";
 import { HeroBanner } from "@/shared/ui/ds";
 
@@ -124,7 +124,6 @@ export const MyProfileLayout = ({
               {/* === Left Sidebar === */}
               <aside className="w-full lg:w-[280px] flex-shrink-0 space-y-5">
                 <Navigation navigation={ACCOUNT_NAVIGATION} />
-                <ComparePlans />
               </aside>
 
               {/* === Main Panel === */}

@@ -17,7 +17,7 @@ export type SkillType = "reading" | "listening";
 export type QuestionType = "radio" | "select" | "fillup" | "checkbox" | "matching" | "matrix";
 export type MatchingLayoutType = "standard" | "summary" | "heading";
 export type ContentStatus = "draft" | "published";
-export type OrderStatus = "pending" | "completed" | "cancelled";
+export type OrderStatus = "pending" | "completed" | "cancelled" | "expired";
 export type PackageType = "combo" | "single";
 export type CouponType = "percent" | "fixed";
 

@@ -18,7 +18,7 @@ import { ORDER_COLUMNS } from "./lib/columns";
 // Types
 // ============================================================
 
-type OrderStatus = "pending" | "completed" | "cancelled";
+type OrderStatus = "pending" | "completed" | "cancelled" | "expired";
 type PackageType = "combo" | "single";
 type SkillType = "listening" | "reading";
 
@@ -253,13 +253,15 @@ export async function updateOrderStatus(
 /**
  * Atomically transition order status from "pending" to "completed".
  * Returns { updated: true, order } if the transition happened,
- * or { updated: false, order: null } if the order was already completed/cancelled.
+ * or { updated: false, order, currentStatus } if the order was already completed/cancelled/expired.
  *
  * Used by webhook handlers to ensure idempotent payment processing.
+ * The `currentStatus` field helps the webhook differentiate between
+ * "already completed" (safe) vs "expired" (needs admin review).
  *
  * @param supabaseAdmin - Admin client (bypass RLS)
  * @param orderId - Order ID text
- * @returns { updated, order }
+ * @returns { updated, order, currentStatus }
  */
 export async function completeOrder(
     supabaseAdmin: SupabaseClient,
@@ -275,9 +277,25 @@ export async function completeOrder(
 
     if (error) throw error;
 
+    if (data !== null) {
+        return {
+            updated: true,
+            order: data,
+            currentStatus: "completed" as OrderStatus,
+        };
+    }
+
+    // Transition didn't happen — fetch current status for the caller
+    const { data: currentOrder } = await supabaseAdmin
+        .from("orders")
+        .select(ORDER_COLUMNS)
+        .eq("order_id", orderId)
+        .maybeSingle();
+
     return {
-        updated: data !== null,
-        order: data,
+        updated: false,
+        order: currentOrder,
+        currentStatus: (currentOrder?.status ?? null) as OrderStatus | null,
     };
 }
 
@@ -326,4 +344,86 @@ export async function getOrders(
 
     if (error) throw error;
     return { orders: data ?? [], total: count ?? 0 };
+}
+
+// ============================================================
+// Order Expiration & Continue-Payment Helpers
+// ============================================================
+
+/** TTL for pending orders in minutes (matching pg_cron config) */
+export const ORDER_TTL_MINUTES = 60;
+
+/**
+ * Check if an order is still payable (pending + within TTL).
+ *
+ * @param order - Order row
+ * @returns true if the order can still be paid
+ */
+export function isOrderPayable(order: { status: string; created_at: string }): boolean {
+    if (order.status !== "pending") return false;
+    const ageMs = Date.now() - new Date(order.created_at).getTime();
+    return ageMs < ORDER_TTL_MINUTES * 60 * 1000;
+}
+
+/**
+ * Get remaining time in seconds before an order expires.
+ * Returns 0 if already expired.
+ */
+export function getOrderTimeRemaining(order: { status: string; created_at: string }): number {
+    if (order.status !== "pending") return 0;
+    const expiresAt = new Date(order.created_at).getTime() + ORDER_TTL_MINUTES * 60 * 1000;
+    return Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+}
+
+/**
+ * Find an existing pending order for the same user + package params.
+ * Used to prevent duplicate order creation when user re-visits checkout.
+ *
+ * @param supabaseAdmin - Admin client (bypass RLS)
+ * @param userId - User UUID
+ * @param packageType - "combo" | "single"
+ * @param duration - Duration in months
+ * @returns Existing pending order within TTL, or null
+ */
+export async function findExistingPendingOrder(
+    supabaseAdmin: SupabaseClient,
+    userId: string,
+    packageType: string,
+    duration: number,
+) {
+    const cutoff = new Date(Date.now() - ORDER_TTL_MINUTES * 60 * 1000).toISOString();
+
+    const { data } = await supabaseAdmin
+        .from("orders")
+        .select(ORDER_COLUMNS)
+        .eq("user_id", userId)
+        .eq("package_type", packageType)
+        .eq("duration", duration)
+        .eq("status", "pending")
+        .gte("created_at", cutoff)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+    return data ?? null;
+}
+
+/**
+ * Expire stale pending orders (called from API route or cron).
+ * This is a TypeScript wrapper around the Supabase RPC.
+ * Primary expiration is handled by pg_cron directly in the database.
+ *
+ * @param supabaseAdmin - Admin client (bypass RLS)
+ * @param ttlMinutes - TTL in minutes (default: ORDER_TTL_MINUTES)
+ * @returns Number of expired orders
+ */
+export async function expireStaleOrders(
+    supabaseAdmin: SupabaseClient,
+    ttlMinutes: number = ORDER_TTL_MINUTES,
+) {
+    const { data, error } = await supabaseAdmin
+        .rpc("expire_stale_orders", { p_ttl_minutes: ttlMinutes });
+
+    if (error) throw error;
+    return data as number;
 }

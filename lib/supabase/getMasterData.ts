@@ -102,6 +102,14 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
                                     sourceUrl: (generalSettings.logo as string) ?? "",
                                 },
                             },
+                            defaultContentImage: {
+                                node: {
+                                    sourceUrl:
+                                        (generalSettings.defaultContentImage as string) ??
+                                        (generalSettings.default_content_image as string) ??
+                                        "/assets/figma/icons/logo.png",
+                                },
+                            },
                             facebook: (generalSettings.facebook as string) ?? "",
                             email: (generalSettings.email as string) ?? "",
                             zalo: (generalSettings.zalo as string) ?? "",
