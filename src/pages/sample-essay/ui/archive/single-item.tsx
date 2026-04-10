@@ -12,6 +12,7 @@ const PART_COLORS = [
   "rgb(100, 200, 150)", // Part 4 (for listening)
 ];
 
+export const SingleItem = ({ post, skill }: { post: any; skill: string }) => {
   const getFieldInfo = () => {
     switch (skill) {
       case "speaking": {
@@ -47,13 +48,13 @@ const PART_COLORS = [
   // Original vertical card layout for all skills (including Writing and Speaking on home page)
   return (
     <TestCard
-      image={post.featuredImage?.node.sourceUrl}
+      image={post.featuredImage?.node?.sourceUrl || post.featured_image}
       title={post.title}
       skill={skill as 'reading' | 'listening' | 'speaking' | 'writing'}
       part={label}
-      isPro={post.postMeta?.proUserOnly ?? false}
+      isPro={post.postMeta?.proUserOnly ?? post.pro_user_only ?? false}
       href={ROUTES.SAMPLE_ESSAY.SINGLE(post.slug)}
-      isLocked={post.postMeta?.proUserOnly ?? false}
+      isLocked={post.postMeta?.proUserOnly ?? post.pro_user_only ?? false}
     />
   );
 };
