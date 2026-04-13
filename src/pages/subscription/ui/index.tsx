@@ -48,14 +48,14 @@ export const PageSubscription = ({ testimonialsConfig, faqConfig, bannerConfig }
       />
 
       {/* === SECTION: Subscription Plans === */}
-      <div data-section="subscription-plans">
+      <div data-section="subscription-plans" className="px-4 sm:px-6">
         <Container>
           <SubscriptionPlans buyProLink={buyProLink} />
         </Container>
       </div>
 
       {/* === SECTION: Testimonials === */}
-      <div data-section="subscription-testimonials" className="w-full bg-gray-50 py-10">
+      <div data-section="subscription-testimonials" className="w-full bg-gray-50 py-16 mt-5">
         <Testimonials config={testimonialsConfig} />
       </div>
 

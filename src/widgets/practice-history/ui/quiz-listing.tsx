@@ -302,22 +302,24 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
   };
 
   return (
-    <Table<NodeWithScore>
-      columns={columns}
-      dataSource={filteredDataSource}
-      scroll={{ x: 768 }}
-      loading={loading}
-      size="small"
-      pagination={{
-        current: currentPage,
-        pageSize: pageSize,
-        total: filteredDataSource.length, // Sử dụng số lượng đã filter
-        showSizeChanger: true,
-        pageSizeOptions: ["10", "20", "50"],
-        showTotal: (total) => `Hiển thị ${total} bài làm trong 60 ngày gần nhất`,
-      }}
-      onChange={handleTableChange}
-    />
+    <div className="w-full overflow-x-auto">
+      <Table<NodeWithScore>
+        columns={columns}
+        dataSource={filteredDataSource}
+        scroll={{ x: 768 }}
+        loading={loading}
+        size="small"
+        pagination={{
+          current: currentPage,
+          pageSize: pageSize,
+          total: filteredDataSource.length,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50"],
+          showTotal: (total) => `Hiển thị ${total} bài làm trong 60 ngày gần nhất`,
+        }}
+        onChange={handleTableChange}
+      />
+    </div>
   );
 };
 

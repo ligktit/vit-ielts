@@ -1,5 +1,6 @@
 import { Container } from "@/shared/ui";
 import { CategoryCard } from "@/shared/ui/ds";
+import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 import type { TestPlatformIntroConfig } from "./types";
 
 // ─── Default Data ─────────────────────────────────────────────────────────────
@@ -64,9 +65,9 @@ export const IeltsTestPlatformIntro = ({ config }: IeltsTestPlatformIntroProps) 
   const cards = c.cards?.length ? c.cards : DEFAULTS.cards;
 
   return (
-    <div data-section="platform-intro" className="relative py-16 md:py-24 bg-[#FEF6F5]">
+    <div data-section="platform-intro" className="relative py-14 md:py-24 bg-[#FEF6F5] mb-12 px-4 sm:px-6">
       <Container className="relative z-10">
-        <div className="text-center mb-14 flex flex-col items-center gap-4">
+        <ScrollFadeIn className="text-center mb-14 flex flex-col items-center gap-4">
           {/* Badge */}
           <span className="inline-block px-[20px] py-[12px] rounded-full text-xs font-bold tracking-wider text-[#D94A56] bg-[#D94A56]/15 uppercase">
             {c.badge}
@@ -76,19 +77,20 @@ export const IeltsTestPlatformIntro = ({ config }: IeltsTestPlatformIntroProps) 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-800">
             {c.title} <span className="text-[#D94A56]">{c.titleHighlight}</span>
           </h2>
-        </div>
+        </ScrollFadeIn>
 
         {/* Category Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
           {cards.map((item, index) => (
-            <CategoryCard
-              key={index}
-              title={item.title}
-              icon={item.icon}
-              bg={item.bg}
-              color={item.color}
-              href={item.href}
-            />
+            <ScrollFadeIn key={index} delay={index * 80}>
+              <CategoryCard
+                title={item.title}
+                icon={item.icon}
+                bg={item.bg}
+                color={item.color}
+                href={item.href}
+              />
+            </ScrollFadeIn>
           ))}
         </div>
       </Container>

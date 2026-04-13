@@ -38,6 +38,8 @@ export type FilterFormValues = {
   size: number;
   year: string;
   topic: string | string[];
+  task: string;
+  passage: string;
   questionType: string;
   quarter: string;
 };
@@ -210,7 +212,7 @@ export const PageArchive = ({
 
   return (
     <FormProvider {...methods}>
-      <div className="min-h-screen bg-white pb-20">
+      <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
         <SEOHeader fullHead={seo?.fullHead} title={seo?.title} />
 
         {/* Sample Essay Page Header Section */}
@@ -232,7 +234,7 @@ export const PageArchive = ({
             );
           })()}
 
-        <Container className="mt-12 px-0">
+        <Container className="mt-12 px-4 sm:px-6">
           {/* === SECTION: Suggestions === */}
           <section id="ipl-suggestions" data-section="suggestions">
             <div className="mb-6 flex items-center justify-between">
@@ -257,7 +259,7 @@ export const PageArchive = ({
               </div>
             </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {suggestions.map((item: (typeof sampleEssays.edges)[number], index: number) => (
                 <HorizontalItem post={item} skill={skill as "speaking" | "writing"} key={index} />
               ))}
@@ -321,7 +323,7 @@ export const PageArchive = ({
               <div className="space-y-10">
                 {items.length > 0 ? (
                   <>
-                    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                       {items.map((item: (typeof sampleEssays.edges)[number], index: number) => (
                         <HorizontalItem post={item} skill={skill as "speaking" | "writing"} key={index} />
                       ))}
@@ -333,6 +335,7 @@ export const PageArchive = ({
                             ? `${ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING}/page/${page}?${new URLSearchParams(window.location.search).toString()}`
                             : `${ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}/page/${page}?${new URLSearchParams(window.location.search).toString()}`
                         );
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                       };
 
                       return (
@@ -341,7 +344,7 @@ export const PageArchive = ({
                             type="button"
                             disabled={currentPage <= 1}
                             onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                            className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                            className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                           >
                             <span className="material-symbols-rounded text-xl">chevron_left</span>
                           </button>
@@ -358,7 +361,7 @@ export const PageArchive = ({
                                 <button
                                   type="button"
                                   onClick={() => handlePageChange(page)}
-                                  className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition ${
+                                  className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
                                     page === currentPage
                                       ? "bg-primary-500 text-white"
                                       : "text-[#2D3142] hover:bg-gray-100"
@@ -374,7 +377,7 @@ export const PageArchive = ({
                             type="button"
                             disabled={currentPage >= totalPages}
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                            className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                            className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                           >
                             <span className="material-symbols-rounded text-xl">chevron_right</span>
                           </button>

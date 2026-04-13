@@ -13,7 +13,7 @@ export type HeroBannerProps = {
 
 export const HeroBanner = ({ title, breadcrumbs = [], className = '' }: HeroBannerProps) => {
   return (
-    <section className={`relative w-full overflow-hidden bg-white ${className}`}>
+    <section className={`relative w-full overflow-x-hidden bg-white ${className}`}>
       {/* 1. Background sọc đỏ kẻ ô ly. Nền trắng. */}
       <div
         className="absolute inset-0 pointer-events-none z-0"
@@ -24,10 +24,10 @@ export const HeroBanner = ({ title, breadcrumbs = [], className = '' }: HeroBann
         }}
       />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-[350px] sm:min-h-[380px] md:min-h-[419px] px-4 pb-16 w-full" style={{ paddingTop: 'calc(var(--header-height) + 66px)' }}>
+      <div className="relative z-10 flex flex-col items-center justify-center px-4 pb-16 w-full hero-banner-inner">
         {/* 2. Title */}
         <h1
-          className="font-['Noto_Sans'] font-bold text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] leading-normal text-center text-[#374151] w-full whitespace-nowrap"
+          className="font-['Noto_Sans'] font-bold text-[32px] sm:text-[48px] md:text-[56px] lg:text-[64px] leading-normal text-center text-[#374151] w-full"
           style={{ textShadow: "0 4px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.30)" }}
         >
           {title}
@@ -35,7 +35,7 @@ export const HeroBanner = ({ title, breadcrumbs = [], className = '' }: HeroBann
 
         {/* 3. Breadcrumb text */}
         {breadcrumbs.length > 0 && (
-          <nav aria-label="Breadcrumb" className="flex flex-row items-center justify-center gap-4 sm:gap-5 mt-6 sm:mt-8 flex-wrap">
+          <nav aria-label="Breadcrumb" className="flex flex-row items-center justify-center gap-4 sm:gap-5 mt-3 sm:mt-3 flex-wrap">
             {breadcrumbs.map((item, index) => (
               <span key={index} className="flex items-center gap-4 sm:gap-5">
                 {index > 0 && (

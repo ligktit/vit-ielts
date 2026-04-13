@@ -183,6 +183,10 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
   const visiblePages = buildPages(currentPage, totalPages);
   const pagedExams = allExams.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const goToPage = (page: number) => {
+    setValue("page", page, { shouldDirty: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Unique collection titles for filter sidebar
   const availableCollections = useMemo<string[]>(() => {
@@ -200,7 +204,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
       <div className="min-h-screen bg-white pb-20">
         <ExamLibraryHeroBanner config={heroConfig} />
 
-        <Container className="mt-12 px-0">
+        <Container className="mt-12 px-4 sm:px-6">
           {/* === SECTION: Mock Tests === */}
           <section id="iel-main" data-section="iel-main">
             <div className="mb-10 flex flex-col gap-6">
@@ -287,10 +291,8 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                     <button
                       type="button"
                       disabled={currentPage <= 1}
-                      onClick={() =>
-                        setValue("page", Math.max(1, currentPage - 1), { shouldDirty: true })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_left</span>
                     </button>
@@ -306,8 +308,8 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                           )}
                           <button
                             type="button"
-                            onClick={() => setValue("page", page, { shouldDirty: true })}
-                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition ${
+                            onClick={() => goToPage(page)}
+                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
                               page === currentPage
                                 ? "bg-primary-500 text-white"
                                 : "text-[#2D3142] hover:bg-gray-100"
@@ -322,12 +324,8 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                     <button
                       type="button"
                       disabled={currentPage >= totalPages}
-                      onClick={() =>
-                        setValue("page", Math.min(totalPages, currentPage + 1), {
-                          shouldDirty: true,
-                        })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_right</span>
                     </button>

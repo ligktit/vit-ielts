@@ -28,6 +28,7 @@ export interface HighlightItem {
   nodeId: string;
   text: string;
   type: "highlight" | "underline";
+  color?: string;
 }
 
 interface SavedPassageData {

@@ -88,7 +88,7 @@ export const DashboardStats = () => {
     },
     {
       iconSrc: "/assets/figma/icons/Note.svg",
-      label: "Số bài test đã hoàn thành",
+      label: "Bài test đã hoàn thành",
       value: String(totalTests),
       bgColor: "#2F80ED",
     },
@@ -108,7 +108,7 @@ export const DashboardStats = () => {
       {stats.map((stat) => (
         <div
           key={stat.label}
-          className="flex items-stretch rounded-[40px] overflow-hidden max-w-full"
+          className="flex items-stretch rounded-[100px] overflow-hidden max-w-full"
           style={{
              backgroundColor: stat.bgColor,
              border: `6px solid ${stat.bgColor}`,
@@ -124,10 +124,10 @@ export const DashboardStats = () => {
           <div 
             className="flex flex-col justify-center px-4 sm:px-5 py-2 min-w-0 flex-1 bg-white rounded-r-[34px]"
           >
-            <p className="text-[#2D3142] font-semibold text-base md:text-lg whitespace-nowrap overflow-hidden text-ellipsis line-clamp-1">
+            <p className="text-[#2D3142] font-semibold text-base whitespace-nowrap overflow-hidden text-ellipsis line-clamp-1">
               {stat.label}
             </p>
-            <p className="text-2xl md:text-[28px] font-normal leading-tight mt-1" style={{ color: stat.bgColor }}>
+            <p className="text-2xl font-normal leading-tight mt-1" style={{ color: stat.bgColor }}>
               {stat.value}
             </p>
           </div>

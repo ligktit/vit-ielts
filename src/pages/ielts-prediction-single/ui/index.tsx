@@ -52,7 +52,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
     <>
       <SEOHeader fullHead={post.seo?.fullHead} title={post.seo?.title} />
 
-      <div className="min-h-screen pb-20 bg-white relative">
+      <div className="min-h-screen pb-20 bg-white relative px-4 sm:px-6">
         {/* Background Grid - Only in Hero Area */}
         <div
           className="absolute inset-x-0 top-0 h-[380px] md:h-[420px] pointer-events-none z-0"
@@ -69,7 +69,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
 
         <Container className="relative z-10 pt-[160px] md:pt-[220px] mb-8">
           {/* Header Box */}
-          <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] px-[20px] md:px-[61px] py-[30px] md:py-[50px] max-w-[900px] mx-auto shadow-[0_4px_24px_rgba(0,0,0,0.04)] text-left">
+          <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] px-[20px] md:px-[61px] py-[30px] md:py-[50px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] text-left">
             <div className="mb-[23px]">
               <Breadcrumb items={dsBreadcrumbItems} />
             </div>
@@ -116,7 +116,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
           </div>
         </Container>
 
-        <Container className="max-w-[1600px] relative z-10">
+        <Container className="max-w-[1360px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column: Fixed details */}
             <div className="w-full lg:w-[220px] shrink-0 relative z-10">
@@ -369,7 +369,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
         </Container>
 
         {/* Bottom Related Section */}
-        <Container className="max-w-[1600px] mt-20 relative z-10">
+        <Container className="max-w-[1360px] mt-20 relative z-10">
           <div className="mb-6">
             <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
               Bài viết tương tự

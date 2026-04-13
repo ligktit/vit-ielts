@@ -30,7 +30,7 @@ export default function AdminOrdersPage() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
 
     const fetchOrders = useCallback(async () => {
         setLoading(true);

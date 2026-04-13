@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
-import { createClient } from "~supabase/client";
+import { createAdminClient } from "~supabase/admin-client";
 import {
   DashboardOutlined,
   UserOutlined,
@@ -234,7 +234,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
@@ -316,7 +316,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   );
 
   const handleLogout = useCallback(async () => {
-    const supabase = createClient();
+    const supabase = createAdminClient();
     await supabase.auth.signOut();
     message.success("Đã đăng xuất");
     window.location.href = "/admin/login";
@@ -328,6 +328,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     <ConfigProvider
       theme={{
         algorithm: theme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+        token: theme === "dark"
+          ? {
+              colorText: "#e5e7eb",
+              colorTextPlaceholder: "#9ca3af",
+              colorBgContainer: "#1a1b23",
+              colorBorder: "rgba(255,255,255,0.1)",
+            }
+          : {
+              colorText: "#1a1b2e",
+              colorTextPlaceholder: "#94a3b8",
+              colorBgContainer: "#ffffff",
+              colorBorder: "rgba(0,0,0,0.12)",
+            },
       }}
     >
       <div className="admin-shell" data-admin-theme={theme}>
@@ -341,18 +354,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside className={`admin-sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}>
         {/* Logo */}
         <div className="admin-sidebar-logo">
-          <div className="admin-sidebar-logo-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <span className="admin-sidebar-logo-text">IELTS Master</span>
+          <img
+            src="/logo.png"
+            alt="IELTS Prediction"
+            className="admin-sidebar-logo-img"
+            style={{ height: 46, width: "auto", objectFit: "contain" }}
+          />
         </div>
 
         {/* Menu */}

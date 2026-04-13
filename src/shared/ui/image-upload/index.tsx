@@ -20,7 +20,6 @@ export function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(value || null);
 
-  // Helper function để validate URL hợp lệ (không phải fakepath)
   const isValidImageUrl = (url: string | undefined): boolean => {
     if (!url || !url.trim()) return false;
     if (url.includes('fakepath') || url.includes('C:\\') || url.includes('C:/')) {
@@ -46,7 +45,6 @@ export function ImageUpload({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      // Truyền đường dẫn file cũ để xóa (nếu có và hợp lệ)
       if (value && value.trim() && isValidImageUrl(value)) {
         formData.append("oldPath", value);
       }
@@ -64,7 +62,6 @@ export function ImageUpload({
       const data = await res.json();
       const imagePath = data.path;
 
-      // Validate URL trả về từ API
       if (!isValidImageUrl(imagePath)) {
         throw new Error("URL ảnh không hợp lệ. Vui lòng thử lại.");
       }
@@ -85,7 +82,7 @@ export function ImageUpload({
     accept: {
       "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp"],
     },
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 5 * 1024 * 1024,
     multiple: false,
     onDrop: (acceptedFiles) => {
       if (acceptedFiles.length > 0) {
@@ -112,40 +109,43 @@ export function ImageUpload({
   };
 
   return (
-    <div className="space-y-2">
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: "var(--admin-text-primary, #374151)" }}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span style={{ color: "#ef4444", marginLeft: 4 }}>*</span>}
         </label>
       )}
 
       {preview && isValidImageUrl(preview) ? (
-        <div className="relative border border-gray-300 rounded-lg p-4 bg-gray-50">
-          <div className="relative w-full h-48">
+        <div style={{
+          border: "1px solid var(--admin-border, #d1d5db)",
+          borderRadius: 8,
+          padding: 16,
+          background: "var(--admin-surface-hover, #f9fafb)",
+        }}>
+          <div style={{ position: "relative", width: "100%", height: 192 }}>
             {preview.startsWith('http://') || preview.startsWith('https://') ? (
-              // External URL (ImgBB) - use regular img tag
               <img
                 src={preview}
                 alt="Preview"
-                className="w-full h-full object-contain rounded"
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 4 }}
                 onError={(e) => {
                   console.error("Failed to load image:", preview);
                   e.currentTarget.style.display = 'none';
                 }}
               />
             ) : (
-              // Local/relative URL - use Next.js Image
               <Image
                 src={preview}
                 alt="Preview"
                 fill
-                className="object-contain rounded"
+                style={{ objectFit: "contain", borderRadius: 4 }}
                 unoptimized={preview.startsWith('/img-admin/')}
               />
             )}
           </div>
-          <div className="mt-4 flex gap-2">
+          <div style={{ marginTop: 16, display: "flex", gap: 8 }}>
             <Button
               {...getRootProps()}
               icon={<UploadOutlined />}
@@ -158,10 +158,10 @@ export function ImageUpload({
               Delete
             </Button>
           </div>
-          <div className="mt-2 text-sm text-gray-500">
-            <Input 
-              value={preview || ""} 
-              className="text-xs"
+          <div style={{ marginTop: 8 }}>
+            <Input
+              value={preview || ""}
+              style={{ fontSize: 12 }}
               placeholder="Hoặc dán URL ảnh trực tiếp vào đây"
               onChange={(e) => {
                 const newValue = e.target.value.trim();
@@ -181,27 +181,27 @@ export function ImageUpload({
       ) : (
         <div
           {...getRootProps()}
-          className={`
-            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-            transition-colors
-            ${
-              isDragActive
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-300 hover:border-gray-400 bg-gray-50"
-            }
-          `}
+          style={{
+            border: `2px dashed ${isDragActive ? "#3b82f6" : "var(--admin-border, #d1d5db)"}`,
+            borderRadius: 8,
+            padding: "32px 16px",
+            textAlign: "center",
+            cursor: "pointer",
+            background: isDragActive ? "rgba(59,130,246,0.06)" : "var(--admin-surface-hover, #f9fafb)",
+            transition: "border-color 0.2s, background 0.2s",
+          }}
         >
           <input {...getInputProps()} />
-          <UploadOutlined className="text-4xl text-gray-400 mb-4" />
-          <p className="text-gray-600 mb-2">
+          <UploadOutlined style={{ fontSize: 36, color: "var(--admin-text-secondary, #9ca3af)", marginBottom: 12 }} />
+          <p style={{ color: "var(--admin-text-secondary, #6b7280)", marginBottom: 4 }}>
             {isDragActive
               ? "Thả file vào đây..."
               : "Kéo thả hình ảnh vào đây hoặc click để chọn"}
           </p>
-          <p className="text-sm text-gray-500">PNG, JPG, GIF tối đa 5MB</p>
+          <p style={{ fontSize: 13, color: "var(--admin-text-secondary, #9ca3af)", margin: 0 }}>PNG, JPG, GIF tối đa 5MB</p>
           {uploading && (
-            <div className="mt-4">
-              <p className="text-blue-600">Đang upload...</p>
+            <div style={{ marginTop: 12 }}>
+              <p style={{ color: "#3b82f6" }}>Đang upload...</p>
             </div>
           )}
         </div>

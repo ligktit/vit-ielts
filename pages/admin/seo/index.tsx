@@ -248,7 +248,6 @@ export default function SeoManagerPage() {
                                 <Form
                                     form={seoForm}
                                     layout="vertical"
-                                    style={{ maxWidth: 700 }}
                                 >
                                     <Form.Item name="siteTitle" label="Site Title" rules={[{ required: true }]}>
                                         <Input placeholder="IELTS Prediction" />

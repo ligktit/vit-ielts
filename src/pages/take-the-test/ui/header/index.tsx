@@ -153,7 +153,7 @@ function Header({ post }: { post: IPracticeSingle }) {
 
   return (
     <>
-      <header className="py-2 bg-white shadow z-20 mb-[20px]">
+      <header className="py-2 bg-white shadow z-20 mb-[20px] px-[16px]">
         <Container className="max-w-none">
           <div className="flex items-center">
             <div className="md:w-1/2">
@@ -179,21 +179,12 @@ function Header({ post }: { post: IPracticeSingle }) {
                   <h2 className="font-bold text-base">{post.title}</h2>
 
                   <div className="flex items-center">
-                    <span
-                      className="material-symbols-rounded block! text-xl! text-gray-500"
-                      style={{
-                        fontVariationSettings:
-                          '"FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24',
-                      }}
-                    >
-                      timer
-                    </span>
-                    <span className={`font-bold px-2 text-base ${timer && timer.asSeconds() < 0 ? 'text-gray-400' : 'text-primary'}`}>
+                    <span className={`font-medium text-sm ${timer && timer.asSeconds() < 0 ? 'text-gray-400' : 'text-dark'}`}>
                       {timer ? (
                         timer.asSeconds() < 0
-                          ? `-${dayjs.duration(Math.abs(timer.asSeconds()), 'seconds').format("mm:ss")}`
-                          : timer.format("mm:ss")
-                      ) : "00:00"}
+                          ? `${Math.ceil(timer.asSeconds() / 60)} minutes remaining`
+                          : `${Math.ceil(timer.asSeconds() / 60)} minutes remaining`
+                      ) : "0 minutes remaining"}
                     </span>
                   </div>
                 </div>
@@ -211,7 +202,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                   priority
                 />
 
-                <Tooltip title="Lưu nháp" className="hidden md:block">
+                {/* <Tooltip title="Lưu nháp" className="hidden md:block">
                   <Button
                     className="p-[0] border-[0] shadow-[0]"
                     onClick={handleManualSave}
@@ -221,7 +212,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                       save
                     </span>
                   </Button>
-                </Tooltip>
+                </Tooltip> */}
 
                 <Tooltip title="Open Notes" className="hidden md:block">
                   <Button

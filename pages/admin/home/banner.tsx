@@ -73,7 +73,7 @@ function HeroBannerPage() {
             <Form.Item label="Highlight (màu đỏ)" name={["title", "highlight"]} rules={[{ required: true }]}>
               <Input placeholder="Thử Như Thật" />
             </Form.Item>
-            <div style={{ background: "#f5f5f5", padding: 12, borderRadius: 8, marginTop: 8 }}>
+            <div style={{ background: "var(--admin-surface-hover)", padding: 12, borderRadius: 8, marginTop: 8 }}>
               <strong>Preview:</strong>{" "}
               <span style={{ fontSize: 18, fontWeight: 700 }}>
                 {Form.useWatch(["title", "line1"], form) || "IELTS Prediction Test"}

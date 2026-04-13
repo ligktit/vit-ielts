@@ -67,7 +67,7 @@ export const PageSingle = ({
             </div>
           </div>
         </Container>
-        <Container className="max-w-[1600px] relative z-10">
+        <Container className="max-w-[1360px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column: Fixed details */}
             <div className="w-full lg:w-[220px] shrink-0 relative z-10">

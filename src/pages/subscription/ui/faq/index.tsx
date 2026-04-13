@@ -16,7 +16,7 @@ export const FAQ = ({ config }: FAQProps) => {
   };
 
   return (
-    <div className="bg-white py-16">
+    <div className="bg-white py-16 px-4 sm:px-6">
       <Container>
         <div className="max-w-4xl mx-auto">
           {/* Badge */}
@@ -52,7 +52,7 @@ export const FAQ = ({ config }: FAQProps) => {
                 {/* Question */}
                 <button
                   onClick={() => toggleItem(index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                  className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
                 >
                   <span className="text-gray-900 font-semibold text-lg pr-4 flex-1">
                     {item.question}

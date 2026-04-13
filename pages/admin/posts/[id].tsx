@@ -70,8 +70,9 @@ export default function AdminPostEditorPage() {
             const currentStatus = form.getFieldValue("status");
             const finalStatus = targetStatus || currentStatus || "draft";
             
-            const body = { 
-                ...values, 
+            const body = {
+                ...values,
+                pro_user_only: form.getFieldValue("pro_user_only") ?? false,
                 status: finalStatus,
                 seo: values.seo || {}
             };

@@ -649,7 +649,7 @@ export function PageTakeTheTest() {
                       <Splitter layout={isMobileView ? "vertical" : undefined}>
                         {post.quizFields.skill[0] === "reading" && (
                           <Splitter.Panel min="20%" max="80%">
-                            <div className="prose-sm max-w-none p-[16px] pt-[30px] bg-white h-full overflow-y-auto text-[#000]">
+                            <div className="prose-sm max-w-none p-[16px] pt-[30px] pb-[120px] bg-white h-full overflow-y-auto text-[#000]">
                               {headingQuestion ? (
                                 <PassageRenderer
                                   passageContent={currentPassage.passage_content}
@@ -683,7 +683,7 @@ export function PageTakeTheTest() {
                             )}
                           >
                             <TextSelectionWrapper>
-                              <div className="p-6 space-y-6">
+                              <div className="p-6 pb-[120px] space-y-6">
                                 {(currentPassage?.questions || []).map(
                                   (question, index) => {
                                     const isHeadingQ =

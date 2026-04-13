@@ -94,6 +94,13 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
 
     // Hydrate form from SSR data on mount (if available)
     useEffect(() => {
+        initialLoadDone.current = false;
+        setSaveError(null);
+        setIsDirty(false);
+        setLastSavedAt(null);
+        setSlugManuallyEdited(false);
+        setActiveTab("content");
+
         if (initialQuiz) {
             const quiz = initialQuiz as Record<string, unknown>;
             form.setFieldsValue({
@@ -106,12 +113,19 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                 status: quiz.status,
             });
             if (quiz.slug) setSlugManuallyEdited(true);
-            setIsDirty(false);
-            setSaveError(null);
+            setPassages(
+                (quiz.passages as PassageData[] | undefined)?.map((p: PassageData, idx: number) => ({
+                    ...p, sort_order: idx,
+                    questions: (p.questions ?? []).map((q: QuestionData, qIdx: number) => ({ ...q, sort_order: qIdx })),
+                })) ?? [{ ...DEFAULT_PASSAGE, sort_order: 0, questions: [] }]
+            );
             setTimeout(() => { initialLoadDone.current = true; }, 0);
         } else if (quizId) {
             fetchQuiz(); // Fallback: client-side fetch if no SSR data
         } else {
+            // New quiz
+            form.resetFields();
+            setPassages([{ ...DEFAULT_PASSAGE, sort_order: 0, questions: [] }]);
             initialLoadDone.current = true;
         }
     }, [quizId]);
@@ -129,7 +143,9 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
 
     // ── Unsaved changes: Next.js route change ──
     useEffect(() => {
-        const handler = () => {
+        const handler = (url: string) => {
+            // Allow navigation within quiz admin pages (e.g. new quiz, quiz list)
+            if (url.startsWith('/admin/quizzes')) return;
             if (isDirtyRef.current && !window.confirm('Bạn có thay đổi chưa lưu. Bạn có chắc muốn rời trang?')) {
                 router.events.emit('routeChangeError');
                 throw 'Route change aborted due to unsaved changes';
@@ -618,12 +634,14 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                     align-items: center;
                     justify-content: space-between;
                     padding: 12px 24px;
-                    background: #fff;
-                    border-bottom: 1px solid #f0f0f0;
+                    background: var(--admin-surface);
+                    border-bottom: 1px solid var(--admin-border);
                     position: sticky;
                     top: 0;
                     z-index: 10;
                     gap: 16px;
+                    margin-top: 15px;
+                    border-radius: 8px;
                 }
 
                 .quiz-editor-topbar-left {
@@ -658,7 +676,7 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                 .quiz-editor-layout {
                     display: flex;
                     gap: 20px;
-                    padding: 20px 24px;
+                    padding-top: 30px;
                     align-items: flex-start;
                 }
 
@@ -732,13 +750,13 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                 }
 
                 .quiz-sidebar-shortcut-row kbd {
-                    background: #f5f5f5;
-                    border: 1px solid #d9d9d9;
+                    background: var(--admin-surface-hover);
+                    border: 1px solid var(--admin-border);
                     border-radius: 4px;
                     padding: 1px 6px;
                     font-family: monospace;
                     font-size: 11px;
-                    color: #333;
+                    color: var(--admin-text-secondary);
                     box-shadow: 0 1px 1px rgba(0,0,0,0.06);
                 }
 
@@ -773,18 +791,22 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                 .quiz-editor-sidebar-card {
                     border-radius: 8px !important;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+                    background: var(--admin-surface) !important;
+                    border: 1px solid var(--admin-border) !important;
                 }
 
                 .quiz-editor-sidebar-card .ant-card-head {
                     min-height: auto !important;
                     padding: 10px 16px !important;
-                    background: #fafafa !important;
+                    background: var(--admin-surface-hover) !important;
+                    border-bottom: 1px solid var(--admin-border) !important;
                     border-radius: 8px 8px 0 0 !important;
                 }
 
                 .quiz-editor-sidebar-card .ant-card-head-title {
                     padding: 0 !important;
                     font-size: 13px !important;
+                    color: var(--admin-text-primary) !important;
                 }
 
                 .quiz-editor-sidebar-card .ant-card-body {
@@ -792,7 +814,7 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                 }
 
                 .quiz-editor-back-btn:hover {
-                    background: #f5f5f5 !important;
+                    background: var(--admin-surface-hover) !important;
                 }
 
                 /* Tab card styling */
@@ -800,11 +822,22 @@ function QuizEditor({ quizId, initialQuiz }: { quizId?: string; initialQuiz?: Re
                     border-radius: 8px 8px 0 0 !important;
                     padding: 8px 20px !important;
                     font-weight: 500 !important;
+                    background: var(--admin-surface-hover) !important;
+                    border-color: var(--admin-border) !important;
+                    color: var(--admin-text-secondary) !important;
                 }
 
                 .quiz-editor-main .ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active {
-                    border-bottom-color: #fff !important;
+                    background: var(--admin-surface) !important;
+                    border-bottom-color: var(--admin-surface) !important;
                     font-weight: 600 !important;
+                    color: var(--admin-text-primary) !important;
+                }
+
+                .quiz-editor-main .ant-tabs-card > .ant-tabs-content-holder {
+                    background: var(--admin-surface) !important;
+                    border: 1px solid var(--admin-border) !important;
+                    border-radius: 0 8px 8px 8px !important;
                 }
             `}</style>
         </AdminLayout>

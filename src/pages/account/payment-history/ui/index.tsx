@@ -1,5 +1,5 @@
 import { MyProfileLayout } from "@/widgets/layouts";
-import { Card, Skeleton, Table, TableProps, Tag, Button } from "antd";
+import { Card, Skeleton, Table, TableProps, Tag } from "antd";
 import { useEffect, useMemo, useState, useCallback } from "react";
 import dayjs from "dayjs";
 import { currencyFormat } from "@/shared/lib";
@@ -173,8 +173,24 @@ export const PagePaymentHistory = () => {
       dataIndex: "status",
       key: "status",
       render: (status: { text: string; color: string; showContinue: boolean }, record: (typeof dataSource)[number]) => (
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          {status.showContinue && record.orderIdFull ? (
+            <Link href={`${ROUTES.ORDER_RECEIVED}?orderId=${encodeURIComponent(record.orderIdFull)}`}>
+              <Tag
+                style={{
+                  backgroundColor: status.color,
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "4px 12px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                {status.text}
+              </Tag>
+            </Link>
+          ) : (
             <Tag
               style={{
                 backgroundColor: status.color,
@@ -187,28 +203,9 @@ export const PagePaymentHistory = () => {
             >
               {status.text}
             </Tag>
-            {status.showContinue && (
-              <Countdown createdAt={record.rawOrder.created_at} />
-            )}
-          </div>
-          {status.showContinue && record.orderIdFull && (
-            <Link
-              href={`${ROUTES.ORDER_RECEIVED}?orderId=${encodeURIComponent(record.orderIdFull)}`}
-            >
-              <Button
-                type="primary"
-                size="small"
-                style={{
-                  backgroundColor: "#D94A56",
-                  borderColor: "#D94A56",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  borderRadius: "6px",
-                }}
-              >
-                Tiếp tục thanh toán
-              </Button>
-            </Link>
+          )}
+          {status.showContinue && (
+            <Countdown createdAt={record.rawOrder.created_at} />
           )}
         </div>
       ),
@@ -246,15 +243,18 @@ export const PagePaymentHistory = () => {
       <Card className="shadow-sm rounded-lg" bodyStyle={{ padding: 0 }}>
         <div className="p-6">
           {!loading ? (
-            <Table
-              dataSource={dataSource}
-              columns={columns}
-              pagination={false}
-              className="order-history-table"
-              rowClassName={(_, index) =>
-                index % 2 === 0 ? "bg-white" : "bg-gray-50"
-              }
-            />
+            <div className="overflow-x-auto">
+              <Table
+                dataSource={dataSource}
+                columns={columns}
+                pagination={false}
+                className="order-history-table"
+                scroll={{ x: 600 }}
+                rowClassName={(_, index) =>
+                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                }
+              />
+            </div>
           ) : (
             <Skeleton active />
           )}

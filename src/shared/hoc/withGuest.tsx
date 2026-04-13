@@ -5,32 +5,38 @@ import { isAdminRole } from "~lib/parseRoles";
 
 /**
  * SSR guard — redirects authenticated users away from guest-only pages (login/register).
- * Admin users are redirected to /admin, regular users to home.
- * Uses Supabase session instead of legacy cookie-based auth.
+ *
+ * @param context - Next.js SSR context
+ * @param redirect - Optional explicit redirect destination
+ * @param adminPage - Set true when guarding admin login page.
+ *   - adminPage=false (default, user login/register): always redirect to home, even if admin
+ *   - adminPage=true (admin login): redirect admins to /admin, regular users to home
  */
 export async function withGuest(
   context: GetServerSidePropsContext,
-  redirect?: string
+  redirect?: string,
+  adminPage = false
 ): ReturnType<GetServerSideProps> {
   const supabase = createServerSupabase(context);
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
-    // Determine redirect based on user role
     let destination = redirect || ROUTES.HOME;
 
     if (!redirect) {
-      const { data: profile } = await supabase
-        .from("users")
-        .select("roles")
-        .eq("id", user.id)
-        .single();
+      if (adminPage) {
+        // Admin login page: redirect admins to /admin, non-admins to home
+        const { data: profile } = await supabase
+          .from("users")
+          .select("roles")
+          .eq("id", user.id)
+          .single();
 
-      const isAdmin = isAdminRole(profile?.roles);
-
-      if (isAdmin) {
-        destination = "/admin";
+        if (isAdminRole(profile?.roles)) {
+          destination = "/admin";
+        }
       }
+      // User login/register page: always redirect to home regardless of role
     }
 
     return {

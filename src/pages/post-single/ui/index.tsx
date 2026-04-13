@@ -46,7 +46,7 @@ export const PageSingle = ({ post }: { post: IPost }) => {
   return (
     <>
       <SEOHeader fullHead={post.seo?.fullHead} title={post.seo?.title} />
-      <div className="min-h-screen pb-20 bg-white relative">
+      <div className="min-h-screen pb-20 bg-white relative px-4 sm:px-6">
         <div className="absolute inset-x-0 top-0 h-[380px] md:h-[420px] pointer-events-none z-0" style={{ backgroundImage: "linear-gradient(rgba(217,74,86,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,74,86,0.07) 1px, transparent 1px)", backgroundSize: "40px 40px", backgroundPosition: "center top" }} />
         <div className="absolute top-[380px] md:top-[420px] left-0 w-full h-[10px] bg-[#D94A56] z-0" />
         <Container className="relative z-10 pt-[160px] md:pt-[220px] mb-8">
@@ -65,7 +65,7 @@ export const PageSingle = ({ post }: { post: IPost }) => {
             </div>
           </div>
         </Container>
-        <Container className="max-w-[1600px] relative z-10">
+        <Container className="max-w-[1360px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column: Fixed details */}
             <div className="w-full lg:w-[220px] shrink-0 relative z-10">

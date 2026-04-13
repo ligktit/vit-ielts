@@ -129,7 +129,7 @@ export const PageMyProfile = () => {
   };
 
   return (
-    <Card>
+    <Card style={{ borderRadius: 16 }}>
       <Head>
         <title>{`My Profile | ${generalSettingsTitle}`}</title>
       </Head>

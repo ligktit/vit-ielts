@@ -1,6 +1,5 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { createServerSupabase } from "~supabase/server";
-import { supabaseAdmin } from "~supabase/admin";
+import { createAdminServerSupabase } from "~supabase/server";
 import { isAdminRole } from "~lib/parseRoles";
 
 /**
@@ -21,7 +20,7 @@ import { isAdminRole } from "~lib/parseRoles";
 export const withAdmin: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabase(context);
+  const supabase = createAdminServerSupabase(context);
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -36,12 +35,17 @@ export const withAdmin: GetServerSideProps = async (
     };
   }
 
-  // Check admin role via users table
-  const { data: profile } = await supabaseAdmin
+  // Check admin role via users table (use session-based client to avoid service role key dependency)
+  const { data: profile, error: profileError } = await supabase
     .from("users")
     .select("roles")
     .eq("id", user.id)
     .maybeSingle();
+
+  console.log("[withAdmin] user.id:", user.id);
+  console.log("[withAdmin] profile:", JSON.stringify(profile));
+  console.log("[withAdmin] profileError:", profileError);
+  console.log("[withAdmin] isAdminRole:", isAdminRole(profile?.roles));
 
   if (!isAdminRole(profile?.roles)) {
     return {

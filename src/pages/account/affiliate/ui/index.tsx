@@ -577,6 +577,7 @@ export const PageAffiliate = () => {
                 </Button>
                 <Button
                   icon={<BankOutlined />}
+                  size="large"
                   onClick={() => setShowBankForm(true)}
                 >
                   {bankInfo ? "Sửa thông tin NH" : "Cập nhật ngân hàng"}

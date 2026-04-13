@@ -92,17 +92,31 @@ export const TextSelectionProvider = ({
     }
   }, []);
 
-  const createSpan = useCallback((nodeId: string, type: "highlight" | "underline", onClick: (event: MouseEvent) => void) => {
+  const createSpan = useCallback((nodeId: string, type: "highlight" | "underline", onClick: (event: MouseEvent) => void, bgColor?: string) => {
     const span = document.createElement("span");
     span.className = type === "highlight" ? HIGHLIGHT_CLASS : UNDERLINE_CLASS;
-    span.style.backgroundColor = type === "highlight" ? HIGHLIGHT_COLOR : "transparent";
-    span.style.textDecoration = type === "underline" ? UNDERLINE_STYLE : "none";
+    if (type === "highlight") {
+      span.style.backgroundColor = bgColor || HIGHLIGHT_COLOR;
+      span.style.textDecoration = "none";
+      span.style.borderRadius = "3px";
+      span.style.padding = "1px 2px";
+      span.style.color = "#fff";
+    } else {
+      // Note: blue background
+      span.style.backgroundColor = bgColor || "#BFDBFE";
+      span.style.textDecoration = "none";
+      span.style.borderRadius = "3px";
+      span.style.padding = "1px 2px";
+      span.style.color = "#fff";
+      span.style.fontWeight = "600";
+    }
     span.dataset.nodeId = nodeId;
+    span.dataset.color = bgColor || (type === "highlight" ? HIGHLIGHT_COLOR : "#BFDBFE");
     span.onclick = onClick;
     return span;
   }, [HIGHLIGHT_CLASS, HIGHLIGHT_COLOR, UNDERLINE_CLASS, UNDERLINE_STYLE]);
 
-  const processTextNode = useCallback((node: Node, range: Range, nodeId: string, type: "highlight" | "underline") => {
+  const processTextNode = useCallback((node: Node, range: Range, nodeId: string, type: "highlight" | "underline", bgColor?: string) => {
     if (node.nodeType !== Node.TEXT_NODE) return;
     const textNode = node as Text;
     const nodeText = textNode.textContent || "";
@@ -119,7 +133,7 @@ export const TextSelectionProvider = ({
       }
     };
 
-    const span = createSpan(nodeId, type, onClick);
+    const span = createSpan(nodeId, type, onClick, bgColor);
 
     if (textNode.parentElement?.classList.contains(type === "highlight" ? HIGHLIGHT_CLASS : UNDERLINE_CLASS)) {
       textNode.parentElement.parentElement?.replaceChild(textNode, textNode.parentElement);
@@ -160,7 +174,7 @@ export const TextSelectionProvider = ({
   }, [HIGHLIGHT_CLASS, UNDERLINE_CLASS, createSpan]);
 
   // --- CORE LOGIC: APPLY ---
-  const applySelection = useCallback((type: "highlight" | "underline", existingId?: string, forceRange?: Range) => {
+  const applySelection = useCallback((type: "highlight" | "underline", existingId?: string, forceRange?: Range, bgColor?: string) => {
     let range: Range;
     let selection: Selection | null = null;
 
@@ -190,10 +204,10 @@ export const TextSelectionProvider = ({
         if (node === range.endContainer || node.contains?.(range.endContainer)) endIdx = idx;
       });
       for (let i = startIdx; i <= endIdx; i++) {
-        traverseNodes(children[i], (childNode) => processTextNode(childNode, range, nodeId, type));
+        traverseNodes(children[i], (childNode) => processTextNode(childNode, range, nodeId, type, bgColor));
       }
     } else {
-      processTextNode(ancestor, range, nodeId, type);
+      processTextNode(ancestor, range, nodeId, type, bgColor);
     }
 
     if (selection) selection.removeAllRanges();
@@ -202,18 +216,32 @@ export const TextSelectionProvider = ({
   }, [SANDBOX_ID, processTextNode, traverseNodes]);
 
   // --- HANDLERS ---
+  const HIGHLIGHT_BROWN = "#92400E";
+  const HIGHLIGHT_PINK  = "#EC4899";
+  const NOTE_BLUE       = "#48a7f6";
+
   const handleHighlight = useCallback(() => {
-    const res = applySelection("highlight");
+    // Detect if selection overlaps with existing annotation → pink, else brown
+    let bgColor = HIGHLIGHT_BROWN;
+    const selection = document.getSelection();
+    if (selection?.rangeCount) {
+      const range = selection.getRangeAt(0);
+      const existingSpans = document.querySelectorAll("[data-node-id]");
+      const hasOverlap = Array.from(existingSpans).some((span) => range.intersectsNode(span));
+      if (hasOverlap) bgColor = HIGHLIGHT_PINK;
+    }
+
+    const res = applySelection("highlight", undefined, undefined, bgColor);
     if (res) {
-        setHighlights(prev => [...prev, { ...res, type: "highlight" }]);
-        setTooltip((prev) => ({ ...prev, visible: false }));
+      setHighlights(prev => [...prev, { ...res, type: "highlight", color: bgColor }]);
+      setTooltip((prev) => ({ ...prev, visible: false }));
     }
   }, [applySelection]);
 
   const handleNote = useCallback(() => {
-    const res = applySelection("underline");
+    const res = applySelection("underline", undefined, undefined, NOTE_BLUE);
     if (res) {
-        setHighlights(prev => [...prev, { ...res, type: "underline" }]);
+        setHighlights(prev => [...prev, { ...res, type: "underline", color: NOTE_BLUE }]);
         
         setTimeout(() => {
             const span = document.querySelector(`span[data-node-id="${res.nodeId}"]`);
@@ -351,7 +379,7 @@ export const TextSelectionProvider = ({
                     const range = document.createRange();
                     range.setStart(currentNode, idx);
                     range.setEnd(currentNode, idx + item.text.length);
-                    applySelection(item.type, item.nodeId, range);
+                    applySelection(item.type, item.nodeId, range, item.color);
                     restored = true;
                     break;
                 }
@@ -411,37 +439,17 @@ export const TextSelectionProvider = ({
 
     if (!selectedText || !isWithinWrapper) return;
 
-    let highlightId: string | undefined;
-    let underlineId: string | undefined;
+    // When user selects new text, always show Note/Highlight options
+    // (even if selection overlaps existing spans — that triggers pink highlight).
+    // Remove option is only shown via the span's own onClick handler.
+    setSelectedHighlightId(null);
+    setSelectedUnderlineId(null);
+    setCurrentSelection(null);
 
-    const checkNode = (node: HTMLElement) => {
-         if (node.dataset?.nodeId) {
-            const hlClass = HIGHLIGHT_CLASS.split(" ")[0];
-            const ulClass = UNDERLINE_CLASS.split(" ")[0];
-            if (node.classList.contains(hlClass)) highlightId = node.dataset.nodeId;
-            else if (node.classList.contains(ulClass)) underlineId = node.dataset.nodeId;
-         }
-    }
-
-    const ancestor = range.commonAncestorContainer;
-    if (ancestor.hasChildNodes()) {
-      const nodeWithId = Array.from(ancestor.childNodes).find((node) => (node as HTMLElement).dataset?.nodeId);
-      if (nodeWithId) checkNode(nodeWithId as HTMLElement);
-    } else {
-      const parent = ancestor.parentElement;
-      if (parent) checkNode(parent);
-    }
-
-    setSelectedHighlightId(highlightId || null);
-    setSelectedUnderlineId(underlineId || null);
-    if (underlineId) {
-      const currentNote = notesRef.current.find((n) => n.nodeId === underlineId);
-      setCurrentSelection(currentNote || null);
-    }
     const { x, y, width, height } = range.getBoundingClientRect();
     setTooltip({ position: { x: x + width / 2, y: y + height + 2 }, visible: true });
 
-  }, [HIGHLIGHT_CLASS, SANDBOX_ID, UNDERLINE_CLASS]);
+  }, [SANDBOX_ID]);
 
   useEffect(() => {
     const hideTooltip = (event: MouseEvent) => {
@@ -538,12 +546,90 @@ const NoteFormInput = ({ initialValue, isEdit = false }: { initialValue?: string
 
 const TooltipPopup = () => {
   const { tooltip, tooltipRef, selectedHighlightId, selectedUnderlineId, currentSelection, handleHighlight, handleNote, removeHighlight, notes } = useTextSelectionContext()!;
+
+  const isDefault = !currentSelection && !selectedHighlightId && !selectedUnderlineId;
+
   return (
-    <div ref={tooltipRef} style={{ left: tooltip.position.x, top: tooltip.position.y, opacity: tooltip.visible ? 1 : 0, visibility: tooltip.visible ? "visible" : "hidden" }} className="shadow-primary rounded-lg absolute p-1 bg-white -translate-x-1/2 flex items-center border border-gray-100 z-50">
-      {!currentSelection && selectedHighlightId && ( <Tooltip title="Remove Highlight"><Button onClick={removeHighlight} size="small" className="p-0"><MarkerClearIcon className="text-2xl" /></Button></Tooltip> )}
-      {!currentSelection && selectedUnderlineId && ( <NoteFormInput initialValue={notes.find((n) => n.nodeId === selectedUnderlineId)?.nodeContent} isEdit={notes.find((n) => n.nodeId === selectedUnderlineId)} /> )}
-      {currentSelection && ( <NoteFormInput initialValue={notes.find((n) => n.nodeId === currentSelection.nodeId)?.nodeContent} isEdit={notes.find((n) => n.nodeId === currentSelection.nodeId)} /> )}
-      {!currentSelection && !selectedHighlightId && !selectedUnderlineId && ( <> <Tooltip title="Highlight"><Button onClick={handleHighlight} size="small" className="p-0"><MarkerIcon className="text-2xl" /></Button></Tooltip> <Tooltip title="Note"><Button onClick={handleNote} size="small" className="p-0"><NoteIcon className="text-2xl" /></Button></Tooltip> </> )}
+    <div
+      ref={tooltipRef}
+      style={{
+        left: tooltip.position.x,
+        top: tooltip.position.y,
+        opacity: tooltip.visible ? 1 : 0,
+        visibility: tooltip.visible ? "visible" : "hidden",
+        transform: "translateX(-50%) translateY(8px)",
+      }}
+      className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-xl"
+    >
+      {/* Arrow pointing up */}
+      {(isDefault || selectedHighlightId) && (
+        <div
+          style={{
+            position: "absolute",
+            top: -8,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "8px solid transparent",
+            borderRight: "8px solid transparent",
+            borderBottom: "8px solid white",
+            filter: "drop-shadow(0 -1px 1px rgba(0,0,0,0.06))",
+          }}
+        />
+      )}
+
+      {/* Main content */}
+      <div className="px-1 py-1">
+        {/* Default: Note + Highlight */}
+        {isDefault && (
+          <div className="flex items-stretch gap-4">
+            <button
+              type="button"
+              onClick={handleHighlight}
+              className="flex flex-col items-center gap-1.5 pl-3 py-2 cursor-pointer"
+            >
+              <MarkerIcon className="text-[22px] text-[#1f2937]" />
+              <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Highlight</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleNote}
+              className="flex flex-col items-center gap-1.5 pr-3 py-2 cursor-pointer"
+            >
+              <NoteIcon className="text-[22px] text-[#1f2937]" />
+              <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Note</span>
+            </button>
+          </div>
+        )}
+
+        {/* Remove highlight */}
+        {!currentSelection && selectedHighlightId && (
+          <button
+            type="button"
+            onClick={removeHighlight}
+            className="flex flex-col items-center gap-1.5 px-4 py-2 cursor-pointer"
+          >
+            <MarkerClearIcon className="text-[22px] text-[#1f2937]" />
+            <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Remove</span>
+          </button>
+        )}
+
+        {/* Note form (new or existing underline) */}
+        {(!currentSelection && selectedUnderlineId) && (
+          <NoteFormInput
+            initialValue={notes.find((n) => n.nodeId === selectedUnderlineId)?.nodeContent}
+            isEdit={notes.find((n) => n.nodeId === selectedUnderlineId)}
+          />
+        )}
+        {currentSelection && (
+          <NoteFormInput
+            initialValue={notes.find((n) => n.nodeId === currentSelection.nodeId)?.nodeContent}
+            isEdit={notes.find((n) => n.nodeId === currentSelection.nodeId)}
+          />
+        )}
+      </div>
+
     </div>
   );
 };

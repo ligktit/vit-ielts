@@ -275,9 +275,9 @@ export default function AdminQuizzesPage() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [search, setSearch] = useState("");
-    const [skillFilter, setSkillFilter] = useState<string>("");
-    const [typeFilter, setTypeFilter] = useState<string>("");
-    const [statusFilter, setStatusFilter] = useState<string>("");
+    const [skillFilter, setSkillFilter] = useState<string | undefined>(undefined);
+    const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
+    const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
     const [showAddModal, setShowAddModal] = useState(false);
 
     const fetchQuizzes = useCallback(async () => {
@@ -371,7 +371,7 @@ export default function AdminQuizzesPage() {
             title: "Lượt làm",
             dataIndex: "tests_taken",
             key: "tests_taken",
-            width: 90,
+            width: 110,
             sorter: (a, b) => a.tests_taken - b.tests_taken,
         },
         {

@@ -1,0 +1,87 @@
+import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
+
+export type PostCardProps = {
+  image?: string;
+  title: string;
+  date?: string;
+  isPro?: boolean;
+  href?: string;
+};
+
+export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => {
+  const fallbackImage = useContentImageFallback();
+  const imageSrc = resolveContentImage(image, fallbackImage);
+  const isLogoFallback = !image && imageSrc.includes("logo.png");
+
+  const Tag = href ? "a" : "div";
+  const linkProps = href ? { href } : {};
+
+  return (
+    <Tag
+      {...linkProps}
+      className="group flex flex-col bg-white rounded-[30px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 w-full cursor-pointer overflow-hidden"
+    >
+      {/* Image */}
+      <div className="relative h-[200px] shrink-0 overflow-hidden bg-secondary-50 rounded-t-[30px] rounded-b-[15px]">
+        {isLogoFallback && (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--color-secondary-200),_white_55%,_var(--color-primary-50))]" />
+        )}
+        <img
+          src={imageSrc}
+          alt={title}
+          className={`absolute inset-0 w-full h-full ${
+            isLogoFallback
+              ? "object-contain p-12 opacity-30 mix-blend-multiply"
+              : "object-cover"
+          } transition-transform duration-500 group-hover:scale-105`}
+          loading="lazy"
+        />
+
+        {/* PRO / FREE badge */}
+        <span
+          className={`absolute top-3 right-3 rounded-[6px] px-3 py-[5px] text-[13px] font-bold uppercase tracking-wide text-white shadow-sm ${
+            isPro ? "bg-primary-500" : "bg-[#22C55E]"
+          }`}
+        >
+          {isPro ? "PRO" : "FREE"}
+        </span>
+      </div>
+
+      {/* Body */}
+      <div className="flex flex-1 flex-col justify-between px-4 py-4 sm:px-5">
+        {/* Title */}
+        <h3
+          className="text-[16px] font-bold text-[#202020] leading-snug line-clamp-2 group-hover:text-primary-500 transition-colors mb-6 mt-3"
+          title={title}
+        >
+          {title}
+        </h3>
+
+        {/* Footer: brand (left) + date (right) */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Brand */}
+          <div className="flex items-center gap-[6px] min-w-0">
+            <img
+              src="/red-logo.png"
+              alt="IELTS Prediction"
+              className="h-[18px] w-auto shrink-0"
+            />
+            <span className="text-[14px] font-semibold text-primary-500 truncate">
+              IELTS Prediction
+            </span>
+          </div>
+
+          {/* Date */}
+          {date && (
+            <div className="flex items-center gap-[5px] shrink-0">
+              <span className="material-symbols-rounded text-[12px] text-[#9CA3AF]">
+                calendar_today
+              </span>
+              <span className="text-[14px] text-[#6A7282]">{date}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </Tag>
+  );
+};

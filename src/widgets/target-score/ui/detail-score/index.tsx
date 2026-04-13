@@ -77,7 +77,7 @@ export const DetailScore = () => {
             <button
               type="button"
               onClick={() => setIsSetTargetScoreDialogOpen(true)}
-              className="w-full bg-red-50 rounded-lg p-4 flex flex-col space-y-2 hover:bg-red-100 transition-colors cursor-pointer text-left whitespace-nowrap"
+              className="w-full bg-red-50 rounded-lg p-4 flex flex-col space-y-2 hover:bg-red-100 transition-colors cursor-pointer text-left"
               style={{
                 backgroundColor: "rgba(217, 74, 86, 0.1)",
               }}

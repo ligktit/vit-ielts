@@ -12,9 +12,9 @@ const navigationItems = [
       <Image
         src="/assets/figma/icons/book (1) 1.svg"
         alt="Mock Tests"
-        width={24}
-        height={24}
-        className={active ? "" : "brightness-0"}
+        width={22}
+        height={22}
+        className={active ? "brightness-0 invert" : "brightness-0"}
       />
     ),
   },
@@ -25,9 +25,9 @@ const navigationItems = [
       <Image
         src="/assets/figma/icons/listen 1.svg"
         alt="Listening Practices"
-        width={24}
-        height={24}
-        className={active ? "" : "brightness-0"}
+        width={22}
+        height={22}
+        className={active ? "brightness-0 invert" : "brightness-0"}
       />
     ),
   },
@@ -38,9 +38,9 @@ const navigationItems = [
       <Image
         src="/assets/figma/icons/reading-book 1.svg"
         alt="Reading Practices"
-        width={24}
-        height={24}
-        className={active ? "" : "brightness-0"}
+        width={22}
+        height={22}
+        className={active ? "brightness-0 invert" : "brightness-0"}
       />
     ),
   },
@@ -51,9 +51,9 @@ const navigationItems = [
       <Image
         src="/assets/figma/icons/speaking 1.svg"
         alt="Speaking Samples"
-        width={24}
-        height={24}
-        className={active ? "" : "brightness-0"}
+        width={22}
+        height={22}
+        className={active ? "brightness-0 invert" : "brightness-0"}
       />
     ),
   },
@@ -64,9 +64,9 @@ const navigationItems = [
       <Image
         src="/assets/figma/icons/copywriting (1) 1.svg"
         alt="Writing Samples"
-        width={24}
-        height={24}
-        className={active ? "" : "brightness-0"}
+        width={22}
+        height={22}
+        className={active ? "brightness-0 invert" : "brightness-0"}
       />
     ),
   },
@@ -96,7 +96,7 @@ function QuizLibraryNav() {
                 "flex items-center justify-center gap-4 h-[50px] py-[15px] px-[20px] rounded-[25px] border transition-colors",
                 active
                   ? "bg-primary-500 border-primary text-white"
-                  : "bg-white border-[#191D24] text-[#191D24] hover:bg-gray-50"
+                  : "bg-white border-[#191D22] text-[#191D22] hover:bg-gray-50"
               )}
             >
               {item.icon(active)}

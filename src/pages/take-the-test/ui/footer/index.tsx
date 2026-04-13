@@ -31,6 +31,7 @@ function Footer() {
     handleSubmitAnswer,
     activeQuestionIndex,
     setActiveQuestionIndex,
+    testResult,
   } = useExamContext();
 
   const {
@@ -452,11 +453,13 @@ function Footer() {
     <>
       <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white">
         {post.quizFields.skill[0] === "listening" && post.quizFields.audio && (
-          <AudioPlayer 
-            key="listening-audio-player"
-            audioUrl={post.quizFields.audio.node.mediaItemUrl}
-            isReady={isReady}
-          />
+          <div className={testResult.testMode === "simulation" ? "invisible h-0 overflow-hidden" : ""}>
+            <AudioPlayer
+              key="listening-audio-player"
+              audioUrl={post.quizFields.audio.node.mediaItemUrl}
+              isReady={isReady}
+            />
+          </div>
         )}
         <div className="flex items-center w-full p-[12px] pr-[0] pt-[0]">
           <div className="flex justify-between items-center h-full flex-grow mr-10">
@@ -472,7 +475,10 @@ function Footer() {
                     <div className="justify-center w-full">
                       <div className="flex items-center gap-[5px] h-full">
                         <div className="flex items-center border-t-[3px] border-gray-200 pt-2">
-                          <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px]">
+                          <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px] flex items-center gap-1.5">
+                            {info.totalQuestions > 0 && info.answeredCount === info.totalQuestions && (
+                              <span className="text-green-500 material-symbols-rounded text-[18px] leading-none bold">check</span>
+                            )}
                             {isReadingTest ? "Passage" : "Part"} {(info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1}
                           </span>
                         </div>
@@ -511,7 +517,10 @@ function Footer() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
-                      <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap">
+                      <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap flex items-center gap-1.5">
+                        {info.totalQuestions > 0 && info.answeredCount === info.totalQuestions && (
+                          <span className="text-green-500 material-symbols-rounded text-[18px] leading-none bold">check</span>
+                        )}
                         {isReadingTest ? "Passage" : "Part"} {(info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1}
                       </span>
                       <span className="text-[16px] text-gray-500 whitespace-nowrap">

@@ -164,6 +164,7 @@
   transform: scale(1.1);
   z-index: 2;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  outline: 2px solid #f97316;
 }
 
 .dayOtherMonth {
@@ -311,7 +312,7 @@
 
 .statsTable {
   width: 100%;
-  border-collapse: separate;
+  border-collapse: collapse;
   border-spacing: 0;
   font-size: 14px;
 }
