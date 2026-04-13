@@ -357,7 +357,11 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                   <span className="material-symbols-rounded">close</span>
                 </button>
               </div>
-              <Filter mobile collections={availableCollections} onClose={() => setDrawerOpen(false)} />
+              <Filter
+                mobile
+                collections={availableCollections}
+                onClose={() => setDrawerOpen(false)}
+              />
             </div>
           </div>
         )}

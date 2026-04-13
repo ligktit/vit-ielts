@@ -175,7 +175,7 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
     try {
       const quiz = await getQuizBySlug(supabase, slug?.toString() || "");
 
-      if (!quiz || (quiz.type !== "academic" && quiz.type !== "general")) {
+      if (!quiz) {
         return { notFound: true };
       }
 
