@@ -336,7 +336,7 @@ const InfoRow = ({ label, value, className = "" }: { label: string; value: strin
 );
 
 const SummaryBox = ({ label, value }: { label: string; value: string }) => (
-  <div className="bg-[#F8F9FA] rounded-xl border border-gray-100 p-4 text-center">
+  <div className="bg-[#fff] rounded-xl border border-gray-100 p-4 text-center">
     <p className="text-[10px] uppercase text-gray-500 font-bold mb-1 tracking-wide">{label}</p>
     <p className="text-xs font-bold text-[#2D3142] break-words">{value}</p>
   </div>

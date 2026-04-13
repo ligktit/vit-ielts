@@ -31,7 +31,7 @@ export const PracticeHistory = () => {
 
   return (
     <div
-      className="bg-white rounded-xl overflow-hidden"
+      className="bg-white rounded-xl overflow-x-auto"
       style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
       data-section="practice-history"
     >

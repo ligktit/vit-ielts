@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { Quiz } from "~services/types/database";
 import { ROUTES } from "@/shared/routes";
 import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
+import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 
 export type PracticeSectionProps = {
   title?: string;
@@ -31,10 +32,10 @@ export const PracticeSection = ({
   if (items.length === 0) return null;
 
   return (
-    <div data-section="practice-carousel" className="py-[48px] bg-white">
+    <ScrollFadeIn data-section="practice-carousel" className="bg-white">
       <Container>
         {/* Header */}
-        <div className="flex justify-between items-end mb-8 pl-1 pr-1">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-end mb-8 pl-1 pr-1">
           <h2 className="text-[28px] md:text-[32px] font-bold text-[#2D3142]">{title}</h2>
           <Link
             href={viewMoreLink}
@@ -57,14 +58,14 @@ export const PracticeSection = ({
           </Link>
         </div>
 
-        {/* Carousel wrapper: [Prev] [Track] [Next] */}
-        <div className="flex items-center gap-4 -mx-4 sm:mx-0">
+        {/* Carousel wrapper: arrows are absolute outside the track */}
+        <div className="relative">
           {/* Prev arrow */}
           <button
             type="button"
             onClick={handlePrev}
             aria-label="Previous"
-            className="hidden sm:flex shrink-0 items-center justify-center w-7 h-7 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+            className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
           >
             <img
               src="/assets/figma/icons/Arrow1.svg"
@@ -75,7 +76,7 @@ export const PracticeSection = ({
           </button>
 
           {/* Splide carousel — pt on each slide matches card lift distance (14px) */}
-          <div className="flex-1 min-w-0">
+          <div>
             <Splide
               ref={splideRef as any}
               hasTrack={false}
@@ -88,8 +89,9 @@ export const PracticeSection = ({
                 arrows: false,
                 breakpoints: {
                   1280: { perPage: 3 },
-                  1024: { perPage: 2 },
-                  640: { perPage: 1.2, gap: "16px", focus: "center" },
+                  1024: { perPage: 2, gap: "20px" },
+                  768: { perPage: 2, gap: "16px" },
+                  480: { perPage: 1, gap: "16px" },
                 },
               }}
             >
@@ -129,7 +131,7 @@ export const PracticeSection = ({
             type="button"
             onClick={handleNext}
             aria-label="Next"
-            className="hidden sm:flex shrink-0 items-center justify-center w-7 h-7 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+            className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
           >
             <img
               src="/assets/figma/icons/Arrow1.svg"
@@ -139,6 +141,6 @@ export const PracticeSection = ({
           </button>
         </div>
       </Container>
-    </div>
+    </ScrollFadeIn>
   );
 };

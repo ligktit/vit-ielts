@@ -25,7 +25,7 @@ const FilterSection = ({
 }) => {
   return (
     <section
-      className="bg-white rounded-[32px] p-[16px]"
+      className="bg-white rounded-[32px] px-[16px] py-[25px]"
       style={{
         boxShadow:
           "0 4px 8px -2px rgba(16, 24, 40, 0.10), 0 2px 4px -2px rgba(16, 24, 40, 0.06)",

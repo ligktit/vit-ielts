@@ -53,7 +53,7 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
     <>
       <SEOHeader fullHead={post.seo?.fullHead} title={post.seo?.title} />
 
-      <div className="min-h-screen pb-20 bg-white relative">
+      <div className="min-h-screen pb-20 bg-white relative px-4 sm:px-6">
         {/* Background Grid - Only in Hero Area */}
         <div
           className="absolute inset-x-0 top-0 h-[380px] md:h-[420px] pointer-events-none z-0"
@@ -68,9 +68,9 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
         {/* The Red Stripe (Behind the card) */}
         <div className="absolute top-[380px] md:top-[420px] left-0 w-full h-[10px] bg-[#D94A56] z-0" />
 
-        <Container className="relative z-10 pt-[160px] md:pt-[220px] mb-8">
+        <Container className="relative z-10 pt-[160px] md:pt-[220px] mb-13">
           {/* Header Box */}
-          <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] px-[20px] md:px-[61px] py-[30px] md:py-[50px] max-w-[900px] mx-auto shadow-[0_4px_24px_rgba(0,0,0,0.04)] text-left">
+          <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] px-[20px] md:px-[61px] py-[30px] md:py-[50px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] text-left">
             <div className="mb-[23px]">
               <Breadcrumb items={dsBreadcrumbItems} />
             </div>
@@ -117,11 +117,11 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
           </div>
         </Container>
 
-        <Container className="max-w-[1600px] relative z-10">
+        <Container className="max-w-[1360px] relative z-10">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Column: Fixed details */}
             <div className="w-full lg:w-[220px] shrink-0 relative z-10">
-              <div className="sticky top-24 space-y-6">
+              <div className="sticky top-35 space-y-6">
                 <div>
                   <h3 className="font-bold text-lg text-[#2D3142] mb-3">
                     IELTS {capitalizedSkill} Practice
@@ -317,12 +317,7 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
                       <h3 className="font-bold text-lg text-[#2D3142]">
                         Có thể bạn quan tâm
                       </h3>
-                      <Link
-                        href={skill === "listening" ? ROUTES.PRACTICE.ARCHIVE_LISTENING : ROUTES.PRACTICE.ARCHIVE_READING}
-                        className="text-xs text-[#2F80ED] hover:underline"
-                      >
-                        Tất cả bài viết &gt;
-                      </Link>
+
                     </div>
 
                     <div className="space-y-4">
@@ -356,10 +351,10 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
         </Container>
 
         {/* Bottom Related Section */}
-        <Container className="max-w-[1600px] mt-20 relative z-10">
+        <Container className="max-w-[1360px] mt-20 relative z-10">
           <div className="mb-6">
             <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
-              Bài viết tương tự
+              Bài thi tương tự
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">

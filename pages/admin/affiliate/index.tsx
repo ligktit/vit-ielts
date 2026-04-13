@@ -82,7 +82,13 @@ export default function AdminAffiliatePage() {
     const affColumns: ColumnsType<AffiliateRow> = [
         {
             title: "User", key: "user",
-            render: (_, r) => <div><div className="text-sm font-semibold text-gray-900">{r.user?.name ?? "—"}</div>{r.user?.email && <div className="text-xs font-semibold text-blue-600">{r.user.email}</div>}<span className="font-mono text-xs text-gray-400 mt-1 block">ID: {r.user_id?.substring(0, 12) ?? "—"}...</span></div>,
+            render: (_, r) => (
+                <div>
+                    <div className="text-sm font-semibold" style={{ color: "var(--admin-text-primary)" }}>{r.user?.name ?? "—"}</div>
+                    {r.user?.email && <div className="text-xs font-semibold text-blue-600">{r.user.email}</div>}
+                    <span className="font-mono text-xs mt-1 block" style={{ color: "var(--admin-text-secondary)" }}>ID: {r.user_id?.substring(0, 12) ?? "—"}...</span>
+                </div>
+            ),
         },
         { title: "Link", dataIndex: "custom_link", key: "custom_link", render: (v: string | null) => v ?? "—" },
         {

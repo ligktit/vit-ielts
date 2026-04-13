@@ -207,7 +207,7 @@ const AdminAffiliateConfigPage = () => {
             />
           </Form.Item>
 
-          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="p-4 rounded-lg" style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.25)" }}>
             <Text type="secondary">
               Hệ thống tự động kiểm tra:
               <ul className="mt-2 space-y-1">

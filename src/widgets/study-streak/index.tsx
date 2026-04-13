@@ -32,7 +32,7 @@ export const StudyStreak = () => {
       {/* Summary stat cards */}
       <StreakSummaryCards summary={summary} loading={loading} />
 
-      <Card>
+      <Card style={{ borderRadius: 16 }} styles={{ body: { overflowX: 'auto' } }}>
         {/* View toggle */}
         <div className={styles.viewToggle}>
           <Segmented

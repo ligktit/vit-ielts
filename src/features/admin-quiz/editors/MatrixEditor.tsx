@@ -41,10 +41,10 @@ export default function MatrixEditor({ data, onChange }: MatrixEditorProps) {
 
             <style jsx>{`
                 .sub-editor-container {
-                    background: #f8f9fa;
+                    background: var(--admin-surface-hover);
                     padding: 12px;
                     border-radius: 8px;
-                    border: 1px solid #f0f0f0;
+                    border: 1px solid var(--admin-border);
                 }
             `}</style>
         </div>

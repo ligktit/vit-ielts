@@ -35,8 +35,7 @@ export const useAuth = () => {
     });
     if (error) throw error;
 
-    // Always check admin role first — determines default destination
-    let isAdmin = false;
+    // Check role — admin accounts must NOT log in via user login page
     if (data.user) {
       const { data: profile } = await supabase
         .from("users")
@@ -44,21 +43,16 @@ export const useAuth = () => {
         .eq("id", data.user.id)
         .single();
 
-      isAdmin = isAdminRole(profile?.roles);
+      if (isAdminRole(profile?.roles)) {
+        // Sign out immediately and block access
+        await supabase.auth.signOut();
+        throw new Error("Tài khoản quản trị viên phải đăng nhập tại trang /admin/login.");
+      }
     }
 
-    // Determine redirect destination:
-    // - Admin always goes to /admin (unless explicit redirect to a specific admin/page)
-    // - Regular user uses ?redirect param or falls back to /
+    // Regular user: redirect to ?redirect param or home
     const explicitRedirect = router.query.redirect as string | undefined;
-    if (isAdmin) {
-      // Admin: use explicit redirect only if it's an admin page, otherwise go to /admin
-      window.location.href = (explicitRedirect && explicitRedirect.startsWith("/admin"))
-        ? explicitRedirect
-        : "/admin";
-    } else {
-      window.location.href = explicitRedirect || "/";
-    }
+    window.location.href = explicitRedirect || "/";
 
     return data;
   };

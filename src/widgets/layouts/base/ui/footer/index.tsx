@@ -9,6 +9,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import type { FooterCtaBannerConfig } from "./types";
 import { CTABanner } from "@/shared/ui/ds/organisms/cta-banner";
+import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 
 export const Footer = () => {
   const {
@@ -125,8 +126,8 @@ export const Footer = () => {
     <footer data-section="footer" className="bg-gray-100">
       {/* === SECTION: Footer CTA Banner === */}
       {!hideCtaBanner && (
-        <div data-section="footer-cta-banner" className="pt-16 pb-8 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ScrollFadeIn data-section="footer-cta-banner" className="pt-16 pb-16 bg-white">
+          <div className="mx-auto sm:px-6">
             <CTABanner
               title={ctaBannerConfig?.title || "Sẵn sàng cho kì thi IELTS máy?"}
               subtitle={
@@ -139,11 +140,11 @@ export const Footer = () => {
               }
             />
           </div>
-        </div>
+        </ScrollFadeIn>
       )}
 
       {/* === SECTION: Footer Main Content (Links + Newsletter) === */}
-      <div data-section="footer-links" className="bg-[#374151] pt-16 pb-12">
+      <div data-section="footer-links" className="bg-[#374151] pt-16 pb-12 px-4 sm:px-6">
         <Container>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-12 gap-y-12">
             
@@ -163,7 +164,7 @@ export const Footer = () => {
               </Link>
 
               {/* Tagline */}
-              <p className="text-white text-[14px] leading-[21px] font-normal font-noto-sans">
+              <p className="text-white text-[14px] leading-[21px] font-normal font-noto-sans mb-0">
                 IELTS PREDICTION Test (IPT) specializes in providing highly
                 accuratte test simulations and forecast sets that closely
                 reflect the real IELTS exam.
@@ -293,7 +294,7 @@ export const Footer = () => {
       </div>
 
       {/* === SECTION: Footer Copyright === */}
-      <div data-section="footer-copyright" className="bg-[#374151] border-t border-gray-600">
+      <div data-section="footer-copyright" className="bg-[#374151] border-t border-gray-600 px-4 sm:px-6">
         <Container className="py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-300">
             <p className="font-noto-sans text-[14px]">

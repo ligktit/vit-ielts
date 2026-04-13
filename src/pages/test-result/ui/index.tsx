@@ -11,10 +11,10 @@ import { calculateScore } from "@/shared/lib";
 import { BandScore } from "@/widgets/blocks/band-score";
 import AnswerKeys from "./answer-keys";
 import { SEOHeader } from "@/widgets";
-import ReviewExplanation from "./review-explanation";
 import ExamModeModal from "@/pages/ielts-exam-library/ui/exam-mode-modal";
 import { ROUTES } from "@/shared/routes";
 import { useAuth } from "@/appx/providers";
+import { useRouter } from "next/router";
 import { useProContentModal } from "@/shared/ui/pro-content";
 import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 dayjs.extend(duration);
@@ -30,6 +30,7 @@ export function PageTestResult({
   user: IUser;
   scoreData: ReturnType<typeof calculateScore>;
 }) {
+  const router = useRouter();
   const fallbackImage = useContentImageFallback();
   const { currentUser } = useAuth();
   const openProContentModal = useProContentModal((state) => state.open);
@@ -90,11 +91,9 @@ export function PageTestResult({
   // --- Lấy số câu đúng (Để truyền vào Bancore) ---
   const correctAnswers = Number(scoreData?.correctAns ?? 0);
 
-  const getEncouragementMessage = (percent: number) => {
-    if (percent === 0) return "Oops! bạn chưa làm đúng câu nào, cố gắng lần sau nha.";
-    if (percent < 50) return "Bạn cần cố gắng hơn nữa nhé!";
-    if (percent < 80) return "Làm khá tốt! Tiếp tục phát huy nha.";
-    return "Tuyệt vời! Kết quả rất xuất sắc.";
+  const getEncouragementMessage = () => {
+    if (scoreData.correctAns === 0) return "Oops! bạn chưa làm đúng câu nào, cố gắng lần sau nha.";
+    return "Chúc mừng! Bạn đã hoàn thành bài test, cùng kiểm tra kết quả nhé!";
   };
 
   return (
@@ -112,8 +111,8 @@ export function PageTestResult({
       />
 
       {/* Main Page Layout Wrapper */}
-      <div className="bg-[#f8f9fb] min-h-screen">
-        <Container className="space-y-6 md:space-y-8 pb-12 pt-8 max-w-[1600px]">
+      <div className="bg-[#f8f9fb] min-h-screen mb-[50px]">
+        <Container className="space-y-6 md:space-y-8 pb-12 pt-8 max-w-[1360px]">
         
         {/* Banner Section */}
         <div className="flex flex-col md:flex-row w-full rounded-[24px] overflow-hidden shadow-sm h-auto md:h-[261px]">
@@ -148,8 +147,8 @@ export function PageTestResult({
           {/* Mascot Box */}
           <div className="flex-1 bg-white rounded-[24px] shadow-sm border-b-[6px] border-primary-500 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="flex-1 space-y-6 relative z-10">
-              <h2 className="text-lg md:text-xl font-bold text-[#2D3142]">
-                {getEncouragementMessage(scorePercent)}
+              <h2 className="text-lg md:text-base font-bold text-[#2D3142] max-w-[450px]">
+                {getEncouragementMessage()}
               </h2>
               <div className="flex flex-wrap items-center gap-6">
                 {/* Custom Score Circle */}
@@ -159,13 +158,10 @@ export function PageTestResult({
                   </span>
                 </div>
                 
-                <Button 
-                  size="large" 
+                <Button
+                  size="large"
                   className="bg-primary-500! text-white! hover:bg-primary-400! border-none rounded-full px-6 font-semibold shadow-md"
-                  onClick={() => {
-                    const el = document.getElementById("explanation-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
+                  onClick={() => router.push(ROUTES.TEST_RESULT_EXPLANATION(testResult.id))}
                 >
                   Xem giải thích
                 </Button>
@@ -175,7 +171,7 @@ export function PageTestResult({
             {/* Mascot Image */}
             <div className="w-40 h-40 md:w-56 md:h-[260px] relative shrink-0 z-0 hidden sm:block self-end -mb-6 md:-mb-8">
               <Image 
-                src={scorePercent < 50 ? "/assets/figma/icons/fail.png" : "/assets/figma/icons/pass.png"} 
+                src={scoreData.correctAns === 0 ? "/assets/figma/icons/fail.png" : "/assets/figma/icons/pass.png"}
                 alt="IELTS Prediction Mascot Status" 
                 fill 
                 className="object-contain object-bottom" 
@@ -202,7 +198,7 @@ export function PageTestResult({
               </div>
               <div className="text-center space-y-1 md:space-y-2">
                 <p className="font-bold text-primary-500 text-lg md:text-[22px]">Sai</p>
-                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{scoreData.total_questions - scoreData.correctAns - ((scoreData as any).skipped || 0) || Math.max(0, scoreData.total_questions - scoreData.correctAns)}</p>
+                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{scoreData.incorrect}</p>
               </div>
             </div>
             {/* Skipped */}
@@ -212,7 +208,7 @@ export function PageTestResult({
               </div>
               <div className="text-center space-y-1 md:space-y-2">
                 <p className="font-bold text-[#F2994A] text-lg md:text-[22px]">Bỏ qua</p>
-                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{(scoreData as any).skipped || 0}</p>
+                <p className="font-black text-[#2D3142] text-xl md:text-[28px]">{scoreData.missed}</p>
               </div>
             </div>
           </div>
@@ -273,18 +269,6 @@ export function PageTestResult({
         </div>
       </Container>
       
-      {/* Explanation Section */}
-      <Container id="explanation-section" className="max-w-[1600px] mb-12">
-        <div className="flex flex-col justify-center items-start gap-3 p-4 md:p-6 rounded-[24px] bg-primary-500 w-full">
-          <h3 className="text-xl md:text-2xl font-bold text-white flex items-center space-x-2 w-full">
-            <span className="material-symbols-rounded text-3xl!" aria-hidden> library_books </span>
-            <span>Explanation</span>
-          </h3>
-          <div className="bg-white p-6 md:p-8 rounded-[16px] shadow-sm w-full self-stretch">
-            <ReviewExplanation quiz={post} testResult={testResult} />
-          </div>
-        </div>
-      </Container>
       </div>
       {/* Giữ nguyên ExamModeModal */}
       <ExamModeModal

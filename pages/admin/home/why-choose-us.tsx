@@ -73,7 +73,7 @@ function WhyChooseUsPage() {
 
           {/* ── Stat Cards ── */}
           <Card title="📊 Thống kê (4 card)" size="small" style={{ marginBottom: 16 }}>
-            <p style={{ color: "#888", marginBottom: 12 }}>
+            <p style={{ color: "var(--admin-text-secondary)", marginBottom: 12 }}>
               Thứ tự: 2 card bên trái, 2 card bên phải. Tổng nên giữ 4 card.
             </p>
             <Form.List name="stats">

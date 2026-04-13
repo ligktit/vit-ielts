@@ -121,8 +121,8 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 /* ═══ Size classes — Figma measurements ═══ */
 const SIZE_CLASSES: Record<ButtonSize, string> = {
   sm: 'h-9 px-4 text-sm',                    /* 36px height */
-  md: 'min-h-[49px] px-5 py-[15px] text-sm', /* Figma: 49px, padding [15,20] */
-  lg: 'min-h-[56px] px-6 py-[18px] text-base',
+  md: 'min-h-[49px] px-5 text-sm', /* Figma: 49px, padding [15,20] */
+  lg: 'min-h-[56px] px-6 text-sm',
 };
 
 /* ═══ Icon sizing per context ═══ */
@@ -155,7 +155,7 @@ export const Button = ({
   const classNames = twMerge(
     // Base styles (Figma: gap 16px, radius 25px, font Noto Sans 700)
     'inline-flex items-center justify-center gap-4',
-    'border border-transparent rounded-[25px]',
+    'border border-transparent rounded-[100px]',
     'font-bold cursor-pointer whitespace-nowrap select-none leading-normal',
     'transition-[background,color,border-color,box-shadow,transform] duration-[180ms]',
     'active:enabled:scale-[0.96]',

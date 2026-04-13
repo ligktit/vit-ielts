@@ -223,7 +223,7 @@ function SortablePassagePanel({
 
                 .passage-name {
                     font-size: 14px;
-                    color: #333;
+                    color: var(--admin-text-primary);
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -351,9 +351,9 @@ export default function PassageList({
 
             <style jsx>{`
                 .passage-list-container {
-                    border: 1px solid #f0f0f0;
+                    border: 1px solid var(--admin-border);
                     border-radius: 8px;
-                    background: #fff;
+                    background: var(--admin-surface);
                     overflow: hidden;
                 }
 
@@ -362,8 +362,8 @@ export default function PassageList({
                     align-items: center;
                     justify-content: space-between;
                     padding: 14px 20px;
-                    border-bottom: 1px solid #f0f0f0;
-                    background: #fafafa;
+                    border-bottom: 1px solid var(--admin-border);
+                    background: var(--admin-surface-hover);
                 }
 
                 .passage-list-header-left {
@@ -375,7 +375,7 @@ export default function PassageList({
                 .passage-list-title {
                     font-size: 15px;
                     font-weight: 600;
-                    color: #1a1a2e;
+                    color: var(--admin-text-primary);
                 }
 
                 .passage-list-subtitle {
@@ -393,7 +393,7 @@ export default function PassageList({
 
                 .passage-collapse .ant-collapse-item {
                     border: none !important;
-                    border-bottom: 1px solid #f5f5f5 !important;
+                    border-bottom: 1px solid var(--admin-border) !important;
                     border-radius: 0 !important;
                 }
 
@@ -404,21 +404,21 @@ export default function PassageList({
                 .passage-collapse .ant-collapse-header {
                     padding: 12px 20px !important;
                     align-items: center !important;
-                    background: #fff !important;
+                    background: var(--admin-surface) !important;
                     transition: background 0.15s !important;
                 }
 
                 .passage-collapse .ant-collapse-header:hover {
-                    background: #f9f9ff !important;
+                    background: var(--admin-surface-hover) !important;
                 }
 
                 .passage-collapse .ant-collapse-content {
-                    border-top: 1px solid #f0f0f0 !important;
+                    border-top: 1px solid var(--admin-border) !important;
                 }
 
                 .passage-collapse .ant-collapse-content-box {
                     padding: 20px !important;
-                    background: #fafbfc !important;
+                    background: var(--admin-surface-hover) !important;
                 }
             `}</style>
         </div>

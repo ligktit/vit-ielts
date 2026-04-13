@@ -4,6 +4,7 @@ import { Button, ConfigProvider, Splitter, Collapse } from "antd";
 import { IPracticeSingle, ITestResult } from "../../api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import Image from "next/image";
 import { QuestionRender } from "@/shared/ui/exam";
 import { FormProvider, useForm } from "react-hook-form";
 import _ from "lodash";
@@ -111,9 +112,11 @@ const removeFillHistoryCorrectTags = (text: string | undefined): string => {
 function ReviewExplanation({
   quiz,
   testResult,
+  fullPage = false,
 }: {
   quiz: IPracticeSingle;
   testResult: ITestResult;
+  fullPage?: boolean;
 }) {
   // Parse answers từ JSON string và debug
   const parsedAnswers = useMemo(() => {
@@ -1291,12 +1294,44 @@ function ReviewExplanation({
     };
   }, [isListening, PlyrComponent]);
 
-  return (
-    <>
-      <Splitter
-        layout={isMobileView ? "vertical" : undefined}
-        className="h-[600px] border-t"
-      >
+  const passages = newPost?.quizFields?.passages ?? [];
+  const passageLabel = isReading ? "Passage" : "Part";
+
+  // Compute per-passage question info for the footer (mirrors take-the-test footer logic)
+  const passagesFooterInfo = useMemo(() => {
+    return (newPost?.quizFields?.passages ?? []).map((passage: any, idx: number) => {
+      const questionIndices: number[] = [];
+      let startIdx = 0;
+
+      // Compute startIndex for each question in this passage
+      let runningIdx = 0;
+      (newPost?.quizFields?.passages ?? []).forEach((p: any, pIdx: number) => {
+        (p.questions ?? []).forEach((q: any) => {
+          const count = countQuestion({ questions: [q] } as any);
+          if (pIdx === idx) {
+            for (let i = 0; i < count; i++) questionIndices.push(runningIdx + i);
+          }
+          runningIdx += count;
+        });
+      });
+
+      const answeredCount = questionIndices.filter((qi) => {
+        const ans = mappedAnswers[qi];
+        if (ans === null || ans === undefined || ans === "") return false;
+        if (Array.isArray(ans)) return ans.length > 0;
+        if (typeof ans === "object") return Object.keys(ans).length > 0;
+        return String(ans).trim() !== "";
+      }).length;
+
+      return { questions: questionIndices, total: questionIndices.length, answered: answeredCount };
+    });
+  }, [newPost, mappedAnswers]);
+
+  const splitter = (
+    <Splitter
+      layout={isMobileView ? "vertical" : undefined}
+      className={fullPage ? "flex-1 min-h-0" : "h-[600px] border-t"}
+    >
         {/* PANEL 1 (BÊN TRÁI) */}
         <Splitter.Panel
           min="40%"
@@ -1332,14 +1367,14 @@ function ReviewExplanation({
         <Splitter.Panel className="relative" style={{ overflow: 'visible' }}>
           {/* 2a. NẾU LÀ READING: Hiển thị Câu hỏi */}
           {isReading && (
-            <div className="overflow-y-auto h-[calc(600px-50px)]">
+            <div className={`overflow-y-auto ${fullPage ? "h-full" : "h-[calc(600px-50px)]"}`}>
               {QuestionsPanelContent}
             </div>
           )}
 
           {/* 2b. NẾU LÀ LISTENING: Hiển thị Audio & Explanations */}
           {isListening && (
-            <div className="h-[calc(600px-50px)] relative flex flex-col" style={{ overflow: 'visible' }}>
+            <div className={`${fullPage ? "h-full" : "h-[calc(600px-50px)]"} relative flex flex-col`} style={{ overflow: 'visible' }}>
               {/* Audio player - không scroll, overflow visible để menu settings không bị che */}
               <div ref={ref} className="p-4 md:p-12 flex-shrink-0" style={{ overflow: 'visible', position: 'relative', zIndex: 100 }}>
                 <div style={{ overflow: 'visible', position: 'relative', zIndex: 100 }}>
@@ -1353,32 +1388,113 @@ function ReviewExplanation({
             </div>
           )}
 
-          {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-100 flex justify-between items-center px-4 py-2 border-t">
-            <p className="font-semibold text-[#374151] line-clamp-1">
-              {currentPassage.title}
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                type="primary"
-                disabled={!hasPrevPassage}
-                onClick={handlePrevPassage}
-              >
-                <span className="material-symbols-rounded">chevron_left</span>
-                <span>Previous</span>
-              </Button>
-              <Button
-                type="primary"
-                disabled={!hasNextPassage}
-                onClick={handleNextPassage}
-              >
-                <span>Next</span>
-                <span className="material-symbols-rounded">chevron_right</span>
-              </Button>
+          {/* Footer (only when NOT fullPage — fullPage footer is rendered outside Splitter) */}
+          {!fullPage && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gray-100 flex justify-between items-center px-4 py-2 border-t">
+              <p className="font-semibold text-[#374151] line-clamp-1">
+                {currentPassage.title}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button type="primary" disabled={!hasPrevPassage} onClick={handlePrevPassage}>
+                  <span className="material-symbols-rounded">chevron_left</span>
+                  <span>Previous</span>
+                </Button>
+                <Button type="primary" disabled={!hasNextPassage} onClick={handleNextPassage}>
+                  <span>Next</span>
+                  <span className="material-symbols-rounded">chevron_right</span>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </Splitter.Panel>
       </Splitter>
+  );
+
+  if (fullPage) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        {splitter}
+
+        {/* Full-width footer — identical to take-the-test footer (no submit button) */}
+        <footer className="shrink-0 bg-white flex items-center w-full p-[12px] pr-[0] pt-[0]">
+          <div className="flex justify-between items-center h-full flex-grow mr-[110px]">
+            {passages.map((passage: any, idx: number) => {
+              const isCurrent = idx === currentPassageIndex;
+              const info = passagesFooterInfo[idx] ?? { questions: [], total: 0, answered: 0 };
+              return (
+                <div
+                  key={idx}
+                  onClick={() => setCurrentPassageIndex(idx)}
+                  className="h-full flex items-center cursor-pointer w-full"
+                >
+                  {isCurrent ? (
+                    <div className="justify-center w-full">
+                      <div className="flex items-center gap-[5px] h-full">
+                        <div className="flex items-center border-t-[3px] border-gray-200 pt-2">
+                          <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px]">
+                            {passageLabel} {idx + 1}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 overflow-x-auto py-1">
+                          {info.questions.map((qi: number) => {
+                            const ans = mappedAnswers[qi];
+                            const isAnswered = ans !== null && ans !== undefined && String(ans).trim() !== "" && !(Array.isArray(ans) && ans.length === 0);
+                            return (
+                              <div key={qi} className="flex flex-col items-center gap-2 flex-shrink-0">
+                                <div className={twMerge("w-full h-[3px] rounded-sm", isAnswered ? "bg-green-500" : "bg-gray-200")} />
+                                <span className="text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded">
+                                  {qi + 1}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
+                      <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap">
+                        {passageLabel} {idx + 1}
+                      </span>
+                      <span className="text-[16px] text-gray-500 whitespace-nowrap">
+                        {info.answered} of {info.total}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Prev / Next arrow buttons — identical to take-the-test */}
+          <div className="relative h-full flex items-center flex-shrink-0">
+            <div className="absolute bottom-[70px] right-[35px] mb-1 flex gap-1">
+              <button
+                type="button"
+                onClick={handlePrevPassage}
+                disabled={!hasPrevPassage}
+                className="flex items-center justify-center w-[55px] h-[55px] bg-gray-800 disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
+              >
+                <Image width={23} height={26} sizes="100%" alt="prev" src="/bold-al.png" priority />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextPassage}
+                disabled={!hasNextPassage}
+                className="bg-[#000]! flex items-center justify-center w-[55px] h-[55px] disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
+              >
+                <Image width={23} height={26} sizes="100%" alt="next" src="/bold-ar.png" priority />
+              </button>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {splitter}
     </>
   );
 }

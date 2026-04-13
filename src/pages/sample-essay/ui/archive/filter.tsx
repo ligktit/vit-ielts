@@ -1,34 +1,58 @@
-import {
-  Button,
-  Card,
-  Checkbox,
-  ConfigProvider,
-  Divider,
-  Drawer,
-  Input,
-  InputRef,
-  Space,
-} from "antd";
-import { Control, Controller, useForm, useFormContext } from "react-hook-form";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import { useRouter } from "next/router";
-import _ from "lodash";
-import { SampleEssayProps } from "../..";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import { Drawer } from "antd";
+import type { Dispatch, SetStateAction } from "react";
+import type { SampleEssayProps } from "../..";
+import type { FilterFormValues } from ".";
 
-type FilterOption = { slug: string; name: string };
-type FilterFormValues = {
-  search?: string;
-  year: string;
-  sampleSource: string;
-  quarter: string;
-  part?: string; // Used for speaking and listening
-  questionType?: string; // Used for speaking, reading, and listening
-  topic?: string; // Used for writing
-  task?: string; // Used for writing
-  passage?: string; // Used for reading
-  type: string;
-  sort: string;
-};
+// ─── Custom primitives (đồng bộ với exam-library) ─────────────────────────────
+
+const FilterCheckbox = ({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: () => void;
+}) => (
+  <label className="flex items-center gap-[12px] cursor-pointer group">
+    <div
+      className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] border transition-colors ${
+        checked
+          ? "border-primary-500 bg-primary-500 text-white"
+          : "border-black/20 bg-white text-transparent group-hover:border-primary-400"
+      }`}
+    >
+      <span className="material-symbols-rounded text-[14px]">check</span>
+    </div>
+    <span className="text-[14px] text-[#2D3142] selection:bg-transparent">{label}</span>
+    <input type="checkbox" checked={checked} onChange={onChange} className="hidden" />
+  </label>
+);
+
+const FilterSection = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) => (
+  <section
+    className="bg-white rounded-[32px] px-[16px] py-[25px]"
+    style={{
+      boxShadow:
+        "0 4px 8px -2px rgba(16, 24, 40, 0.10), 0 2px 4px -2px rgba(16, 24, 40, 0.06)",
+    }}
+  >
+    <h3 className="font-[var(--font-noto-sans)] font-bold text-[#2D3142] text-[16px] leading-[1.2] mb-[18px]">
+      {title}
+    </h3>
+    {children}
+  </section>
+);
+
+// ─── Filter configs ────────────────────────────────────────────────────────────
 
 const FILTER_CONFIGS = {
   quarters: [
@@ -79,248 +103,167 @@ const FILTER_CONFIGS = {
   ],
 };
 
-interface FilterSectionProps {
-  title?: string;
-  options: FilterOption[];
-  name: keyof FilterFormValues;
-  control: Control<FilterFormValues>;
-}
-
-const FilterCheckboxGroup: React.FC<FilterSectionProps> = ({
-  options,
-  name,
-  control,
-}) => (
-  <div className="flex flex-col gap-4">
-    {options.map((item) => (
-      <Controller
-        key={item.slug}
-        name={name}
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <Checkbox
-            checked={value === item.slug}
-            onChange={(e) => onChange(e.target.checked ? item.slug : "")}
-          >
-            {item.name}
-          </Checkbox>
-        )}
-      />
-    ))}
-  </div>
-);
-
-const FilterCard: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
-  <Card>
-    <h3 className="text-lg md:text-xl font-bold mb-5">{title}</h3>
-    {children}
-  </Card>
-);
-
-const SearchCard: React.FC<{
-  setValue: (
-    name: keyof FilterFormValues,
-    value: string,
-    options?: object
-  ) => void;
-}> = ({ setValue }) => {
-  const router = useRouter();
-  const searchInputRef = useRef<InputRef>(null);
-
-  const handleSearch = () => {
-    if (searchInputRef.current) {
-      setValue("search", searchInputRef.current.input?.value || "", {
-        shouldDirty: true,
-      });
-    }
-  };
-
-  return (
-    <FilterCard title="Search">
-      <Space.Compact style={{ width: "100%" }}>
-        <Input
-          ref={searchInputRef}
-          allowClear
-          onClear={() => setValue("search", "", { shouldDirty: true })}
-          defaultValue={router.query.search?.toString() || ""}
-          placeholder="Search"
-          onPressEnter={handleSearch}
-        />
-        <Button
-          type="primary"
-          icon={
-            <span
-              className="material-symbols-rounded flex"
-              style={{ display: "flex" }}
-            >
-              search
-            </span>
-          }
-          onClick={handleSearch}
-        />
-      </Space.Compact>
-    </FilterCard>
-  );
-};
+// ─── Props ─────────────────────────────────────────────────────────────────────
 
 interface FilterProps {
   drawerOpen: boolean;
   setDrawerOpen: Dispatch<SetStateAction<boolean>>;
   filterData: SampleEssayProps["filterData"];
   skill: "speaking" | "writing" | "reading" | "listening";
+  mobile?: boolean;
 }
+
+// ─── Main Filter ───────────────────────────────────────────────────────────────
 
 export const Filter: React.FC<FilterProps> = ({
   drawerOpen,
   setDrawerOpen,
   filterData,
   skill,
+  mobile = false,
 }) => {
-  const router = useRouter();
-  const { control, setValue, reset } = useFormContext<FilterFormValues>();
-  const {
-    control: mobileControl,
-    getValues,
-    reset: mobileReset,
-  } = useForm<FilterFormValues>();
+  const { watch, setValue } = useFormContext<FilterFormValues>();
+  const values = watch();
+
+  const [searchDraft, setSearchDraft] = useState((values.search as string) ?? "");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const queryParams = _.merge(
-      { type: "all", sort: "newest" },
-      _.omit(router.query, ["slug"])
-    );
-    reset(queryParams as FilterFormValues);
-    mobileReset(queryParams as FilterFormValues);
-  }, [mobileReset, reset, router.query]);
+    setSearchDraft((values.search as string) ?? "");
+  }, [values.search]);
 
-  const commonFilters = (
-    control: Control<FilterFormValues>,
-    isMobile = false
-  ) => (
-    <>
-      <div>
-        <h3 className="text-lg md:text-xl font-bold mb-5">Year</h3>
-        <FilterCheckboxGroup
-          options={filterData?.annualPeriods?.nodes || filterData?.sampleEssayFilterData?.years?.map((y: any) => ({ slug: y, name: y })) || []}
-          name="year"
-          control={control}
-        />
-      </div>
-      {isMobile && <Divider />}
-      <div>
-        <h3 className="text-lg md:text-xl font-bold mb-5">Sample Source</h3>
-        <FilterCheckboxGroup
-          options={filterData?.sampleSources?.nodes || filterData?.sampleEssayFilterData?.sources?.map((s: any) => ({ slug: s, name: s })) || []}
-          name="sampleSource"
-          control={control}
-        />
-      </div>
-      {isMobile && <Divider />}
-      <div>
-        <h3 className="text-lg md:text-xl font-bold mb-5">Quarter</h3>
-        <FilterCheckboxGroup
-          options={FILTER_CONFIGS.quarters}
-          name="quarter"
-          control={control}
-        />
-      </div>
-      {isMobile && <Divider />}
-    </>
-  );
+  const applySearch = () => {
+    setValue("search", searchDraft.trim(), { shouldDirty: true });
+  };
 
-  const skillSpecificFilters = (
-    control: Control<FilterFormValues>,
-    isMobile = false
-  ) => {
+  const yearOptions: { slug: string; name: string }[] =
+    filterData?.annualPeriods?.nodes ||
+    filterData?.sampleEssayFilterData?.years?.map((y: string) => ({ slug: y, name: y })) ||
+    [];
+
+  const sourceOptions: { slug: string; name: string }[] =
+    filterData?.sampleSources?.nodes ||
+    filterData?.sampleEssayFilterData?.sources?.map((s: string) => ({ slug: s, name: s })) ||
+    [];
+
+  const getChecked = (field: keyof FilterFormValues, slug: string) => {
+    const val = values[field];
+    if (Array.isArray(val)) return val.includes(slug);
+    return val === slug;
+  };
+
+  const toggleValue = (field: keyof FilterFormValues, slug: string) => {
+    const val = values[field];
+    if (Array.isArray(val)) {
+      const next = val.includes(slug) ? val.filter((v) => v !== slug) : [...val, slug];
+      setValue(field, next as any, { shouldDirty: true });
+    } else {
+      setValue(field, val === slug ? "" : (slug as any), { shouldDirty: true });
+    }
+  };
+
+  const skillSections = () => {
     switch (skill) {
       case "speaking":
         return (
-          <>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">
-                Speaking Part
-              </h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.speakingParts}
-                name="part"
-                control={control}
-              />
+          <FilterSection title="Speaking Part">
+            <div className="flex flex-col gap-[18px]">
+              {FILTER_CONFIGS.speakingParts.map((opt) => (
+                <FilterCheckbox
+                  key={opt.slug}
+                  checked={getChecked("part", opt.slug)}
+                  label={opt.name}
+                  onChange={() => toggleValue("part", opt.slug)}
+                />
+              ))}
             </div>
-          </>
+          </FilterSection>
         );
       case "writing":
         return (
           <>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">Topic</h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.topics}
-                name="topic"
-                control={control}
-              />
-            </div>
-            {isMobile && <Divider />}
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">Task</h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.writingTasks}
-                name="task"
-                control={control}
-              />
-            </div>
+            <FilterSection title="Topic">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.topics.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("topic", opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("topic", opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
+            <FilterSection title="Task">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.writingTasks.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("task" as keyof FilterFormValues, opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("task" as keyof FilterFormValues, opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
           </>
         );
       case "reading":
         return (
           <>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">
-                Question Form
-              </h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.questionTypes}
-                name="questionType"
-                control={control}
-              />
-            </div>
-            {isMobile && <Divider />}
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">Passage</h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.readingPassages}
-                name="passage"
-                control={control}
-              />
-            </div>
+            <FilterSection title="Question Form">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.questionTypes.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("questionType", opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("questionType", opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
+            <FilterSection title="Passage">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.readingPassages.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("passage" as keyof FilterFormValues, opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("passage" as keyof FilterFormValues, opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
           </>
         );
       case "listening":
         return (
           <>
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">
-                Listening Part
-              </h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.listeningParts}
-                name="part"
-                control={control}
-              />
-            </div>
-            {isMobile && <Divider />}
-            <div>
-              <h3 className="text-lg md:text-xl font-bold mb-5">
-                Question Form
-              </h3>
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.questionTypes}
-                name="questionType"
-                control={control}
-              />
-            </div>
+            <FilterSection title="Listening Part">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.listeningParts.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("part", opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("part", opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
+            <FilterSection title="Question Form">
+              <div className="flex flex-col gap-[18px]">
+                {FILTER_CONFIGS.questionTypes.map((opt) => (
+                  <FilterCheckbox
+                    key={opt.slug}
+                    checked={getChecked("questionType", opt.slug)}
+                    label={opt.name}
+                    onChange={() => toggleValue("questionType", opt.slug)}
+                  />
+                ))}
+              </div>
+            </FilterSection>
           </>
         );
       default:
@@ -328,137 +271,121 @@ export const Filter: React.FC<FilterProps> = ({
     }
   };
 
+  const content = (
+    <div className={`flex flex-col gap-[24px] ${mobile ? "pb-24 pt-4 px-2" : ""}`}>
+      {/* Search */}
+      <FilterSection title="Search">
+        <div className="relative flex items-center h-[40px] w-full rounded-full border border-[rgba(0,0,0,0.15)] overflow-hidden bg-white focus-within:border-primary-400 focus-within:ring-1 focus-within:ring-primary-100 transition-shadow">
+          <input
+            ref={searchInputRef}
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                applySearch();
+              }
+            }}
+            placeholder="Search"
+            className="flex-1 w-full h-full bg-transparent px-[16px] text-[14px] text-[#2D3142] outline-none placeholder:text-black/30"
+          />
+          <button
+            type="button"
+            onClick={applySearch}
+            className="flex h-full w-[44px] items-center justify-center bg-[#D94A56] text-white transition hover:bg-[#D94A56]/90"
+          >
+            <span className="material-symbols-rounded text-[20px]">search</span>
+          </button>
+        </div>
+      </FilterSection>
+
+      {/* Year */}
+      {yearOptions.length > 0 && (
+        <FilterSection title="Year">
+          <div className="flex flex-col gap-[18px]">
+            {yearOptions.map((opt) => (
+              <FilterCheckbox
+                key={opt.slug}
+                checked={getChecked("year", opt.slug)}
+                label={opt.name}
+                onChange={() => toggleValue("year", opt.slug)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Sample Source */}
+      {sourceOptions.length > 0 && (
+        <FilterSection title="Sample Source">
+          <div className="flex flex-col gap-[18px]">
+            {sourceOptions.map((opt) => (
+              <FilterCheckbox
+                key={opt.slug}
+                checked={getChecked("sampleSource", opt.slug)}
+                label={opt.name}
+                onChange={() => toggleValue("sampleSource", opt.slug)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Quarter */}
+      <FilterSection title="Quarter">
+        <div className="flex flex-col gap-[18px]">
+          {FILTER_CONFIGS.quarters.map((opt) => (
+            <FilterCheckbox
+              key={opt.slug}
+              checked={getChecked("quarter", opt.slug)}
+              label={opt.name}
+              onChange={() => toggleValue("quarter", opt.slug)}
+            />
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* Skill-specific sections */}
+      {skillSections()}
+    </div>
+  );
+
   return (
-    <ConfigProvider
-      theme={{
-        components: {
-          Card: { bodyPadding: 16 },
-          Checkbox: { fontSize: 16, lineHeight: 1 },
-        },
-      }}
-    >
-      <div className="space-y-6">
-        <SearchCard setValue={setValue} />
-        <FilterCard title="Year">
-          <FilterCheckboxGroup
-            options={filterData?.annualPeriods?.nodes || filterData?.sampleEssayFilterData?.years?.map((y: any) => ({ slug: y, name: y })) || []}
-            name="year"
-            control={control}
-          />
-        </FilterCard>
-        <FilterCard title="Sample Source">
-          <FilterCheckboxGroup
-            options={filterData?.sampleSources?.nodes || filterData?.sampleEssayFilterData?.sources?.map((s: any) => ({ slug: s, name: s })) || []}
-            name="sampleSource"
-            control={control}
-          />
-        </FilterCard>
-        <FilterCard title="Quarter">
-          <FilterCheckboxGroup
-            options={FILTER_CONFIGS.quarters}
-            name="quarter"
-            control={control}
-          />
-        </FilterCard>
-        {skill === "speaking" ? (
-          <>
-            <FilterCard title="Speaking Part">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.speakingParts}
-                name="part"
-                control={control}
-              />
-            </FilterCard>
-          </>
-        ) : skill === "writing" ? (
-          <>
-            <FilterCard title="Topic">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.topics}
-                name="topic"
-                control={control}
-              />
-            </FilterCard>
-            <FilterCard title="Task">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.writingTasks}
-                name="task"
-                control={control}
-              />
-            </FilterCard>
-          </>
-        ) : skill === "reading" ? (
-          <>
-            <FilterCard title="Question Form">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.questionTypes}
-                name="questionType"
-                control={control}
-              />
-            </FilterCard>
-            <FilterCard title="Passage">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.readingPassages}
-                name="passage"
-                control={control}
-              />
-            </FilterCard>
-          </>
-        ) : (
-          <>
-            <FilterCard title="Listening Part">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.listeningParts}
-                name="part"
-                control={control}
-              />
-            </FilterCard>
-            <FilterCard title="Question Form">
-              <FilterCheckboxGroup
-                options={FILTER_CONFIGS.questionTypes}
-                name="questionType"
-                control={control}
-              />
-            </FilterCard>
-          </>
-        )}
-      </div>
+    <>
+      {/* Desktop sidebar */}
+      {content}
+
+      {/* Mobile drawer */}
       <Drawer
         title="Filter"
         open={drawerOpen}
-        closeIcon={false}
+        onClose={() => setDrawerOpen(false)}
+        closeIcon={
+          <span className="material-symbols-rounded text-[20px] text-[#2D3142]">close</span>
+        }
         footer={
-          <div className="flex gap-4">
-            <Button
-              type="primary"
-              size="large"
-              block
-              className="w-1/2"
-              onClick={() => {
-                Object.entries(getValues()).forEach(([key, value]) => {
-                  setValue(key as keyof FilterFormValues, value, {
-                    shouldDirty: true,
-                  });
-                });
-                setDrawerOpen(false);
-              }}
-            >
-              <span className="text-sm">Apply</span>
-            </Button>
-            <Button
-              block
-              size="large"
-              className="w-1/2"
+          <div className="flex gap-3">
+            <button
+              type="button"
               onClick={() => setDrawerOpen(false)}
+              className="flex-1 rounded-full bg-primary-500 py-3 text-[14px] font-bold text-white transition hover:bg-primary-600"
             >
-              <span className="text-sm">Cancel</span>
-            </Button>
+              Apply
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              className="flex-1 rounded-full border border-[rgba(0,0,0,0.1)] bg-white py-3 text-[14px] font-bold text-[#2D3142] transition hover:bg-gray-50"
+            >
+              Cancel
+            </button>
           </div>
         }
       >
-        {commonFilters(mobileControl, true)}
-        {skillSpecificFilters(mobileControl, true)}
+        <div className="flex flex-col gap-[24px] py-2">
+          {content}
+        </div>
       </Drawer>
-    </ConfigProvider>
+    </>
   );
 };

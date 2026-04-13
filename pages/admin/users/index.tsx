@@ -256,6 +256,7 @@ export default function AdminUsersPage() {
             title: "Tên",
             dataIndex: "name",
             key: "name",
+            width: 180,
             sorter: true,
             sortOrder: sortField === "name" ? (sortOrder === "asc" ? "ascend" : "descend") : undefined,
             render: (name: string | null, record: UserRow) => (
@@ -274,6 +275,7 @@ export default function AdminUsersPage() {
             title: "Email",
             dataIndex: "email",
             key: "email",
+            width: 220,
             sorter: true,
             sortOrder: sortField === "email" ? (sortOrder === "asc" ? "ascend" : "descend") : undefined,
             ellipsis: true,
@@ -299,7 +301,7 @@ export default function AdminUsersPage() {
             title: "Gói",
             dataIndex: "is_pro",
             key: "is_pro",
-            width: 100,
+            width: 145,
             render: (isPro: boolean, record: UserRow) => {
                 if (isPro) {
                     const isExpired = record.pro_expiration_date
@@ -672,12 +674,14 @@ export default function AdminUsersPage() {
                 }
 
                 .admin-users-total-badge {
-                    font-size: 13px;
-                    color: var(--admin-text-muted);
-                    background: var(--admin-glass-bg-hover);
-                    padding: 2px 10px;
-                    border-radius: 12px;
-                    font-weight: 500;
+                    font-size: 14px;
+                    color: white;
+                    background: linear-gradient(135deg, var(--admin-brand, #d94a56), var(--admin-brand-dark, #b53d47));
+                    padding: 4px 14px;
+                    border-radius: 20px;
+                    font-weight: 600;
+                    letter-spacing: 0.2px;
+                    box-shadow: 0 2px 8px rgba(217, 74, 86, 0.3);
                 }
 
                 /* ── Quick filter tabs ── */

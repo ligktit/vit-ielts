@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { TestimonialsConfig, ReviewItem } from "./types";
 import { Button } from "@/shared/ui/ds/atoms/button";
+import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 
 // ─── Default Data ─────────────────────────────────────────────────────────────
 
@@ -125,8 +126,8 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
   const col3 = reviews.slice(perCol * 2);
 
   return (
-    <div data-section="testimonials" className="w-full px-4 sm:px-6 lg:px-8 py-10">
-      <div className="relative overflow-hidden bg-primary-500 rounded-[30px] w-full min-h-[560px] lg:min-h-[700px] max-w-[1566px] mx-auto flex flex-col">
+    <ScrollFadeIn data-section="testimonials" className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="relative overflow-hidden bg-primary-500 rounded-[30px] w-full min-h-[560px] lg:min-h-[700px] max-w-[1360px] mx-auto flex flex-col">
         {/* === Decorative SVG === */}
         <div
           className="absolute pointer-events-none select-none left-[-43px] top-[347px] w-[517px] h-[517px] z-0"
@@ -142,35 +143,48 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
           />
         </div>
 
-        {/* === Main layout === */}
-        <div className="relative z-10 flex-1 w-full flex flex-col lg:grid lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr] gap-8 lg:gap-12 items-center py-10 lg:py-14 px-6 sm:px-8 lg:px-14 xl:px-20">
+        {/* === Mobile layout (< lg) === */}
+        <div className="lg:hidden relative z-10 flex flex-col gap-6 py-10 px-6 sm:px-8">
+          {/* Text + CTA */}
+          <div className="flex flex-col gap-4">
+            <h2 className="font-noto-sans font-bold text-[32px] text-white leading-tight">
+              {c.title}
+            </h2>
+            <p className="font-noto-sans font-semibold text-sm text-white/90 leading-relaxed">
+              {c.description}
+            </p>
+            <div className="mt-2 mb-[20px]">
+              <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
+                {c.cta?.text ?? "Đăng ký ngay"}
+              </Button>
+            </div>
+          </div>
+          {/* Vertical list cards — 1 per row */}
+          <div className="flex flex-col gap-4">
+            {reviews.slice(0, 5).map((r, i) => (
+              <ReviewCard key={i} {...r} />
+            ))}
+          </div>
+        </div>
 
-          {/* ── Left: Content block ── */}
+        {/* === Desktop layout (>= lg) === */}
+        <div className="hidden lg:grid relative z-10 flex-1 w-full lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr] gap-8 lg:gap-12 items-center py-10 lg:py-14 px-6 sm:px-8 lg:px-14 xl:px-12">
+          {/* Left: Content block */}
           <div className="flex flex-col gap-4 lg:self-start lg:mt-[52px]">
-            <h2 className="font-noto-sans font-bold text-[36px] text-white leading-tight">
+            <h2 className="font-noto-sans font-bold text-[36px] text-white leading-tight max-w-[250px]">
               {c.title}
             </h2>
             <p className="font-noto-sans font-semibold text-base text-white/90 leading-relaxed">
               {c.description}
             </p>
-
-            {/* CTA Button */}
             <div className="mt-4">
-              <Button
-                variant="white"
-                size="lg"
-                href={c.cta?.link ?? "#"}
-              >
-                {c.cta?.text ?? "Xem Thêm Phản Hồi"}
+              <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
+                {c.cta?.text ?? "Đăng ký ngay"}
               </Button>
             </div>
           </div>
-
-          {/* ── Right: 3-column infinite scroll feed ── */}
-          <div
-            className="hidden lg:grid grid-cols-2 xl:grid-cols-3 gap-4 self-center w-full"
-            aria-label="Phản hồi từ học viên"
-          >
+          {/* Right: 3-column infinite scroll */}
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 self-center w-full" aria-label="Phản hồi từ học viên">
             <ScrollColumn reviews={col1} direction="down" />
             <ScrollColumn reviews={col2} direction="up" />
             <div className="hidden xl:block">
@@ -179,6 +193,6 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </ScrollFadeIn>
   );
 };

@@ -292,12 +292,12 @@ export default function AffiliateUsersPage() {
         const idToDisplay = userId || record.user_id;
         return (
           <div className="flex flex-col">
-            <div className="font-semibold text-gray-900">{record.name || "N/A"}</div>
+            <div className="font-semibold" style={{ color: "var(--admin-text-primary)" }}>{record.name || "N/A"}</div>
             {record.email && (
               <span className="text-xs font-semibold text-blue-600">{record.email}</span>
             )}
             <Tooltip title={idToDisplay}>
-              <span className="font-mono text-xs text-gray-400 mt-1">ID: {idToDisplay?.substring(0, 12)}...</span>
+              <span className="font-mono text-xs mt-1" style={{ color: "var(--admin-text-secondary)" }}>ID: {idToDisplay?.substring(0, 12)}...</span>
             </Tooltip>
           </div>
         );
@@ -407,8 +407,8 @@ export default function AffiliateUsersPage() {
         title={
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold m-0">Quản lý Affiliate Users</h1>
-            <div className="text-sm text-gray-500 mr-4">
-              Tổng số: <strong className="text-gray-900">{filteredAffiliates?.length || 0}</strong>
+            <div className="text-sm mr-4" style={{ color: "var(--admin-text-secondary)" }}>
+              Tổng số: <strong style={{ color: "var(--admin-text-primary)" }}>{filteredAffiliates?.length || 0}</strong>
             </div>
           </div>
         }
@@ -455,7 +455,7 @@ export default function AffiliateUsersPage() {
         >
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--admin-text-primary)" }}>
                 Link tùy chỉnh (tùy chọn)
               </label>
               <Input
@@ -464,13 +464,13 @@ export default function AffiliateUsersPage() {
                 onChange={(e) => setCustomLink(e.target.value)}
                 addonBefore="ref="
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs mt-1" style={{ color: "var(--admin-text-secondary)" }}>
                 Nếu để trống, hệ thống sẽ tự động tạo link
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--admin-text-primary)" }}>
                 Mức hoa hồng (%)
               </label>
               <InputNumber
@@ -596,22 +596,23 @@ export default function AffiliateUsersPage() {
                 >
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {!affiliateDetail.links || affiliateDetail.links.length === 0 ? (
-                      <p className="text-gray-500 text-center py-4">Chưa có link nào</p>
+                      <p className="text-center py-4" style={{ color: "var(--admin-text-secondary)" }}>Chưa có link nào</p>
                     ) : (
                       affiliateDetail.links.map((link: any) => (
                         <div
                           key={link.id}
-                          className="p-3 bg-gray-50 rounded border border-gray-200"
+                          className="p-3 rounded"
+                          style={{ background: "var(--admin-surface-hover)", border: "1px solid var(--admin-border)" }}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <div className="font-semibold text-sm">
+                              <div className="font-semibold text-sm" style={{ color: "var(--admin-text-primary)" }}>
                                 {link.customLink ? `Custom: ${link.customLink}` : "Default"}
                               </div>
-                              <div className="text-xs text-gray-600 font-mono break-all">
+                              <div className="text-xs font-mono break-all" style={{ color: "var(--admin-text-secondary)" }}>
                                 {link.link}
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">
+                              <div className="text-xs mt-1" style={{ color: "var(--admin-text-secondary)" }}>
                                 {dayjs(link.createdAt).format("DD/MM/YYYY HH:mm")}
                               </div>
                             </div>
@@ -633,25 +634,26 @@ export default function AffiliateUsersPage() {
                 >
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {!affiliateDetail.commissions || affiliateDetail.commissions.length === 0 ? (
-                      <p className="text-gray-500 text-center py-4">Chưa có commission nào</p>
+                      <p className="text-center py-4" style={{ color: "var(--admin-text-secondary)" }}>Chưa có commission nào</p>
                     ) : (
                       affiliateDetail.commissions.map((commission: any) => (
                         <div
                           key={commission.id}
-                          className="p-3 bg-gray-50 rounded border border-gray-200"
+                          className="p-3 rounded"
+                          style={{ background: "var(--admin-surface-hover)", border: "1px solid var(--admin-border)" }}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <div className="font-semibold text-sm">
+                              <div className="font-semibold text-sm" style={{ color: "var(--admin-text-primary)" }}>
                                 Order: #{(commission.orderId || commission.order_id)?.substring(0, 12)}...
                               </div>
-                              <div className="text-xs text-gray-600">
+                              <div className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
                                 Amount: {formatPrice(commission.amount)} | Commission:{" "}
                                 <strong className="text-green-600">
                                   {formatPrice(commission.commissionAmount || commission.commission_amount)}
                                 </strong>
                               </div>
-                              <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                              <div className="text-xs mt-1 flex items-center gap-2" style={{ color: "var(--admin-text-secondary)" }}>
                                 <span>
                                   {dayjs(commission.createdAt).format("DD/MM/YYYY HH:mm")}
                                 </span>

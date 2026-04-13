@@ -147,12 +147,12 @@ const AdminPayoutsPage = () => {
       width: 250,
       render: (_: unknown, record: PayoutRow) => (
         <div>
-          <div className="font-semibold text-gray-900">{record.user_name || "N/A"}</div>
+          <div className="font-semibold" style={{ color: "var(--admin-text-primary)" }}>{record.user_name || "N/A"}</div>
           {record.user_email && (
             <div className="text-xs font-semibold text-blue-600">{record.user_email}</div>
           )}
           <Tooltip title={record.user_id}>
-            <span className="font-mono text-xs text-gray-400 mt-1 block">ID: {record.user_id?.substring(0, 12) || "N/A"}...</span>
+            <span className="font-mono text-xs mt-1 block" style={{ color: "var(--admin-text-secondary)" }}>ID: {record.user_id?.substring(0, 12) || "N/A"}...</span>
           </Tooltip>
           {record.affiliate_custom_link && (
             <Tag color="blue" className="mt-1">ref: {record.affiliate_custom_link}</Tag>
@@ -178,9 +178,9 @@ const AdminPayoutsPage = () => {
         const bank = record.bank_snapshot;
         return (
           <div className="text-xs">
-            <div className="font-semibold">{bank.bank_name}</div>
-            <div className="font-mono">{bank.account_number}</div>
-            <div className="text-gray-500">{bank.account_holder}</div>
+            <div className="font-semibold" style={{ color: "var(--admin-text-primary)" }}>{bank.bank_name}</div>
+            <div className="font-mono" style={{ color: "var(--admin-text-primary)" }}>{bank.account_number}</div>
+            <div style={{ color: "var(--admin-text-secondary)" }}>{bank.account_holder}</div>
           </div>
         );
       },
@@ -295,19 +295,19 @@ const AdminPayoutsPage = () => {
           <Card>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">{pendingCount}</div>
-              <div className="text-gray-500">Chờ duyệt</div>
+              <div style={{ color: "var(--admin-text-secondary)" }}>Chờ duyệt</div>
             </div>
           </Card>
           <Card>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">{formatVND(pendingAmount)}</div>
-              <div className="text-gray-500">Tổng tiền chờ duyệt</div>
+              <div style={{ color: "var(--admin-text-secondary)" }}>Tổng tiền chờ duyệt</div>
             </div>
           </Card>
           <Card>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{total}</div>
-              <div className="text-gray-500">Tổng payouts</div>
+              <div style={{ color: "var(--admin-text-secondary)" }}>Tổng payouts</div>
             </div>
           </Card>
         </div>
@@ -457,7 +457,7 @@ const AdminPayoutsPage = () => {
             </Descriptions>
 
             {/* VietQR Code */}
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
+            <div className="text-center p-4 rounded-lg" style={{ background: "var(--admin-surface-hover)" }}>
               <div className="flex items-center justify-center gap-2 mb-3">
                 <QrcodeOutlined className="text-lg" />
                 <Text strong>VietQR — Quét mã để chuyển khoản</Text>

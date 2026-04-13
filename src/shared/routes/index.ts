@@ -40,6 +40,7 @@ export const ROUTES = {
 
   TAKE_THE_TEST: (slug: string) => `/take-the-test/${slug}`,
   TEST_RESULT: (id: string) => `/test-result/${id}`,
+  TEST_RESULT_EXPLANATION: (id: string) => `/test-result/explanation/${id}`,
 
   SAMPLE_ESSAY: {
     ARCHIVE_SPEAKING: "/ielts-speaking-sample",

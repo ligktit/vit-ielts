@@ -14,7 +14,7 @@ export const Container = ({
     <div
       id={id}
       className={twMerge(
-        "mx-auto max-w-[1600px]",
+        "mx-auto max-w-[1360px]",
         className
       )}
       {...props}

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { User } from "@supabase/supabase-js";
-import { createApiSupabase } from "~supabase/server";
+import { createAdminApiSupabase } from "~supabase/server";
 import { supabaseAdmin } from "~supabase/admin";
 import { isAdminRole } from "./parseRoles";
 
@@ -21,7 +21,7 @@ export async function requireAdmin(
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<User | null> {
-  const supabase = createApiSupabase(req, res);
+  const supabase = createAdminApiSupabase(req, res);
   const {
     data: { user },
   } = await supabase.auth.getUser();

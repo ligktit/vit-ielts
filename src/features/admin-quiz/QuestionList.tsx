@@ -158,8 +158,8 @@ function SortableQuestionCard({
                                     <Badge
                                         count={subItemCount}
                                         style={{
-                                            backgroundColor: '#f0f0f0',
-                                            color: '#666',
+                                            backgroundColor: 'var(--admin-surface-hover)',
+                                            color: 'var(--admin-text-secondary)',
                                             fontSize: 11,
                                             boxShadow: 'none',
                                         }}
@@ -206,17 +206,17 @@ function SortableQuestionCard({
             <style jsx>{`
                 .question-card {
                     display: flex;
-                    border: 1px solid #e8e8e8;
+                    border: 1px solid var(--admin-border);
                     border-radius: 8px;
                     margin-bottom: 8px;
                     overflow: hidden;
-                    background: #fff;
+                    background: var(--admin-surface);
                     transition: all 0.2s;
                     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
                 }
 
                 .question-card:hover {
-                    border-color: #d9d9d9;
+                    border-color: var(--admin-border);
                     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
                 }
 
@@ -240,7 +240,7 @@ function SortableQuestionCard({
                     align-items: center;
                     justify-content: space-between;
                     padding: 10px 14px;
-                    background: #fafafa;
+                    background: var(--admin-surface-hover);
                     gap: 8px;
                     cursor: pointer;
                     user-select: none;
@@ -252,7 +252,7 @@ function SortableQuestionCard({
                 }
 
                 .question-card--expanded .question-card-header {
-                    border-bottom: 1px solid #f0f0f0;
+                    border-bottom: 1px solid var(--admin-border);
                     background: #e6f4ff;
                 }
 
@@ -302,7 +302,7 @@ function SortableQuestionCard({
                 .question-card-number {
                     font-weight: 700;
                     font-size: 13px;
-                    color: #333;
+                    color: var(--admin-text-primary);
                     min-width: 28px;
                 }
 
@@ -459,8 +459,8 @@ export default function QuestionList({ questions, onAdd, onRemove, onUpdate, onR
                     align-items: center;
                     justify-content: center;
                     padding: 40px 20px;
-                    background: #fafafa;
-                    border: 1px dashed #e8e8e8;
+                    background: var(--admin-surface-hover);
+                    border: 1px dashed var(--admin-border);
                     border-radius: 8px;
                 }
             `}</style>

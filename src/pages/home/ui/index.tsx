@@ -45,7 +45,7 @@ export const PageHome = ({
       <IeltsTestPlatformIntro config={testPlatformIntroConfig} />
 
       {/* === SECTION: Practice Tests Carousel === */}
-      <div data-section="practice-tests" className="w-full bg-white flex flex-col gap-8 pb-10 pt-4">
+      <div data-section="practice-tests" className="w-full bg-white flex flex-col gap-8 pb-10 pt-4 px-4 sm:px-6">
         <PracticeSection
           title="IELTS Online Test"
           viewMoreLink={ROUTES.EXAM.ARCHIVE}

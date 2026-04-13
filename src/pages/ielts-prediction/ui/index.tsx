@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import _ from "lodash";
 import { createClient } from "~supabase/client";
-import { TestCard } from "@/shared/ui/ds";
+import { PostCard } from "./post-card";
 import type { Post } from "~services/types/database";
 import { getPosts } from "~services/post";
 import dayjs from "dayjs";
@@ -199,6 +199,10 @@ export const PageIELTSPrediction = ({
   const total = data?.posts?.pageInfo.offsetPagination.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / currentPageSize));
   const visiblePages = buildPages(currentPage, totalPages);
+  const goToPage = (page: number) => {
+    setValue("page", page, { shouldDirty: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const handleSortChange = (nextSort: FilterFormValues["sort"]) => {
     setValue("sort", nextSort, { shouldDirty: true });
     setValue("page", 1, { shouldDirty: true });
@@ -212,7 +216,7 @@ export const PageIELTSPrediction = ({
           skillLabel="IELTS Prediction"
         />
 
-        <Container className="mt-12 px-0">
+        <Container className="mt-12 px-4 sm:px-6">
           {/* === SECTION: IELTS Practice === */}
           <section id="ipl-practice" data-section="ipl-practice">
             <div className="mb-10 flex flex-col gap-6">
@@ -273,12 +277,12 @@ export const PageIELTSPrediction = ({
                 ) : items.length ? (
                   <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {items.map(({ node }: { node: Post }, index: number) => (
-                      <TestCard
+                      <PostCard
                         key={node.id || index}
                         image={node.featured_image || undefined}
                         title={node.title}
-                        subtitle={node.published_at ? dayjs(node.published_at).format("DD/MM/YYYY") : undefined}
-                        actionText="Chi tiết"
+                        date={node.published_at ? dayjs(node.published_at).format("DD/MM/YYYY") : undefined}
+                        isPro={node.pro_user_only}
                         href={`/${node.slug}`}
                       />
                     ))}
@@ -303,14 +307,12 @@ export const PageIELTSPrediction = ({
                     <button
                       type="button"
                       disabled={currentPage <= 1}
-                      onClick={() =>
-                        setValue("page", Math.max(1, currentPage - 1), { shouldDirty: true })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_left</span>
                     </button>
-                    
+
                     {/* Page Numbers */}
                     {visiblePages.map((page, index, array) => {
                       const isGap = index > 0 && page - array[index - 1] > 1;
@@ -323,8 +325,8 @@ export const PageIELTSPrediction = ({
                           )}
                           <button
                             type="button"
-                            onClick={() => setValue("page", page, { shouldDirty: true })}
-                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition ${
+                            onClick={() => goToPage(page)}
+                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
                               page === currentPage
                                 ? "bg-primary-500 text-white"
                                 : "text-[#2D3142] hover:bg-gray-100"
@@ -340,12 +342,8 @@ export const PageIELTSPrediction = ({
                     <button
                       type="button"
                       disabled={currentPage >= totalPages}
-                      onClick={() =>
-                        setValue("page", Math.min(totalPages, currentPage + 1), {
-                          shouldDirty: true,
-                        })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_right</span>
                     </button>

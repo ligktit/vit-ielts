@@ -66,6 +66,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
       </div>
 
       {/* Stats table */}
+      <div className="overflow-hidden rounded-xl border border-gray-200">
       <table className={styles.statsTable}>
         <thead>
           <tr>
@@ -98,6 +99,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   );
 };

@@ -236,13 +236,11 @@ export default function MediaLibraryPage() {
                     <Space>
                         <Button
                             type={viewMode === "grid" ? "primary" : "default"}
-                            ghost={viewMode === "grid"}
                             icon={<AppstoreOutlined />}
                             onClick={() => setViewMode("grid")}
                         />
                         <Button
                             type={viewMode === "list" ? "primary" : "default"}
-                            ghost={viewMode === "list"}
                             icon={<UnorderedListOutlined />}
                             onClick={() => setViewMode("list")}
                         />

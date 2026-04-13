@@ -349,7 +349,6 @@ export const Header = () => {
       </div>
 
       {/* === SECTION: Header Navigation === */}
-      <div className="w-full h-[50px]" />
       <DSHeader
         logoSrc={"/assets/figma/logos/logo-color.png"}
         logoAlt={generalSettingsTitle || "IELTS Prediction"}
@@ -386,6 +385,7 @@ export const Header = () => {
           },
         ]}
         isAuthenticated={mounted && isSignedIn}
+        authLoading={!mounted}
         userName={currentUser?.name || "User"}
         userAvatar={(currentUser?.userData?.avatar?.node as any)?.srcSet}
         onLogin={() => router.push(ROUTES.LOGIN(router.asPath))}

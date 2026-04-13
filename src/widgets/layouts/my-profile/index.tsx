@@ -97,6 +97,14 @@ export const MyProfileLayout = ({
           { label: "Checkout" },
         ],
       },
+      [ROUTES.ORDER_RECEIVED]: {
+        title: "Order Received",
+        breadcrumbs: [
+          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
+          { label: "Order Received" },
+        ],
+      },
     };
     return configs[pathname];
   };
@@ -117,17 +125,17 @@ export const MyProfileLayout = ({
       )}
 
       {/* === SECTION: Main Content === */}
-      <section data-section="dashboard-content" className="bg-[#f8f9fb] min-h-screen">
-        <Container>
+      <section data-section="dashboard-content" className="bg-[#f8f9fb] lg:mb-13 overflow-x-hidden">
+        <Container className="px-4 sm:px-6">
           <div className="py-8 lg:py-10">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:items-start">
               {/* === Left Sidebar === */}
               <aside className="w-full lg:w-[280px] flex-shrink-0 space-y-5">
                 <Navigation navigation={ACCOUNT_NAVIGATION} />
               </aside>
 
               {/* === Main Panel === */}
-              <main className="flex-1 min-w-0 space-y-6">
+              <main className="flex-1 min-w-0 w-full space-y-6">
                 {children}
               </main>
             </div>

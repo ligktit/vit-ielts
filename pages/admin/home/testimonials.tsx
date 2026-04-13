@@ -83,7 +83,7 @@ function TestimonialsPage() {
             title="⭐ Danh sách review"
             size="small"
             style={{ marginBottom: 16 }}
-            extra={<span style={{ color: "#888" }}>Nên có 15 reviews (5/cột × 3 cột)</span>}
+            extra={<span style={{ color: "var(--admin-text-secondary)" }}>Nên có 15 reviews (5/cột × 3 cột)</span>}
           >
             <Form.List name="reviews">
               {(fields, { add, remove }) => (

@@ -244,13 +244,13 @@ export default function FileUploadField({
           borderColor: isDragActive
             ? "#1890ff"
             : uploading
-              ? "#d9d9d9"
-              : "#d9d9d9",
+              ? "var(--admin-border)"
+              : "var(--admin-border)",
           backgroundColor: isDragActive
             ? "#e6f7ff"
             : uploading
-              ? "#fafafa"
-              : "#fafafa",
+              ? "var(--admin-surface-hover)"
+              : "var(--admin-surface-hover)",
           cursor: uploading ? "not-allowed" : "pointer",
         }}
       >
@@ -286,7 +286,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 8,
   },
   dropzone: {
-    border: "2px dashed #d9d9d9",
+    border: "2px dashed var(--admin-border)",
     borderRadius: 8,
     padding: "20px 16px",
     textAlign: "center",
@@ -300,9 +300,9 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     padding: "10px 12px",
-    border: "1px solid #f0f0f0",
+    border: "1px solid var(--admin-border)",
     borderRadius: 8,
-    backgroundColor: "#fafafa",
+    backgroundColor: "var(--admin-surface-hover)",
     gap: 12,
   },
   imagePreview: {

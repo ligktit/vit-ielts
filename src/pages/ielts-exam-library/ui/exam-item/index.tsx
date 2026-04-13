@@ -141,7 +141,7 @@ export const ExamItem = ({
 
           <div className="mt-auto flex items-center justify-between gap-3">
             {/* CTA button */}
-            <div className="relative flex h-[49px] flex-1 max-w-[190px] items-center gap-[10px] px-4 rounded-[25px] border border-[rgba(128,128,128,0.55)] bg-white overflow-hidden transition-[border-color] duration-300 hover:border-[var(--color-primary-450)] group/btn">
+            <div className="relative flex h-[49px] flex-1 max-w-[170px] items-center gap-[10px] px-4 rounded-[40px] border border-[rgba(128,128,128,0.55)] bg-white overflow-hidden transition-[border-color] duration-300 hover:border-[var(--color-primary-450)] group/btn">
               <div className="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-300 ease-out bg-[var(--color-primary-450)] rounded-[25px]" />
               <div className="relative z-10 flex-shrink-0 text-[var(--color-primary-500)] group-hover/btn:text-white transition-colors duration-300">
                 {isProtected ? (

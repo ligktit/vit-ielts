@@ -55,7 +55,7 @@ export const TestCard = ({
     <Tag
       {...linkProps}
       onClick={onClick}
-      className={`group flex flex-col bg-white rounded-[30px] outline-none shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 w-full max-w-[356px] h-[400px] ${className} ${!href ? 'cursor-default' : 'cursor-pointer'}`}
+      className={`group flex flex-col bg-white rounded-[30px] outline-none shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 w-full min-h-[400px] ${className} ${!href ? 'cursor-default' : 'cursor-pointer'}`}
     >
       {/* Upper Image Section — Figma spec: 356×220 */}
       <div className="relative h-[220px] shrink-0 overflow-hidden bg-secondary-50 rounded-t-[30px] rounded-b-[15px]">
@@ -90,7 +90,7 @@ export const TestCard = ({
       {/* Body Section */}
       <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
         <div className="space-y-[8px] mb-4">
-          <h3 className="text-[17px] font-bold text-[#202020] leading-snug mb-3 truncate group-hover:text-primary-500 transition-colors" title={title}>
+          <h3 className="text-[17px] font-bold text-[#202020] leading-snug mb-3 group-hover:text-primary-500 transition-colors">
             {title}
           </h3>
           {(subtitle || attempts !== undefined) && (
@@ -104,7 +104,7 @@ export const TestCard = ({
         {(actionText || score !== undefined) && (
           <div className="mt-auto flex items-end justify-between gap-3">
             {actionText && (
-              <div className="relative flex h-[49px] flex-1 min-w-0 max-w-[190px] items-center gap-[10px] px-4 rounded-[25px] border border-[rgba(128,128,128,0.55)] bg-white overflow-hidden transition-[border-color] duration-300 hover:border-[var(--color-primary-450)] pointer-events-auto group/btn">
+              <div className="relative flex h-[49px] flex-1 min-w-0 max-w-[170px] items-center gap-[10px] px-4 rounded-[25px] border border-[rgba(128,128,128,0.55)] bg-white overflow-hidden transition-[border-color] duration-300 hover:border-[var(--color-primary-450)] pointer-events-auto group/btn">
                 {/* Left-to-right fill overlay */}
                 <div className="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-300 ease-out bg-[var(--color-primary-450)] rounded-[25px]" />
                 {/* Icon */}

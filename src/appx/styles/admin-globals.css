@@ -804,8 +804,6 @@
   border-bottom: 1px solid var(--admin-border) !important;
   font-weight: 600 !important;
   font-size: 12px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.3px !important;
 }
 
 [data-admin-theme="dark"] .admin-content .ant-table-tbody > tr > td {
@@ -836,6 +834,18 @@
 }
 
 /* Pagination */
+.admin-content .ant-pagination {
+  gap: 6px !important;
+}
+
+.admin-content .ant-pagination-item,
+.admin-content .ant-pagination-prev,
+.admin-content .ant-pagination-next,
+.admin-content .ant-pagination-jump-prev,
+.admin-content .ant-pagination-jump-next {
+  margin: 0 !important;
+}
+
 [data-admin-theme="dark"] .admin-content .ant-pagination-item {
   background: var(--admin-glass-bg) !important;
   border: 1px solid var(--admin-border) !important;
@@ -897,6 +907,15 @@
 
 [data-admin-theme="dark"] .admin-content .ant-select-arrow {
   color: var(--admin-text-muted) !important;
+}
+
+/* Placeholder & selected value text — both themes */
+.admin-shell .admin-content .ant-select-selection-placeholder {
+  color: var(--admin-text-secondary) !important;
+  opacity: 1 !important;
+}
+.admin-shell .admin-content .ant-select-selection-item {
+  color: var(--admin-text-primary) !important;
 }
 
 /* Button adjustments */

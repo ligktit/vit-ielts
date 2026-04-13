@@ -277,6 +277,10 @@ export const PageIELTSPracticeLibrary = ({
   const total = data?.quizzes.pageInfo.offsetPagination.total || 0;
   const totalPages = Math.max(1, Math.ceil(total / currentPageSize));
   const visiblePages = buildPages(currentPage, totalPages);
+  const goToPage = (page: number) => {
+    setValue("page", page, { shouldDirty: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const handleSortChange = (nextSort: FilterFormValues["sort"]) => {
     setValue("sort", nextSort, { shouldDirty: true });
     setValue("page", 1, { shouldDirty: true });
@@ -290,7 +294,7 @@ export const PageIELTSPracticeLibrary = ({
           skillLabel={skill === "reading" ? "Reading" : "Listening"}
         />
 
-        <Container className="mt-12 px-0">
+        <Container className="mt-12 px-4 sm:px-6">
           {/* === SECTION: Suggestions === */}
           <section id="ipl-suggestions" data-section="suggestions">
             <div className="flex items-center justify-between mb-6">
@@ -415,14 +419,12 @@ export const PageIELTSPracticeLibrary = ({
                     <button
                       type="button"
                       disabled={currentPage <= 1}
-                      onClick={() =>
-                        setValue("page", Math.max(1, currentPage - 1), { shouldDirty: true })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_left</span>
                     </button>
-                    
+
                     {/* Page Numbers */}
                     {visiblePages.map((page, index, array) => {
                       const isGap = index > 0 && page - array[index - 1] > 1;
@@ -435,8 +437,8 @@ export const PageIELTSPracticeLibrary = ({
                           )}
                           <button
                             type="button"
-                            onClick={() => setValue("page", page, { shouldDirty: true })}
-                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition ${
+                            onClick={() => goToPage(page)}
+                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
                               page === currentPage
                                 ? "bg-primary-500 text-white"
                                 : "text-[#2D3142] hover:bg-gray-100"
@@ -452,12 +454,8 @@ export const PageIELTSPracticeLibrary = ({
                     <button
                       type="button"
                       disabled={currentPage >= totalPages}
-                      onClick={() =>
-                        setValue("page", Math.min(totalPages, currentPage + 1), {
-                          shouldDirty: true,
-                        })
-                      }
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
+                      onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
                     >
                       <span className="material-symbols-rounded text-xl">chevron_right</span>
                     </button>

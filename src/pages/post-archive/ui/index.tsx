@@ -32,7 +32,7 @@ export const PageArchive = ({
         title={category.name || "Blog"} 
         breadcrumbs={dsBreadcrumbs} 
       />
-      <Container>
+      <Container className="px-4 sm:px-6">
         <div className="flex -m-4 flex-wrap mt-2">
           <div className="p-4 w-full">
             <div className="pb-5 space-y-4">
@@ -50,9 +50,10 @@ export const PageArchive = ({
                     defaultCurrent={paged}
                     defaultPageSize={pageSize}
                     total={posts.pageInfo.offsetPagination.total}
-                    onChange={(page) =>
-                      router.push(`${category.link}/page/${page}`)
-                    }
+                    onChange={(page) => {
+                      router.push(`${category.link}/page/${page}`);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
                   />
                 </>
               ) : (

@@ -20,7 +20,7 @@ export const StreakSummaryCards = ({ summary, loading }: Props) => {
       {STATS.map((stat) => (
         <div
           key={stat.key}
-          className="flex items-stretch rounded-[36px] overflow-hidden max-w-full"
+          className="flex items-stretch rounded-[100px] overflow-hidden max-w-full"
           style={{
              backgroundColor: stat.bgColor,
              border: `5px solid ${stat.bgColor}`,

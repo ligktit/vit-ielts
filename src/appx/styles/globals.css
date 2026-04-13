@@ -79,6 +79,7 @@
   --animate-float: float 4s ease-in-out infinite;
   --animate-scroll-down: scroll-down 30s linear infinite;
   --animate-scroll-up: scroll-up 30s linear infinite;
+  --animate-fade-in-up: fadeInUp 1s ease-out both;
 
   @keyframes float {
     0%, 100% { transform: translateY(0); }
@@ -93,6 +94,17 @@
   @keyframes scroll-up {
     0%   { transform: translateY(-50%); }
     100% { transform: translateY(0); }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -163,6 +175,10 @@ p {
   margin-bottom: 24px !important;
 }
 
+.prose-sm .sandbox p:first-child {
+  margin-top: 0 !important;
+}
+
 :where(.css-dev-only-do-not-override-10l2ewt).ant-splitter>.ant-splitter-bar .ant-splitter-bar-dragger::after {
   background-image: url('../../../public/arrow.png');
   width: 36px;
@@ -198,6 +214,7 @@ p {
 html {
   font-size: 16px;
   /* Hoặc 1rem */
+  scroll-behavior: smooth;
 }
 
 html.text-size-small {
@@ -745,6 +762,16 @@ br {
    Arrow styling is now handled by Button component className.
    See: src/pages/home/ui/practice-section/index.tsx */
 
+
+/* Hero Banner — responsive padding-top */
+.hero-banner-inner {
+  padding-top: calc(var(--header-height) + 110px);
+}
+@media (min-width: 550px) {
+  .hero-banner-inner {
+    padding-top: calc(var(--header-height) + 130px);
+  }
+}
 
 /* Rich Text Editor (Quill) */
 .ql-editor {

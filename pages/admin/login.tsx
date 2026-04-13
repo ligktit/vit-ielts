@@ -2,17 +2,14 @@ import { useState } from "react";
 import { Button, Input, message } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { createClient } from "~supabase/client";
+import { createAdminClient } from "~supabase/admin-client";
 import { isAdminRole } from "~lib/parseRoles";
 import type { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { createServerSupabase } from "~supabase/server";
-import { supabaseAdmin } from "~supabase/admin";
+import { createAdminServerSupabase } from "~supabase/server";
 import Head from "next/head";
 import {
   LockOutlined,
   MailOutlined,
-  EyeInvisibleOutlined,
-  EyeTwoTone,
 } from "@ant-design/icons";
 
 type FormData = {
@@ -22,7 +19,7 @@ type FormData = {
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = createAdminClient();
   const {
     control,
     handleSubmit,
@@ -80,9 +77,20 @@ export default function AdminLoginPage() {
   return (
     <>
       <Head>
-        <title>Admin Login — IELTS Master</title>
+        <title>Admin Login — IELTS Prediction</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .admin-login-page input:-webkit-autofill,
+        .admin-login-page input:-webkit-autofill:hover,
+        .admin-login-page input:-webkit-autofill:focus,
+        .admin-login-page input:-webkit-autofill:active {
+          transition: background-color 99999s ease-in-out 0s !important;
+          -webkit-text-fill-color: #e5e7eb !important;
+          caret-color: #e5e7eb !important;
+        }
+      ` }} />
 
       <div className="admin-login-page">
         {/* Animated background */}
@@ -97,25 +105,18 @@ export default function AdminLoginPage() {
           <div className="admin-login-branding">
             <div className="admin-login-branding-content">
               <div className="admin-login-logo">
-                <div className="admin-login-logo-icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-                <span className="admin-login-logo-text">IELTS Master</span>
+                <img
+                  src="/logo.png"
+                  alt="IELTS Prediction"
+                  style={{ height: 40, width: "auto", objectFit: "contain" }}
+                />
               </div>
               <h1 className="admin-login-branding-title">
                 Quản trị hệ thống
               </h1>
               <p className="admin-login-branding-desc">
                 Truy cập bảng điều khiển để quản lý nội dung, người dùng và toàn
-                bộ hệ thống IELTS Master.
+                bộ hệ thống IELTS Prediction.
               </p>
               <div className="admin-login-features">
                 <div className="admin-login-feature">
@@ -200,17 +201,15 @@ export default function AdminLoginPage() {
                       },
                     }}
                     render={({ field }) => (
-                      <Input.Password
+                      <Input
                         {...field}
                         id="admin-password"
+                        type="password"
                         placeholder="Nhập mật khẩu"
                         size="large"
                         status={errors.password ? "error" : ""}
                         className="admin-login-input"
                         autoComplete="current-password"
-                        iconRender={(visible) =>
-                          visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-                        }
                       />
                     )}
                   />
@@ -266,6 +265,7 @@ export default function AdminLoginPage() {
 
         <style jsx>{`
           .admin-login-page {
+            color-scheme: dark;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -587,6 +587,7 @@ export default function AdminLoginPage() {
             color: #4b5563 !important;
           }
 
+
           /* Password input wrapper */
           .admin-login-page
             .admin-login-input.ant-input-password
@@ -610,13 +611,23 @@ export default function AdminLoginPage() {
             box-shadow: 0 0 0 2px rgba(217, 74, 86, 0.1) !important;
           }
 
-          .admin-login-page .admin-login-input.ant-input-password .ant-input {
+          .admin-login-page .admin-login-input.ant-input-password .ant-input,
+          .admin-login-page .admin-login-input.ant-input-password .ant-input:focus,
+          .admin-login-page .admin-login-input.ant-input-password .ant-input:hover {
             background: transparent !important;
+            background-color: transparent !important;
             border: none !important;
             box-shadow: none !important;
             color: #e5e7eb !important;
             padding: 0 !important;
             height: auto !important;
+          }
+
+          .admin-login-page .admin-login-input.ant-input-password .ant-input-suffix,
+          .admin-login-page .admin-login-input.ant-input-password .ant-input-suffix span,
+          .admin-login-page .admin-login-input.ant-input-password .ant-input-suffix svg {
+            color: #9ca3af !important;
+            fill: #9ca3af !important;
           }
 
           /* Error status */
@@ -646,21 +657,20 @@ AdminLoginPage.Layout = ({ children }: { children: React.ReactNode }) => (
 );
 
 /**
- * SSR: If user is already logged in AND is admin, redirect to /admin.
- * If logged in but not admin, redirect to /.
- * Otherwise, show the login page.
+ * SSR: Chỉ redirect về /admin nếu đã đăng nhập với tài khoản admin.
+ * User thường đang đăng nhập vẫn được xem trang này bình thường.
  */
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const supabase = createServerSupabase(context);
+  const supabase = createAdminServerSupabase(context);
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (user) {
-    // Check if admin
-    const { data: profile } = await supabaseAdmin
+    // Chỉ redirect nếu đã là admin
+    const { data: profile } = await supabase
       .from("users")
       .select("roles")
       .eq("id", user.id)
@@ -674,14 +684,7 @@ export const getServerSideProps: GetServerSideProps = async (
         },
       };
     }
-
-    // Logged in but not admin
-    return {
-      redirect: {
-        destination: "/",
-        statusCode: 302,
-      },
-    };
+    // User thường đang đăng nhập → vẫn hiển thị form admin login
   }
 
   return { props: {} };

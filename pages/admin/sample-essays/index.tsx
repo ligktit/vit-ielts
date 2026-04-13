@@ -28,7 +28,7 @@ export default function AdminSampleEssaysPage() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(20);
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
 
     const fetchEssays = useCallback(async () => {
         setLoading(true);

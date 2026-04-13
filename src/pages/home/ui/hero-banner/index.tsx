@@ -36,7 +36,7 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
   return (
     <section
       data-section="hero-banner"
-      className="relative w-full overflow-hidden bg-white min-h-[700px] flex items-center pt-24 pb-12 lg:pt-32 lg:pb-20"
+      className="relative w-full overflow-hidden bg-white min-h-[700px] flex items-center pt-[180px] pb-12 lg:pt-32 lg:pb-20 px-4 sm:px-6"
       style={{
         backgroundImage:
           "linear-gradient(rgba(217,74,86,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,74,86,0.07) 1px, transparent 1px)",
@@ -46,35 +46,37 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
     >
       <Container className="relative z-10 w-full">
         {/* Layout 2 cột: Cột trái (Text) và Cột phải (Hình ảnh) */}
-        <div className="flex flex-col lg:flex-row items-center lg:justify-center justify-between gap-12 lg:gap-20 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-20 w-full">
 
           {/* CỘT TRÁI: Cụm Text & CTA */}
-          <div className="flex flex-col items-start z-20 w-full lg:max-w-max gap-8">
+          <div className="flex flex-col items-start z-20 w-full gap-8">
             {/* Title */}
-            <h1 className="text-[40px] leading-[1.2] sm:text-[48px] lg:text-[56px] font-bold tracking-tight text-[var(--color-default)]">
-              <span className="block whitespace-nowrap">{c.title.line1}</span>
-              <span className="block">
+            <h1
+              className="text-[40px] leading-[1.2] sm:text-[52px] lg:text-[60px] font-bold tracking-tight text-[var(--color-default)] animate-fade-in-up"
+              style={{ animationDelay: "0ms" }}
+            >
+              <span className="block whitespace-nowrap font-medium">{c.title.line1}</span>
+              <span className="block font-medium">
                 {c.title.line2}{" "}
-                <span className="text-primary-500">{c.title.highlight}</span>
+                <span className="text-primary-500 font-bold">{c.title.highlight}</span>
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-400 leading-[1.6] max-w-[600px] lg:max-w-max">
+            <p
+              className="text-[22px] leading-[1.8] max-w-[600px] font-normal animate-fade-in-up"
+              style={{ animationDelay: "120ms" }}
+            >
               {c.subtitle}
             </p>
 
             {/* Checklist */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 w-full text-base sm:text-lg text-[var(--color-default)] font-semibold">
+            <div
+              className="flex flex-wrap gap-x-8 gap-y-4 w-full text-base sm:text-[22px] text-[var(--color-default)] font-semibold animate-fade-in-up"
+              style={{ animationDelay: "240ms" }}
+            >
               {c.checklist.map((item, i) => (
-                <div
-                  key={i}
-                  className={`flex items-center gap-3 whitespace-nowrap ${
-                    i === c.checklist.length - 1 && c.checklist.length % 2 !== 0
-                      ? "sm:col-span-2"
-                      : ""
-                  }`}
-                >
+                <div key={i} className="flex items-center gap-3 whitespace-nowrap">
                   <CheckCircleIcon />
                   <span>{item}</span>
                 </div>
@@ -82,7 +84,10 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
             </div>
 
             {/* CTA Button */}
-            <div>
+            <div
+              className="animate-fade-in-up"
+              style={{ animationDelay: "360ms" }}
+            >
               <Button
                 variant="primary"
                 size="lg"
@@ -95,10 +100,13 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
           </div>
 
           {/* CỘT PHẢI: Mascots */}
-          <div className="relative w-full max-w-[800px] h-[400px] sm:h-[500px] lg:h-[673px] flex items-center justify-center lg:justify-end shrink-0">
+          <div
+            className="relative w-full h-[400px] sm:h-[500px] lg:h-[673px] flex items-center justify-center lg:justify-end animate-fade-in-up"
+            style={{ animationDelay: "120ms" }}
+          >
 
             {/* Máy tính (Screen) */}
-            <div className="absolute top-0 right-0 w-[90%] h-[70%] sm:w-[80%] sm:h-[80%] lg:w-[800px] lg:min-h-[673px] lg:h-[673px] z-10 transition-transform duration-700 hover:scale-105">
+            <div className="absolute top-0 right-[-8%] w-[90%] h-[70%] sm:w-[80%] sm:h-[80%] lg:w-full lg:min-h-[673px] lg:h-[673px] z-10 transition-transform duration-700 hover:scale-105">
               <Image
                 src={c.images.screen}
                 alt="IELTS Interface Screen"
@@ -109,7 +117,7 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
             </div>
 
             {/* Mascot */}
-            <div className="absolute bottom-0 left-0 sm:left-[5%] lg:-left-[10%] w-[200px] h-[260px] sm:w-[280px] sm:h-[350px] lg:w-[320px] lg:h-[400px] z-20 animate-float">
+            <div className="absolute bottom-0 left-0 sm:left-[0] lg:-left-[10%] w-[200px] h-[260px] sm:w-[280px] sm:h-[350px] lg:w-[320px] lg:h-[400px] z-20 animate-float">
               <Image
                 src={c.images.mascot}
                 alt="IELTS Mascot"
