@@ -1412,7 +1412,7 @@ function ReviewExplanation({
 
   if (fullPage) {
     return (
-      <div className="flex flex-col h-full overflow-hidden">
+      <div id="iel-test-result-explanation" className="flex flex-col h-full overflow-hidden">
         {splitter}
 
         {/* Full-width footer — identical to take-the-test footer (no submit button) */}
@@ -1493,9 +1493,9 @@ function ReviewExplanation({
   }
 
   return (
-    <>
+    <div id="iel-test-result-explanation">
       {splitter}
-    </>
+    </div>
   );
 }
 

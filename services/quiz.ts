@@ -114,7 +114,7 @@ export async function getQuizzes(
     // Pagination + ordering
     query = query
         .range((page - 1) * pageSize, page * pageSize - 1)
-        .order("created_at", { ascending: false });
+        .order("published_at", { ascending: false });
 
     const { data, error, count } = await query;
 

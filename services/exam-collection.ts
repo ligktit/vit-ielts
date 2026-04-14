@@ -27,7 +27,7 @@ import type {
 
 /** Select columns for quiz summary — includes passages+questions for modal UI */
 const QUIZ_SUMMARY_SELECT =
-    "id, title, slug, skill, featured_image, pro_user_only, tests_taken, time_minutes, question_form, source, year, passages(id, sort_order, questions(id, explanations, sort_order))";
+    "id, title, slug, skill, type, score_type, featured_image, pro_user_only, tests_taken, time_minutes, question_form, source, year, passages(id, sort_order, questions(id, explanations, sort_order))";
 
 // ============================================================================
 // Internal Types (shapes returned by QUIZ_SUMMARY_SELECT)
@@ -47,6 +47,8 @@ type PassageSummary = {
 
 /** Shape returned by Supabase for QUIZ_SUMMARY_SELECT */
 type QuizSummaryRow = ExamCollectionItem & {
+    type: string;
+    score_type: string | null;
     passages: PassageSummary[];
 };
 
@@ -62,6 +64,7 @@ type MappedExamItem = {
         testsTaken: number;
         skill: [string, string];
         type: [string, string];
+        scoreType: string | null;
         time: number;
         passages: { questions: { explanations: { content: string }[] }[] }[];
     };
@@ -379,7 +382,8 @@ function toExamItemWithQuizFields(item: QuizSummaryRow): MappedExamItem {
             proUserOnly: item.pro_user_only,
             testsTaken: item.tests_taken,
             skill: [item.skill, item.skill],
-            type: ["exam", "exam"],
+            type: [item.type ?? "exam", item.type ?? "exam"],
+            scoreType: item.score_type ?? null,
             time: item.time_minutes,
             passages,
         },

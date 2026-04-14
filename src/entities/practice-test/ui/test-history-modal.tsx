@@ -182,10 +182,19 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
                         ? calcTimeTaken(item.test_time || quizData?.time_minutes || 60, item.time_left) 
                         : "0:00";
                         
-                      const displayScore = Number.isInteger(score10) 
-                        ? score10.toString() 
-                        : score10.toFixed(1).replace('.', ',');
-                      const isPass = score10 >= 5;
+                      const isMockTest = quizData?.type === 'exam' || quizData?.type === 'academic' || quizData?.type === 'general';
+                      let displayScoreOutput: string;
+                      let isPass: boolean;
+
+                      if (isMockTest) {
+                        const displayScoreStr = Number.isInteger(score10) ? score10.toString() : score10.toFixed(1);
+                        displayScoreOutput = `${displayScoreStr}/10`;
+                        isPass = score10 >= 5;
+                      } else {
+                        const total = correct + incorrect + missed;
+                        displayScoreOutput = `${correct}/${total}`;
+                        isPass = total > 0 && correct / total >= 0.5;
+                      }
 
                       return (
                         <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
@@ -204,7 +213,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
                           <td className="py-4 px-4 text-center font-semibold text-[#2D3142]">{missed}</td>
                           <td className="py-4 px-4 text-center">
                             <span className={`font-bold ${isPass ? "text-[#1B8C40]" : "text-[#D94A56]"}`}>
-                              {displayScore}/10
+                              {displayScoreOutput}
                             </span>
                           </td>
                           <td className="py-4 px-4 text-center">

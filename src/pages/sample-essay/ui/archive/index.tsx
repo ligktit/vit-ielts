@@ -226,7 +226,6 @@ export const PageArchive = ({
                 title={bannerData.title}
                 breadcrumbs={[
                   { label: "Trang chủ", href: "/" },
-                  { label: "Thư viện bài thi thử IELTS", href: "/ielts-practice-library" },
                   { label: skill === "writing" ? "Writing Samples" : "Speaking Samples" },
                 ]}
               />

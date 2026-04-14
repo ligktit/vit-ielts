@@ -199,19 +199,30 @@ export const QuizListing = ({ skill }: { skill: "listening" | "reading" }) => {
           const missed = scoreResult?.missed ?? 0;
           const total = correct + incorrect + missed;
 
-          if (total === 0) return <span className="font-medium">0/10</span>;
+          const quizType = record.testResultFields.quiz.node.quizFields.type?.[0] || 'practice';
+          const isMockTest = quizType === 'exam' || quizType === 'academic' || quizType === 'general';
 
-          const score10 = (correct / total) * 10;
-          const displayScore = Number.isInteger(score10) 
-            ? score10.toString() 
-            : score10.toFixed(1).replace('.', ',');
-          const isPass = score10 >= 5;
+          if (isMockTest) {
+             const score10 = (correct / total) * 10;
+             const displayScore = Number.isInteger(score10) 
+               ? score10.toString() 
+               : score10.toFixed(1);
+             const isPass = score10 >= 5;
 
-          return (
-            <span className={`font-bold ${isPass ? "text-[#1B8C40]" : "text-primary-500"}`}>
-              {displayScore}/10
-            </span>
-          );
+             return (
+               <span className={`font-bold ${isPass ? "text-[#1B8C40]" : "text-primary-500"}`}>
+                 {displayScore}/10
+               </span>
+             );
+          } else {
+             const isPass = correct / total >= 0.5;
+             if (total === 0) return <span className="font-medium">0/{total}</span>;
+             return (
+               <span className={`font-bold ${isPass ? "text-[#1B8C40]" : "text-primary-500"}`}>
+                 {correct}/{total}
+               </span>
+             );
+          }
         },
       },
       {
