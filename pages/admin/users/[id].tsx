@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import {
     Card, Descriptions, Tag, Button, Tabs, Table, Modal,
     InputNumber, Space, message, Spin, Avatar, Popconfirm, Tooltip,
+    Form, Input, Select, DatePicker
 } from "antd";
 import {
     UserOutlined, CrownOutlined, ArrowLeftOutlined,
     DesktopOutlined, TabletOutlined, MobileOutlined, CopyOutlined, CheckOutlined,
+    EditOutlined, DeleteOutlined
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../_layout";
@@ -137,6 +139,11 @@ export default function AdminUserDetailPage() {
     const [loading, setLoading] = useState(true);
     const [proModalVisible, setProModalVisible] = useState(false);
     const [durationMonths, setDurationMonths] = useState(1);
+    
+    // ── Edit & Delete State ──
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [updating, setUpdating] = useState(false);
+    const [editForm] = Form.useForm();
 
     useEffect(() => {
         if (id) fetchUser();
@@ -178,6 +185,67 @@ export default function AdminUserDetailPage() {
             }
         } catch {
             message.error("Error toggling Pro status");
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        try {
+            const res = await fetch(`/api/admin/users/${id}`, {
+                method: "DELETE",
+            });
+            const json = await res.json();
+            if (json.success) {
+                message.success("Đã xoá user");
+                router.push("/admin/users");
+            } else {
+                message.error(json.error || "Có lỗi xảy ra");
+            }
+        } catch {
+            message.error("Lỗi khi xoá user");
+        }
+    };
+
+    const handleUpdateUser = async (values: any) => {
+        setUpdating(true);
+        try {
+            const updateData = {
+                name: values.name,
+                gender: values.gender,
+                phone_number: values.phone_number,
+                roles: values.role ? [values.role] : [],
+                date_of_birth: values.date_of_birth ? values.date_of_birth.format("YYYY-MM-DD") : null,
+            };
+
+            const res = await fetch(`/api/admin/users/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updateData),
+            });
+            const json = await res.json();
+            if (json.success) {
+                message.success("Cập nhật thông tin thành công");
+                setEditModalVisible(false);
+                fetchUser();
+            } else {
+                message.error(json.error || "Có lỗi xảy ra");
+            }
+        } catch {
+            message.error("Lỗi khi cập nhật");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const openEditModal = () => {
+        if (user) {
+            editForm.setFieldsValue({
+                name: user.name,
+                gender: user.gender,
+                phone_number: user.phone_number,
+                role: Array.isArray(user.roles) && user.roles.includes("administrator") ? "administrator" : "subscriber",
+                date_of_birth: user.date_of_birth ? dayjs(user.date_of_birth) : null,
+            });
+            setEditModalVisible(true);
         }
     };
 
@@ -310,6 +378,22 @@ export default function AdminUserDetailPage() {
                     }
                     extra={
                         <Space>
+                            <Button
+                                icon={<EditOutlined />}
+                                onClick={openEditModal}
+                            >
+                                Sửa
+                            </Button>
+                            <Popconfirm
+                                title="Xoá User này?"
+                                description="Hành động này không thể hoàn tác."
+                                onConfirm={handleDeleteUser}
+                                okText="Xoá"
+                                cancelText="Hủy"
+                                okButtonProps={{ danger: true }}
+                            >
+                                <Button danger icon={<DeleteOutlined />}>Xoá</Button>
+                            </Popconfirm>
                             {user.is_pro ? (
                                 <Popconfirm
                                     title="Hủy Pro?"
@@ -431,6 +515,51 @@ export default function AdminUserDetailPage() {
                             className="w-full"
                         />
                     </div>
+                </Modal>
+
+                {/* Edit Info Modal */}
+                <Modal
+                    title="Sửa thông tin User"
+                    open={editModalVisible}
+                    onCancel={() => setEditModalVisible(false)}
+                    onOk={() => editForm.submit()}
+                    confirmLoading={updating}
+                    okText="Lưu"
+                    cancelText="Hủy"
+                >
+                    <Form
+                        form={editForm}
+                        layout="vertical"
+                        onFinish={handleUpdateUser}
+                    >
+                        <Form.Item name="name" label="Họ và tên">
+                            <Input placeholder="Nhập họ và tên" />
+                        </Form.Item>
+                        <Form.Item name="phone_number" label="Số điện thoại">
+                            <Input placeholder="Nhập SĐT" />
+                        </Form.Item>
+                        <Form.Item name="gender" label="Giới tính">
+                            <Select
+                                options={[
+                                    { value: "Nam", label: "Nam" },
+                                    { value: "Nữ", label: "Nữ" },
+                                    { value: "Khác", label: "Khác" },
+                                ]}
+                                allowClear
+                            />
+                        </Form.Item>
+                        <Form.Item name="date_of_birth" label="Ngày sinh">
+                            <DatePicker format="DD/MM/YYYY" className="w-full" />
+                        </Form.Item>
+                        <Form.Item name="role" label="Vai trò">
+                            <Select
+                                options={[
+                                    { value: "subscriber", label: "Subscriber" },
+                                    { value: "administrator", label: "Quản trị viên" },
+                                ]}
+                            />
+                        </Form.Item>
+                    </Form>
                 </Modal>
             </div>
         </AdminLayout>
