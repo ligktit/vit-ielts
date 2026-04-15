@@ -1,6 +1,6 @@
 // file: index.tsx
 
-import { Button, ConfigProvider, Splitter, Collapse } from "antd";
+import { Button, ConfigProvider, Splitter, Collapse, Tooltip, Modal } from "antd";
 import { IPracticeSingle, ITestResult } from "../../api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -12,11 +12,16 @@ import parse, { HTMLReactParserOptions, domToReact } from "html-react-parser";
 import dynamic from "next/dynamic";
 const Plyr = dynamic(() => import("plyr-react"), { ssr: false });
 import "plyr-react/plyr.css";
-import { TextSelectionWrapper } from "@/shared/ui/text-selection";
+import { TextSelectionWrapper, TextSelectionProvider } from "@/shared/ui/text-selection";
 import { Checkbox as AntCheckbox } from "antd";
 import { normalizeParseResult, SafeRender } from "@/shared/lib/html-normalize";
 import { countQuestion } from "@/shared/lib";
 import { calculateStartIndexForAllQuestions } from "@/shared/lib/calculateStartIndex";
+import { ExamContext, useExamContext } from "@/pages/take-the-test/context";
+import Notepad from "@/pages/take-the-test/ui/notepad";
+import { Container } from "@/shared/ui";
+import Link from "next/link";
+import { ROUTES } from "@/shared/routes";
 
 // Helper function để đếm số câu hỏi con từ một question
 // Sử dụng cùng logic với countQuestion để đảm bảo nhất quán
@@ -108,6 +113,202 @@ const removeFillHistoryCorrectTags = (text: string | undefined): string => {
   );
   return cleanedText;
 };
+
+function ReviewHeader({
+  quiz,
+  testResult,
+}: {
+  quiz: IPracticeSingle;
+  testResult: ITestResult;
+}) {
+  const { isNotesViewOpen, setIsNotesViewOpen, selectedTextSize, setSelectedTextSize } =
+    useExamContext();
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [optionsView, setOptionsView] = useState("main");
+
+  const textSizes = [
+    { key: "Regular", name: "Regular" },
+    { key: "large", name: "Large" },
+    { key: "xlarge", name: "Extra Large" },
+  ];
+
+  return (
+    <>
+      <header className="py-2 bg-white shadow z-20 mb-[20px] px-[16px] shrink-0">
+        <Container className="max-w-none">
+          <div className="flex items-center">
+            <div className="md:w-1/2">
+              <div className="flex">
+                <div className="h-full md:h-12 aspect-[750/449] relative duration-300">
+                  <Link href="/">
+                    <Image
+                      sizes="100%"
+                      alt="logo"
+                      src="/logo.png"
+                      priority
+                      fill
+                      className="object-contain"
+                    />
+                  </Link>
+                </div>
+                <div className="title-wrap ml-[15px]">
+                  <h2 className="font-bold text-base">{quiz.title}</h2>
+                  <div className="flex items-center">
+                    <span className="font-medium text-sm text-gray-500">Review Mode</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-1/2">
+              <div className="flex items-center justify-end space-x-8">
+                <Image
+                  width={28}
+                  height={24}
+                  sizes="100%"
+                  alt="wifi"
+                  src="/wifi.png"
+                  priority
+                />
+
+                <Tooltip title="Open Notes" className="hidden md:block">
+                  <Button
+                    className="p-[0] border-[0] shadow-[0]"
+                    onClick={() => setIsNotesViewOpen((prev) => !prev)}
+                  >
+                    <span className="material-symbols-rounded bold block! text-[24px]! text-[#222]">
+                      assignment
+                    </span>
+                  </Button>
+                </Tooltip>
+
+                <Button
+                  className="p-[0] border-[0] shadow-[0]"
+                  onClick={() => setIsOptionsOpen(true)}
+                >
+                  <div className="hambuger">
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                    <div className="bar"></div>
+                  </div>
+                </Button>
+
+                <Link
+                  href={ROUTES.TEST_RESULT(testResult.id)}
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                >
+                  <span className="material-symbols-rounded text-[20px]">arrow_back</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </header>
+
+      <Modal
+        open={isOptionsOpen}
+        onCancel={() => {
+          setIsOptionsOpen(false);
+          setTimeout(() => setOptionsView("main"), 200);
+        }}
+        footer={null}
+        closable={true}
+        closeIcon={
+          <Image
+            width={18}
+            height={18}
+            sizes="100%"
+            alt="close"
+            src="/bold-close.png"
+            className="mr-[35px] mt-[5px]"
+            priority
+          />
+        }
+        width="100%"
+        wrapClassName="fullscreen-modal"
+        title={
+          optionsView === "main" ? (
+            <h3 className="text-[27px] font-[500] text-center mt-[-2px]">Options</h3>
+          ) : (
+            <div className="relative flex justify-center items-center h-full ml-[-16px] mt-[-5px]">
+              <button
+                onClick={() => setOptionsView("main")}
+                className="absolute left-0 flex gap-[10px] items-center text-gray-600 hover:text-black cursor-pointer"
+              >
+                <Image
+                  width={17}
+                  height={25}
+                  sizes="100%"
+                  src="/bold-arrow.png"
+                  alt="icon"
+                  className="mt-[-3px] option-icon"
+                  priority
+                />
+                <span className="font-[500] text-[27px] text-[#000] popup-title">Options</span>
+              </button>
+              <h3 className="text-[27px] font-[500] text-center popup-title">Text size</h3>
+            </div>
+          )
+        }
+        transitionName=""
+        maskTransitionName=""
+      >
+        <div className="max-w-[700px] mx-auto mt-4">
+          {optionsView === "main" && (
+            <div className="tool-group">
+              <div
+                className="tool-box cursor-pointer popup-bar-item"
+                onClick={() => setOptionsView("textSize")}
+              >
+                <div className="flex items-center gap-[25px]">
+                  <Image
+                    width={28}
+                    height={24}
+                    className="icon-left"
+                    sizes="100%"
+                    alt="text size"
+                    src="/text-size-icon.png"
+                    priority
+                  />
+                  <div className="title">Text size</div>
+                </div>
+                <Image
+                  width={28}
+                  height={24}
+                  className="icon-right"
+                  sizes="100%"
+                  alt="arrow"
+                  src="/arrow-right.png"
+                  priority
+                />
+              </div>
+            </div>
+          )}
+          {optionsView === "textSize" && (
+            <div className="border border-[#c5c5c5] rounded-[4px] overflow-hidden mt-[30px]">
+              {textSizes.map((size) => (
+                <button
+                  key={size.key}
+                  onClick={() => setSelectedTextSize(size.key)}
+                  className="w-full flex items-center text-left px-[36px] py-[27px] border-b border-gray-300 last:border-b-0 hover:bg-gray-100 transition-colors"
+                >
+                  <span
+                    className={`material-symbols-rounded check-size xbold mr-[25px] transition-opacity ${
+                      selectedTextSize === size.key ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    check
+                  </span>
+                  <span className="text-[18px] size-text">{size.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+    </>
+  );
+}
 
 function ReviewExplanation({
   quiz,
@@ -339,6 +540,11 @@ function ReviewExplanation({
 
   const [isMobileView, setIsMobileView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  // State for review mode notes/highlights (mirrors ExamContext)
+  const [isNotesViewOpen, setIsNotesViewOpen] = useState(false);
+  const [savedPassageData, setSavedPassageData] = useState<Record<number, { notes: any[]; highlights: any[] }>>({});
+  const [selectedTextSize, setSelectedTextSize] = useState("Regular");
 
   // ▼▼▼ HeadingAnswerBlock ▼▼▼
   const HeadingAnswerBlock = ({
@@ -667,6 +873,15 @@ function ReviewExplanation({
     };
   }, []);
 
+  useEffect(() => {
+    if (!fullPage) return;
+    document.documentElement.className = "";
+    document.documentElement.classList.add(`text-size-${selectedTextSize}`);
+    return () => {
+      document.documentElement.className = "";
+    };
+  }, [selectedTextSize, fullPage]);
+
   // ▼▼▼ LOGIC processedPassageComponent (ĐÃ SỬA LỖI STYLE) ▼▼▼
   const processedPassageComponent = useMemo(() => {
     if (!currentPassage?.passage_content) return null;
@@ -686,7 +901,7 @@ function ReviewExplanation({
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: currentPassage.passage_content,
+            __html: (currentPassage.passage_content || '').replace(/&nbsp;|\u00A0/g, ' '),
           }}
         />
       );
@@ -839,7 +1054,7 @@ function ReviewExplanation({
         },
       };
 
-      const parsedResult = parse(currentPassage.passage_content, parserOptions);
+      const parsedResult = parse((currentPassage.passage_content || '').replace(/&nbsp;|\u00A0/g, ' '), parserOptions);
       console.log('[processedPassageComponent] Parsed result type:', typeof parsedResult, 'Is array:', Array.isArray(parsedResult), 'Is valid element:', React.isValidElement(parsedResult), parsedResult);
       
       const normalized = normalizeParseResult(parsedResult);
@@ -874,7 +1089,7 @@ function ReviewExplanation({
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: currentPassage.passage_content,
+            __html: (currentPassage.passage_content || '').replace(/&nbsp;|\u00A0/g, ' '),
           }}
         />
       );
@@ -1327,6 +1542,40 @@ function ReviewExplanation({
     });
   }, [newPost, mappedAnswers]);
 
+  // Minimal ExamContext value for review mode (enables TextSelectionProvider + Notepad)
+  const reviewExamContextValue = useMemo(() => ({
+    post: quiz as any,
+    testID: testResult.id,
+    part: {
+      current: currentPassageIndex,
+      total: (newPost?.quizFields?.passages ?? []).length,
+      setCurrent: setCurrentPassageIndex,
+    },
+    isFormDisabled: true,
+    setFormDisabled: () => {},
+    isReady: true,
+    setIsReady: () => {},
+    testResult: testResult.testResultFields,
+    timer: undefined,
+    setTimer: () => {},
+    handleSubmitAnswer: () => {},
+    isNotesViewOpen,
+    setIsNotesViewOpen,
+    selectedTextSize,
+    setSelectedTextSize,
+    activeQuestionIndex: 0,
+    setActiveQuestionIndex: () => {},
+    items: { available: [] as any[] },
+    setItems: () => {},
+    activeId: null,
+    overId: null,
+    answerOptions: [],
+    startIndex: 0,
+    getQuestionStartIndex: () => 0,
+    savedPassageData,
+    setSavedPassageData,
+  }), [currentPassageIndex, isNotesViewOpen, savedPassageData, selectedTextSize, quiz, testResult, newPost, setCurrentPassageIndex]);
+
   const splitter = (
     <Splitter
       layout={isMobileView ? "vertical" : undefined}
@@ -1340,14 +1589,16 @@ function ReviewExplanation({
         >
           {/* 1a. NẾU LÀ READING: Hiển thị Passage */}
           {isReading && (
-            <div className="prose prose-sm max-w-none p-4 md:p-12 bg-white">
-              <h2 className="text-[#374151] text-2xl font-bold">
-                {currentPassage.title}
-              </h2>
-              <SafeRender name="processedPassageComponent">
-                {processedPassageComponent}
-              </SafeRender>
-            </div>
+            <TextSelectionWrapper>
+              <div className="prose prose-sm max-w-none p-4 md:p-12 bg-white break-words [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
+                <h2 className="text-[#374151] text-2xl font-bold">
+                  {currentPassage.title}
+                </h2>
+                <SafeRender name="processedPassageComponent">
+                  {processedPassageComponent}
+                </SafeRender>
+              </div>
+            </TextSelectionWrapper>
           )}
 
           {/* 1b. NẾU LÀ LISTENING: Hiển thị Câu hỏi (ẩn explanation bằng CSS) */}
@@ -1412,83 +1663,99 @@ function ReviewExplanation({
 
   if (fullPage) {
     return (
-      <div className="flex flex-col h-full overflow-hidden">
-        {splitter}
+      <ExamContext.Provider value={reviewExamContextValue as any}>
+        <TextSelectionProvider key={currentPassageIndex}>
+          <div className="flex flex-col h-full overflow-hidden">
+            <ReviewHeader quiz={quiz} testResult={testResult} />
 
-        {/* Full-width footer — identical to take-the-test footer (no submit button) */}
-        <footer className="shrink-0 bg-white flex items-center w-full p-[12px] pr-[0] pt-[0]">
-          <div className="flex justify-between items-center h-full flex-grow mr-[110px]">
-            {passages.map((passage: any, idx: number) => {
-              const isCurrent = idx === currentPassageIndex;
-              const info = passagesFooterInfo[idx] ?? { questions: [], total: 0, answered: 0 };
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setCurrentPassageIndex(idx)}
-                  className="h-full flex items-center cursor-pointer w-full"
-                >
-                  {isCurrent ? (
-                    <div className="justify-center w-full">
-                      <div className="flex items-center gap-[5px] h-full">
-                        <div className="flex items-center border-t-[3px] border-gray-200 pt-2">
-                          <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px]">
-                            {passageLabel} {idx + 1}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 overflow-x-auto py-1">
-                          {info.questions.map((qi: number) => {
-                            const ans = mappedAnswers[qi];
-                            const isAnswered = ans !== null && ans !== undefined && String(ans).trim() !== "" && !(Array.isArray(ans) && ans.length === 0);
-                            return (
-                              <div key={qi} className="flex flex-col items-center gap-2 flex-shrink-0">
-                                <div className={twMerge("w-full h-[3px] rounded-sm", isAnswered ? "bg-green-500" : "bg-gray-200")} />
-                                <span className="text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded">
-                                  {qi + 1}
-                                </span>
+            <div className="flex flex-grow min-h-0 overflow-hidden">
+              {/* Main content: splitter + footer */}
+              <div className={twMerge("flex flex-col min-h-0 w-full duration-300 overflow-hidden", isNotesViewOpen && "w-9/12")}>
+                {splitter}
+
+                {/* Full-width footer — identical to take-the-test footer (no submit button) */}
+                <footer className="shrink-0 bg-white flex items-center w-full p-[12px] pr-[0] pt-[0]">
+                  <div className="flex justify-between items-center h-full flex-grow mr-[110px]">
+                    {passages.map((passage: any, idx: number) => {
+                      const isCurrent = idx === currentPassageIndex;
+                      const info = passagesFooterInfo[idx] ?? { questions: [], total: 0, answered: 0 };
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setCurrentPassageIndex(idx)}
+                          className="h-full flex items-center cursor-pointer w-full"
+                        >
+                          {isCurrent ? (
+                            <div className="justify-center w-full">
+                              <div className="flex items-center gap-[5px] h-full">
+                                <div className="flex items-center border-t-[3px] border-gray-200 pt-2">
+                                  <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px]">
+                                    {passageLabel} {idx + 1}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 overflow-x-auto py-1">
+                                  {info.questions.map((qi: number) => {
+                                    const ans = mappedAnswers[qi];
+                                    const isAnswered = ans !== null && ans !== undefined && String(ans).trim() !== "" && !(Array.isArray(ans) && ans.length === 0);
+                                    return (
+                                      <div key={qi} className="flex flex-col items-center gap-2 flex-shrink-0">
+                                        <div className={twMerge("w-full h-[3px] rounded-sm", isAnswered ? "bg-green-500" : "bg-gray-200")} />
+                                        <span className="text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded">
+                                          {qi + 1}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
+                              <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap">
+                                {passageLabel} {idx + 1}
+                              </span>
+                              <span className="text-[16px] text-gray-500 whitespace-nowrap">
+                                {info.answered} of {info.total}
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
-                      <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap">
-                        {passageLabel} {idx + 1}
-                      </span>
-                      <span className="text-[16px] text-gray-500 whitespace-nowrap">
-                        {info.answered} of {info.total}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                      );
+                    })}
+                  </div>
 
-          {/* Prev / Next arrow buttons — identical to take-the-test */}
-          <div className="relative h-full flex items-center flex-shrink-0">
-            <div className="absolute bottom-[70px] right-[35px] mb-1 flex gap-1">
-              <button
-                type="button"
-                onClick={handlePrevPassage}
-                disabled={!hasPrevPassage}
-                className="flex items-center justify-center w-[55px] h-[55px] bg-gray-800 disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
-              >
-                <Image width={23} height={26} sizes="100%" alt="prev" src="/bold-al.png" priority />
-              </button>
-              <button
-                type="button"
-                onClick={handleNextPassage}
-                disabled={!hasNextPassage}
-                className="bg-[#000]! flex items-center justify-center w-[55px] h-[55px] disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
-              >
-                <Image width={23} height={26} sizes="100%" alt="next" src="/bold-ar.png" priority />
-              </button>
+                  {/* Prev / Next arrow buttons — identical to take-the-test */}
+                  <div className="relative h-full flex items-center flex-shrink-0">
+                    <div className="absolute bottom-[70px] right-[35px] mb-1 flex gap-1">
+                      <button
+                        type="button"
+                        onClick={handlePrevPassage}
+                        disabled={!hasPrevPassage}
+                        className="flex items-center justify-center w-[55px] h-[55px] bg-gray-800 disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
+                      >
+                        <Image width={23} height={26} sizes="100%" alt="prev" src="/bold-al.png" priority />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNextPassage}
+                        disabled={!hasNextPassage}
+                        className="bg-[#000]! flex items-center justify-center w-[55px] h-[55px] disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
+                      >
+                        <Image width={23} height={26} sizes="100%" alt="next" src="/bold-ar.png" priority />
+                      </button>
+                    </div>
+                  </div>
+                </footer>
+              </div>
+
+              {/* Notepad sidebar */}
+              <div className={twMerge("w-0 overflow-hidden duration-300", isNotesViewOpen && "w-3/12")}>
+                <Notepad />
+              </div>
             </div>
           </div>
-        </footer>
-      </div>
+        </TextSelectionProvider>
+      </ExamContext.Provider>
     );
   }
 
