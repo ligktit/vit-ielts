@@ -104,8 +104,8 @@ export function PageTestResult({
   const displayScoreStr = isMockTest
     ? (
       bandScore !== null
-        ? (Number.isInteger(bandScore) ? `${bandScore}` : `${bandScore.toFixed(1)}`)
-        : (Number.isInteger(numericScore) ? `${numericScore}` : `${numericScore.toFixed(1)}`)
+        ? bandScore.toFixed(1)
+        : numericScore.toFixed(1)
     )
     : `${scoreData.correctAns}/${scoreData.total_questions}`;
   const scoreLabel = isMockTest ? "Band Score" : "Câu đúng";

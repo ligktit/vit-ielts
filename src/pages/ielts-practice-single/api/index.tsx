@@ -15,6 +15,7 @@ export type IPracticeSingle = {
   slug: string;
   hasAccess: boolean;
   relatedPracticeQuizzes: {
+    id: string;
     databaseId: number;
     title: string;
     featuredImage: false | string;

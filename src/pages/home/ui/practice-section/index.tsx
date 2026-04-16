@@ -197,10 +197,9 @@ export const PracticeSection = ({
                         openProContentModal();
                         return;
                       }
-                    } else if (!getItemHref) {
-                      e?.preventDefault();
-                      handleCardClick(quiz);
                     }
+                    // For logged-in users clicking normal practice cards, 
+                    // we do nothing and let the standard <Link> handle the navigation to the href.
                   };
 
                   return (

@@ -21,6 +21,57 @@ import type {
 // ============================================================================
 
 /**
+ * Lấy các bài mẫu liên quan — cùng skill, ưu tiên cùng source + year.
+ * Loại trừ bài hiện tại. Limit 6.
+ */
+export async function getRelatedSampleEssays(
+    supabase: SupabaseClient,
+    essayId: string
+): Promise<SampleEssay[]> {
+    // Step 1: lấy metadata bài hiện tại
+    const { data: current, error } = await supabase
+        .from("sample_essays")
+        .select("skill, source, year, quarter")
+        .eq("id", essayId)
+        .single();
+
+    if (error || !current) return [];
+
+    // Step 2: tìm bài cùng skill + source + year (best match)
+    let query = supabase
+        .from("sample_essays")
+        .select("id, title, slug, excerpt, skill, featured_image, pro_user_only, published_at, created_at")
+        .eq("status", "published")
+        .neq("id", essayId)
+        .eq("skill", current.skill)
+        .limit(8);
+
+    if (current.source) query = query.eq("source", current.source);
+    if (current.year) query = query.eq("year", current.year);
+
+    const { data, error: relErr } = await query.order("created_at", { ascending: false });
+
+    if (relErr) return [];
+
+    // Fallback: nếu không đủ, lấy thêm cùng skill
+    if ((data ?? []).length >= 4) return data as SampleEssay[];
+
+    const existingIds = new Set((data ?? []).map((e: any) => e.id));
+    existingIds.add(essayId);
+
+    const { data: fallback } = await supabase
+        .from("sample_essays")
+        .select("id, title, slug, excerpt, skill, featured_image, pro_user_only, published_at, created_at")
+        .eq("status", "published")
+        .eq("skill", current.skill)
+        .not("id", "in", `(${[...existingIds].join(",")})`)
+        .limit(8 - (data ?? []).length)
+        .order("created_at", { ascending: false });
+
+    return [...(data ?? []), ...(fallback ?? [])] as SampleEssay[];
+}
+
+/**
  * Lấy bài mẫu theo slug.
  * Chỉ trả về bài có status = 'published'.
  *

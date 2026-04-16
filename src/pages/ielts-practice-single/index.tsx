@@ -36,6 +36,7 @@ function toIPracticeSingle(
     slug: quiz.slug,
     hasAccess,
     relatedPracticeQuizzes: relatedQuizzes.map((rq) => ({
+      id: rq.id,
       databaseId: 0,
       title: rq.title,
       featuredImage: rq.featured_image || false,

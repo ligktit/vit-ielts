@@ -222,7 +222,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
               </div>
 
               {/* Download PDF Box */}
-              {post.quizFields.pdf?.node?.mediaItemUrl && (
+              {false && post.quizFields.pdf?.node?.mediaItemUrl && (
                 <div className="bg-white rounded-[12px] border-2 border-primary-500 p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="material-symbols-rounded text-primary-500 font-bold text-[28px]">

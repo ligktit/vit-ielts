@@ -3,7 +3,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import _ from "lodash";
 import { ROUTES } from "@/shared/routes";
 import { createServerSupabase } from "~supabase/server";
-import { getSampleEssays, getSampleEssayBySlug } from "~services/sample-essay";
+import { getSampleEssays, getSampleEssayBySlug, getRelatedSampleEssays } from "~services/sample-essay";
 import { readConfig } from "~services/cms-config";
 import type { SampleEssayBannerConfig } from "./ui/archive/types";
 import type { SampleEssayFilters } from "~services/types/database";
@@ -130,6 +130,8 @@ export const getServerSidePropsSingle = async (
     return { notFound: true };
   }
 
+  const relatedEssays = await getRelatedSampleEssays(supabase, essay.id).catch(() => []);
+
   // Check Pro access
   if (essay.pro_user_only) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -167,6 +169,7 @@ export const getServerSidePropsSingle = async (
   return {
     props: {
       sampleEssay: essay,
+      relatedEssays: JSON.parse(JSON.stringify(relatedEssays)),
     },
   };
 };
