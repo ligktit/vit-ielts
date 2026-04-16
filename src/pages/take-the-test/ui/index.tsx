@@ -614,11 +614,28 @@ export function PageTakeTheTest() {
     <>
       {/* Render AudioPlayer outside TextSelectionProvider to prevent unmounting */}
       <form onSubmit={handleSubmit(handleSubmitAnswer)}>
-        <div className="flex flex-col h-screen">
-          <Header post={post} />
-
-          {/* 🔥 FIX QUAN TRỌNG: ĐẶT key={part.current} ĐỂ BUỘC UNMOUNT/MOUNT */}
+        {/* flex ROW: left column + notepad sidebar side by side */}
+        <div className="flex h-screen">
+          {/* 🔥 TextSelectionProvider wraps left column + Notepad for full-height sidebar */}
           <TextSelectionProvider key={part.current}>
+            {/* Left column: header + passage info + splitter */}
+            <div
+              className={twMerge(
+                "flex flex-col flex-1 min-w-0 h-full overflow-hidden duration-300",
+                isNotesViewOpen && "w-9/12 flex-none"
+              )}
+            >
+              <Header post={post} />
+
+              <main className="shrink grow overflow-hidden flex flex-col pb-[60px]">
+                <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
+                  <div className="p-[16px]">
+                    <div className="font-bold text-gray-800 text-base md:text-lg leading-tight">
+                      {passageInfo.partLabel} {passageInfo.partNumber}
+                    </div>
+                    <div className="text-[#000] text-base">
+                      Read the text and answer questions {passageInfo.questionRange}
+                    </div>
             <main id="iel-take-test-main" className="shrink grow overflow-hidden flex flex-col pb-[60px]">
               <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
                 <div className="p-[16px]">
@@ -629,23 +646,16 @@ export function PageTakeTheTest() {
                     Read the text and answer questions {passageInfo.questionRange}
                   </div>
                 </div>
-              </div>
 
-              <ExamContext.Provider value={newContextValue}>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={rectIntersection}
-                  onDragStart={handleDragStart}
-                  onDragOver={handleDragOver}
-                  onDragEnd={handleDragEnd}
-                >
-                  <div className="flex h-full flex-grow min-h-0">
-                    <div
-                      className={twMerge(
-                        "w-full duration-300",
-                        isNotesViewOpen && "w-10/12"
-                      )}
-                    >
+                <ExamContext.Provider value={newContextValue}>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={rectIntersection}
+                    onDragStart={handleDragStart}
+                    onDragOver={handleDragOver}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <div className="flex h-full flex-grow min-h-0">
                       <Splitter layout={isMobileView ? "vertical" : undefined}>
                         {post.quizFields.skill[0] === "reading" && (
                           <Splitter.Panel min="20%" max="80%">
@@ -713,32 +723,34 @@ export function PageTakeTheTest() {
                         </Splitter.Panel>
                       </Splitter>
                     </div>
-                    <div
-                      className={twMerge(
-                        "w-0 overflow-hidden duration-300",
-                        isNotesViewOpen && "w-2/12"
-                      )}
-                    >
-                      <Notepad />
-                    </div>
-                  </div>
 
-                  <DragOverlay>
-                    {activeId ? (
-                      <DraggableOption
-                        id={activeId}
-                        // @ts-ignore
-                        content={
-                          answerOptions[parseInt(String(activeId).split("-")[2])]
-                            ?.optionText || ""
-                        }
-                        isOverlay
-                      />
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              </ExamContext.Provider>
-            </main>
+                    <DragOverlay>
+                      {activeId ? (
+                        <DraggableOption
+                          id={activeId}
+                          // @ts-ignore
+                          content={
+                            answerOptions[parseInt(String(activeId).split("-")[2])]
+                              ?.optionText || ""
+                          }
+                          isOverlay
+                        />
+                      ) : null}
+                    </DragOverlay>
+                  </DndContext>
+                </ExamContext.Provider>
+              </main>
+            </div>
+
+            {/* Notepad sidebar — full height from header to footer */}
+            <div
+              className={twMerge(
+                "w-0 overflow-hidden duration-300 shrink-0",
+                isNotesViewOpen && "w-3/12"
+              )}
+            >
+              <Notepad />
+            </div>
           </TextSelectionProvider>
 
           {/* Footer is outside TextSelectionProvider so AudioPlayer won't unmount */}

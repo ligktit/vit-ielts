@@ -67,7 +67,7 @@ export const TextSelectionProvider = ({
     UNDERLINE_STYLE,
   } = options;
 
-  const { part, savedPassageData, setSavedPassageData } = useExamContext();
+  const { part, savedPassageData, setSavedPassageData, setIsNotesViewOpen } = useExamContext();
 
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState({ position: { x: 0, y: 0 }, visible: false });
@@ -98,15 +98,15 @@ export const TextSelectionProvider = ({
     if (type === "highlight") {
       span.style.backgroundColor = bgColor || HIGHLIGHT_COLOR;
       span.style.textDecoration = "none";
-      span.style.borderRadius = "3px";
-      span.style.padding = "1px 2px";
+      span.style.borderRadius = "0";
+      span.style.padding = "1px 0";
       span.style.color = "#fff";
     } else {
       // Note: blue background
       span.style.backgroundColor = bgColor || "#BFDBFE";
       span.style.textDecoration = "none";
-      span.style.borderRadius = "3px";
-      span.style.padding = "1px 2px";
+      span.style.borderRadius = "0";
+      span.style.padding = "1px 0";
       span.style.color = "#fff";
       span.style.fontWeight = "600";
     }
@@ -122,14 +122,18 @@ export const TextSelectionProvider = ({
     const nodeText = textNode.textContent || "";
 
     const onClick = () => {
+      const selection = document.getSelection();
+      if (selection && selection.toString().trim()) return;
       if (type === "highlight") {
         setSelectedHighlightId(nodeId);
         setSelectedUnderlineId(null);
       } else {
+        // Notes are managed via sidebar — open sidebar when clicking note span
         setSelectedUnderlineId(nodeId);
         setSelectedHighlightId(null);
         const currentNote = notesRef.current.find((n) => n.nodeId === nodeId);
         setCurrentSelection(currentNote || null);
+        setIsNotesViewOpen(true);
       }
     };
 
@@ -164,13 +168,16 @@ export const TextSelectionProvider = ({
       textNode.parentElement?.removeChild(textNode);
     }
 
-    const { x, y, width, height } = span.getBoundingClientRect();
-    span.addEventListener("click", () => {
-      setTooltip({
-        position: { x: x + width / 2, y: y + height + 2 },
-        visible: true,
+    // Only show tooltip popup for highlights, not for notes (notes use sidebar)
+    if (type === "highlight") {
+      const { x, y, width, height } = span.getBoundingClientRect();
+      span.addEventListener("click", () => {
+        setTooltip({
+          position: { x: x + width / 2, y: y + height + 2 },
+          visible: true,
+        });
       });
-    });
+    }
   }, [HIGHLIGHT_CLASS, UNDERLINE_CLASS, createSpan]);
 
   // --- CORE LOGIC: APPLY ---
@@ -242,18 +249,8 @@ export const TextSelectionProvider = ({
     const res = applySelection("underline", undefined, undefined, NOTE_BLUE);
     if (res) {
         setHighlights(prev => [...prev, { ...res, type: "underline", color: NOTE_BLUE }]);
-        
-        setTimeout(() => {
-            const span = document.querySelector(`span[data-node-id="${res.nodeId}"]`);
-            if (span) {
-                const { x, y, width, height } = span.getBoundingClientRect();
-                setTooltip({
-                    position: { x: x + width / 2, y: y + height + 2 },
-                    visible: true,
-                });
-            }
-        }, 0);
-
+        // Hide tooltip immediately - sidebar will open instead
+        setTooltip(prev => ({ ...prev, visible: false }));
         return { nodeId: res.nodeId, text: res.text, nodeContent: "" };
     }
     return null;
@@ -301,10 +298,7 @@ export const TextSelectionProvider = ({
   // --- NOTE SUBMIT ---
   const handleNoteSubmit = useCallback((value: string, isEdit: Note | false = false) => {
     const trimmedValue = value.trim();
-    if (isEdit && trimmedValue === "") {
-      removeUnderline(isEdit.nodeId);
-      return;
-    }
+    // Allow saving empty notes - only delete via explicit DELETE button
     if (isEdit && isEdit.nodeContent === trimmedValue) {
       setCurrentSelection(null);
       setTooltip((prev) => ({ ...prev, visible: false }));
@@ -484,7 +478,13 @@ export const TextSelectionProvider = ({
         handleHighlight,
         handleNote: () => {
           const result = handleNote();
-          if (result) setCurrentSelection(result);
+          if (result) {
+            setCurrentSelection(result);
+            // Add note to notes immediately with empty content
+            setNotes(prev => [...prev, { nodeId: result.nodeId, text: result.text, nodeContent: "" }]);
+            // Open sidebar instead of showing popup
+            setIsNotesViewOpen(true);
+          }
         },
         removeHighlight,
         removeUnderline,
@@ -548,6 +548,7 @@ const TooltipPopup = () => {
   const { tooltip, tooltipRef, selectedHighlightId, selectedUnderlineId, currentSelection, handleHighlight, handleNote, removeHighlight, notes } = useTextSelectionContext()!;
 
   const isDefault = !currentSelection && !selectedHighlightId && !selectedUnderlineId;
+  const showArrow = isDefault || !!selectedHighlightId;
 
   return (
     <div
@@ -558,47 +559,68 @@ const TooltipPopup = () => {
         opacity: tooltip.visible ? 1 : 0,
         visibility: tooltip.visible ? "visible" : "hidden",
         transform: "translateX(-50%) translateY(8px)",
+        pointerEvents: tooltip.visible ? "auto" : "none",
       }}
-      className="absolute z-50 bg-white border border-gray-200 rounded-lg shadow-xl"
+      className="absolute z-50 bg-white border border-gray-400"
     >
       {/* Arrow pointing up */}
-      {(isDefault || selectedHighlightId) && (
-        <div
-          style={{
-            position: "absolute",
-            top: -8,
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 0,
-            height: 0,
-            borderLeft: "8px solid transparent",
-            borderRight: "8px solid transparent",
-            borderBottom: "8px solid white",
-            filter: "drop-shadow(0 -1px 1px rgba(0,0,0,0.06))",
-          }}
-        />
+      {showArrow && (
+        <>
+          {/* Outer arrow (border) */}
+          <div
+            style={{
+              position: "absolute",
+              top: -9,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "10px solid transparent",
+              borderRight: "10px solid transparent",
+              borderBottom: "10px solid #99a1af",
+            }}
+          />
+          {/* Inner arrow (white fill) */}
+          <div
+            style={{
+              position: "absolute",
+              top: -8,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 0,
+              height: 0,
+              borderLeft: "9px solid transparent",
+              borderRight: "9px solid transparent",
+              borderBottom: "9px solid white",
+            }}
+          />
+        </>
       )}
 
       {/* Main content */}
-      <div className="px-1 py-1">
-        {/* Default: Note + Highlight */}
+      <div className="px-3 py-2.5 pt-1 pl-1.5">
+        {/* Default: Note + Highlight with icon backgrounds */}
         {isDefault && (
-          <div className="flex items-stretch gap-4">
-            <button
-              type="button"
-              onClick={handleHighlight}
-              className="flex flex-col items-center gap-1.5 pl-3 py-2 cursor-pointer"
-            >
-              <MarkerIcon className="text-[22px] text-[#1f2937]" />
-              <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Highlight</span>
-            </button>
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleNote}
-              className="flex flex-col items-center gap-1.5 pr-3 py-2 cursor-pointer"
+              className="flex flex-col items-center cursor-pointer group"
             >
-              <NoteIcon className="text-[22px] text-[#1f2937]" />
+              <div className="w-[44px] h-[40px] bg-[#e5e7eb] rounded-lg flex items-center justify-center bg-transparent">
+                <NoteIcon className="text-[24px] text-[#374151]" />
+              </div>
               <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Note</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleHighlight}
+              className="flex flex-col items-center cursor-pointer group"
+            >
+              <div className="w-[44px] h-[40px] bg-[#e5e7eb] rounded-lg flex items-center justify-center bg-transparent">
+                <MarkerIcon className="text-[24px] text-[#374151]" />
+              </div>
+              <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Highlight</span>
             </button>
           </div>
         )}
@@ -608,28 +630,15 @@ const TooltipPopup = () => {
           <button
             type="button"
             onClick={removeHighlight}
-            className="flex flex-col items-center gap-1.5 px-4 py-2 cursor-pointer"
+            className="flex flex-col items-center gap-2 px-2 cursor-pointer group"
           >
-            <MarkerClearIcon className="text-[22px] text-[#1f2937]" />
+            <div className="w-[44px] h-[44px] bg-[#e5e7eb] rounded-lg flex items-center justify-center group-hover:bg-[#fecaca] transition-colors">
+              <MarkerClearIcon className="text-[24px] text-[#374151]" />
+            </div>
             <span className="text-[12px] font-medium text-[#4B5563] whitespace-nowrap">Remove</span>
           </button>
         )}
-
-        {/* Note form (new or existing underline) */}
-        {(!currentSelection && selectedUnderlineId) && (
-          <NoteFormInput
-            initialValue={notes.find((n) => n.nodeId === selectedUnderlineId)?.nodeContent}
-            isEdit={notes.find((n) => n.nodeId === selectedUnderlineId)}
-          />
-        )}
-        {currentSelection && (
-          <NoteFormInput
-            initialValue={notes.find((n) => n.nodeId === currentSelection.nodeId)?.nodeContent}
-            isEdit={notes.find((n) => n.nodeId === currentSelection.nodeId)}
-          />
-        )}
       </div>
-
     </div>
   );
 };
