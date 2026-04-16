@@ -35,12 +35,19 @@ const defaultSliderOptions: Options = {
 export function ExamCollection({
   loading = false,
   data,
+  optionsOverride,
 }: {
   loading?: boolean;
   data?: IExamCollection["data"]["reading" | "listening"][number] & { skill?: string };
+  /** Override Splide options — merged on top of defaultSliderOptions */
+  optionsOverride?: Partial<Options>;
 }) {
   const splideRef = useRef<{ splide: SplideType } | null>(null);
-  const sliderOptions = useMemo(() => _.merge(defaultSliderOptions, []), []);
+  const sliderOptions = useMemo(
+    () => _.merge({}, defaultSliderOptions, optionsOverride ?? {}),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const handlePrev = () => splideRef.current?.splide?.go("<");
   const handleNext = () => splideRef.current?.splide?.go(">");

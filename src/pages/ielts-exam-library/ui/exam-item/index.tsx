@@ -161,7 +161,7 @@ export const ExamItem = ({
               {item.title}
             </h3>
             <p className="font-noto-sans text-[14px] text-[#6A7282]">
-              {quizFields.testsTaken?.toLocaleString() ?? 0} attempts
+              {quizFields.testsTaken ?? 0} attempts
             </p>
           </div>
 

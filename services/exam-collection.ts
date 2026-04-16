@@ -11,6 +11,7 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import { sanitizeFilterValue } from "./lib/sanitize";
+import { readConfig } from "./cms-config";
 import type {
     MockTest,
     MockTestCollection,
@@ -156,12 +157,42 @@ export async function getExamCollections(
     if (collError) throw collError;
 
     // -----------------------------------------------------------------------
+    // Step 3.5: Apply Global Sort Order if exists
+    // -----------------------------------------------------------------------
+    let sortedCollections = [...(matchedCollections || [])];
+    try {
+        const orderConfig = await readConfig<{ collection_ids: string[] }>(
+            supabase,
+            "library/mock-collections-order"
+        );
+        const globalOrderIds = orderConfig?.collection_ids;
+        
+        if (globalOrderIds && Array.isArray(globalOrderIds) && globalOrderIds.length > 0) {
+            sortedCollections.sort((a, b) => {
+                const idxA = globalOrderIds.indexOf(a.id);
+                const idxB = globalOrderIds.indexOf(b.id);
+                
+                // Nếu không có trong danh sách order, đẩy xuống dưới, xếp theo created_at
+                if (idxA === -1 && idxB === -1) {
+                   return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                }
+                if (idxA === -1) return 1;
+                if (idxB === -1) return -1;
+                
+                return idxA - idxB;
+            });
+        }
+    } catch {
+        // silent fallback to default sort
+    }
+
+    // -----------------------------------------------------------------------
     // Step 4: Paginate collections
     // -----------------------------------------------------------------------
-    const total = matchedCollections.length;
+    const total = sortedCollections.length;
     const totalPages = Math.ceil(total / pageSize);
     const startIndex = (page - 1) * pageSize;
-    const paginatedCollections = matchedCollections.slice(
+    const paginatedCollections = sortedCollections.slice(
         startIndex,
         startIndex + pageSize
     );
@@ -447,5 +478,76 @@ function buildEmptyResponse(
     return {
         data: { reading: [], listening: [] },
         pageInfo: { total: 0, currentPage: page, totalPages: 0, pageSize },
+    };
+}
+
+/**
+ * Lấy danh sách collections theo IDs cụ thể (admin đã chọn hiển thị trang chủ).
+ * Giữ nguyên thứ tự IDs admin chọn.
+ *
+ * @param supabase - Supabase client instance
+ * @param collectionIds - Mảng UUID của các collections muốn hiển thị
+ * @returns ExamCollectionResponse grouped by reading/listening
+ */
+export async function getExamCollectionsByIds(
+    supabase: SupabaseClient,
+    collectionIds: string[]
+): Promise<ExamCollectionResponse> {
+    if (!collectionIds || collectionIds.length === 0) {
+        return buildEmptyResponse(1, collectionIds.length);
+    }
+
+    // Áp dụng Global Order cho danh sách truyền vào
+    try {
+        const orderConfig = await readConfig<{ collection_ids: string[] }>(
+            supabase,
+            "library/mock-collections-order"
+        );
+        const globalOrderIds = orderConfig?.collection_ids;
+        if (globalOrderIds && Array.isArray(globalOrderIds) && globalOrderIds.length > 0) {
+            collectionIds.sort((a, b) => {
+                const idxA = globalOrderIds.indexOf(a);
+                const idxB = globalOrderIds.indexOf(b);
+                if (idxA === -1 && idxB === -1) return 0;
+                if (idxA === -1) return 1;
+                if (idxB === -1) return -1;
+                return idxA - idxB;
+            });
+        }
+    } catch {
+        // silent
+    }
+
+    // Fetch tất cả details song song
+    const results = await Promise.allSettled(
+        collectionIds.map((id) => getCollectionDetail(supabase, id))
+    );
+
+    const readingCollections: CollectionWithExams[] = [];
+    const listeningCollections: CollectionWithExams[] = [];
+
+    for (const result of results) {
+        if (result.status !== "fulfilled" || !result.value) continue;
+        const { collection, reading, listening } = result.value;
+
+        if (reading.length > 0) {
+            readingCollections.push({ ...collection, exams: reading });
+        }
+        if (listening.length > 0) {
+            listeningCollections.push({ ...collection, exams: listening });
+        }
+    }
+
+    return {
+        data: {
+            reading: readingCollections,
+            listening: listeningCollections,
+        },
+        pageInfo: {
+            total: collectionIds.length,
+            currentPage: 1,
+            totalPages: 1,
+            pageSize: collectionIds.length,
+        },
     };
 }

@@ -11,7 +11,7 @@ export const TargetScore = () => {
   return (
     <WidgetContextProvider>
       <div
-        className="flex flex-col gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
         data-section="target-score"
       >
         {/* My IELTS score target card */}

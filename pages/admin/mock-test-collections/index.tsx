@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    Table, Input, Space, Button, message, Popconfirm,
-    Modal, Form, Typography, Tag,
+    Table, Input, InputNumber, Space, Button, message, Popconfirm,
+    Modal, Form, Typography, Tag, Switch, Tooltip,
 } from "antd";
 import {
     PlusOutlined, SearchOutlined, EditOutlined,
     DeleteOutlined, BookOutlined, MinusCircleOutlined,
-    FileTextOutlined,
+    FileTextOutlined, HomeOutlined, SaveOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../_layout";
@@ -262,6 +262,11 @@ export default function ExamLibraryPage() {
     const [createColOpen, setCreateColOpen] = useState(false);
     const [createMTOpen, setCreateMTOpen] = useState(false);
 
+    // Toggle states
+    const [homepageIds, setHomepageIds] = useState<string[]>([]);
+    const [globalOrderIds, setGlobalOrderIds] = useState<string[]>([]);
+    const [toggling, setToggling] = useState<string | null>(null);
+
     const fetchCollections = useCallback(async () => {
         setColLoading(true);
         try {
@@ -298,8 +303,74 @@ export default function ExamLibraryPage() {
         }
     }, []);
 
+
+
+    const fetchGlobalOrder = useCallback(async () => {
+        try {
+            const res = await fetch("/api/admin/library/mock-collections-order");
+            if (res.ok) {
+                const data = await res.json();
+                setGlobalOrderIds(data?.collection_ids ?? []);
+            }
+        } catch { /* silent */ }
+    }, []);
+
+    const fetchHomepageConfig = useCallback(async () => {
+        try {
+            const res = await fetch("/api/admin/home/practice-section");
+            if (res.ok) {
+                const data = await res.json();
+                setHomepageIds(data?.collection_ids ?? []);
+            }
+        } catch { /* silent */ }
+    }, []);
+
+    const toggleHomepage = useCallback(async (collectionId: string, checked: boolean) => {
+        setToggling(collectionId);
+        try {
+            const updatedIds = checked
+                ? [...homepageIds, collectionId]
+                : homepageIds.filter(id => id !== collectionId);
+            const res = await fetch("/api/admin/home/practice-section", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ collection_ids: updatedIds }),
+            });
+            if (res.ok) {
+                setHomepageIds(updatedIds);
+                message.success(checked ? "Đã thêm vào trang chủ" : "Đã gỡ khỏi trang chủ");
+            } else {
+                message.error("Lỗi khi cập nhật config trang chủ");
+            }
+        } catch {
+            message.error("Lỗi kết nối");
+        } finally {
+            setToggling(null);
+        }
+    }, [homepageIds]);
+
+    const saveGlobalOrder = useCallback(async (newIds: string[]) => {
+        try {
+            const res = await fetch("/api/admin/library/mock-collections-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ collection_ids: newIds }),
+            });
+            if (res.ok) {
+                setGlobalOrderIds(newIds);
+                message.success("Đã lưu thứ tự hiển thị");
+            } else {
+                message.error("Lỗi khi lưu thứ tự");
+            }
+        } catch {
+            message.error("Lỗi kết nối");
+        }
+    }, []);
+
     useEffect(() => { fetchCollections(); }, [fetchCollections]);
     useEffect(() => { fetchAllMockTests(); }, [fetchAllMockTests]);
+    useEffect(() => { fetchHomepageConfig(); }, [fetchHomepageConfig]);
+    useEffect(() => { fetchGlobalOrder(); }, [fetchGlobalOrder]);
 
     const standaloneMockTests = useMemo(() => {
         const usedIds = new Set(collections.flatMap(c => c.mock_test_ids ?? []));
@@ -359,8 +430,79 @@ export default function ExamLibraryPage() {
         }
     };
 
+    // ----- Inline order change handler -----
+    const [hasUnsavedOrder, setHasUnsavedOrder] = useState(false);
+    const [savingOrder, setSavingOrder] = useState(false);
+
+    /** Compute order position for a given collection ID (1-based) */
+    const getOrderPosition = (id: string): number => {
+        const idx = globalOrderIds.indexOf(id);
+        if (idx !== -1) return idx + 1;
+        // Not in order list → show high number
+        return globalOrderIds.length + 1 + collections.findIndex(c => c.id === id);
+    };
+
+    const handleOrderChange = useCallback((collectionId: string, newPos: number | null) => {
+        if (newPos === null || newPos < 1) return;
+
+        // Build the full ordered list: globalOrderIds + any missing collection IDs
+        const allIds = [...globalOrderIds];
+        for (const c of collections) {
+            if (!allIds.includes(c.id)) allIds.push(c.id);
+        }
+
+        // Remove the item being moved
+        const filtered = allIds.filter(id => id !== collectionId);
+
+        // Insert at new position (1-based → 0-based)
+        const insertIdx = Math.min(newPos - 1, filtered.length);
+        filtered.splice(insertIdx, 0, collectionId);
+
+        // Optimistic update
+        setGlobalOrderIds(filtered);
+        setHasUnsavedOrder(true);
+    }, [globalOrderIds, collections]);
+
+    const saveOrder = async () => {
+        setSavingOrder(true);
+        try {
+            const res = await fetch("/api/admin/library/mock-collections-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ collection_ids: globalOrderIds }),
+            });
+            if (res.ok) {
+                message.success("Đã lưu thứ tự hiển thị");
+                setHasUnsavedOrder(false);
+            } else {
+                message.error("Lỗi khi lưu thứ tự");
+            }
+        } catch {
+            message.error("Lỗi kết nối");
+        } finally {
+            setSavingOrder(false);
+        }
+    };
+
     // Collection table columns
     const colColumns: ColumnsType<CollectionRow> = [
+        {
+            title: "Thứ tự",
+            key: "order",
+            width: 90,
+            render: (_, record) => {
+                const pos = getOrderPosition(record.id);
+                return (
+                    <InputNumber
+                        size="small"
+                        min={1}
+                        value={pos}
+                        onChange={(val) => handleOrderChange(record.id, val)}
+                        style={{ width: 60 }}
+                    />
+                );
+            },
+        },
         {
             title: "Collection",
             dataIndex: "title",
@@ -396,6 +538,25 @@ export default function ExamLibraryPage() {
             key: "created_at",
             width: 120,
             render: (d) => dayjs(d).format("DD/MM/YYYY"),
+        },
+        {
+            title: "Trang chủ",
+            key: "homepage",
+            width: 110,
+            render: (_, record) => {
+                const isOn = homepageIds.includes(record.id);
+                return (
+                    <Tooltip title={isOn ? "Đang hiển thị trang chủ. Click để gỡ." : "Click để hiển thị trang chủ"}>
+                        <Switch
+                            size="small"
+                            checked={isOn}
+                            loading={toggling === record.id}
+                            onChange={(checked) => toggleHomepage(record.id, checked)}
+                            checkedChildren={<HomeOutlined />}
+                        />
+                    </Tooltip>
+                );
+            },
         },
         {
             title: "",
@@ -507,6 +668,17 @@ export default function ExamLibraryPage() {
                 <AdminGlassCard style={{ flex: 1, padding: "16px 20px" }}>
                     <div style={{
                         fontSize: 26, fontWeight: 700, lineHeight: 1.2,
+                        color: homepageIds.length > 0 ? "var(--admin-primary, #D94A56)" : undefined,
+                    }}>
+                        {homepageIds.length}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--admin-text-secondary)", marginTop: 4 }}>
+                        Trang chủ
+                    </div>
+                </AdminGlassCard>
+                <AdminGlassCard style={{ flex: 1, padding: "16px 20px" }}>
+                    <div style={{
+                        fontSize: 26, fontWeight: 700, lineHeight: 1.2,
                         color: standaloneMockTests.length > 0 ? "var(--color-warning, #fa8c16)" : undefined,
                     }}>
                         {standaloneMockTests.length}
@@ -519,15 +691,30 @@ export default function ExamLibraryPage() {
 
             {/* Collections Table */}
             <AdminGlassCard>
-                <Space style={{ marginBottom: 16 }} wrap>
-                    <Input.Search
-                        placeholder="Tìm collection..."
-                        allowClear
-                        onSearch={(v) => { setSearch(v); setPage(1); }}
-                        style={{ width: 280 }}
-                        prefix={<SearchOutlined />}
-                    />
-                </Space>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <Space wrap>
+                        <Input.Search
+                            placeholder="Tìm collection..."
+                            allowClear
+                            onSearch={(v) => { setSearch(v); setPage(1); }}
+                            style={{ width: 280 }}
+                            prefix={<SearchOutlined />}
+                        />
+                    </Space>
+                    {(hasUnsavedOrder || savingOrder) && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ fontSize: 13, color: "var(--color-warning, #fa8c16)" }}>Chưa lưu thay đổi thứ tự</span>
+                            <Button 
+                                type="primary" 
+                                icon={<SaveOutlined />} 
+                                loading={savingOrder} 
+                                onClick={saveOrder}
+                            >
+                                Lưu thay đổi
+                            </Button>
+                        </div>
+                    )}
+                </div>
 
                 <Table
                     columns={colColumns}
@@ -613,6 +800,7 @@ export default function ExamLibraryPage() {
                     router.push(`/admin/mock-tests/${id}`);
                 }}
             />
+
         </AdminLayout>
     );
 }

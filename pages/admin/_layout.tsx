@@ -95,7 +95,6 @@ const MENU_SECTIONS: MenuSection[] = [
           { key: "/admin/home/test-platform-intro", label: "Test Platform Intro" },
           { key: "/admin/home/why-choose-us", label: "Why Choose Us" },
           { key: "/admin/home/testimonials", label: "Testimonials" },
-          { key: "/admin/home/practice-section", label: "Practice Section" },
         ],
       },
       {

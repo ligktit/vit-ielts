@@ -34,7 +34,7 @@ export const ExamDate = () => {
   }, [examDate]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm md:min-h-[200px]">
+    <div className="md:min-h-[200px]">
       <SetExamDateModal
         open={isSetExamDateDialogOpen}
         onCancel={() => setIsSetExamDateDialogOpen(false)}
