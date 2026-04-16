@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Card, Input, Space, Button, Radio, Popover } from "antd";
-import { DeleteOutlined, CommentOutlined } from "@ant-design/icons";
+import { Card, Input, Space, Button, Radio } from "antd";
+import { DeleteOutlined } from "@ant-design/icons";
 
 type RadioSelectQuestion = {
     question: string;
@@ -12,16 +12,18 @@ type RadioSelectQuestion = {
 type RadioSelectEditorProps = {
     questions: RadioSelectQuestion[];
     onChange: (v: RadioSelectQuestion[]) => void;
+    presetOptions?: string[];
 };
 
-export default function RadioSelectEditor({ questions, onChange }: RadioSelectEditorProps) {
-    const [openExpIdx, setOpenExpIdx] = useState<number | null>(null);
+export default function RadioSelectEditor({ questions, onChange, presetOptions }: RadioSelectEditorProps) {
+    const isPreset = presetOptions && presetOptions.length > 0;
 
-    const add = () =>
-        onChange([
-            ...questions,
-            { question: "", correct: 0, options: [{ option_text: "" }] },
-        ]);
+    const add = () => {
+        const options = isPreset
+            ? presetOptions.map((o) => ({ option_text: o }))
+            : [{ option_text: "" }];
+        onChange([...questions, { question: "", correct: 0, options }]);
+    };
     const remove = (idx: number) => onChange(questions.filter((_, i) => i !== idx));
 
     const update = (idx: number, field: string, value: unknown) => {
@@ -72,36 +74,12 @@ export default function RadioSelectEditor({ questions, onChange }: RadioSelectEd
                     size="small"
                     style={{ background: "#f9fafb", borderColor: "#e5e7eb" }}
                     extra={
-                        <Space>
-                            <Popover
-                                open={openExpIdx === idx}
-                                onOpenChange={(v) => setOpenExpIdx(v ? idx : null)}
-                                trigger="click"
-                                title="Giải thích cho câu hỏi này"
-                                content={
-                                    <Input.TextArea
-                                        rows={3}
-                                        style={{ width: 300 }}
-                                        placeholder="Nhập giải thích (ví dụ: Đoạn 2 có đề cập…)"
-                                        value={q.explanation ?? ""}
-                                        onChange={(e) => update(idx, "explanation", e.target.value)}
-                                    />
-                                }
-                            >
-                                <Button
-                                    size="small"
-                                    icon={<CommentOutlined />}
-                                    type={q.explanation ? "primary" : "default"}
-                                    title="Add explanation"
-                                />
-                            </Popover>
-                            <Button
-                                size="small"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => remove(idx)}
-                            />
-                        </Space>
+                        <Button
+                            size="small"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={() => remove(idx)}
+                        />
                     }
                 >
                     {/* Question text */}
@@ -159,26 +137,46 @@ export default function RadioSelectEditor({ questions, onChange }: RadioSelectEd
                                         onChange={() => update(idx, "correct", oIdx)}
                                     />
                                 </div>
-                                <Input
-                                    placeholder={`Option ${oIdx + 1}`}
-                                    value={(opt as { option_text?: string; content?: string }).option_text ?? (opt as { content?: string }).content ?? ""}
-                                    onChange={(e) => updateOption(idx, oIdx, e.target.value)}
-                                    style={{ flex: 1, minWidth: 0 }}
-                                />
-                                {q.options?.length > 1 && (
-                                    <Button
-                                        size="small"
-                                        danger
-                                        icon={<DeleteOutlined />}
-                                        onClick={() => removeOption(idx, oIdx)}
-                                        style={{ flexShrink: 0 }}
-                                    />
+                                {isPreset ? (
+                                    <span
+                                        style={{
+                                            flex: 1,
+                                            padding: "4px 11px",
+                                            background: "#f5f5f5",
+                                            border: "1px solid #d9d9d9",
+                                            borderRadius: 6,
+                                            fontSize: 14,
+                                            color: "#595959",
+                                        }}
+                                    >
+                                        {(opt as { option_text?: string }).option_text ?? ""}
+                                    </span>
+                                ) : (
+                                    <>
+                                        <Input
+                                            placeholder={`Option ${oIdx + 1}`}
+                                            value={(opt as { option_text?: string; content?: string }).option_text ?? (opt as { content?: string }).content ?? ""}
+                                            onChange={(e) => updateOption(idx, oIdx, e.target.value)}
+                                            style={{ flex: 1, minWidth: 0 }}
+                                        />
+                                        {q.options?.length > 1 && (
+                                            <Button
+                                                size="small"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() => removeOption(idx, oIdx)}
+                                                style={{ flexShrink: 0 }}
+                                            />
+                                        )}
+                                    </>
                                 )}
                             </div>
                         ))}
-                        <Button size="small" className="mt-1" onClick={() => addOption(idx)}>
-                            + Add Option
-                        </Button>
+                        {!isPreset && (
+                            <Button size="small" className="mt-1" onClick={() => addOption(idx)}>
+                                + Add Option
+                            </Button>
+                        )}
                     </div>
                 </Card>
             ))}

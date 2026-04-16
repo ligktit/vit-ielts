@@ -81,8 +81,8 @@ export const DraggableOption = ({
         bold ? "font-bold" : "font-normal",
         isDropped ? "bg-transparent" : "bg-white",
         isOverlay
-          ? "cursor-grabbing border-2 border-blue-500 shadow-md px-3 py-0.5 w-max max-w-[400px] break-words"
-          : "cursor-grab w-fit max-w-full",
+          ? "cursor-grabbing border-2 border-blue-500 shadow-md px-3 py-0.5 w-max whitespace-nowrap"
+          : "cursor-grab w-fit max-w-full whitespace-nowrap",
         !isDropped && "px-3 py-0.5 shadow-sm", // Removed border border-gray-200
         isDragging && "opacity-30",
         className
@@ -174,7 +174,7 @@ export const SummaryDroppableSlot = ({
       tabIndex={0}
       data-droppable-id={id}
       className={twMerge(
-        "min-w-[96px] max-w-fit inline-block align-baseline max-h-[27px] px-2 py-0.5 leading-[20px]",
+        "min-w-[96px] max-w-fit inline-block align-baseline min-h-[27px] px-2 py-0.5 leading-[20px] whitespace-nowrap",
         "border border-dashed rounded-sm outline-none",
         "text-center relative transition-colors cursor-pointer",
         isSelected || isOver ? "active-slot" : "border-gray-400",
