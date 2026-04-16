@@ -39,6 +39,10 @@ export function PageTestResult({
   const [bandScore, setBandScore] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const numericScore = useMemo(() => {
+    const parsedScore = Number(scoreData.score);
+    return Number.isFinite(parsedScore) ? parsedScore : 0;
+  }, [scoreData.score]);
 
   // --- Tính toán thời gian (Giữ nguyên logic gốc) ---
   const timeSpent = useMemo(() => {
@@ -79,9 +83,9 @@ export function PageTestResult({
   // --- [ĐÃ SỬA] Tính toán điểm % ---
   const scorePercent = useMemo(() => {
     // [ĐÃ SỬA] Ưu tiên dùng điểm từ bandScore nếu có, nếu không thì dùng scoreData.score
-    const scoreToUse = bandScore !== null ? bandScore : Number(scoreData.score);
+    const scoreToUse = bandScore !== null ? bandScore : numericScore;
     return Math.round((scoreToUse / 9) * 100);
-  }, [scoreData.score, bandScore]); // [ĐÃ SỬA] Thêm dependency
+  }, [numericScore, bandScore]); // [ĐÃ SỬA] Thêm dependency
 
   // --- Lấy skill (Giữ nguyên logic gốc) ---
   const skill = useMemo(() => {
@@ -97,7 +101,13 @@ export function PageTestResult({
   };
 
   const isMockTest = post.quizFields.type?.[0] === "exam" || post.quizFields.type?.[0] === "academic" || post.quizFields.type?.[0] === "general";
-  const displayScoreStr = isMockTest ? (bandScore !== null ? Number.isInteger(bandScore) ? `${bandScore}` : `${bandScore.toFixed(1)}` : Number.isInteger(scoreData.score) ? `${scoreData.score}` : `${scoreData.score.toFixed(1)}`) : `${scoreData.correctAns}/${scoreData.total_questions}`;
+  const displayScoreStr = isMockTest
+    ? (
+      bandScore !== null
+        ? (Number.isInteger(bandScore) ? `${bandScore}` : `${bandScore.toFixed(1)}`)
+        : (Number.isInteger(numericScore) ? `${numericScore}` : `${numericScore.toFixed(1)}`)
+    )
+    : `${scoreData.correctAns}/${scoreData.total_questions}`;
   const scoreLabel = isMockTest ? "Band Score" : "Câu đúng";
 
   return (
