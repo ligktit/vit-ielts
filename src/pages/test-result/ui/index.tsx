@@ -257,9 +257,6 @@ export function PageTestResult({
               </div>
             </div>
           </div>
-              </div>
-            </div>
-          </div>
 
           {/* Time Spent */}
           <div className="bg-white rounded-[24px] p-6 shadow-sm flex flex-col space-y-3">
