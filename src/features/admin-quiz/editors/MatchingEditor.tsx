@@ -44,14 +44,21 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
 
             {data.layoutType === "summary" && (
                 <Form.Item label="Summary Text" className="mb-0">
+                    <p className="px-3 py-2 mb-2 bg-neutral-100 rounded border border-dashed border-gray-300 text-sm text-gray-600">
+                        Dùng <code className="bg-gray-200 px-1 rounded">{"{ }"}</code> để đánh dấu chỗ trống, viết đáp án đúng bên trong.{" "}
+                        Ví dụ: <em>The process is <strong>{"{"+"efficient"+"}"}</strong> and cost-effective.</em>
+                    </p>
                     <TextArea
-                        rows={3}
+                        rows={5}
                         value={data.summaryText ?? ""}
                         onChange={(e) => update("summaryText", e.target.value)}
+                        placeholder="Type the summary paragraph here. Wrap each blank with { correct_answer }…"
                     />
                 </Form.Item>
             )}
 
+            {data.layoutType !== "summary" && (
+            <>
             <Divider orientation="left" plain className="!my-2">
                 Matching Items
             </Divider>
@@ -137,6 +144,8 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                     Add Item
                 </Button>
             </div>
+            </>
+            )}
 
             <Divider orientation="left" plain className="!my-2">
                 Answer Options

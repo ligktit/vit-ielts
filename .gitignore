@@ -46,3 +46,4 @@ scripts/figma-data/design-system-page.json
 
 # sample legacy code
 /mf504-quiz-creator
+.claude/settings.local.json

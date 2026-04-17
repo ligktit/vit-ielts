@@ -81,6 +81,14 @@ export const QUESTION_TEMPLATES: QuestionTemplate[] = [
         question_form: "sentence_completion",
     },
     {
+        id: "short_answer",
+        label: "Short Answer",
+        description: "Answer questions using NO MORE THAN TWO/THREE WORDS from the passage",
+        icon: "✍️",
+        type: "fillup",
+        question_form: "short_answer",
+    },
+    {
         id: "table_completion",
         label: "Table / Diagram / Flow Chart Completion",
         description: "Fill in a table, diagram or flow chart",
@@ -133,6 +141,14 @@ export const QUESTION_TEMPLATES: QuestionTemplate[] = [
         question_form: "list_selection",
     },
     // ── Matching types ──────────────────────────────────────────
+    {
+        id: "matching_summary",
+        label: "Summary Completion (Word Bank)",
+        description: "Drag words from a word bank into gaps in a summary paragraph",
+        icon: "🔡",
+        type: "matching",
+        question_form: "summary_completion",
+    },
     {
         id: "matching_headings",
         label: "Matching Headings",

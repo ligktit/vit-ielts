@@ -252,7 +252,7 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
               </div>
 
               {/* Download PDF Box */}
-              {post.quizFields.pdf?.node?.mediaItemUrl && (
+              {false && post.quizFields.pdf?.node?.mediaItemUrl && (
                 <div className="bg-white rounded-[12px] border-2 border-primary-500 p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="material-symbols-rounded text-primary-500 font-bold text-[28px]">
@@ -341,29 +341,70 @@ export function PageIELTSPracticeSingle({ post }: { post: IPracticeSingle }) {
           </div>
         </Container>
 
-        {/* Bottom Related Section */}
-        <Container className="max-w-[1360px] mt-20 relative z-10">
-          <div className="mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
-              Bài thi tương tự
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {post.relatedPracticeQuizzes?.slice(0, 4).map((quiz, i) => (
-              <TestCardWithScore
-                key={i}
-                quizId={quiz.id}
-                title={quiz.title}
-                image={quiz.featuredImage || undefined}
-                skill={skill}
-                part={normalizeSectionBadge(skill, i + 1).label}
-                attempts={1195}
-                isPro={post.quizFields.proUserOnly}
-                href={ROUTES.PRACTICE.SINGLE(quiz.slug)}
-              />
-            ))}
-          </div>
-        </Container>
+        {/* Bottom Related Section — carousel */}
+        {post.relatedPracticeQuizzes?.length > 0 && (
+          <Container className="max-w-[1360px] mt-20 relative z-10">
+            <div className="mb-8">
+              <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
+                Bài thi tương tự
+              </h2>
+            </div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => splideRef.current?.splide?.go("<")}
+                aria-label="Previous"
+                className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+              >
+                <img src="/assets/figma/icons/Arrow1.svg" alt="" className="w-3 h-3 [filter:brightness(0)_invert(1)]" style={{ transform: "rotate(180deg)" }} />
+              </button>
+
+              <Splide
+                ref={splideRef as any}
+                hasTrack={false}
+                options={{
+                  type: "slide",
+                  perPage: 4,
+                  perMove: 1,
+                  gap: "24px",
+                  pagination: false,
+                  arrows: false,
+                  breakpoints: {
+                    1280: { perPage: 3 },
+                    1024: { perPage: 2, gap: "20px" },
+                    768: { perPage: 2, gap: "16px" },
+                    480: { perPage: 1, gap: "16px" },
+                  },
+                }}
+              >
+                <SplideTrack>
+                  {post.relatedPracticeQuizzes.slice(0, 8).map((quiz, i) => (
+                    <SplideSlide key={quiz.id} className="pb-8 pt-[14px] px-1">
+                      <TestCardWithScore
+                        quizId={quiz.id}
+                        title={quiz.title}
+                        image={quiz.featuredImage || undefined}
+                        skill={skill}
+                        part={normalizeSectionBadge(skill, i + 1).label}
+                        isPro={post.quizFields.proUserOnly}
+                        href={ROUTES.PRACTICE.SINGLE(quiz.slug)}
+                      />
+                    </SplideSlide>
+                  ))}
+                </SplideTrack>
+              </Splide>
+
+              <button
+                type="button"
+                onClick={() => splideRef.current?.splide?.go(">")}
+                aria-label="Next"
+                className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+              >
+                <img src="/assets/figma/icons/Arrow1.svg" alt="" className="w-3 h-3 [filter:brightness(0)_invert(1)]" />
+              </button>
+            </div>
+          </Container>
+        )}
       </div>
     </>
   );

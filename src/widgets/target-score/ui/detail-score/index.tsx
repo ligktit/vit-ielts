@@ -28,7 +28,7 @@ export const DetailScore = () => {
   }, [targetScore]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm md:min-h-[200px]">
+    <div className="md:min-h-[200px]">
       <SetTargetScoreModal
         open={isSetTargetScoreDialogOpen}
         onCancel={() => setIsSetTargetScoreDialogOpen(false)}

@@ -11,7 +11,7 @@ type Props = {
 const GROUPS: { label: string; ids: string[] }[] = [
     {
         label: "Fill-in-the-blank",
-        ids: ["summary_completion", "sentence_completion", "table_completion"],
+        ids: ["summary_completion", "sentence_completion", "short_answer", "table_completion"],
     },
     {
         label: "Single Answer",
@@ -24,6 +24,7 @@ const GROUPS: { label: string; ids: string[] }[] = [
     {
         label: "Matching",
         ids: [
+            "matching_summary",
             "matching_headings",
             "matching_name",
             "matching_paragraph_information",

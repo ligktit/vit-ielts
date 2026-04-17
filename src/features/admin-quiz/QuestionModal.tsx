@@ -46,7 +46,11 @@ function buildDefaultDataForTemplate(tmpl: QuestionTemplate): Partial<QuestionDa
         base.question_text = "";
     }
     if (tmpl.type === "matching") {
-        base.matching_question = { layoutType: "standard", matchingItems: [], answerOptions: [] };
+        const layoutType =
+            tmpl.id === "matching_headings" ? "heading" :
+            tmpl.id === "matching_summary" ? "summary" :
+            "standard";
+        base.matching_question = { layoutType, matchingItems: [], answerOptions: [], summaryText: "" };
     }
     if (tmpl.type === "matrix") {
         base.matrix_question = { matrixCategories: [], matrixItems: [] };
@@ -117,6 +121,7 @@ export default function QuestionModal({ open, initialData, onCancel, onSave }: Q
                     <RadioSelectEditor
                         questions={localData.list_of_questions ?? []}
                         onChange={(v) => handleUpdate("list_of_questions", v)}
+                        presetOptions={activeTemplate?.presetOptions}
                     />
                 );
             case "fillup":

@@ -218,27 +218,31 @@ function Header({ post }: { post: IPracticeSingle }) {
 
             <div className="w-1/2">
               <div className="flex items-center justify-end space-x-3 md:space-x-6">
-                <Link
-                  href={getBackUrl()}
-                  className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors"
-                >
-                  <span className="material-symbols-rounded bold block! text-[20px] md:text-[24px]!">arrow_back</span>
-                  <span className="hidden lg:inline text-sm whitespace-nowrap">Quay lại</span>
-                </Link>
+                {isFormDisabled && (
+                  <>
+                    <Link
+                      href={getBackUrl()}
+                      className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors"
+                    >
+                      <span className="material-symbols-rounded bold block! text-[20px] md:text-[24px]!">arrow_back</span>
+                      <span className="hidden lg:inline text-sm whitespace-nowrap">Quay lại</span>
+                    </Link>
 
-                <button
-                  type="button"
-                  disabled={isRetaking}
-                  onClick={() => {
-                    setIsRetaking(true);
-                    const url = ROUTES.TAKE_THE_TEST(post.slug);
-                    window.location.href = `${url}?retake=true`;
-                  }}
-                  className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors disabled:opacity-50"
-                >
-                  <span className={`material-symbols-rounded bold block! text-[20px] md:text-[24px]! ${isRetaking ? "animate-spin" : ""}`}>refresh</span>
-                  <span className="hidden lg:inline text-sm whitespace-nowrap">{isRetaking ? "Đang tải..." : "Làm lại"}</span>
-                </button>
+                    <button
+                      type="button"
+                      disabled={isRetaking}
+                      onClick={() => {
+                        setIsRetaking(true);
+                        const url = ROUTES.TAKE_THE_TEST(post.slug);
+                        window.location.href = `${url}?retake=true`;
+                      }}
+                      className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors disabled:opacity-50"
+                    >
+                      <span className={`material-symbols-rounded bold block! text-[20px] md:text-[24px]! ${isRetaking ? "animate-spin" : ""}`}>refresh</span>
+                      <span className="hidden lg:inline text-sm whitespace-nowrap">{isRetaking ? "Đang tải..." : "Làm lại"}</span>
+                    </button>
+                  </>
+                )}
 
                 <div className="w-[1px] h-[24px] bg-gray-300 hidden md:block mx-2"></div>
 

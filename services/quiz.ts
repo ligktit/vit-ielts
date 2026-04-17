@@ -214,7 +214,7 @@ export async function getRelatedQuizzes(
         .eq("status", "published")
         .neq("id", quizId)
         .eq("skill", currentQuiz.skill)
-        .limit(6);
+        .limit(8);
 
     // Prioritize same source, year, quarter (best match)
     if (currentQuiz.source) query = query.eq("source", currentQuiz.source);

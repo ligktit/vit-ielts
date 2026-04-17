@@ -11,11 +11,18 @@ import { SingleSampleEssay } from "@/pages/sample-essay/api";
 import { decode } from "html-entities";
 import { createClient } from "~supabase/client";
 import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
+import { ROUTES } from "@/shared/routes";
+import type { SampleEssay } from "~services/types/database";
+import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
+import "@splidejs/react-splide/css/core";
+import type { Splide as SplideType } from "@splidejs/splide";
 
 export const PageSingle = ({
   sampleEssay: post,
+  relatedEssays = [],
 }: {
   sampleEssay: SingleSampleEssay;
+  relatedEssays?: Pick<SampleEssay, "id" | "title" | "slug" | "featured_image" | "skill" | "excerpt" | "pro_user_only">[];
 }) => {
   const fallbackImage = useContentImageFallback();
   const [copied, setCopied] = useState(false);
@@ -148,31 +155,29 @@ export const PageSingle = ({
             {/* Middle Column: Main Content */}
             <div className="w-full lg:flex-1 min-w-0 space-y-6 relative z-10">
               <div className="aspect-[21/10] relative rounded-[24px] overflow-hidden border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
-                  <Image
-                    src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
-                    alt={post.featuredImage?.node.altText || post.title}
-                    fill
-                    className="object-contain"
-                    unoptimized
-                  />
-                </div>
-                <div className="mt-5 space-y-1.5">
-                  
-                  <div className="flex justify-between">
-                    <div className="flex gap-x-2">
-                      <p className="text-xs text-gray-600 flex items-center space-x-1">
-                        <span className="material-symbols-rounded text-lg! leading-none!">
-                          visibility
-                        </span>
-                        <span>{post.postMeta?.views || 0}</span>
-                      </p>
-                      <p className="text-xs text-gray-600 flex items-center space-x-1">
-                        <span className="material-symbols-rounded text-lg! leading-none!">
-                          calendar_month
-                        </span>
-                        <span>{dayjs(post.date).format("DD/MM/YYYY")}</span>
-                      </p>
-                    </div>
+                <Image
+                  src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
+                  alt={post.featuredImage?.node.altText || post.title}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <div className="flex gap-x-2">
+                    <p className="text-xs text-gray-600 flex items-center space-x-1">
+                      <span className="material-symbols-rounded text-lg! leading-none!">
+                        visibility
+                      </span>
+                      <span>{post.postMeta?.views || 0}</span>
+                    </p>
+                    <p className="text-xs text-gray-600 flex items-center space-x-1">
+                      <span className="material-symbols-rounded text-lg! leading-none!">
+                        calendar_month
+                      </span>
+                      <span>{dayjs(post.date).format("DD/MM/YYYY")}</span>
+                    </p>
                   </div>
                 </div>
                 <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8 mt-6 overflow-hidden">
@@ -185,6 +190,41 @@ export const PageSingle = ({
                   <SharePost />
                 </div>
               </div>
+              <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8 overflow-hidden">
+                <style dangerouslySetInnerHTML={{ __html: `
+                  .wp-content-sanitized * {
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                  }
+                  .wp-content-sanitized img {
+                    height: auto !important;
+                    max-width: 100% !important;
+                  }
+                  .wp-content-sanitized table {
+                    width: 100% !important;
+                    table-layout: fixed !important;
+                    overflow-wrap: break-word !important;
+                  }
+                  .wp-content-sanitized [style*="position: absolute"],
+                  .wp-content-sanitized [style*="position:absolute"] {
+                    position: relative !important;
+                  }
+                  .wp-content-sanitized [style*="height"] {
+                    max-height: 2000px !important;
+                  }
+                  .wp-content-sanitized iframe {
+                    max-width: 100% !important;
+                  }
+                `}} />
+                <div
+                  className="wp-content-sanitized text-sm md:text-base text-[#2D3142] leading-relaxed prose prose-sm md:prose-base max-w-none prose-p:!mb-2 overflow-x-auto"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                ></div>
+              </div>
+              <div className="p-4">
+                <SharePost />
+              </div>
+            </div>
 
             {/* Right Column: Related items */}
             <div className="w-full lg:w-[280px] shrink-0 relative z-10">
@@ -194,6 +234,69 @@ export const PageSingle = ({
             </div>
           </div>
         </Container>
+
+        {/* Bottom: Bài viết liên quan carousel */}
+        {relatedEssays.length > 0 && (
+          <Container className="max-w-[1360px] mt-16 relative z-10">
+            <div className="mb-8">
+              <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">Bài viết liên quan</h2>
+            </div>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => splideRef.current?.splide?.go("<")}
+                aria-label="Previous"
+                className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+              >
+                <img src="/assets/figma/icons/Arrow1.svg" alt="" className="w-3 h-3 [filter:brightness(0)_invert(1)]" style={{ transform: "rotate(180deg)" }} />
+              </button>
+
+              <Splide
+                ref={splideRef as any}
+                hasTrack={false}
+                options={{
+                  type: "slide",
+                  perPage: 4,
+                  perMove: 1,
+                  gap: "24px",
+                  pagination: false,
+                  arrows: false,
+                  breakpoints: {
+                    1280: { perPage: 3 },
+                    1024: { perPage: 2, gap: "20px" },
+                    768: { perPage: 2, gap: "16px" },
+                    480: { perPage: 1, gap: "16px" },
+                  },
+                }}
+              >
+                <SplideTrack>
+                  {relatedEssays.slice(0, 8).map((essay) => (
+                    <SplideSlide key={essay.id} className="pb-8 pt-[14px] px-1">
+                      <TestCard
+                        image={essay.featured_image ?? undefined}
+                        title={essay.title}
+                        skill={essay.skill as any}
+                        isPro={essay.pro_user_only}
+                        isLocked={essay.pro_user_only}
+                        href={ROUTES.SAMPLE_ESSAY.SINGLE(essay.slug)}
+                        actionText="Xem thêm"
+                      />
+                    </SplideSlide>
+                  ))}
+                </SplideTrack>
+              </Splide>
+
+              <button
+                type="button"
+                onClick={() => splideRef.current?.splide?.go(">")}
+                aria-label="Next"
+                className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+              >
+                <img src="/assets/figma/icons/Arrow1.svg" alt="" className="w-3 h-3 [filter:brightness(0)_invert(1)]" />
+              </button>
+            </div>
+          </Container>
+        )}
       </div>
     </>
   );

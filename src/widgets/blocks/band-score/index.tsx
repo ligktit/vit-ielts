@@ -310,7 +310,7 @@ export function BandScore({
             key: idx.toString(),
             label: (
               <span className="px-2 font-extrabold font-nunito">
-                {item.score}
+                {Number(item.score).toFixed(1)}
               </span>
             ),
             children: (

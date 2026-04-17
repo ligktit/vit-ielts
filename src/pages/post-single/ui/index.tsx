@@ -131,37 +131,21 @@ export const PageSingle = ({ post }: { post: IPost }) => {
             {/* Middle Column: Main Content */}
             <div className="w-full lg:flex-1 min-w-0 space-y-6 relative z-10">
               <div className="aspect-[21/10] relative rounded-[24px] overflow-hidden border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
-                  <Image
-                    src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
-                    alt={post.featuredImage?.node.altText || post.title}
-                    fill
-                    className="object-contain"
-                    unoptimized
-                  />
-                </div>
-                <div className="mt-5 space-y-1.5">
-                  
-                  <div className="flex justify-between">
-                    <StarRating post={post} />
-                    <div className="flex gap-x-2">
-                      <p className="text-xs text-gray-600 flex items-center space-x-1">
-                        <span className="material-symbols-rounded text-lg! leading-none!">
-                          visibility
-                        </span>
-                        <span>{post.postMeta?.views || 0}</span>
-                      </p>
-                      <p className="text-xs text-gray-600 flex items-center space-x-1">
-                        <span className="material-symbols-rounded text-lg! leading-none!">
-                          calendar_month
-                        </span>
-                        <span>{dayjs(post.date).format("DD/MM/YYYY")}</span>
-                      </p>
-                    </div>
-                  </div>
-                  {post.categories?.edges?.length > 0 && (
-                    <div className="flex items-center text-xs font-nunito flex-wrap gap-x-2 gap-y-1">
-                      <span className="material-symbols-rounded filled text-red-800 text-3xl!">
-                        shoppingmode
+                <Image
+                  src={resolveContentImage(post.featuredImage?.node.sourceUrl, fallbackImage)}
+                  alt={post.featuredImage?.node.altText || post.title}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <StarRating post={post} />
+                  <div className="flex gap-x-2">
+                    <p className="text-xs text-gray-600 flex items-center space-x-1">
+                      <span className="material-symbols-rounded text-lg! leading-none!">
+                        visibility
                       </span>
                       {post.categories?.edges?.map(({ node }, index) => (
                         <Link
@@ -184,7 +168,33 @@ export const PageSingle = ({ post }: { post: IPost }) => {
                 <div className="p-4">
                   <SharePost />
                 </div>
+                {post.categories?.edges?.length > 0 && (
+                  <div className="flex items-center text-xs font-nunito flex-wrap gap-x-2 gap-y-1">
+                    <span className="material-symbols-rounded filled text-red-800 text-3xl!">
+                      shoppingmode
+                    </span>
+                    {post.categories?.edges?.map(({ node }, index) => (
+                      <Link
+                        href={node.link}
+                        key={index}
+                        className="block bg-gray-200 rounded-full font-extrabold text-gray-500 hover:text-red-800 duration-150"
+                      >
+                        <span className="px-3 py-1 block">{node.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
+              <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
+                <div
+                  className="text-sm md:text-base text-[#2D3142] leading-relaxed prose prose-sm md:prose-base max-w-none prose-p:!mb-2"
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                ></div>
+              </div>
+              <div className="p-4">
+                <SharePost />
+              </div>
+            </div>
 
             {/* Right Column: Related items */}
             <div className="w-full lg:w-[280px] shrink-0 relative z-10">
@@ -196,7 +206,7 @@ export const PageSingle = ({ post }: { post: IPost }) => {
         </Container>
 
         {/* === SECTION: Similar Posts === */}
-        <SimilarPostsSection currentPostId={post.id} categories={post.categories || []} />
+        <SimilarPostsSection currentPostId={post.id} categories={post.categories as any} />
       </div>
     </>
   );

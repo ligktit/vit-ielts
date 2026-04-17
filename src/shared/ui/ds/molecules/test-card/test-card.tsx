@@ -97,7 +97,7 @@ export const TestCard = ({
           </h3>
           {(subtitle || attempts !== undefined) && (
             <p className="font-['Noto_Sans'] text-[14px] font-normal leading-normal text-[#6A7282]">
-              {attempts !== undefined ? `${attempts.toLocaleString()} attempts` : subtitle}
+              {attempts !== undefined ? `${attempts} attempts` : subtitle}
             </p>
           )}
         </div>
