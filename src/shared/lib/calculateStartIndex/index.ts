@@ -22,16 +22,12 @@ export function calculateStartIndexForAllQuestions(quiz: any): Map<string, numbe
         const questionType = question.type?.[0];
         let numberOfSubQuestions = 1;
 
-        // Xử lý matching với layoutType = 'heading' - đếm gaps trong passage_content
         if (questionType === 'matching' && String(question.matchingQuestion?.layoutType).trim().toLowerCase() === 'heading') {
           let gapCount = 0;
           (passage.passage_content || "").replace(/\{(.*?)\}/g, () => { gapCount++; return ''; });
           numberOfSubQuestions = gapCount > 0 ? gapCount : 1;
-        } else if (questionType === 'checkbox') {
-          // @ts-ignore
-          numberOfSubQuestions = Number(question.optionChoose) || 1;
         } else {
-          // Dùng countQuestion cho các loại câu hỏi khác
+          // Dùng countQuestion cho các loại câu hỏi khác (bao gồm cả checkbox)
           numberOfSubQuestions = countQuestion({ questions: [question] } as any);
         }
 

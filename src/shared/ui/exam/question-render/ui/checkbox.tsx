@@ -1,5 +1,5 @@
 import parse from "html-react-parser";
-import { Checkbox as AntCheckbox, Collapse } from "antd";
+import { Checkbox as AntCheckbox } from "antd";
 import { Controller, useFormContext } from "react-hook-form";
 import { useState, useMemo } from "react"; // Thêm useMemo
 import { twMerge } from "tailwind-merge";
@@ -8,6 +8,7 @@ import { twMerge } from "tailwind-merge";
 import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import { AnswerFormValues, useExamContext } from "@/pages/take-the-test/context";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
+import { QuestionExplanation } from "./question-explanation";
 
 // ▼▼▼ HÀM HELPER ▼▼▼
 const parseMaxOptionsFromText = (
@@ -77,7 +78,9 @@ export const Checkbox = ({
   return (
     <div className="space-y-4" id={`#question-no-${realStartIndex + 1}`}>
       <h3 className={twMerge("text-lg font-bold", isFocused && "active-quizz")}>
-          Questions {questionRange}
+          {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+            ? question.title 
+            : `Questions ${questionRange}`}
       </h3>
 
       <div className="leading-[2] prose prose-sm max-w-none">
@@ -171,21 +174,8 @@ export const Checkbox = ({
       {readOnly && (
         <div className="space-y-2 pt-2">
            {question.explanations?.[0]?.content && (
-            <Collapse
-              size="small"
-              items={[
-                {
-                  key: "1",
-                  label: "Explanation",
-                  children: (
-                    <div className="prose">
-                      <TextSelectionWrapper>
-                        {parse(question.explanations?.[0]?.content || "")}
-                      </TextSelectionWrapper>
-                    </div>
-                  ),
-                },
-              ]}
+            <QuestionExplanation 
+              content={question.explanations?.[0]?.content}
             />
           )}
         </div>

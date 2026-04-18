@@ -38,6 +38,7 @@ export type QuizPassage = {
     sort_order: number;
     audio_start?: number;
     audio_end?: number;
+    start_question_number?: number;
     questions: QuizQuestion[];
 };
 

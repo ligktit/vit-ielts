@@ -39,14 +39,12 @@ const AudioPlayer = ({ audioUrl, isReady, onTimeUpdate }: AudioPlayerProps) => {
     const initPlayer = async () => {
       // Wait for container to be ready
       if (!containerRef.current) {
-        console.log("Container ref not ready");
         return;
       }
 
       try {
         // Double check container is still in DOM
         if (!containerRef.current.isConnected) {
-          console.log("Container not connected to DOM");
           return;
         }
 
@@ -58,7 +56,6 @@ const AudioPlayer = ({ audioUrl, isReady, onTimeUpdate }: AudioPlayerProps) => {
         
         // Verify container is still valid before appending
         if (!containerRef.current || !containerRef.current.isConnected) {
-          console.log("Container invalid before append");
           audioElementRef.current = null;
           return;
         }
@@ -68,7 +65,6 @@ const AudioPlayer = ({ audioUrl, isReady, onTimeUpdate }: AudioPlayerProps) => {
 
         // Verify audioElement is now in DOM before initializing Plyr
         if (!audioElement.isConnected || !audioElement.parentNode) {
-          console.log("Audio element not connected after append");
           if (audioElement.parentNode) {
             audioElement.parentNode.removeChild(audioElement);
           }
@@ -81,7 +77,6 @@ const AudioPlayer = ({ audioUrl, isReady, onTimeUpdate }: AudioPlayerProps) => {
         
         // Final check before Plyr initialization
         if (!audioElement.isConnected || !audioElement.parentNode) {
-          console.log("Audio element disconnected before Plyr init");
           if (audioElement.parentNode) {
             audioElement.parentNode.removeChild(audioElement);
           }
@@ -111,7 +106,6 @@ const AudioPlayer = ({ audioUrl, isReady, onTimeUpdate }: AudioPlayerProps) => {
         });
 
         isInitializedRef.current = true;
-        console.log("Audio player initialized successfully");
       } catch (error) {
         console.error("Failed to initialize audio player:", error);
         // Cleanup on error

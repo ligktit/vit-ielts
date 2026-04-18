@@ -1,7 +1,7 @@
 import { useFormContext, Controller } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import parse, { DOMNode, Element } from "html-react-parser"; // [SỬA] Import thêm DOMNode
-import { Collapse } from "antd";
+// import { Collapse } from "antd"; // Removed for QuestionExplanation
 import { twMerge } from "tailwind-merge";
 import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import {
@@ -22,6 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useExamContext } from "@/pages/take-the-test/context";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
 import React from "react"; // [SỬA] Import React
+import { QuestionExplanation } from "./question-explanation";
 
 type AnswerFormValues = { answers: (string | number[] | object)[] };
 type IQuestion =
@@ -332,10 +333,12 @@ export function MatchingQuestion({
     };
 
     return (
-      <div className="space-y-6" id={`#question-no-${startIndex + 1}`}>
-        <div className="heading-group">
-          <h3 className="text-[16px] font-bold">
-            Questions {startIndex + 1} - {startIndex + totalGaps}
+      <div className="space-y-6" id={`question-block-${startIndex + 1}`}>
+        <div className="heading-group space-y-2">
+          <h3 className="text-lg font-bold">
+            {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+              ? question.title 
+              : `Questions ${startIndex + 1}–${startIndex + totalGaps}`}
           </h3>
           <div className="text-[16px] leading-[2] prose prose-sm max-w-none text-[#000]">
             {parse(
@@ -465,28 +468,13 @@ export function MatchingQuestion({
                   </div>
 
                   {/* 3. Hiển thị Explanation */}
-                  {question.explanations?.[0]?.content && (
-                    <div className="mt-6">
-                      <Collapse
-                        size="small"
-                        items={[
-                          {
-                            key: `exp-summary-general-${startIndex}`,
-                            label: "Explanation",
-                            children: (
-                              <div className="prose prose-sm max-w-none p-2 rounded">
-                                {" "}
-                                <TextSelectionWrapper>
-                                  {" "}
-                                  {parse(question.explanations?.[0]?.content || "")}{" "}
-                                </TextSelectionWrapper>{" "}
-                              </div>
-                            ),
-                          },
-                        ]}
-                      />
-                    </div>
-                  )}
+                    {question.explanations?.[0]?.content && (
+                      <div className="mt-6">
+                        <QuestionExplanation 
+                          content={question.explanations?.[0]?.content}
+                        />
+                      </div>
+                    )}
                 </>
               );
             }
@@ -695,10 +683,7 @@ export function MatchingQuestion({
                       )}
                     >
                       <SortableContext items={allOptionIds} id="available">
-                        <div className={twMerge(
-                          "flex gap-3",
-                          isListening ? "flex-col" : "flex-wrap"
-                        )}>
+                        <div className="flex flex-row flex-wrap gap-3">
                           {allOptionIds.map((id, optionIndex) => {
                             const optionText = answerOptions[optionIndex]?.optionText;
                             if (!optionText) return null;
@@ -710,11 +695,11 @@ export function MatchingQuestion({
                                 <DraggableOption
                                   key={id}
                                   id={id}
-                                   content={optionText}
-                                   isDropped={false}
-                                   bold={shouldBeBold}
-                                   className={isListening ? "block rounded-md px-4 py-2 bg-white text-[#000] text-center shadow-sm border border-gray-200 w-fit max-w-full" : ""}
-                                 />
+                                  content={optionText}
+                                  isDropped={false}
+                                  bold={shouldBeBold}
+                                  className="block rounded-md px-4 py-2 bg-white text-[#000] text-center shadow-sm border border-gray-200 w-fit max-w-full"
+                                />
                               );
                             } else {
                               return (
@@ -738,15 +723,13 @@ export function MatchingQuestion({
 
                   if (isListening) {
                     return (
-                      <div className="flex flex-col lg:flex-row items-start gap-8">
+                      <div className="flex flex-col gap-8">
                         <div>
                           {TextContent}
                         </div>
-                        <div className="w-full lg:w-[350px] shrink-0">
-                          <div className="sticky top-4">
-                            <p className="text-[16px] font-bold mb-4">List of options</p>
-                            {OptionsContent}
-                          </div>
+                        <div className="w-full">
+                          <p className="text-[16px] font-bold mb-4">List of options</p>
+                          {OptionsContent}
                         </div>
                       </div>
                     );
@@ -799,10 +782,12 @@ export function MatchingQuestion({
     }
 
     return (
-      <div className="space-y-6" id={`#question-no-${startIndex + 1}`}>
+      <div className="space-y-6" id={`question-block-${startIndex + 1}`}>
         <div className="heading-group">
-          <h3 className="text-[16px] font-bold">
-            {question.title || "Questions"}
+          <h3 className="text-lg font-bold">
+            {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+              ? question.title 
+              : (question.title || "Questions")}
           </h3>
           <div className="text-[16px] leading-[2] prose prose-sm max-w-none text-[#000]">
             {parse(
@@ -816,7 +801,7 @@ export function MatchingQuestion({
             {/* Sử dụng `allOptionIds` ổn định cho SortableContext
              */}
             <SortableContext items={allOptionIds} id="available">
-              <div className="space-y-2">
+              <div className="flex flex-row flex-wrap gap-2">
                 {/* Lặp qua `allOptionIds` ổn định
                  */}
                 {allOptionIds.map((id, optionIndex) => {
@@ -863,7 +848,7 @@ export function MatchingQuestion({
           <div className="mt-6 space-y-4">
             <div className="pt-3 heading-list">
               <h4 className="text-[16px] font-bold mb-4">List of Headings</h4>
-              <div className="space-y-2 prose prose-sm max-w-none">
+              <div className="flex flex-row flex-wrap gap-3 prose prose-sm max-w-none w-full">
                 {answerOptions.map((option, index) => (
                   <div
                     key={`heading-opt-${index}`}
@@ -878,23 +863,8 @@ export function MatchingQuestion({
             </div>
             {question.explanations?.[0]?.content && (
               <div className="mt-2">
-                <Collapse
-                  size="small"
-                  items={[
-                    {
-                      key: `exp-heading-general-${startIndex}`,
-                      label: "Explanation",
-                      children: (
-                        <div className="prose prose-sm max-w-none p-2 rounded">
-                          {" "}
-                          <TextSelectionWrapper>
-                            {" "}
-                            {parse(question.explanations?.[0]?.content || "")}{" "}
-                          </TextSelectionWrapper>{" "}
-                        </div>
-                      ),
-                    },
-                  ]}
+                <QuestionExplanation 
+                  content={question.explanations?.[0]?.content}
                 />
               </div>
             )}
@@ -936,12 +906,12 @@ export function MatchingQuestion({
 
 
     return (
-      <div className="space-y-6" id={`#question-no-${startIndex + 1}`}>
-        <div className="heading-group">
-          <h3 className="text-[16px] font-bold ">
-            {question.title ||
-              `Questions ${startIndex + 1} - ${startIndex + standardQuestionCount
-              }`}
+      <div className="space-y-6" id={`question-block-${startIndex + 1}`}>
+        <div className="heading-group space-y-2">
+          <h3 className="text-lg font-bold">
+            {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+              ? question.title 
+              : (question.title || `Questions ${startIndex + 1}–${startIndex + (itemsToMatch?.length || 0)}`)}
           </h3>
           <div className="text-[16px] leading-[2] prose prose-sm max-w-none text-[#000]">
             {parse(
@@ -1102,7 +1072,7 @@ export function MatchingQuestion({
                 // === READONLY MODE FOR LIST LAYOUT ===
                 return (
                   <div className="space-y-6">
-                    <div className="flex flex-col md:flex-row gap-8">
+                    <div className="flex flex-col gap-8">
                       {/* Left Column: Questions with visual results */}
                       <div className="space-y-4">
                         <h4 className="text-[16px] font-bold mb-4 invisible hidden md:block">
@@ -1135,7 +1105,7 @@ export function MatchingQuestion({
                             <div
                               key={`result-list-${itemIndex}`}
                               className="flex items-center justify-start gap-4"
-                              id={`question-no-${questionAbsoluteIndex + 1}`}
+                              id={`#question-no-${questionAbsoluteIndex + 1}`}
                             >
                               <div className="text-[16px] text-[#000]">
                                 <TextSelectionWrapper>
@@ -1185,7 +1155,7 @@ export function MatchingQuestion({
                         <h4 className="text-[16px] font-bold mb-4">
                           List of options
                         </h4>
-                        <div className="flex flex-col gap-3">
+                        <div className="flex flex-row flex-wrap gap-3">
                           {answerOptions.map((option, index) => (
                             <div
                               key={`list-opt-readonly-${index}`}
@@ -1203,21 +1173,8 @@ export function MatchingQuestion({
                     {/* Explanation Section */}
                     {question.explanations?.[0]?.content && (
                       <div className="mt-4">
-                        <Collapse
-                          size="small"
-                          items={[
-                            {
-                              key: `exp-list-general-${startIndex}`,
-                              label: "Explanation",
-                              children: (
-                                <div className="prose prose-sm max-w-none p-2 rounded">
-                                  <TextSelectionWrapper>
-                                    {parse(question.explanations?.[0]?.content || "")}
-                                  </TextSelectionWrapper>
-                                </div>
-                              ),
-                            },
-                          ]}
+                        <QuestionExplanation 
+                          content={question.explanations?.[0]?.content}
                         />
                       </div>
                     )}
@@ -1234,7 +1191,7 @@ export function MatchingQuestion({
                   onDragOver={handleDragOver}
                   onDragEnd={handleDragEnd}
                 >
-                  <div className="flex flex-col md:flex-row gap-8">
+                  <div className="flex flex-col gap-8">
                     {/* Left Column: Questions */}
                     <div className="space-y-6">
                       <h4 className="text-[16px] font-bold mb-4 invisible hidden md:block">
@@ -1246,8 +1203,8 @@ export function MatchingQuestion({
                         return (
                           <div
                             key={containerId}
-                            className="flex items-center justify-start gap-4"
-                            id={`question-no-${questionAbsoluteIndex + 1}`}
+                            className="flex items-center justify-start gap-4 flex-col lg:flex-row w-full"
+                            id={`#question-no-${questionAbsoluteIndex + 1}`}
                           >
                             <div className="text-[16px] text-[#000]">
                               <TextSelectionWrapper>
@@ -1321,7 +1278,7 @@ export function MatchingQuestion({
                         items={items["available"] || []}
                         id="available"
                       >
-                        <div className="flex flex-col gap-3 items-start">
+                        <div className="flex flex-row flex-wrap gap-3 items-start">
                           {(items["available"] || []).map((id) => {
                             const optionIndex = parseInt(
                               String(id).split("-")[2]
@@ -1446,7 +1403,7 @@ export function MatchingQuestion({
                     <h4 className="text-[16px] font-bold mb-4">
                       Answer Options
                     </h4>
-                    <div className="space-y-2 prose prose-sm max-w-none">
+                    <div className="flex flex-row flex-wrap gap-3 prose prose-sm max-w-none w-full">
                       {answerOptions.map((option, index) => (
                         <div
                           key={`sa-opt-${index}`}
@@ -1463,21 +1420,8 @@ export function MatchingQuestion({
                   {/* 3. Explanation */}
                   {question.explanations?.[0]?.content && (
                     <div className="mt-2">
-                      <Collapse
-                        size="small"
-                        items={[
-                          {
-                            key: `exp-standard-general-${startIndex}`,
-                            label: "Explanation",
-                            children: (
-                              <div className="prose prose-sm max-w-none p-2 rounded">
-                                <TextSelectionWrapper>
-                                  {parse(question.explanations?.[0]?.content || "")}
-                                </TextSelectionWrapper>
-                              </div>
-                            ),
-                          },
-                        ]}
+                      <QuestionExplanation 
+                        content={question.explanations?.[0]?.content}
                       />
                     </div>
                   )}
@@ -1567,7 +1511,7 @@ export function MatchingQuestion({
                   {!readOnly && (
                     <div className="pt-3">
                       <SortableContext items={allOptionIds} id="available">
-                        <div className="space-y-2">
+                        <div className="flex flex-row flex-wrap gap-2">
                           {allOptionIds.map((id, optionIndex) => {
                             const optionText =
                               answerOptions[optionIndex]?.optionText;

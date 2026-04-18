@@ -14,7 +14,7 @@ export type QuizFormData = {
     year?: string;
     quarter?: string;
     part?: string;
-    question_form?: string;
+    question_form?: string[];
     status: "draft" | "published";
     passages: PassageData[];
 };
@@ -26,6 +26,7 @@ export type PassageData = {
     sort_order: number;
     audio_start?: number;
     audio_end?: number;
+    start_question_number?: number;
     questions: QuestionData[];
 };
 

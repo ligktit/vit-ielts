@@ -84,13 +84,6 @@ export default function CheckboxEditor({
               />
             }
           >
-            <Button
-              size="small"
-              icon={<CommentOutlined />}
-              type={o.explanation ? "primary" : "default"}
-              title="Add explanation"
-              style={{ flexShrink: 0 }}
-            />
           </Popover>
           <Button
             size="small"

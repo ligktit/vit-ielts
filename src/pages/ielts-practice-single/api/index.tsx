@@ -60,6 +60,7 @@ export type IPracticeSingle = {
       passage_content: string;
       audio_start?: string;
       audio_end?: string;
+      start_question_number?: number;
       questions: {
         startIndex?: number;
         question_form: [

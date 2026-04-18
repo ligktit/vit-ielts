@@ -157,6 +157,12 @@ export const ExamProvider = ({
     if (!post?.quizFields?.passages) return { refMap: rMap, sigMap: sMap, idMap: iMap };
     let absoluteQuestionIndex = 0;
     post.quizFields.passages.forEach((passage, pIndex) => {
+      // If passage has a custom start number, reset the absolute index
+      const explicitStart = (passage as any).start_question_number;
+      if (explicitStart && !isNaN(Number(explicitStart))) {
+        absoluteQuestionIndex = Number(explicitStart) - 1;
+      }
+
       passage.questions.forEach((q, qIndex) => {
         if ((q as any).id) iMap.set((q as any).id, absoluteQuestionIndex);
         rMap.set(q, absoluteQuestionIndex);

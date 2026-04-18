@@ -1,10 +1,11 @@
 import parse from "html-react-parser";
-import { Radio as AntRadio, Collapse, Space } from "antd";
+import { Radio as AntRadio, Space } from "antd";
 import { Controller, useFormContext } from "react-hook-form";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
 import { IQuestion, AnswerFormValues } from "@/shared/types/exam";
 import { useState, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
+import { QuestionExplanation } from "./question-explanation";
 // 1. IMPORT CONTEXT
 import { useExamContext } from "@/pages/take-the-test/context";
 
@@ -23,7 +24,7 @@ export const Radio = ({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   // 2. LẤY HÀM TÌM KIẾM TỪ CONTEXT
-  const { setActiveQuestionIndex, getQuestionStartIndex } = useExamContext();
+  const { setActiveQuestionIndex, getQuestionStartIndex, post } = useExamContext();
 
   // 3. TÍNH TOÁN INDEX THỰC TẾ (GLOBAL INDEX)
   const realStartIndex = useMemo(() => {
@@ -56,7 +57,9 @@ export const Radio = ({
   return (
     <div className="space-y-4" id={`question-block-${realStartIndex + 1}`}>
       <h3 className="text-lg font-bold">
-        Questions {displayStart}{questionRange}
+        {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+          ? question.title 
+          : `Questions ${displayStart}${questionRange}`}
       </h3>
 
       <div className="leading-[2] prose prose-sm max-w-none">
@@ -192,18 +195,15 @@ export const Radio = ({
       })}
 
       {readOnly && question.explanations && question.explanations.length > 0 && (
-        <Collapse
-          size="small"
-          items={question.explanations.map((exp, index) => ({
-            key: index,
-            label: `Explanation`,
-            children: (
-              <div className="prose prose-sm max-w-none">
-                {parse(exp.content || "")}
-              </div>
-            ),
-          }))}
-        />
+        <div className="space-y-2">
+          {question.explanations.map((exp, index) => (
+            <QuestionExplanation 
+              key={index} 
+              content={exp.content || ""} 
+              label={question.explanations && question.explanations.length > 1 ? `Explanation ${index + 1}` : "Explanation"}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

@@ -22,6 +22,7 @@ import Notepad from "@/pages/take-the-test/ui/notepad";
 import { Container } from "@/shared/ui";
 import Link from "next/link";
 import { ROUTES } from "@/shared/routes";
+import { QuestionExplanation } from "@/shared/ui/exam/question-render/ui";
 
 // Helper function để đếm số câu hỏi con từ một question
 // Sử dụng cùng logic với countQuestion để đảm bảo nhất quán
@@ -739,20 +740,7 @@ function ReviewExplanation({
           )}
         </div>
         {explanationText && (
-          <Collapse
-            className="mt-4"
-            items={[
-              {
-                key: "1",
-                label: "Explanation",
-                children: (
-                  <div className="prose prose-sm max-w-none">
-                    {normalizeParseResult(parse(explanationText))}
-                  </div>
-                ),
-              },
-            ]}
-          />
+          <QuestionExplanation content={explanationText} />
         )}
       </div>
     );
@@ -1345,7 +1333,7 @@ function ReviewExplanation({
     return (
       <ConfigProvider>
         <FormProvider {...methods}>
-          <div className={twMerge("p-4 md:p-12 space-y-6 bg-white")}>
+          <div className={twMerge("p-6 pb-[120px] space-y-6 bg-white")}>
             {currentPassage.questions &&
               currentPassage.questions.map((question: any, index: number) => {
                 const questionType = question.type?.[0];
@@ -1583,6 +1571,29 @@ function ReviewExplanation({
     });
   }, [newPost, mappedAnswers]);
 
+  const passageInfo = useMemo(() => {
+    if (
+      !currentPassage ||
+      !currentPassage.questions ||
+      currentPassage.questions.length === 0
+    ) {
+      return { partLabel: "", partNumber: 0, questionRange: "" };
+    }
+    const partLabel =
+      quiz.quizFields.skill[0] === "reading" ? "Passage" : "Part";
+    const originalPartIndex = (currentPassage as any).originalPartIndex;
+    const partNumber = (originalPartIndex !== undefined ? originalPartIndex : (currentPassage as any).partIndex) + 1;
+    const startQuestion = (currentPassage.questions[0]?.startIndex ?? 0) + 1;
+    let questionCountInPassage = 0;
+    currentPassage.questions.forEach((q:any) => questionCountInPassage += countSubQuestions(q));
+    const endQuestion = startQuestion + questionCountInPassage - 1;
+    const questionRange =
+      questionCountInPassage <= 1
+        ? `${startQuestion}`
+        : `${startQuestion}-${endQuestion}`;
+    return { partLabel, partNumber, questionRange };
+  }, [currentPassage, quiz.quizFields.skill]);
+
   // Minimal ExamContext value for review mode (enables TextSelectionProvider + Notepad)
   const reviewExamContextValue = useMemo(() => ({
     post: quiz as any,
@@ -1631,10 +1642,7 @@ function ReviewExplanation({
           {/* 1a. NẾU LÀ READING: Hiển thị Passage */}
           {isReading && (
             <TextSelectionWrapper>
-              <div className="prose prose-sm max-w-none p-4 md:p-12 bg-white break-words [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
-                <h2 className="text-[#374151] text-2xl font-bold">
-                  {currentPassage.title}
-                </h2>
+              <div className="prose-sm max-w-none p-[16px] pt-[30px] pb-[120px] bg-white h-full overflow-y-auto text-[#000] break-words [overflow-wrap:anywhere] [&_*]:[overflow-wrap:anywhere]">
                 <SafeRender name="processedPassageComponent">
                   {processedPassageComponent}
                 </SafeRender>
@@ -1660,7 +1668,9 @@ function ReviewExplanation({
           {/* 2a. NẾU LÀ READING: Hiển thị Câu hỏi */}
           {isReading && (
             <div className={`overflow-y-auto ${fullPage ? "h-full" : "h-[calc(600px-50px)]"}`}>
-              {QuestionsPanelContent}
+              <TextSelectionWrapper>
+                {QuestionsPanelContent}
+              </TextSelectionWrapper>
             </div>
           )}
 
@@ -1709,9 +1719,21 @@ function ReviewExplanation({
           <div className="flex flex-col h-full overflow-hidden">
             <ReviewHeader quiz={quiz} testResult={testResult} />
 
-            <div className="flex flex-grow min-h-0 overflow-hidden">
+            <div id="iel-test-result-explanation" className="flex flex-grow min-h-0 overflow-hidden">
               {/* Main content: splitter + footer */}
               <div className={twMerge("flex flex-col min-h-0 w-full duration-300 overflow-hidden", isNotesViewOpen && "w-9/12")}>
+                
+                <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
+                  <div className="p-[16px]">
+                    <div className="font-bold text-gray-800 text-base md:text-lg leading-tight">
+                      {passageInfo.partLabel} {passageInfo.partNumber}
+                    </div>
+                    <div className="text-[#000] text-base">
+                      Read the text and answer questions {passageInfo.questionRange}
+                    </div>
+                  </div>
+                </div>
+
                 {splitter}
 
                 {/* Full-width footer — identical to take-the-test footer (no submit button) */}

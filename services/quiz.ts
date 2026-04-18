@@ -311,6 +311,7 @@ export async function createQuiz(
         sort_order: p.sort_order ?? index,
         audio_start: p.audio_start,
         audio_end: p.audio_end,
+        start_question_number: p.start_question_number,
     }));
 
     const { data: passages, error: passageError } = await supabase
@@ -407,6 +408,7 @@ export async function updateQuiz(
             sort_order: p.sort_order ?? index,
             audio_start: p.audio_start ?? null,
             audio_end: p.audio_end ?? null,
+            start_question_number: p.start_question_number ?? null,
             questions: (p.questions ?? []).map((q, qIndex) => ({
                 type: q.type,
                 title: q.title ?? null,

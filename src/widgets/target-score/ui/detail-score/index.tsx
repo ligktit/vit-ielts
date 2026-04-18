@@ -73,20 +73,20 @@ export const DetailScore = () => {
 
       {/* Content */}
       <div className="p-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-stretch">
           {/* Overall Score Card */}
-          <div className="w-full md:w-[calc(20%-0.4rem)]">
+          <div className="w-full md:w-[calc(20%-0.4rem)] flex">
             <button
               type="button"
               onClick={() => setIsSetTargetScoreDialogOpen(true)}
-              className="w-full bg-red-50 rounded-lg p-4 flex flex-col space-y-2 hover:bg-red-100 transition-colors cursor-pointer text-left"
+              className="w-full bg-red-50 rounded-lg p-4 flex flex-col space-y-2 hover:bg-red-100 transition-colors cursor-pointer text-left h-full"
               style={{
                 backgroundColor: "rgba(217, 74, 86, 0.1)",
               }}
             >
               <p className="text-xs font-medium text-gray-600">Overall score</p>
-              <div className="flex justify-between items-center">
-                <p className="text-4xl font-bold" style={{ color: "#d94a56" }}>
+              <div className="flex justify-between items-center mt-auto">
+                <p className="text-2xl font-bold pr-2" style={{ color: "#d94a56" }}>
                   {loading ? "_" : overallScore}
                 </p>
                 <span className="material-symbols-rounded text-gray-600 text-xl">
@@ -99,15 +99,16 @@ export const DetailScore = () => {
           {/* Section Cards */}
           {["Listening", "Reading", "speaking", "Writing"].map(
             (item, index) => (
-              <div key={index} className="w-full md:w-[calc(20%-0.4rem)]">
+              <div key={index} className="w-full md:w-[calc(20%-0.4rem)] flex">
                 <button
+                  type="button"
                   onClick={() => setIsSetTargetScoreDialogOpen(true)}
-                  className="w-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col space-y-2 hover:border-gray-300 transition-colors cursor-pointer text-left"
+                  className="w-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col space-y-2 hover:border-gray-300 transition-colors cursor-pointer text-left h-full"
                 >
                   <p className="text-xs font-medium text-gray-600">
                     {_.capitalize(item)}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900 mt-auto">
                     {loading
                       ? "_"
                       : targetScore[item.toLowerCase() as keyof typeof targetScore] != null

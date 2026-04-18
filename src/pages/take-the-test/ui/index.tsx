@@ -184,7 +184,6 @@ export function PageTakeTheTestWrapper({
       );
     }
 
-    console.log("Filtering passages. Selected parts:", parts, "Total passages:", rawPost.quizFields.passages.length);
 
     // Filter passages based on selected parts and preserve original index
     const filteredPassagesWithOriginalIndex: Array<{ passage: any; originalIndex: number }> = [];
@@ -194,7 +193,6 @@ export function PageTakeTheTestWrapper({
       }
     });
 
-    console.log("Filtered passages count:", filteredPassagesWithOriginalIndex.length);
 
     // Ensure at least one passage exists
     if (filteredPassagesWithOriginalIndex.length === 0) {
@@ -208,12 +206,18 @@ export function PageTakeTheTestWrapper({
       }
     }
 
-    // Reset partIndex and recalculate startIndex from 0 after filtering
+    // Reset partIndex and recalculate startIndex after filtering
     // Also preserve originalPartIndex for display purposes
     let currentIndex = 0;
     const filteredPassages = filteredPassagesWithOriginalIndex.map(({ passage, originalIndex }, newIndex) => {
       _.set(passage, "partIndex", newIndex);
       _.set(passage, "originalPartIndex", originalIndex); // Preserve original index for display
+
+      // If passage has a custom start_question_number, reset currentIndex
+      const explicitStart = (passage as any).start_question_number;
+      if (explicitStart && !isNaN(Number(explicitStart))) {
+        currentIndex = Number(explicitStart) - 1;
+      }
 
       passage.questions.forEach((question: any, questionIndex: number) => {
         _.set(
@@ -267,6 +271,7 @@ export function PageTakeTheTest() {
     setIsNotesViewOpen,
     timer,
     selectedTextSize,
+    getQuestionStartIndex,
     ...restOfContext
   } = examContext;
 
@@ -315,22 +320,35 @@ export function PageTakeTheTest() {
       !currentPassage.questions ||
       currentPassage.questions.length === 0
     ) {
-      return { partLabel: "", partNumber: 0, questionRange: "" };
+      return { partLabel: "", partNumber: 0, questionRange: "", customTitle: "" };
     }
+
+    const isPractice = post.quizFields.type?.[0] === "practice";
+
     const partLabel =
       post.quizFields.skill[0] === "reading" ? "Passage" : "Part";
     // Use originalPartIndex if available (for filtered passages), otherwise use partIndex
     const originalPartIndex = (currentPassage as any).originalPartIndex;
     const partNumber = (originalPartIndex !== undefined ? originalPartIndex : (currentPassage as any).partIndex) + 1;
-    const startQuestion = (currentPassage.questions[0]?.startIndex ?? 0) + 1;
+    
+    // Fallback to auto-calculated startIndex if start_question_number is not provided
+    const explicitStart = (currentPassage as any).start_question_number;
+    const startQuestion = explicitStart ? explicitStart : (currentPassage.questions[0]?.startIndex ?? 0) + 1;
+    
     const questionCountInPassage = countQuestion(currentPassage);
     const endQuestion = startQuestion + questionCountInPassage - 1;
     const questionRange =
       questionCountInPassage <= 1
         ? `${startQuestion}`
         : `${startQuestion}-${endQuestion}`;
-    return { partLabel, partNumber, questionRange };
-  }, [currentPassage, post.quizFields.skill]);
+
+    return { 
+      partLabel, 
+      partNumber, 
+      questionRange, 
+      customTitle: isPractice ? currentPassage.title : "" 
+    };
+  }, [currentPassage, post.quizFields.skill, post.quizFields.type]);
 
   useEffect(() => {
     document.documentElement.style.overflowY = "hidden";
@@ -363,8 +381,7 @@ export function PageTakeTheTest() {
       }
 
       const options = headingQuestion.matchingQuestion?.answerOptions || [];
-      // @ts-ignore
-      const sIndex = headingQuestion.startIndex || 0;
+      const sIndex = getQuestionStartIndex(headingQuestion);
 
       let gapCount = 0;
       const answers: string[] = [];
@@ -541,6 +558,7 @@ export function PageTakeTheTest() {
     activeId,
     answerOptions,
     startIndex,
+    getQuestionStartIndex,
   };
 
   if (!currentPassage) {
@@ -631,7 +649,7 @@ export function PageTakeTheTest() {
                 <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
                   <div className="p-[16px]">
                     <div className="font-bold text-gray-800 text-base md:text-lg leading-tight">
-                      {passageInfo.partLabel} {passageInfo.partNumber}
+                      {passageInfo.customTitle || `${passageInfo.partLabel} ${passageInfo.partNumber}`}
                     </div>
                     <div className="text-[#000] text-base">
                       Read the text and answer questions {passageInfo.questionRange}

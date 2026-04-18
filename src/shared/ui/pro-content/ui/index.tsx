@@ -3,21 +3,13 @@ import { useProContentModal } from "../context";
 import Link from "next/link";
 import { LinkButton } from "../../link-button";
 import { useAppContext } from "@/appx/providers";
-import { useMemo } from "react";
+
+import { ROUTES } from "@/shared/routes";
 
 export const ProContentModal = () => {
   const open = useProContentModal((state) => state.isOpen);
   const close = useProContentModal((state) => state.close);
   const appContext = useAppContext();
-
-  const buyProLink = useMemo(() => {
-    try {
-      return appContext.masterData.websiteOptions.websiteOptionsFields
-        .generalSettings.buyProLink;
-    } catch {
-      return "";
-    }
-  }, [appContext]);
 
   return (
     <Modal
@@ -27,8 +19,8 @@ export const ProContentModal = () => {
       footer={
         <div className="space-x-2">
           <Button onClick={close}>Close</Button>
-          <Link href={typeof buyProLink === 'string' && buyProLink ? buyProLink : "/"} passHref legacyBehavior>
-            <LinkButton target="_blank" type="primary">
+          <Link href={ROUTES.SUBSCRIPTION} passHref legacyBehavior>
+            <LinkButton type="primary">
               Buy Premium
             </LinkButton>
           </Link>

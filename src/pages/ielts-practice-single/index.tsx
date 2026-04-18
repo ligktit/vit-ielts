@@ -80,6 +80,7 @@ function toIPracticeSingle(
         passage_content: p.content ?? "",
         audio_start: p.audio_start?.toString() ?? undefined,
         audio_end: p.audio_end?.toString() ?? undefined,
+        start_question_number: p.start_question_number ? Number(p.start_question_number) : undefined,
         questions: (p.questions ?? []).map((q) => {
           const listOfQuestions = safeParseJsonb<any[]>(q.list_of_questions);
           const listOfOptions = safeParseJsonb<any[]>(q.list_of_options);

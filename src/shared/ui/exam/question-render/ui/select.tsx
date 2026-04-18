@@ -6,13 +6,14 @@ import parse, {
   HTMLReactParserOptions,
 } from "html-react-parser";
 import { Fragment, JSX, useMemo, useState } from "react";
-import { Collapse, Select as SelectAnt, theme } from "antd";
+import { Select as SelectAnt, theme } from "antd";
 import _ from "lodash";
 import { Controller, useFormContext } from "react-hook-form";
 import { AnswerFormValues, useExamContext } from "@/pages/take-the-test/context";
 import { randomUUID } from "@/shared/lib";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
 import { twMerge } from "tailwind-merge";
+import { QuestionExplanation } from "./question-explanation";
 
 export const Select = ({
   question,
@@ -28,9 +29,10 @@ export const Select = ({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   
   // 1. LẤY HÀM TÌM KIẾM TỪ CONTEXT
-  const { setActiveQuestionIndex, getQuestionStartIndex } = useExamContext();
+  const { setActiveQuestionIndex, getQuestionStartIndex, post } = useExamContext();
 
   // 2. TÍNH TOÁN INDEX THỰC TẾ (GLOBAL INDEX)
+  // ... (trung gian không đổi) ...
   const realStartIndex = useMemo(() => {
     // QUAN TRỌNG: Trong review mode (readOnly), propStartIndex đã được tính đúng từ newPost
     // Nên LUÔN LUÔN dùng propStartIndex khi readOnly mode để đảm bảo khớp với answers array
@@ -232,7 +234,9 @@ export const Select = ({
   return (
     <div className="space-y-4" id={`question-block-${realStartIndex + 1}`}>
       <h3 className="text-lg font-bold">
-        Question {displayStart}{questionRange}
+        {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+          ? question.title 
+          : `Questions ${displayStart}${questionRange}`}
       </h3>
       
       <div className="leading-[2] prose prose-sm max-w-none">
@@ -342,37 +346,24 @@ export const Select = ({
                   {questionData.questions[index]?.answers?.join(", ")}
                 </span>
               </p>
-              <Collapse
-                size="small"
-                items={[
-                  {
-                    key: "1",
-                    label: "Explanation",
-                    children: (
-                      <div className="prose">
-                        {parse(explanation.content || "")}
-                      </div>
-                    ),
-                  },
-                ]}
+              <QuestionExplanation 
+                content={explanation.content || ""}
+                label={question.explanations && question.explanations.length > 1 ? `Explanation ${index + 1}` : "Explanation"}
               />
             </Fragment>
           ))}
         </div>
       )}
       {readOnly && useSubQuestions && question.explanations && question.explanations.length > 0 && (
-        <Collapse
-          size="small"
-          items={question.explanations.map((exp, index) => ({
-            key: index,
-            label: `Explanation`,
-            children: (
-              <div className="prose prose-sm max-w-none">
-                {parse(exp.content || "")}
-              </div>
-            ),
-          }))}
-        />
+        <div className="space-y-2">
+          {question.explanations.map((exp, index) => (
+            <QuestionExplanation 
+              key={index}
+              content={exp.content || ""}
+              label={question.explanations && question.explanations.length > 1 ? `Explanation ${index + 1}` : "Explanation"}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

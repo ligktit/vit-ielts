@@ -1,39 +1,21 @@
 /**
  * Backfill question_form on both questions and quizzes tables.
  *
- * Root cause analysis:
- *   - WordPress ACF stored question_form as '["uncategorized","Uncategorized"]' for 97% of questions
- *   - The real structural info is in question.type (radio|fillup|matching|matrix|checkbox|select)
- *     + matching_question.layout_type (standard|summary|heading)
- *   - The migration script faithfully copied the useless "uncategorized" tags
+ * Maps old slugs → new canonical slugs matching the filter UI.
  *
- * This script:
- *   1. Reads every question with its type + matching layout
- *   2. Maps (type, layout) → canonical question_form slug (aligned with customer filter labels)
- *   3. Updates each question's question_form
- *   4. Aggregates per quiz → updates quizzes.question_form (comma-separated unique forms)
+ * New canonical slugs (LISTENING):
+ *   gap_filling, map, diagram_label, matching_features,
+ *   matching_information, multiple_choice_many, multiple_choice_single, other
  *
- * Mapping table (type → IELTS question form):
+ * New canonical slugs (READING):
+ *   gap_filling, matching_endings, matching_features, matching_headings,
+ *   matching_information, multiple_choice_many, multiple_choice_single,
+ *   summary_completion, true_false_not_given, yes_no_not_given, other
  *
- *   LISTENING:
- *     fillup                          → fill-in-the-blank   (Gap Filling)
- *     matching (standard)             → matching             (Matching Features / Information)
- *     matching (summary)              → matching             (Matching Features / Information)
- *     matching (heading)              → matching             (Matching Features / Information)
- *     matrix                          → classification       (treated as "Other" in filter)
- *     radio                           → multiple-choice      (Multiple Choice - One Answer)
- *     checkbox                        → multiple-select      (Multiple Choice - Many Answers)
- *     select                          → dropdown             (Gap Filling variant)
- *
- *   READING:
- *     fillup                          → fill-in-the-blank   (Gap Filling / Summary Completion)
- *     matching (standard)             → matching             (Matching Features / Information / Endings)
- *     matching (summary)              → summary-completion   (Summary Completion)
- *     matching (heading)              → heading-match        (Matching Headings)
- *     matrix                          → classification       (treated as "Other" in filter)
- *     radio                           → multiple-choice      (Multiple Choice - One Answer)
- *     checkbox                        → multiple-select      (Multiple Choice - Many Answers)
- *     select                          → dropdown             (fill variant)
+ * Strategy:
+ *   1. If question already has a specific question_form from admin templates,
+ *      map it directly to the new slug.
+ *   2. Otherwise, infer from (type, matching layout, skill).
  *
  * Usage:
  *   node scripts/backfill-question-form.js          (dry run)
@@ -51,33 +33,70 @@ const supabase = createClient(
 );
 
 // ============================================================================
-// Mapping: (question.type, matching layout, skill) → canonical question_form
+// Direct mapping: old admin template question_form → new canonical slug
+// These are values that were set via the QuestionTemplatePicker in admin UI.
 // ============================================================================
 
-function resolveQuestionForm(type, matchingQuestion, skill) {
-  // For matching type, check layout sub-type
+const DIRECT_MAP = {
+  // Admin template values (from constants.ts QUESTION_TEMPLATES)
+  "summary_completion":              "summary_completion",
+  "sentence_completion":             "gap_filling",
+  "short_answer":                    "gap_filling",
+  "table_completion":                "gap_filling",
+  "multiple_choice":                 "multiple_choice_single",
+  "true_false_not_given":            "true_false_not_given",
+  "yes_no_not_given":                "yes_no_not_given",
+  "list_selection":                  "multiple_choice_many",
+  "matching_headings":               "matching_headings",
+  "matching_name":                   "matching_features",
+  "matching_paragraph_information":  "matching_information",
+  "matching_sentence_endings":       "matching_endings",
+  "choose_a_title":                  "other",
+  "diagram_completion":              "gap_filling",
+  "flow_chart_completion":           "gap_filling",
+
+  // Old backfill script values (from previous run)
+  "fill-in-the-blank":              "gap_filling",
+  "heading-match":                  "matching_headings",
+  "summary-completion":             "summary_completion",
+  "multiple-choice":                "multiple_choice_single",
+  "multiple-select":                "multiple_choice_many",
+  "classification":                 "other",
+  "dropdown":                       "gap_filling",
+  "matching":                       "matching_features",
+
+  // Already-new values (idempotent)
+  "gap_filling":                    "gap_filling",
+  "matching_features":              "matching_features",
+  "matching_information":           "matching_information",
+  "matching_endings":               "matching_endings",
+  "multiple_choice_single":         "multiple_choice_single",
+  "multiple_choice_many":           "multiple_choice_many",
+  "map":                            "map",
+  "diagram_label":                  "diagram_label",
+  "other":                          "other",
+};
+
+// ============================================================================
+// Fallback: infer from (type, matching layout) when question_form is missing
+// ============================================================================
+
+function resolveFromType(type, matchingQuestion) {
   if (type === "matching" && matchingQuestion) {
-    const layout = matchingQuestion.layout_type || "standard";
-    if (layout === "heading") return "heading-match";
-    if (layout === "summary") return "summary-completion";
-    return "matching"; // standard
+    const layout = (matchingQuestion.layoutType || matchingQuestion.layout_type || "standard").toLowerCase();
+    if (layout === "heading") return "matching_headings";
+    if (layout === "summary") return "summary_completion";
+    return "matching_features"; // standard
   }
 
   switch (type) {
-    case "fillup":
-      return "fill-in-the-blank";
-    case "radio":
-      return "multiple-choice";
-    case "checkbox":
-      return "multiple-select";
-    case "select":
-      return "dropdown";
-    case "matrix":
-      return "classification";
-    case "matching":
-      return "matching";
-    default:
-      return "uncategorized";
+    case "fillup":    return "gap_filling";
+    case "radio":     return "multiple_choice_single";
+    case "checkbox":  return "multiple_choice_many";
+    case "select":    return "gap_filling";
+    case "matrix":    return "other";
+    case "matching":  return "matching_features";
+    default:          return "other";
   }
 }
 
@@ -103,12 +122,20 @@ function resolveQuestionForm(type, matchingQuestion, skill) {
 
   // 2. Compute new question_form for each question
   const updates = [];
-  const quizForms = {}; // quiz_id → Set of forms
+  const quizForms = {}; // quiz_id → { skill, forms: Set }
 
   for (const q of questions) {
     const skill = q.passages?.quizzes?.skill || "reading";
     const quizId = q.passages?.quizzes?.id;
-    const newForm = resolveQuestionForm(q.type, q.matching_question, skill);
+    const currentForm = (q.question_form || "").trim();
+
+    // Try direct mapping first, then fallback to type-based inference
+    let newForm;
+    if (currentForm && DIRECT_MAP[currentForm]) {
+      newForm = DIRECT_MAP[currentForm];
+    } else {
+      newForm = resolveFromType(q.type, q.matching_question);
+    }
 
     // Track per-quiz
     if (quizId) {
@@ -117,19 +144,17 @@ function resolveQuestionForm(type, matchingQuestion, skill) {
     }
 
     // Only update if different from current
-    const currentForm = q.question_form || "";
     if (currentForm !== newForm) {
-      updates.push({ id: q.id, newForm, oldForm: currentForm, type: q.type });
+      updates.push({ id: q.id, newForm, oldForm: currentForm || "NULL", type: q.type });
     }
   }
 
-  // 3. Report
+  // 3. Report — Question-level
   console.log(`\nQuestions to update: ${updates.length} / ${questions.length}`);
 
-  // Summary by old → new
   const transitions = {};
   for (const u of updates) {
-    const key = `${u.oldForm || "NULL"} → ${u.newForm}`;
+    const key = `${u.oldForm} → ${u.newForm}`;
     transitions[key] = (transitions[key] || 0) + 1;
   }
   console.log("\nTransitions:");
@@ -137,7 +162,7 @@ function resolveQuestionForm(type, matchingQuestion, skill) {
     console.log(`  ${key}: ${count}`);
   }
 
-  // Quiz-level summary
+  // 4. Report — Quiz-level
   const quizUpdates = [];
   for (const [quizId, info] of Object.entries(quizForms)) {
     const formStr = [...info.forms].sort().join(",");
@@ -145,7 +170,6 @@ function resolveQuestionForm(type, matchingQuestion, skill) {
   }
   console.log(`\nQuizzes to update: ${quizUpdates.length}`);
 
-  // Show a few samples of quiz forms
   const bySkill = { reading: {}, listening: {} };
   for (const qu of quizUpdates) {
     bySkill[qu.skill][qu.question_form] = (bySkill[qu.skill][qu.question_form] || 0) + 1;
@@ -159,11 +183,11 @@ function resolveQuestionForm(type, matchingQuestion, skill) {
     console.log(`  [${count}x] ${combo}`);
   }
 
-  // 4. Write to DB if not dry run
+  // 5. Write to DB if not dry run
   if (!DRY_RUN) {
     console.log("\n--- Writing to database ---");
 
-    // Update questions in batches
+    // Update questions
     let qUpdated = 0;
     for (const u of updates) {
       const { error } = await supabase

@@ -3,6 +3,18 @@
 import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import { IQuestion } from "@/shared/types/exam";
 
+const parseMaxOptionsFromText = (
+    instructions: string | undefined | null
+  ): number => {
+    if (!instructions) return 1;
+    const lowerText = instructions.toLowerCase();
+    if (lowerText.includes("two") || lowerText.includes("2")) return 2;
+    if (lowerText.includes("three") || lowerText.includes("3")) return 3;
+    if (lowerText.includes("four") || lowerText.includes("4")) return 4;
+    if (lowerText.includes("five") || lowerText.includes("5")) return 5;
+    return 1;
+};
+
 // Hàm con để đếm số câu hỏi trong một object question DUY NHẤT
 const countSubQuestions = (question: IQuestion): number => {
     if (!question) return 0;
@@ -51,10 +63,15 @@ const countSubQuestions = (question: IQuestion): number => {
 
     // 5. Dạng Checkbox
     if (questionType === "checkbox") {
-        const correctCount = question.list_of_options?.reduce(
-            (acc: number, option: any) => (option.correct ? acc + 1 : acc), 0
-        ) || 0;
-        return correctCount > 0 ? correctCount : 1;
+        const listCorrectLen = question.list_of_options?.filter((o: any) => o.correct)?.length || 0;
+        const parsedMaxOptions = parseMaxOptionsFromText(question.question || question.instructions);
+        
+        // Cùng chung logic tính số câu hỏi chuẩn của Checkbox:
+        // Lấy listCorrectLen nếu > 0. NẾU KHÔNG lấy cái trong optionChoose hoặc nội dung > 1.
+        const maxSelectableOptions = Number(question.optionChoose) || (parsedMaxOptions > 1 ? parsedMaxOptions : 0) || listCorrectLen || 1;
+        const totalSubQuestions = listCorrectLen || maxSelectableOptions || 1;
+        
+        return totalSubQuestions;
     }
 
     // 6. Fallback dựa vào số lượng giải thích

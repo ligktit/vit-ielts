@@ -134,7 +134,8 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                     pro_user_only: quiz.pro_user_only, score_type: quiz.score_type,
                     featured_image: quiz.featured_image, audio_url: quiz.audio_url,
                     pdf_url: quiz.pdf_url, source: quiz.source, year: quiz.year,
-                    quarter: quiz.quarter, part: quiz.part, question_form: quiz.question_form,
+                    quarter: quiz.quarter, part: quiz.part,
+                    question_form: quiz.question_form ? quiz.question_form.split(",") : [],
                     status: quiz.status,
                 });
                 setPassages(
@@ -164,10 +165,14 @@ function QuizEditor({ quizId }: { quizId?: string }) {
             const payload = {
                 ...values,
                 status: status || values.status || "draft",
+                question_form: Array.isArray(values.question_form)
+                    ? values.question_form.join(",") || null
+                    : values.question_form || null,
                 passages: passages.map((p, pIdx) => ({
                     ...(p.id ? { id: p.id } : {}),
                     title: p.title ?? null, content: p.content ?? null, sort_order: pIdx,
                     audio_start: p.audio_start ?? null, audio_end: p.audio_end ?? null,
+                    start_question_number: p.start_question_number ?? null,
                     questions: (p.questions ?? []).map((q, qIdx) => ({
                         ...(q.id ? { id: q.id } : {}),
                         type: q.type, title: q.title ?? null, question_text: q.question_text ?? null,

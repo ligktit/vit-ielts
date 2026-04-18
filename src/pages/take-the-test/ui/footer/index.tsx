@@ -61,8 +61,14 @@ function Footer() {
     let absoluteQuestionIndex = 0;
 
     const info = post.quizFields.passages.map((passage, passageIndex) => {
+      // If passage has a custom start number, reset the absolute index
+      const explicitStart = (passage as any).start_question_number;
+      if (explicitStart && !isNaN(Number(explicitStart))) {
+        absoluteQuestionIndex = Number(explicitStart) - 1;
+      }
       let passageStartIndex = absoluteQuestionIndex;
       const passageQuestionIndices: number[] = [];
+      const passageQuestionGroups: number[][] = [];
       let totalPassageQuestions = 0;
       // Use originalPartIndex if available (for filtered passages), otherwise use passageIndex
       const originalPartIndex = (passage as any).originalPartIndex;
@@ -88,17 +94,8 @@ function Footer() {
           });
           questionCount = gapCount > 0 ? gapCount : 1;
         } else {
-          // 3. Xử lý cho TẤT CẢ CÁC LOẠI CÒN LẠI
-          const isCheckbox = questionType === 'checkbox';
-
-          if (isCheckbox) {
-              // Logic MỚI: Chỉ đọc 'optionChoose'
-              // @ts-ignore
-              questionCount = Number(q.optionChoose) || 1;
-            } else {
-            // NẾU KHÔNG PHẢI CHECKBOX: Dùng logic CŨ CỦA BẠN
-            questionCount = countQuestion({ questions: [q] });
-          }
+          // 3. Xử lý cho TẤT CẢ CÁC LOẠI CÒN LẠI (bây giờ countQuestion đã tự đếm đúng số answer của Checkbox)
+          questionCount = countQuestion({ questions: [q] });
         }
 
         if (isNaN(questionCount) || questionCount < 1) {
@@ -142,8 +139,20 @@ function Footer() {
         }
         // ▲▲▲ KẾT THÚC SỬA LOGIC HIGHLIGHT ▲▲▲
 
+        const group: number[] = [];
         for (let i = 0; i < questionCount; i++) {
           passageQuestionIndices.push(absoluteQuestionIndex + i);
+          group.push(absoluteQuestionIndex + i);
+        }
+        
+        if (questionType === 'checkbox') {
+          // Chỉ group border lại liền nhau nếu là dạng checkbox
+          passageQuestionGroups.push(group);
+        } else {
+          // Các dạng khác tách rời nhau ra thành từng group riêng biệt
+          for (let i = 0; i < questionCount; i++) {
+            passageQuestionGroups.push([absoluteQuestionIndex + i]);
+          }
         }
 
         totalPassageQuestions += questionCount;
@@ -152,6 +161,9 @@ function Footer() {
 
       const answeredCount = passageQuestionIndices.filter(idx => localAnsweredMap.has(idx)).length;
 
+      const isPractice = post?.quizFields?.type?.[0] === "practice";
+      const customTitle = (isPractice && passage.title) ? passage.title : null;
+
       return {
         partIndex: passageIndex, // Use filtered index for navigation
         displayPartIndex: displayPartIndex, // Use original index for display
@@ -159,6 +171,8 @@ function Footer() {
         answeredCount,
         startIndex: passageStartIndex,
         questions: passageQuestionIndices,
+        questionGroups: passageQuestionGroups,
+        customTitle,
       };
     });
 
@@ -479,48 +493,58 @@ function Footer() {
                             {info.totalQuestions > 0 && info.answeredCount === info.totalQuestions && (
                               <span className="text-green-700 material-symbols-rounded text-[18px] leading-none bold">check</span>
                             )}
-                            {isReadingTest ? "Passage" : "Part"} {(info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1}
+                            {info.customTitle || (isReadingTest ? "Passage" : "Part") + " " + ((info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1)}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 overflow-x-auto py-1">
-                          {info.questions.map(questionIndex => (
-                            <div
-                              key={questionIndex}
-                              className="flex flex-col items-center gap-2 flex-shrink-0"
-                            >
-                              <div
-                                className={twMerge(
-                                  "w-full h-[3px]",
-                                  answeredMap.has(questionIndex)
-                                    ? "bg-green-700"
-                                    : "bg-gray-200"
-                                )}
-                              />
-                              <span
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  handleScrollToQuestion(questionIndex);
-                                }}
-                                className={twMerge(
-                                  "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded",
-                                  activeQuestionIndex === questionIndex &&
-                                  "font-semibold border-2 border-[#418FC6]"
-                                )}
-                              >
-                                {questionIndex + 1}
-                              </span>
+                          {info.questionGroups.map((group, groupIdx) => (
+                            <div key={`group-${groupIdx}`} className="flex flex-col gap-2 flex-shrink-0">
+                              <div className="flex w-full gap-0 h-[3px]">
+                                {group.map(questionIndex => (
+                                  <div
+                                    key={questionIndex}
+                                    className={twMerge(
+                                      "flex-1 h-full",
+                                      answeredMap.has(questionIndex)
+                                        ? "bg-green-700"
+                                        : "bg-gray-200"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                              <div className="flex justify-center gap-1 w-full">
+                                {group.map(questionIndex => (
+                                  <span
+                                    key={`label-${questionIndex}`}
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      handleScrollToQuestion(questionIndex);
+                                    }}
+                                    className={twMerge(
+                                      "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded cursor-pointer",
+                                      activeQuestionIndex === questionIndex &&
+                                      "font-semibold border-2 border-[#418FC6]"
+                                    )}
+                                  >
+                                    {questionIndex + 1}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
+                    <div className={twMerge(
+                      "flex items-center gap-3 h-full w-full justify-center pt-2 mt-[-1px] border-t-[3px]",
+                      info.totalQuestions > 0 && info.answeredCount === info.totalQuestions ? "border-green-700" : "border-transparent"
+                    )}>
                       <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap flex items-center gap-1.5">
                         {info.totalQuestions > 0 && info.answeredCount === info.totalQuestions && (
-                          <span className="text-green-500 material-symbols-rounded text-[18px] leading-none bold">check</span>
+                          <span className="text-green-700 material-symbols-rounded text-[18px] leading-none bold">check</span>
                         )}
-                        {isReadingTest ? "Passage" : "Part"} {(info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1}
+                        {info.customTitle || (isReadingTest ? "Passage" : "Part") + " " + ((info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1)}
                       </span>
                       <span className="text-[16px] text-gray-500 whitespace-nowrap">
                         {info.answeredCount} of {info.totalQuestions}

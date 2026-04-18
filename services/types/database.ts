@@ -59,6 +59,7 @@ export type Passage = {
     sort_order: number;
     audio_start: number | null;
     audio_end: number | null;
+    start_question_number: number | null;
 };
 
 /** JSONB sub-types for question data fields */

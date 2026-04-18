@@ -1,12 +1,13 @@
 import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import { useFormContext, Controller } from "react-hook-form";
 import parse from "html-react-parser";
-import { Collapse } from "antd";
+// import { Collapse } from "antd"; // Removed for QuestionExplanation
 import { twMerge } from "tailwind-merge";
 import { useExamContext } from "@/pages/take-the-test/context";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
 import { useMemo } from "react";
 import { countQuestion } from "@/shared/lib";
+import { QuestionExplanation } from "./question-explanation";
 
 type IMatrixCategory = {
   categoryLetter: string;
@@ -138,7 +139,7 @@ export const MatrixQuestion = ({
             const userDidAnswer = userAnswer !== undefined && userAnswer !== null;
 
             return (
-              <tr key={itemIndex} className="border-b last:border-b-0">
+              <tr key={itemIndex} className="border-b last:border-b-0" id={`#question-no-${absoluteIndex + 1}`}>
                 <td className="p-2 text-center align-middle font-bold text-[16px] pr-[0]">
                   <div className="h-[34px] w-7 flex items-center justify-center rounded-sm mx-auto">{absoluteIndex + 1}</div>
                 </td>
@@ -191,9 +192,11 @@ export const MatrixQuestion = ({
   // Content 1: Title & Instructions (contains media)
   const InstructionsContent = (
     <div className="heading-group space-y-2">
-      <h3 className="font-bold text-base">
-        {question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`}
-      </h3>
+    <h3 className="text-lg font-bold">
+      {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+        ? question.title 
+        : (question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`)}
+    </h3>
       <div className="leading-[2] prose prose-sm max-w-none text-black">
         {parse(contentToCheck || "")}
       </div>
@@ -236,7 +239,7 @@ export const MatrixQuestion = ({
                         const absoluteIndex = realStartIndex + itemIndex;
                         const isActive = activeQuestionIndex === absoluteIndex;
                         return (
-                          <tr key={itemIndex} className="border-b last:border-b-0">
+                          <tr key={itemIndex} className="border-b last:border-b-0" id={`#question-no-${absoluteIndex + 1}`}>
                             <td className="p-2 text-center align-middle font-bold text-[16px] pr-[0]">
                               <div className={twMerge("h-[34px] w-7 flex items-center justify-center rounded-sm mx-auto", isActive && "border-[2px] border-[#418ec8]")}>
                                 {absoluteIndex + 1}
@@ -283,11 +286,10 @@ export const MatrixQuestion = ({
         <div className="space-y-6">
           {StaticQuestionGridJSX}
           {layoutType === "standard" && CategoryListJSX}
-          {question.explanations && question.explanations[0]?.content && (
-            <div className="mt-4">
-              <Collapse size="small" items={[{ key: `general-explanation-${realStartIndex}`, label: "View General Explanation", children: (<div className="prose prose-sm max-w-none p-2 rounded"><TextSelectionWrapper>{parse(question.explanations?.[0]?.content || "")}</TextSelectionWrapper></div>) }]} />
-            </div>
-          )}
+            <QuestionExplanation 
+              content={question.explanations?.[0]?.content}
+              label="View General Explanation"
+            />
         </div>
       )}
     </>
@@ -299,8 +301,10 @@ export const MatrixQuestion = ({
     // 1. Instructions Text with Media Removed
     const InstructionsTextOnly = (
       <div className="heading-group space-y-2 mb-4">
-        <h3 className="font-bold text-base">
-          {question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`}
+        <h3 className="text-lg font-bold">
+          {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+            ? question.title 
+            : (question.title || `Questions ${realStartIndex + 1}–${realStartIndex + matrixItems.length}`)}
         </h3>
         <div className="leading-[2] prose prose-sm max-w-none text-black">
           {parse(contentToCheck || "", {
@@ -325,7 +329,7 @@ export const MatrixQuestion = ({
     );
 
     return (
-      <div id={`#question-no-${realStartIndex + 1}`}>
+      <div id={`question-block-${realStartIndex + 1}`}>
         {/* Row 1: Text Instructions */}
         {InstructionsTextOnly}
 
@@ -343,7 +347,7 @@ export const MatrixQuestion = ({
   }
 
   return (
-    <div className="space-y-6" id={`#question-no-${realStartIndex + 1}`}>
+    <div className="space-y-6" id={`question-block-${realStartIndex + 1}`}>
       {InstructionsContent}
       {MatrixTableContent}
     </div>

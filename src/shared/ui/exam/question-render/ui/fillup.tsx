@@ -2,13 +2,14 @@ import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import { AnswerFormValues, useExamContext } from "@/pages/take-the-test/context";
 import { randomUUID } from "@/shared/lib";
 import { TextSelectionWrapper } from "@/shared/ui/text-selection";
-import { Collapse, Input } from "antd";
+import { Input } from "antd";
 import parse, { Element, HTMLReactParserOptions } from "html-react-parser";
 import React, { Fragment, useMemo } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 import { countQuestion } from "@/shared/lib";
 import { normalizeParseResult, SafeRender } from "@/shared/lib/html-normalize";
+import { QuestionExplanation } from "./question-explanation";
 
 // --- HÀM CHUẨN HÓA CHUỖI ---
 const normalizeString = (str: string | undefined | null) => {
@@ -231,7 +232,7 @@ export const Fillup = ({
             <Input
               autoComplete="off"
               disabled={readOnly}
-              id={`question-no-${displayIndex}`}
+              id={`#question-no-${displayIndex}`}
               size="small"
               placeholder={displayIndex.toString()}
               className="w-24 text-center align-middle"
@@ -268,7 +269,11 @@ export const Fillup = ({
 
   return (
     <div className="space-y-6" id={`question-block-${realStartIndex + 1}`}>
-      <p className="text-lg font-bold">Questions {questionRange}</p>
+      <h3 className="text-lg font-bold">
+        {(post?.quizFields?.type?.[0] === "practice" && question.title) 
+          ? question.title 
+          : `Questions ${questionRange}`}
+      </h3>
       <div className="leading-[2] prose prose-sm max-w-none">
         <TextSelectionWrapper>
           <SafeRender name="fillup-content">
@@ -280,23 +285,8 @@ export const Fillup = ({
       {readOnly && (
         <div className="space-y-4">
           {question.explanations?.[0]?.content && (
-            <Collapse
-              size="small"
-              items={[
-                {
-                  key: "1",
-                  label: "Explanation",
-                  children: (
-                    <div className="prose">
-                      <TextSelectionWrapper>
-                        <SafeRender name="fillup-explanation">
-                          {normalizeParseResult(parse(question.explanations[0].content || ""))}
-                        </SafeRender>
-                      </TextSelectionWrapper>
-                    </div>
-                  ),
-                },
-              ]}
+            <QuestionExplanation 
+              content={question.explanations?.[0]?.content}
             />
           )}
         </div>

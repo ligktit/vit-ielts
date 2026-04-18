@@ -6,6 +6,7 @@ import { EyeOutlined } from "@ant-design/icons";
 import type { FormInstance } from "antd";
 import FileUploadField from "./FileUploadField";
 import Link from "next/link";
+import { LISTENING_QUESTION_FORMS, READING_QUESTION_FORMS } from "@/shared/constants";
 
 const { TextArea } = Input;
 
@@ -282,8 +283,21 @@ export default function QuizEditorForm({
 
                 {/* Question Form (Legacy might keep it inside passages/types, but here it's global for the test config) */}
                 <Form.Item label={renderLabel("Question Form")} name="question_form">
-                     {/* Keep this field from the previous system just in case */}
-                    <Input variant="filled" size="large" disabled={saving} />
+                    <Select
+                        mode="multiple"
+                        variant="filled"
+                        size="large"
+                        options={currentSkill === 'listening' ? LISTENING_QUESTION_FORMS : READING_QUESTION_FORMS}
+                        disabled={saving}
+                        allowClear
+                        showSearch
+                        placeholder="Select Question Form..."
+                        filterOption={(input, option) =>
+                            (option?.label as string ?? "")
+                                .toLowerCase()
+                                .includes(input.toLowerCase())
+                        }
+                    />
                 </Form.Item>
 
                 {/* 10. Status */}

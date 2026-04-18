@@ -32,25 +32,35 @@ function PassageEditorInner({
     return (
         <div>
             <Row gutter={16}>
-                <Col span={isListening ? 16 : 24}>
+                <Col span={isListening ? 13 : 16}>
                     <Form.Item label="Title">
                         <Input value={passage.title ?? ""} onChange={(e) => onUpdatePassage("title", e.target.value)} />
                     </Form.Item>
                 </Col>
                 {isListening && (
                     <>
-                        <Col span={4}>
+                        <Col span={3}>
                             <Form.Item label="Audio Start">
                                 <InputNumber value={passage.audio_start} onChange={(v) => onUpdatePassage("audio_start", v)} className="w-full" />
                             </Form.Item>
                         </Col>
-                        <Col span={4}>
+                        <Col span={3}>
                             <Form.Item label="Audio End">
                                 <InputNumber value={passage.audio_end} onChange={(v) => onUpdatePassage("audio_end", v)} className="w-full" />
                             </Form.Item>
                         </Col>
                     </>
                 )}
+                <Col span={isListening ? 5 : 8}>
+                    <Form.Item label="Start question no">
+                        <InputNumber 
+                            placeholder="Mặc định: 1" 
+                            value={passage.start_question_number} 
+                            onChange={(v) => onUpdatePassage("start_question_number", v)} 
+                            className="w-full" 
+                        />
+                    </Form.Item>
+                </Col>
             </Row>
             <Form.Item label="Content">
                 <RichTextEditor value={passage.content ?? ""} onChange={(html) => onUpdatePassage("content", html)} placeholder="Nhập nội dung passage..." />

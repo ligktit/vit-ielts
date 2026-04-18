@@ -1,6 +1,6 @@
 import { Container } from "@/shared/ui";
-import { HeroBanner } from "@/shared/ui/ds";
-import { Button } from "antd";
+import { HeroBanner, Button } from "@/shared/ui/ds";
+import { Button as AntButton } from "antd";
 import Image from "next/image";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -186,8 +186,10 @@ export function PageTestResult({
                 </div>
                 
                 <Button
-                  size="large"
-                  className="bg-primary-500! text-white! hover:bg-primary-400! border-none rounded-full px-5 font-semibold shadow-md text-sm"
+                  variant="primary"
+                  size="lg"
+                  className="rounded-full px-8 shadow-lg shadow-primary-500/20"
+                  leftIcon={<span className="material-symbols-rounded">search</span>}
                   onClick={() => router.push(ROUTES.TEST_RESULT_EXPLANATION(testResult.id))}
                 >
                   Xem giải thích
