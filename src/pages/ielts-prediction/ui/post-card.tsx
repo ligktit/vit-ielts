@@ -1,4 +1,6 @@
 import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
+import Image from "next/image";
+import Link from "next/link";
 
 export type PostCardProps = {
   image?: string;
@@ -13,12 +15,9 @@ export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => 
   const imageSrc = resolveContentImage(image, fallbackImage);
   const isLogoFallback = !image && imageSrc.includes("logo.png");
 
-  const Tag = href ? "a" : "div";
-  const linkProps = href ? { href } : {};
-
   return (
-    <Tag
-      {...linkProps}
+    <Link
+      href={href || "#"}
       className="group flex flex-col bg-white rounded-[30px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 w-full cursor-pointer overflow-hidden"
     >
       {/* Image */}
@@ -26,15 +25,17 @@ export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => 
         {isLogoFallback && (
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--color-secondary-200),_white_55%,_var(--color-primary-50))]" />
         )}
-        <img
+        <Image
           src={imageSrc}
           alt={title}
-          className={`absolute inset-0 w-full h-full ${
+          fill
+          className={`${
             isLogoFallback
               ? "object-contain p-12 opacity-30 mix-blend-multiply"
               : "object-cover"
           } transition-transform duration-500 group-hover:scale-105`}
           loading="lazy"
+          unoptimized
         />
 
         {/* PRO badge */}
@@ -59,9 +60,11 @@ export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => 
         <div className="flex items-center justify-between gap-2">
           {/* Brand */}
           <div className="flex items-center gap-[6px] min-w-0">
-            <img
+            <Image
               src="/red-logo.png"
               alt="IELTS Prediction"
+              width={100}
+              height={18}
               className="h-[18px] w-auto shrink-0"
             />
             <span className="text-[14px] font-semibold text-primary-500 truncate">
@@ -80,6 +83,6 @@ export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => 
           )}
         </div>
       </div>
-    </Tag>
+    </Link>
   );
 };

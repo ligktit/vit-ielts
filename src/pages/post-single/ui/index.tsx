@@ -1,6 +1,5 @@
 import { Container } from "@/shared/ui";
 import { SEOHeader } from "@/widgets";
-import { Card } from "antd";
 import { Breadcrumb, Avatar } from "@/shared/ui/ds";
 import Link from "next/link";
 import { IPost } from "@/shared/types";
@@ -152,7 +151,7 @@ export const PageSingle = ({ post }: { post: IPost }) => {
                       <span className="material-symbols-rounded text-lg! leading-none!">
                         visibility
                       </span>
-                      <span>{parseInt(post.postFields.viewCount || '0').toLocaleString()}</span>
+                      <span>{(post.postMeta?.views || 0).toLocaleString()}</span>
                     </p>
                   </div>
                 </div>
