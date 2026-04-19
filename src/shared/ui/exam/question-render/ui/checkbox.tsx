@@ -36,7 +36,7 @@ export const Checkbox = ({
   const methods = useFormContext<AnswerFormValues>();
   const [isFocused, setIsFocused] = useState(false);
   // 1. LẤY HÀM TÌM KIẾM TỪ CONTEXT
-  const { setActiveQuestionIndex, getQuestionStartIndex, activeQuestionIndex } = useExamContext();
+  const { post, setActiveQuestionIndex, getQuestionStartIndex, activeQuestionIndex } = useExamContext();
 
   // 2. TÍNH TOÁN INDEX THỰC TẾ (GLOBAL INDEX)
   const realStartIndex = useMemo(() => {

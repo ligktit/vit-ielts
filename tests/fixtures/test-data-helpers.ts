@@ -1,5 +1,4 @@
 import { supabaseAdmin } from "./supabase-live";
-import { supabaseAdmin } from "./supabase-live";
 
 /**
  * Generates a random ID for testing purposes.

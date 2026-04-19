@@ -56,7 +56,7 @@ export function ScrollFadeIn({
   delay?: number;
   threshold?: number;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
   [key: string]: any;
 }) {
   const ref = useScrollFadeIn<HTMLElement>(delay, threshold);

@@ -21,7 +21,7 @@ export type HeaderNavItem = {
 };
 
 export type HeaderUserMenuItem = {
-  label: string;
+  label?: string;
   href?: string;
   onClick?: () => void;
   danger?: boolean;
