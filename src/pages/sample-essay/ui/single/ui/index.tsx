@@ -1,10 +1,10 @@
 import { Container } from "@/shared/ui";
 import { SEOHeader } from "@/widgets";
-import { Breadcrumb, Avatar } from "@/shared/ui/ds";
+import { Breadcrumb, Avatar, TestCard } from "@/shared/ui/ds";
 import Link from "next/link";
 import Image from "next/image";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import SharePost from "./share-post";
 import RelatedEssays from "./related-essays";
 import { SingleSampleEssay } from "@/pages/sample-essay/api";
@@ -37,6 +37,7 @@ export const PageSingle = ({
   >[];
 }) => {
   const fallbackImage = useContentImageFallback();
+  const splideRef = useRef<any>(null);
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = () => {
@@ -329,10 +330,12 @@ export const PageSingle = ({
                 aria-label="Previous"
                 className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
               >
-                <img
+                <Image
                   src="/assets/figma/icons/Arrow1.svg"
-                  alt=""
-                  className="w-3 h-3 [filter:brightness(0)_invert(1)]"
+                  alt="Previous"
+                  width={12}
+                  height={12}
+                  className="[filter:brightness(0)_invert(1)]"
                   style={{ transform: "rotate(180deg)" }}
                 />
               </button>
@@ -386,10 +389,12 @@ export const PageSingle = ({
                 aria-label="Next"
                 className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
               >
-                <img
+                <Image
                   src="/assets/figma/icons/Arrow1.svg"
-                  alt=""
-                  className="w-3 h-3 [filter:brightness(0)_invert(1)]"
+                  alt="Next"
+                  width={12}
+                  height={12}
+                  className="[filter:brightness(0)_invert(1)]"
                 />
               </button>
             </div>
