@@ -130,24 +130,27 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                                                             : "border-white bg-white"
                                                     }`}
                                                 >
-                                                    <div className="flex items-start gap-2">
+                                                    <div className="flex items-center w-full">
                                                         <Radio
                                                             value={oIdx}
                                                             checked={isCorrect}
                                                             disabled
-                                                            className="m-0 mt-0.5"
-                                                        />
-                                                        <div className="min-w-0 break-words prose prose-sm max-w-none flex-1">
-                                                            {renderRichText(
-                                                                opt.option_text || opt.content || opt.label,
-                                                                `[Option ${oIdx + 1}]`
-                                                            )}
-                                                        </div>
-                                                        {isCorrect && (
-                                                            <span className="ml-auto shrink-0 text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                                                                ✓ Correct
-                                                            </span>
-                                                        )}
+                                                            className="m-0 mt-0.5 w-full flex items-start"
+                                                        >
+                                                            <div className="flex items-center justify-between w-full">
+                                                                <div className="min-w-0 break-words prose prose-sm max-w-none">
+                                                                    {renderRichText(
+                                                                        opt.option_text || opt.content || opt.label,
+                                                                        `[Option ${oIdx + 1}]`
+                                                                    )}
+                                                                </div>
+                                                                {isCorrect && (
+                                                                    <span className="ml-2 shrink-0 text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                                                                        ✓ Correct
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </Radio>
                                                     </div>
                                                 </div>
                                             );
@@ -176,21 +179,24 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                     return (
                         <div key={idx}>
                             <div
-                                className={`flex items-start gap-2 rounded-lg px-3 py-2 ${
+                                className={`rounded-lg px-3 py-2 border w-full ${
                                     isCorrect
-                                        ? "bg-green-50 border border-green-300"
-                                        : "bg-white border border-transparent"
+                                        ? "bg-green-50 border-green-300"
+                                        : "bg-white border-transparent"
                                 }`}
                             >
-                                <Checkbox checked={isCorrect} disabled className="mt-0.5" />
-                                <span className="flex-1 text-sm">
-                                    {opt.option_text || opt.option || opt.content || `[Option ${idx + 1}]`}
-                                </span>
-                                {isCorrect && (
-                                    <span className="shrink-0 text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
-                                        ✓ Correct
-                                    </span>
-                                )}
+                                <Checkbox checked={isCorrect} disabled className="mt-0.5 w-full flex items-start">
+                                    <div className="flex items-center justify-between w-full">
+                                        <span className="flex-1 text-sm min-w-0 pr-2">
+                                            {renderRichText(opt.option_text || opt.option || opt.content, `[Option ${idx + 1}]`)}
+                                        </span>
+                                        {isCorrect && (
+                                            <span className="shrink-0 text-xs font-semibold text-green-600 bg-green-100 px-2 py-0.5 rounded-full ml-auto">
+                                                ✓ Correct
+                                            </span>
+                                        )}
+                                    </div>
+                                </Checkbox>
                             </div>
                             {opt.explanation && (
                                 <ExplanationBlock content={opt.explanation} renderRichText={renderRichText} />

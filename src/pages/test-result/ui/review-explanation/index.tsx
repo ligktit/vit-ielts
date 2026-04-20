@@ -1716,7 +1716,7 @@ function ReviewExplanation({
     return (
       <ExamContext.Provider value={reviewExamContextValue as any}>
         <TextSelectionProvider key={currentPassageIndex}>
-          <div className="flex flex-col h-full overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
             <ReviewHeader quiz={quiz} testResult={testResult} />
 
             <div id="iel-test-result-explanation" className="flex flex-grow min-h-0 overflow-hidden">
@@ -1823,7 +1823,7 @@ function ReviewExplanation({
   }
 
   return (
-    <div id="iel-test-result-explanation">
+    <div id="iel-test-result-explanation" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
       {splitter}
     </div>
   );
