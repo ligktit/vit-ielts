@@ -61,6 +61,7 @@ const MENU_SECTIONS: MenuSection[] = [
         key: "exam-library-group", icon: <BookOutlined />, label: "Exam Library",
         children: [
           { key: "/admin/mock-test-collections", label: "Tổng quan" },
+          { key: "/admin/mock-tests", label: "Quản lý Mock Test" },
           { key: "/admin/mock-tests/new", label: "Thêm Mock Test" },
           { key: "/admin/mock-test-collections/new", label: "Thêm Collection" },
         ],
@@ -160,7 +161,7 @@ const BREADCRUMB_MAP: Record<string, string> = {
   "/admin/quizzes/new": "Thêm mới",
   "/admin/mock-test-collections": "Exam Library",
   "/admin/mock-test-collections/new": "Thêm Collection",
-  "/admin/mock-tests": "Mock Tests",
+  "/admin/mock-tests": "Quản lý Mock Test",
   "/admin/mock-tests/new": "Thêm Mock Test",
   "/admin/test-results": "Test Results",
   "/admin/orders": "Orders",

@@ -45,13 +45,12 @@ type ScoringQuestion = QuizQuestion & {
  * @origin functions.php L1456–1469
  */
 function extractWords(text: string): string[] {
+    if (!text) return [];
     const regex = /\{(.*?)\}/g;
-    const results: string[] = [];
     let match: RegExpExecArray | null;
+    const results: string[] = [];
     while ((match = regex.exec(text)) !== null) {
-        if (match[1].trim() !== "") {
-            results.push(match[1].trim().replace(/\s*\|\s*/g, "|"));
-        }
+        results.push(match[1].trim());
     }
     return results;
 }
@@ -67,7 +66,7 @@ function extractWords(text: string): string[] {
  *
  * @origin functions.php L1060–1105 (radio), L1106–1145 (select — same logic)
  */
-function scoreRadioOrSelect(
+function scoreRadio(
     question: ScoringQuestion,
     answers: UserAnswer[],
     answerIndex: number,
@@ -78,10 +77,8 @@ function scoreRadioOrSelect(
 
     for (const subQ of subQuestions) {
         const userAnswer = answers[idx];
-        // WP ACF migration: null correct means index 0 (first option, lost due to JS falsy)
         const correctFlag = subQ.correct ?? 0;
 
-        // PHP: (string)$user_answer == (string)$correct_flag
         if (userAnswer != null && String(userAnswer) === String(correctFlag)) {
             correct++;
         }
@@ -89,6 +86,45 @@ function scoreRadioOrSelect(
     }
 
     return { correct, total: subQuestions.length, nextIndex: idx };
+}
+
+function scoreSelect(
+    question: ScoringQuestion,
+    answers: UserAnswer[],
+    answerIndex: number,
+): { correct: number; total: number; nextIndex: number } {
+    const correctAnswersFromText = extractWords(question.question_text || "");
+    const optionsList = question.list_of_options || [];
+    let correct = 0;
+    let idx = answerIndex;
+
+    const totalFromText = correctAnswersFromText.length;
+
+    if (totalFromText === 0 && question.list_of_questions && question.list_of_questions.length > 0) {
+        // FALLBACK: Use list_of_questions exactly like Radio
+        const subQuestions = question.list_of_questions;
+        for (const subQ of subQuestions) {
+            const userAnswer = answers[idx];
+            const correctFlag = subQ.correct ?? 0;
+            if (userAnswer != null && String(userAnswer) === String(correctFlag)) {
+                correct++;
+            }
+            idx++;
+        }
+        return { correct, total: subQuestions.length, nextIndex: idx };
+    }
+
+    correctAnswersFromText.forEach(correctAnswerText => {
+        const userAnswerIndex = answers[idx] as number;
+        const userAnswerText = optionsList[userAnswerIndex]?.option_text ?? null;
+        
+        if (userAnswerText?.trim().toLowerCase() === correctAnswerText.trim().toLowerCase()) {
+            correct++;
+        }
+        idx++;
+    });
+
+    return { correct, total: totalFromText, nextIndex: idx };
 }
 
 /**
@@ -103,26 +139,39 @@ function scoreFillup(
     answers: UserAnswer[],
     answerIndex: number,
 ): { correct: number; total: number; nextIndex: number } {
-    const explanations = question.explanations ?? [];
     let correct = 0;
     let idx = answerIndex;
 
-    for (const explanation of explanations) {
-        const userAnswer = answers[idx];
-        const userStr = String(userAnswer ?? "").trim().toLowerCase();
+    const correctAnswersFromText = extractWords(question.question_text || "");
+    
+    if (correctAnswersFromText.length > 0) {
+        const total = correctAnswersFromText.length;
+        correctAnswersFromText.forEach(correctWordWithOptions => {
+            const possibleCorrectAnswers = correctWordWithOptions.split("|").map(w => w.trim().toLowerCase());
+            const userAnswerRaw = answers[idx];
+            const userAnswer = String(userAnswerRaw ?? "").trim().toLowerCase();
+            
+            if (userAnswer !== "" && possibleCorrectAnswers.includes(userAnswer)) {
+                correct++;
+            }
+            idx++;
+        });
+        return { correct, total, nextIndex: idx };
+    } else {
+        const explanations = question.explanations ?? [];
+        const total = explanations.length;
+        for (const explanation of explanations) {
+            const userAnswerRaw = answers[idx];
+            const userAnswer = String(userAnswerRaw ?? "").trim().toLowerCase();
+            const possibleCorrectAnswers = (explanation.content ?? "").split("/").map((w) => w.trim().toLowerCase());
 
-        // PHP: split("/", $correct) → array of accepted answers
-        const correctAnswers = (explanation.content ?? "")
-            .split("/")
-            .map((w) => w.trim().toLowerCase());
-
-        if (userStr !== "" && correctAnswers.includes(userStr)) {
-            correct++;
+            if (userAnswer !== "" && possibleCorrectAnswers.includes(userAnswer)) {
+                correct++;
+            }
+            idx++;
         }
-        idx++;
+        return { correct, total, nextIndex: idx };
     }
-
-    return { correct, total: explanations.length, nextIndex: idx };
 }
 
 /**
@@ -152,13 +201,26 @@ function scoreCheckbox(
         ? rawAnswer.map(Number).sort((a, b) => a - b)
         : [];
 
-    // PHP: sort($user) == sort($correct) → all-or-nothing
-    const isCorrect =
-        userIndices.length === correctIndices.length &&
-        userIndices.every((val, i) => val === correctIndices[i]);
+    let correct = 0;
+
+    if (total === 1) {
+        const userChoiceIndex = userIndices.length > 0 ? userIndices[0] : undefined;
+        const correctChoiceIndex = correctIndices.length > 0 ? correctIndices[0] : undefined;
+        if (userChoiceIndex !== undefined && userChoiceIndex === correctChoiceIndex) {
+            correct = 1;
+        }
+    } else {
+        userIndices.forEach((userChoiceIndex) => {
+            if (correctIndices.includes(userChoiceIndex)) {
+                correct++;
+            }
+        });
+        // Cap correct at total just in case
+        correct = Math.min(correct, total);
+    }
 
     return {
-        correct: isCorrect ? correctIndices.length : 0,
+        correct,
         total,
         nextIndex: answerIndex + 1,
     };
@@ -357,8 +419,11 @@ export function calculateScore(
 
         switch (qType) {
             case "radio":
+                result = scoreRadio(question, safeAnswers, answerIndex);
+                break;
+
             case "select":
-                result = scoreRadioOrSelect(question, safeAnswers, answerIndex);
+                result = scoreSelect(question, safeAnswers, answerIndex);
                 break;
 
             case "fillup":
