@@ -7,6 +7,7 @@ import duration from "dayjs/plugin/duration";
 import {
   calculateStoredScoreResult,
   formatResultLabel,
+  getQuizScoreType,
   getQuizType,
   getResultToneClassName,
   toLegacyQuizForScore,
@@ -42,6 +43,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
   const [quizData, setQuizData] = useState<{
     slug: string;
     type: string | undefined;
+    scoreType: string | undefined;
     scoreQuiz: ReturnType<typeof toLegacyQuizForScore>;
   } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,7 +77,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
         // Fetch quiz for scoring details & slug
         const { data: quizRes, error: quizErr } = await supabase
           .from("quizzes")
-          .select("id, title, slug, skill, type, status, time_minutes, passages(*, questions(*))")
+          .select("id, title, slug, skill, type, score_type, status, time_minutes, passages(*, questions(*))")
           .eq("id", quizId)
           .eq("status", "published")
           .single();
@@ -86,6 +88,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
           setQuizData({
             slug: quizRes.slug,
             type: getQuizType(quizRes.type),
+            scoreType: getQuizScoreType(quizRes.score_type),
             scoreQuiz: toLegacyQuizForScore(quizRes),
           });
         } else {
@@ -188,6 +191,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
                       const displayScoreOutput =
                         formatResultLabel({
                           quizType: quizData?.type,
+                          scoreType: quizData?.scoreType,
                           storedScore: item.score,
                           scoreResult,
                           answers: item.answers,
@@ -195,7 +199,10 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
                       const resultToneClassName =
                         displayScoreOutput === "—"
                           ? "text-gray-400"
-                          : getResultToneClassName(quizData?.type);
+                          : getResultToneClassName(
+                              quizData?.type,
+                              quizData?.scoreType,
+                            );
                       const takenIndex =
                         history.length -
                         ((currentPage - 1) * pageSize + idx);

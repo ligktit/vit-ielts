@@ -6,6 +6,7 @@ import { Spin } from "antd";
 import {
   calculateStoredScoreResult,
   formatResultLabel,
+  getQuizScoreType,
   getQuizType,
   getResultToneClassName,
 } from "@/shared/lib";
@@ -74,9 +75,11 @@ export function PracticeHistoryWidget({ post }: { post: IPracticeSingle }) {
           testPart: item.test_part,
         });
         const quizType = getQuizType(post.quizFields.type) ?? "practice";
+        const scoreType = getQuizScoreType(post.quizFields.scoreType);
         const displayScore =
           formatResultLabel({
             quizType,
+            scoreType,
             storedScore: item.score,
             scoreResult,
             answers: item.answers,
@@ -92,7 +95,7 @@ export function PracticeHistoryWidget({ post }: { post: IPracticeSingle }) {
               className={`text-sm font-bold ${
                 displayScore === "—"
                   ? "text-gray-400"
-                  : getResultToneClassName(quizType)
+                  : getResultToneClassName(quizType, scoreType)
               }`}
             >
               {displayScore}

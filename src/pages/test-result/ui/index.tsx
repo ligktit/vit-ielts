@@ -1,6 +1,5 @@
 import { Container } from "@/shared/ui";
 import { HeroBanner, Button } from "@/shared/ui/ds";
-import { Button as AntButton } from "antd";
 import Image from "next/image";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -8,7 +7,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
 import { SEOHeader } from "@/widgets";
-import { BandScore } from "@/widgets/blocks/band-score";
 import { useAuth } from "@/appx/providers";
 import ExamModeModal from "@/pages/ielts-exam-library/ui/exam-mode-modal";
 import { ROUTES } from "@/shared/routes";
@@ -18,7 +16,11 @@ import {
   resolveContentImage,
   useContentImageFallback,
 } from "@/shared/lib/content-image";
-import { formatBandScore } from "@/shared/lib/test-result-display";
+import {
+  formatBandScore,
+  formatResultLabel,
+  getQuizScoreType,
+} from "@/shared/lib/test-result-display";
 
 import type { IPracticeSingle, ITestResult, IUser } from "../api";
 import AnswerKeys from "./answer-keys";
@@ -43,13 +45,14 @@ export function PageTestResult({
   const { currentUser } = useAuth();
   const openProContentModal = useProContentModal((state) => state.open);
 
-  const [bandScore, setBandScore] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const numericScore = useMemo(() => {
-    const parsedScore = Number(scoreData.score);
+    const parsedScore = Number(
+      testResult.testResultFields.score ?? scoreData.score,
+    );
     return Number.isFinite(parsedScore) ? parsedScore : 0;
-  }, [scoreData.score]);
+  }, [scoreData.score, testResult.testResultFields.score]);
 
   const timeSpent = useMemo(() => {
     const total = dayjs.duration({
@@ -90,13 +93,15 @@ export function PageTestResult({
     testResult.testResultFields.timeLeft,
   ]);
 
-  const scorePercent = useMemo(() => {
-    const scoreToUse = bandScore !== null ? bandScore : numericScore;
-    return Math.round((scoreToUse / 9) * 100);
-  }, [bandScore, numericScore]);
-
   const skill = useMemo(() => post.quizFields.skill[0], [post.quizFields.skill]);
-  const correctAnswers = Number(scoreData?.correctAns ?? 0);
+  const quizType = useMemo(
+    () => post.quizFields.type?.[0] ?? "practice",
+    [post.quizFields.type],
+  );
+  const scoreType = useMemo(
+    () => getQuizScoreType(post.quizFields.scoreType),
+    [post.quizFields.scoreType],
+  );
 
   const getEncouragementMessage = () => {
     if (scoreData.correctAns === 0) {
@@ -106,22 +111,30 @@ export function PageTestResult({
     return "Chúc mừng! Bạn đã hoàn thành bài test, cùng kiểm tra kết quả nhé!";
   };
 
-  const isMockTest =
-    post.quizFields.type?.[0] === "exam" ||
-    post.quizFields.type?.[0] === "academic" ||
-    post.quizFields.type?.[0] === "general";
+  const isBandResult =
+    scoreType === "band" ||
+    quizType === "exam" ||
+    quizType === "academic" ||
+    quizType === "general";
 
-  const displayScoreStr = isMockTest
-    ? (formatBandScore(bandScore ?? numericScore) ?? numericScore.toFixed(1))
-    : `${scoreData.correctAns}/${scoreData.total_questions}`;
+  const displayScoreStr =
+    formatResultLabel({
+      quizType,
+      scoreType,
+      storedScore: testResult.testResultFields.score,
+      scoreResult: scoreData,
+      answers: testResult.testResultFields.answers,
+    }) ??
+    (isBandResult
+      ? (formatBandScore(numericScore) ?? numericScore.toFixed(1))
+      : `${scoreData.correctAns}/${scoreData.total_questions}`);
 
-  const scoreLabel = isMockTest ? "Band Score" : "Câu đúng";
+  const scoreLabel = isBandResult ? "Band Score" : "Câu đúng";
 
   // Keep these hooks referenced; behavior stays unchanged from the existing page.
   void user;
   void currentUser;
   void openProContentModal;
-  void scorePercent;
 
   return (
     <>
@@ -286,13 +299,6 @@ export function PageTestResult({
             </div>
           </div>
         </div>
-
-          <div className="hidden">
-            <BandScore
-              correctAnswersCount={correctAnswers}
-              onScoreCalculated={setBandScore}
-            />
-          </div>
 
           <div className="bg-white p-6 md:p-10 rounded-[24px] shadow-sm">
             <AnswerKeys data={scoreData} skill={skill as "listening" | "reading"} />

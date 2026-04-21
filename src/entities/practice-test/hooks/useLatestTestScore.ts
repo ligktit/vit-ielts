@@ -4,6 +4,7 @@ import { useAuth } from "@/appx/providers";
 import {
   calculateStoredScoreResult,
   formatResultLabel,
+  getQuizScoreType,
   getQuizType,
   getResultToneClassName,
   normalizeStoredAnswers,
@@ -50,15 +51,17 @@ export const useLatestTestScore = (quizId?: string) => {
         if (!error && data !== null && data.score !== undefined && data.score !== null) {
           const quizInfo = Array.isArray(data.quizzes) ? data.quizzes[0] : data.quizzes;
           const quizType = getQuizType(quizInfo?.type);
+          const scoreType = getQuizScoreType(quizInfo?.score_type);
           const normalizedAnswers = normalizeStoredAnswers(data.answers);
 
           let formattedScore = formatResultLabel({
             quizType,
+            scoreType,
             storedScore: data.score,
             answers: normalizedAnswers,
           });
 
-          if (!formattedScore && quizType === "practice") {
+          if (!formattedScore) {
             const { data: quizData } = await supabase
               .from("quizzes")
               .select("type, status, passages(*, questions(*))")
@@ -79,6 +82,7 @@ export const useLatestTestScore = (quizId?: string) => {
 
               formattedScore = formatResultLabel({
                 quizType,
+                scoreType,
                 storedScore: data.score,
                 scoreResult,
                 answers: data.answers,
@@ -87,7 +91,7 @@ export const useLatestTestScore = (quizId?: string) => {
           }
 
           setScore(formattedScore);
-          setScoreClassName(getResultToneClassName(quizType));
+          setScoreClassName(getResultToneClassName(quizType, scoreType));
         } else {
           setScore(undefined);
           setScoreClassName(undefined);

@@ -7,6 +7,7 @@ import duration from "dayjs/plugin/duration";
 import {
   calculateStoredScoreResult,
   formatResultLabel,
+  getQuizScoreType,
   getQuizType,
   getResultToneClassName,
   normalizeStoredAnswers,
@@ -76,7 +77,7 @@ export const QuizListing = ({
         const { data: quizzes } = await supabase
           .from("quizzes")
           .select(
-            "id, title, slug, skill, type, status, time_minutes, passages(*, questions(*))",
+            "id, title, slug, skill, type, score_type, status, time_minutes, passages(*, questions(*))",
           )
           .in("id", quizIds)
           .eq("status", "published");
@@ -117,6 +118,10 @@ export const QuizListing = ({
                         skill: [
                           (quiz as any)?.skill || params.quizSkill,
                           (quiz as any)?.skill || params.quizSkill,
+                        ],
+                        scoreType: [
+                          (quiz as any)?.score_type || "percentage",
+                          (quiz as any)?.score_type || "percentage",
                         ],
                       },
                     },
@@ -206,8 +211,12 @@ export const QuizListing = ({
         const quizType =
           getQuizType(record.testResultFields.quiz.node.quizFields.type) ??
           "practice";
+        const scoreType = getQuizScoreType(
+          record.testResultFields.quiz.node.quizFields.scoreType,
+        );
         const resultLabel = formatResultLabel({
           quizType,
+          scoreType,
           storedScore: record.testResultFields.score,
           scoreResult: (record as NodeWithScore)._scoreResult,
           answers: record.testResultFields.answers,
@@ -218,7 +227,12 @@ export const QuizListing = ({
         }
 
         return (
-          <span className={`font-bold ${getResultToneClassName(quizType)}`}>
+          <span
+            className={`font-bold ${getResultToneClassName(
+              quizType,
+              scoreType,
+            )}`}
+          >
             {resultLabel}
           </span>
         );

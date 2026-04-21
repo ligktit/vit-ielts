@@ -286,13 +286,42 @@ export const getQuizType = (value: unknown): string | undefined => {
   return undefined;
 };
 
+export const getQuizScoreType = (value: unknown): string | undefined => {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (Array.isArray(value) && typeof value[0] === "string") {
+    return value[0];
+  }
+
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  if (isRecord(value.quizFields)) {
+    return getQuizScoreType(value.quizFields.scoreType);
+  }
+
+  return undefined;
+};
+
 export const isFullTestQuizType = (quizType: string | null | undefined) =>
   quizType != null && FULL_TEST_TYPES.has(quizType);
 
+const isBandScoreDisplay = ({
+  quizType,
+  scoreType,
+}: {
+  quizType: string | null | undefined;
+  scoreType?: string | null;
+}) => scoreType === "band" || (scoreType == null && isFullTestQuizType(quizType));
+
 export const getResultToneClassName = (
   quizType: string | null | undefined,
+  scoreType?: string | null,
 ) =>
-  isFullTestQuizType(quizType)
+  isBandScoreDisplay({ quizType, scoreType })
     ? "text-[var(--color-primary-500)]"
     : "text-[var(--color-success)]";
 
@@ -309,16 +338,18 @@ export const formatBandScore = (score: unknown) => {
 
 export const formatResultLabel = ({
   quizType,
+  scoreType,
   storedScore,
   scoreResult,
   answers,
 }: {
   quizType: string | null | undefined;
+  scoreType?: string | null;
   storedScore?: number | null;
   scoreResult?: ScoreResult | null;
   answers?: unknown;
 }) => {
-  if (isFullTestQuizType(quizType)) {
+  if (isBandScoreDisplay({ quizType, scoreType })) {
     return formatBandScore(storedScore ?? scoreResult?.score);
   }
 
