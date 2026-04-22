@@ -16,7 +16,7 @@ const parseMaxOptionsFromText = (
 };
 
 // Hàm con để đếm số câu hỏi trong một object question DUY NHẤT
-const countSubQuestions = (question: IQuestion): number => {
+const countSubQuestions = (question: IQuestion, passageContent?: string): number => {
     if (!question) return 0;
 
     const questionType = question.type?.[0];
@@ -38,14 +38,19 @@ const countSubQuestions = (question: IQuestion): number => {
         if ((layoutType === 'standard' || layoutType === 'list') && (question.matchingQuestion.matchingItems?.length ?? 0) > 0) {
             return question.matchingQuestion.matchingItems!.length;
         }
+
+        // C. Nếu là dạng "heading", đếm số ô trống trong passageContent
+        if (layoutType === 'heading') {
+            const content = passageContent || "";
+            const gapCount = (content.match(/\{(.*?)\}/g) || []).length;
+            return gapCount > 0 ? gapCount : 1;
+        }
     }
 
-    // ▼▼▼ BẮT ĐẦU CẬP NHẬT ▼▼▼
     // 2. Xử lý loại "matrix"
     if (questionType === "matrix" && question.matrixQuestion?.matrixItems) {
         return question.matrixQuestion.matrixItems.length;
     }
-    // ▲▲▲ KẾT THÚC CẬP NHẬT ▲▲▲
 
     // 3. Xử lý các dạng Fillup khác (không nằm trong matching)
     const textWithGaps = question.question || "";
@@ -92,9 +97,11 @@ export function countQuestion(passage: Passage | { questions: IQuestion[] }): nu
 
     // Xử lý cả hai trường hợp: Passage hoặc { questions: [...] }
     const questions = 'questions' in passage ? passage.questions : (passage as Passage).questions;
+    const passageContent = ('passage_content' in passage ? (passage as any).passage_content : undefined) || 
+                           ('content' in passage ? (passage as any).content : undefined);
 
     if (!questions || questions.length === 0) {
         return 0;
     }
-    return questions.reduce((total: number, q: any) => total + countSubQuestions(q), 0);
-}
+    return questions.reduce((total: number, q: any) => total + countSubQuestions(q, passageContent), 0);
+}

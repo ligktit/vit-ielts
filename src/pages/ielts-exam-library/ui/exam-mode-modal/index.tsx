@@ -147,7 +147,11 @@ function ExamModeModal({
   }, [activeQuiz.quizFields?.passages, activeQuiz.quizFields?.skill]);
 
   const fullTestInfo = useMemo(() => {
-    if (summaryLoading) return `${activeQuiz.quizFields.time} minutes - loading...`;
+    const time = activeQuiz.quizFields.time;
+    if (summaryLoading) {
+      return `${time} minutes - Loading test details...`;
+    }
+
     const totalQues = (activeQuiz.quizFields?.passages || []).reduce((acc: number, passage: any) => {
       if (passage.questionCount !== undefined) {
         return acc + passage.questionCount;
@@ -155,7 +159,8 @@ function ExamModeModal({
       return acc + countQuestion(passage);
     }, 0);
 
-    return `${activeQuiz.quizFields.time} minutes - ${partOptions.length} parts - ${totalQues} questions`;
+    const parts = partOptions.length;
+    return `${time} minutes - ${parts} ${parts > 1 ? "parts" : "part"} - ${totalQues} questions`;
   }, [partOptions.length, activeQuiz.quizFields?.passages, activeQuiz.quizFields?.time, summaryLoading]);
 
   const testPartWatcher = useWatch({

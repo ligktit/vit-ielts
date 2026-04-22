@@ -2,6 +2,7 @@
 
 import { IPracticeSingle, IQuestion } from "@/pages/test-result/api"; // Đảm bảo đường dẫn import đúng
 import { roundIELTSScore } from "../ielts-round";
+import { lookupBandScore, isFullTestType } from "~services/lib/band-score-table";
 
 // Định nghĩa kiểu dữ liệu cho câu trả lời của người dùng
 type AnswerType = string | number | number[] | object | null | undefined;
@@ -558,7 +559,17 @@ export const calculateScore = (
   }); // Kết thúc lặp qua passages
 
   const scoreValue = totalQuestions > 0 ? (correctCount / totalQuestions) * 9 : 0;
-  const roundedScore = roundIELTSScore(scoreValue).toFixed(1);
+  let roundedScore = roundIELTSScore(scoreValue).toFixed(1);
+
+  // Use official IELTS band score lookup for full tests (40 questions)
+  const quizType = Array.isArray(quizData.quizFields.type) ? quizData.quizFields.type[0] : quizData.quizFields.type;
+  const skill = Array.isArray(quizData.quizFields.skill) ? quizData.quizFields.skill[0] : quizData.quizFields.skill;
+
+  if (isFullTestType(quizType) && totalQuestions === 40) {
+    const bandScore = lookupBandScore(correctCount, skill, quizType);
+    roundedScore = bandScore.toFixed(1);
+  }
+
   const missedCount = totalQuestions - correctCount - incorrectCount;
 
 

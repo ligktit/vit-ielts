@@ -88,6 +88,9 @@ export default async function handler(
     return;
 
   try {
+    // Add caching header
+    res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+
     const supabase = createApiSupabase(req, res);
     const quizId =
       (req.query.quizId as string) || (req.body && req.body.quizId);
@@ -96,10 +99,18 @@ export default async function handler(
       return res.status(400).json({ success: false, error: "Missing quizId" });
     }
 
-    // Full data fetch — same depth as getQuizBySlug used by the detail page
+    // Optimize select to only necessary fields
     const { data: quiz, error } = await supabase
       .from("quizzes")
-      .select("*, passages(*, questions(*))")
+      .select(`
+        id, title, slug, skill, type, pro_user_only, tests_taken, time_minutes, score_type, featured_image,
+        passages (
+          id, sort_order, content,
+          questions (
+            id, sort_order, type, question_text, list_of_questions, list_of_options, matching_question, matrix_question, explanations
+          )
+        )
+      `)
       .eq("id", quizId)
       .eq("status", "published")
       .single();
@@ -119,7 +130,10 @@ export default async function handler(
           .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
           .map(mapQuestionForCounting);
 
-        const questionCount = countQuestion({ questions: mappedQuestions } as any);
+        const questionCount = countQuestion({ 
+          questions: mappedQuestions,
+          content: p.content
+        } as any);
 
         return {
           id: p.id,

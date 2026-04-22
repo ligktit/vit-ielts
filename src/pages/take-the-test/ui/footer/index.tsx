@@ -79,28 +79,10 @@ function Footer() {
         q.startIndex = absoluteQuestionIndex;
 
         const questionType = q.type?.[0];
-        let questionCount;
-
-        // 1. Logic 'matching' (CŨ CỦA BẠN - GIỮ NGUYÊN)
-        const isHeading = questionType === 'matching' &&
-          String(q.matchingQuestion?.layoutType).trim().toLowerCase() === 'heading';
-
-        if (isHeading) {
-          // 2. Logic đếm gap (CŨ CỦA BẠN - GIỮ NGUYÊN)
-          let gapCount = 0;
-          (passage.passage_content || "").replace(/\{(.*?)\}/g, () => {
-            gapCount++;
-            return '';
-          });
-          questionCount = gapCount > 0 ? gapCount : 1;
-        } else {
-          // 3. Xử lý cho TẤT CẢ CÁC LOẠI CÒN LẠI (bây giờ countQuestion đã tự đếm đúng số answer của Checkbox)
-          questionCount = countQuestion({ questions: [q] });
-        }
-
-        if (isNaN(questionCount) || questionCount < 1) {
-          questionCount = 1;
-        }
+        const questionCount = (countQuestion({ 
+          questions: [q],
+          passage_content: passage.passage_content 
+        } as any) || 1);
 
         // ▼▼▼ SỬA LOGIC HIGHLIGHT CHO CHECKBOX TẠI ĐÂY ▼▼▼
         if (questionType === 'matching' || questionType === 'matrix') {
@@ -513,22 +495,39 @@ function Footer() {
                                 ))}
                               </div>
                               <div className="flex justify-center gap-1 w-full">
-                                {group.map(questionIndex => (
+                                {group.length > 1 ? (
                                   <span
-                                    key={`label-${questionIndex}`}
+                                    key={`label-range-${group[0]}`}
                                     onClick={e => {
                                       e.stopPropagation();
-                                      handleScrollToQuestion(questionIndex);
+                                      handleScrollToQuestion(group[0]);
                                     }}
                                     className={twMerge(
-                                      "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded cursor-pointer",
-                                      activeQuestionIndex === questionIndex &&
+                                      "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded cursor-pointer whitespace-nowrap",
+                                      group.includes(activeQuestionIndex) &&
                                       "font-semibold border-2 border-[#418FC6]"
                                     )}
                                   >
-                                    {questionIndex + 1}
+                                    {group[0] + 1}-{group[group.length - 1] + 1}
                                   </span>
-                                ))}
+                                ) : (
+                                  group.map(questionIndex => (
+                                    <span
+                                      key={`label-${questionIndex}`}
+                                      onClick={e => {
+                                        e.stopPropagation();
+                                        handleScrollToQuestion(questionIndex);
+                                      }}
+                                      className={twMerge(
+                                        "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded cursor-pointer",
+                                        activeQuestionIndex === questionIndex &&
+                                        "font-semibold border-2 border-[#418FC6]"
+                                      )}
+                                    >
+                                      {questionIndex + 1}
+                                    </span>
+                                  ))
+                                )}
                               </div>
                             </div>
                           ))}

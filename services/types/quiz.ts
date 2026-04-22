@@ -45,5 +45,7 @@ export type QuizPassage = {
 export type QuizWithPassages = {
     id: string;
     title: string;
+    skill: string;
+    type: string;
     passages: QuizPassage[];
 };

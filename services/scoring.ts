@@ -9,6 +9,7 @@
  */
 
 import type { QuizWithPassages, QuizQuestion } from "./types/quiz";
+import { lookupBandScore, isFullTestType } from "./lib/band-score-table";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -475,7 +476,14 @@ export function calculateScore(
     }
 
     const rawScore = (totalCorrect / totalQuestions) * 9;
-    const roundedScore = Math.round(rawScore * 2) / 2;
+    let roundedScore = Math.round(rawScore * 2) / 2;
+
+    // Use official IELTS band score lookup for full tests (40 questions)
+    // Academic/General/Exam types use the conversion table.
+    // Practice tests (or partial tests) use the linear fallback.
+    if (isFullTestType(quiz.type) && totalQuestions === 40) {
+        roundedScore = lookupBandScore(totalCorrect, quiz.skill, quiz.type);
+    }
 
     return {
         score: roundedScore,

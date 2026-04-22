@@ -70,19 +70,10 @@ export const MatrixQuestion = ({
         const isItemMatch = targetFirstItem && currentFirstItem && targetFirstItem === currentFirstItem;
         if (isTitleMatch || isItemMatch) return currentCount;
 
-        let qCount = 1;
-        const qType = q.type?.[0];
-        if (qType === 'matching' && String((q as any).matchingQuestion?.layoutType).trim().toLowerCase() === 'heading') {
-          let gapCount = 0;
-          (passage.passage_content || "").replace(/\{(.*?)\}/g, () => { gapCount++; return ''; });
-          qCount = gapCount > 0 ? gapCount : 1;
-        } else if (qType === 'checkbox') {
-          // @ts-ignore
-          qCount = Number(q.optionChoose) || 1;
-        } else {
-          qCount = countQuestion({ questions: [q] });
-        }
-        if (isNaN(qCount) || qCount < 1) qCount = 1;
+        const qCount = countQuestion({ 
+          questions: [q],
+          passage_content: passage.passage_content 
+        } as any) || 1;
         currentCount += qCount;
       }
     }

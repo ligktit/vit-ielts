@@ -226,7 +226,10 @@ export function PageTakeTheTestWrapper({
           currentIndex
         );
 
-        const numberOfSubQuestions = countQuestion({ questions: [question] });
+        const numberOfSubQuestions = countQuestion({ 
+          questions: [question],
+          passage_content: passage.passage_content
+        } as any);
         currentIndex += numberOfSubQuestions;
       });
 

@@ -169,19 +169,10 @@ export const ExamProvider = ({
         const signature = generateSignature(q);
         sMap.set(signature, absoluteQuestionIndex);
 
-        let questionCount = 1;
-        const questionType = q.type?.[0];
-        if (questionType === "matching" &&
-          String(q.matchingQuestion?.layoutType).trim().toLowerCase() === "heading") {
-          let gapCount = 0;
-          (passage.passage_content || "").replace(/\{(.*?)\}/g, () => { gapCount++; return ""; });
-          questionCount = gapCount > 0 ? gapCount : 1;
-        } else if (questionType === "checkbox") {
-          // @ts-ignore
-          questionCount = Number(q.optionChoose) || 1;
-        } else {
-          questionCount = countQuestion({ questions: [q] });
-        }
+        let questionCount = countQuestion({ 
+          questions: [q],
+          passage_content: passage.passage_content 
+        } as any);
         if (isNaN(questionCount) || questionCount < 1) questionCount = 1;
         absoluteQuestionIndex += questionCount;
       });

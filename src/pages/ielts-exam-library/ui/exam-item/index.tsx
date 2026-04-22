@@ -93,6 +93,10 @@ export const ExamItem = ({
       <a
         href="#"
         onClick={handleCardClick}
+        onMouseEnter={() => {
+          // Prefetch summary data (question counts) when hovering to make the modal feel instant
+          fetch(`/api/test-flow/summary?quizId=${item.id}`).catch(() => {});
+        }}
         className="group flex flex-col bg-white rounded-[30px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 cursor-pointer w-full h-full"
       >
         {/* Image */}

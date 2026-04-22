@@ -132,6 +132,8 @@ function toQuizForScoring(
     return {
         id: quizRow.id,
         title: quizRow.title,
+        skill: quizRow.skill,
+        type: quizRow.type,
         passages: sortedPassages,
     } as unknown as QuizForScoring;
 }
