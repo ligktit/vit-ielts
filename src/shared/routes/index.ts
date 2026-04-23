@@ -33,7 +33,7 @@ export const ROUTES = {
 
   PREDICTION: {
     ARCHIVE: "/ielts-prediction",
-    SINGLE: (slug: string) => `/ielts-prediction/${slug}`,
+    SINGLE: (slug: string) => `/${slug}`,
   },
 
   CHECKOUT: "/account/checkout",
