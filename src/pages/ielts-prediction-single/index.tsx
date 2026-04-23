@@ -216,14 +216,8 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         }
       }
 
-      if (!hasAccess) {
-        return {
-          redirect: {
-            destination: ROUTES.HOME,
-            permanent: false,
-          },
-        };
-      }
+      // We no longer redirect in GSSP for PRO content, let the UI handle the upgrade modal
+      // This allows users to see the landing page/excerpt before being prompted to upgrade
 
       const relatedQuizzes = await relatedQuizzesPromise;
 
@@ -232,6 +226,7 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       return {
         props: {
           post: JSON.parse(JSON.stringify(post)),
+          hasAccess,
         },
       };
     } catch (error) {

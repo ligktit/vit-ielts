@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ROUTES } from "@/shared/routes";
 import { FormProvider, useForm } from "react-hook-form";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
@@ -284,7 +285,7 @@ export const PageIELTSPrediction = ({
                         title={node.title}
                         date={node.published_at ? dayjs(node.published_at).format("DD/MM/YYYY") : undefined}
                         isPro={node.pro_user_only}
-                        href={`/${node.slug}`}
+                        href={ROUTES.PREDICTION.SINGLE(node.slug)}
                       />
                     ))}
                   </div>

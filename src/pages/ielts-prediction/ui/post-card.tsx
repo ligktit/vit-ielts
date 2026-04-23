@@ -2,6 +2,10 @@ import { resolveContentImage, useContentImageFallback } from "@/shared/lib/conte
 import Image from "next/image";
 import Link from "next/link";
 import { ProBadge } from "@/shared/ui/pro-badge";
+import { useAuth } from "@/appx/providers";
+import { useProContentModal } from "@/shared/ui/pro-content";
+import { ROUTES } from "@/shared/routes";
+import { MouseEvent } from "react";
 
 export type PostCardProps = {
   image?: string;
@@ -16,9 +20,31 @@ export const PostCard = ({ image, title, date, isPro, href }: PostCardProps) => 
   const imageSrc = resolveContentImage(image, fallbackImage);
   const isLogoFallback = !image && imageSrc.includes("logo.png");
 
+  const { currentUser } = useAuth();
+  const openProContentModal = useProContentModal((state) => state.open);
+
+  const requiresLogin = isPro && !currentUser;
+  const requiresUpgrade = isPro && !currentUser?.userData.isPro;
+  const needsIntercept = requiresLogin || requiresUpgrade;
+
+  const handleProtectedAction = (event: MouseEvent) => {
+    if (!needsIntercept) return;
+    event.preventDefault();
+
+    if (requiresLogin) {
+      window.location.href = ROUTES.LOGIN(href || "/");
+      return;
+    }
+
+    if (requiresUpgrade) {
+      openProContentModal();
+    }
+  };
+
   return (
     <Link
-      href={href || "#"}
+      href={needsIntercept ? "#" : (href || "#")}
+      onClick={needsIntercept ? handleProtectedAction : undefined}
       className="group flex flex-col bg-white rounded-[30px] shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-transform duration-350 ease-[var(--ease-slide)] hover:-translate-y-3.5 w-full cursor-pointer overflow-hidden"
     >
       {/* Image */}
