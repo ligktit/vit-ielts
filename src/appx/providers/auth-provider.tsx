@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { createClient } from "~supabase/client";
 import { useAppContext } from "@/appx/providers";
 import { useRouter } from "next/router";
@@ -117,6 +119,61 @@ export const useAuth = () => {
   };
 };
 
+/**
+ * Pages that should NOT trigger an automatic redirect when the Supabase
+ * session ends. The login pages themselves obviously don't need to bounce
+ * to login; the OAuth callback is mid-flight and SIGNED_OUT briefly fires
+ * before SIGNED_IN.
+ */
+const SIGNOUT_REDIRECT_BLOCKLIST = [
+  "/account/login",
+  "/account/register",
+  "/account/forgot-password",
+  "/account/reset-password",
+  "/admin/login",
+  "/auth/callback",
+];
+
+const isPublicAuthPath = (pathname: string) =>
+  SIGNOUT_REDIRECT_BLOCKLIST.some((p) => pathname.startsWith(p));
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const { masterData } = useAppContext();
+  const hasViewer = Boolean(masterData?.viewer);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const { data } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      // SIGNED_OUT: refresh token rejected (expired / revoked / used by
+      // another tab). The SSR-rendered UI still thinks the user is signed
+      // in — bounce them to login so they don't keep typing answers into
+      // a dead session.
+      if (event === "SIGNED_OUT" && hasViewer) {
+        if (typeof window === "undefined") return;
+        const onAdmin = window.location.pathname.startsWith("/admin");
+        if (isPublicAuthPath(window.location.pathname)) return;
+        const target = onAdmin ? "/admin/login" : "/account/login";
+        const redirect = encodeURIComponent(
+          window.location.pathname + window.location.search
+        );
+        window.location.href = `${target}?redirect=${redirect}`;
+        return;
+      }
+
+      // SIGNED_IN fired on a tab whose SSR pageProps say "no viewer" —
+      // happens when the user logs in in another tab. Reload so SSR data
+      // matches the new session.
+      if (event === "SIGNED_IN" && !hasViewer && session?.user) {
+        if (typeof window === "undefined") return;
+        if (isPublicAuthPath(window.location.pathname)) return;
+        window.location.reload();
+      }
+    });
+
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, [hasViewer]);
+
   return <>{children}</>;
 };

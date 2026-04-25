@@ -2,7 +2,7 @@
 
 import { BlankLayout } from "@/widgets/layouts";
 import Header from "./header";
-import { Splitter } from "antd";
+import { Splitter, notification } from "antd";
 import {
   AnswerFormValues,
   ExamContext,
@@ -287,6 +287,9 @@ export function PageTakeTheTest() {
 
   const [isMobileView, setIsMobileView] = useState(false);
   const questionPanelRef = useRef<HTMLDivElement>(null);
+  // Once we've warned the user about a dead session we stop spamming the
+  // toast — they've already been told.
+  const sessionWarnedRef = useRef(false);
 
   // Auto-save draft via API route
   const saveDraftFn = useCallback(async (params: {
@@ -304,6 +307,21 @@ export function PageTakeTheTest() {
       }),
     });
     if (!response.ok) {
+      // 401 = the server-side Supabase session is gone. Surface this
+      // immediately — silently retrying every 60s lets students keep
+      // typing into a void. The AuthProvider listener will redirect on
+      // SIGNED_OUT, but we warn here in case the browser client still
+      // thinks it's authenticated.
+      if (response.status === 401 && !sessionWarnedRef.current) {
+        sessionWarnedRef.current = true;
+        notification.warning({
+          message: "Phiên đăng nhập đã hết hạn",
+          description:
+            "Bài làm chưa được lưu. Vui lòng đăng nhập lại trong tab mới để tiếp tục lưu nháp.",
+          placement: "topRight",
+          duration: 0,
+        });
+      }
       const data = await response.json().catch(() => ({}));
       throw new Error(data.error || "Save draft failed");
     }

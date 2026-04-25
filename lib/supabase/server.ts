@@ -30,7 +30,13 @@ function appendSetCookie(
  */
 function buildCookieString(name: string, value: string, options?: CookieOptions): string {
     const parts = [`${name}=${value}`, `Path=${options?.path ?? "/"}`];
-    if (options?.maxAge) parts.push(`Max-Age=${options.maxAge}`);
+    // typeof check is required: when Supabase deletes a cookie it passes maxAge=0,
+    // and when it persists a session it passes a positive number. Using a truthy
+    // check would drop both the deletion (0) and silently leave persistent
+    // cookies as session cookies when maxAge is missing.
+    if (typeof options?.maxAge === "number") parts.push(`Max-Age=${options.maxAge}`);
+    if (options?.expires instanceof Date) parts.push(`Expires=${options.expires.toUTCString()}`);
+    if (options?.domain) parts.push(`Domain=${options.domain}`);
     if (isProduction) parts.push("Secure");
     parts.push("SameSite=Lax");
     return parts.join("; ");
