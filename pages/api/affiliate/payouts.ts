@@ -4,6 +4,7 @@ import { createApiSupabase } from "~supabase/server";
 import { getAffiliateByUserId } from "~services/affiliate";
 import { createPayoutRequest, getPayoutsByAffiliate } from "~services/payout";
 import { CreatePayoutSchema } from "~services/lib/validation";
+import { sendPayoutRequestEmail } from "~services/email";
 
 export default async function handler(
   req: NextApiRequest,
@@ -70,6 +71,21 @@ export default async function handler(
         parsed.data.amount,
         minPayout,
       );
+
+      // Notify admin
+      try {
+        const { data: userData } = await supabaseAdmin
+          .from("users")
+          .select("name, email")
+          .eq("id", user.id)
+          .single();
+        
+        if (userData) {
+          sendPayoutRequestEmail(userData.name || "User", userData.email || "", parsed.data.amount);
+        }
+      } catch (err) {
+        console.error("[Payout] Failed to send payout request email:", err);
+      }
 
       return res.status(200).json({ success: true, payout });
     } catch (error) {

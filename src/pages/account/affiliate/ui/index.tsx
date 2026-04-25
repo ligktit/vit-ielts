@@ -587,7 +587,14 @@ export const PageAffiliate = () => {
           </Card>
 
           {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+              <Card>
+                <Statistic
+                  title="Tỷ lệ hoa hồng"
+                  value={affiliate?.commissionRate ? affiliate.commissionRate * 100 : 20}
+                  suffix="%"
+                />
+              </Card>
               <Card>
                 <Statistic
                   title="Tổng hoa hồng"

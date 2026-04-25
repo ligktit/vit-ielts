@@ -323,36 +323,56 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
               <div className="sticky top-35 space-y-8">
                 {post.relatedPracticeQuizzes &&
                 post.relatedPracticeQuizzes.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-lg text-[#2D3142]">
-                      Có thể bạn quan tâm
-                    </h3>
-
+                  <>
                     <div className="space-y-4">
-                      {post.relatedPracticeQuizzes.slice(0, 6).map((rel, idx) => (
-                        <Link
-                          key={idx}
-                          href={ROUTES.PREDICTION.SINGLE(rel.slug)}
-                          className="flex gap-3 group items-center"
-                        >
-                          <div className="w-[100px] h-[65px] relative rounded-lg overflow-hidden shrink-0 border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
-                            {rel.featuredImage && (
-                              <Image
-                                src={rel.featuredImage}
-                                alt={rel.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform"
-                                unoptimized
-                              />
-                            )}
-                          </div>
-                          <h4 className="text-sm font-semibold text-[#2D3142] group-hover:text-primary-500 line-clamp-3 transition-colors">
-                            {rel.title}
-                          </h4>
-                        </Link>
-                      ))}
+                      <h3 className="font-bold text-lg text-[#2D3142]">
+                        Bài test nổi bật
+                      </h3>
+                      <TestCardWithScore
+                        quizId={post.relatedPracticeQuizzes[0].id}
+                        title={post.relatedPracticeQuizzes[0].title}
+                        image={post.relatedPracticeQuizzes[0].featuredImage || undefined}
+                        skill={skill}
+                        part={normalizeSectionBadge(skill, 1).label}
+                        attempts={1195}
+                        isPro={post.quizFields.proUserOnly}
+                        href={ROUTES.PREDICTION.SINGLE(post.relatedPracticeQuizzes[0].slug)}
+                      />
                     </div>
-                  </div>
+
+                    {post.relatedPracticeQuizzes.length > 1 && (
+                      <div className="space-y-4">
+                        <h3 className="font-bold text-lg text-[#2D3142]">
+                          Có thể bạn quan tâm
+                        </h3>
+
+                        <div className="space-y-4">
+                          {post.relatedPracticeQuizzes.slice(1, 7).map((rel, idx) => (
+                            <Link
+                              key={idx}
+                              href={ROUTES.PREDICTION.SINGLE(rel.slug)}
+                              className="flex gap-3 group items-center"
+                            >
+                              <div className="w-[100px] h-[65px] relative rounded-lg overflow-hidden shrink-0 border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
+                                {rel.featuredImage && (
+                                  <Image
+                                    src={rel.featuredImage}
+                                    alt={rel.title}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform"
+                                    unoptimized
+                                  />
+                                )}
+                              </div>
+                              <h4 className="text-sm font-semibold text-[#2D3142] group-hover:text-primary-500 line-clamp-3 transition-colors">
+                                {rel.title}
+                              </h4>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

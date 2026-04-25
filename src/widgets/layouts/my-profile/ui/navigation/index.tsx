@@ -2,6 +2,7 @@ import Link from "next/link";
 import { twMerge } from "tailwind-merge";
 import { useRouter } from "next/router";
 import { useAuth } from "@/appx/providers";
+import Image from "next/image";
 
 // === ICON MAP: material-symbols-rounded icon names ===
 const ICON_MAP: Record<string, string> = {
@@ -69,10 +70,22 @@ export const Navigation = ({
                   href={item.link || "#"}
                   className="flex items-center gap-3 px-5 py-3 text-gray-600 hover:bg-gray-50 transition-colors duration-150 group"
                 >
-                  {iconName && (
-                    <span className="material-symbols-rounded text-[18px] text-gray-400 group-hover:text-gray-600">
-                      {iconName}
-                    </span>
+                  {iconName === "group" ? (
+                    <div className="w-[18px] h-[18px] flex items-center justify-center">
+                      <Image
+                        src="/assets/figma/icons/get-money.svg"
+                        alt={item.label || "icon"}
+                        width={18}
+                        height={18}
+                        className="opacity-60 group-hover:opacity-100"
+                      />
+                    </div>
+                  ) : (
+                    iconName && (
+                      <span className="material-symbols-rounded text-[18px] text-gray-400 group-hover:text-gray-600">
+                        {iconName}
+                      </span>
+                    )
                   )}
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
@@ -91,15 +104,26 @@ export const Navigation = ({
                     : "text-[#374151] hover:bg-gray-50"
                 )}
               >
-                {iconName && (
-                  <span
-                    className={twMerge(
-                      "material-symbols-rounded text-[18px]",
-                      isActive ? "text-white" : "text-gray-500"
-                    )}
-                  >
-                    {iconName}
-                  </span>
+                {iconName === "group" ? (
+                  <div className={twMerge("w-[18px] h-[18px] flex items-center justify-center", isActive ? "brightness-0 invert" : "")}>
+                    <Image
+                      src="/assets/figma/icons/get-money.svg"
+                      alt={item.label || "icon"}
+                      width={18}
+                      height={18}
+                    />
+                  </div>
+                ) : (
+                  iconName && (
+                    <span
+                      className={twMerge(
+                        "material-symbols-rounded text-[18px]",
+                        isActive ? "text-white" : "text-gray-500"
+                      )}
+                    >
+                      {iconName}
+                    </span>
+                  )
                 )}
                 <span
                   className={twMerge(

@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfigValidated } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
-import { EMAIL_DEFAULT_CONFIG } from "~services/email";
+import { EMAIL_DEFAULT_CONFIG, getEmailConfig } from "~services/email";
 import { logActivity, getClientIP } from "~services/activity-log";
 import { ZodError } from "zod";
 
@@ -20,8 +20,8 @@ export default async function handler(
 ) {
     if (req.method === "GET") {
         try {
-            const config = await readConfig(supabaseAdmin, SECTION_NAME);
-            return res.status(200).json(config ?? EMAIL_DEFAULT_CONFIG);
+            const config = await getEmailConfig();
+            return res.status(200).json(config);
         } catch (error) {
             return res.status(500).json({
                 success: false,

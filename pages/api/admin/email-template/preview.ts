@@ -49,6 +49,13 @@ export default async function handler(
             "{{brandEmail}}": config.brand?.email || "ieltsprediction9@gmail.com",
             "{{brandWebsite}}": config.brand?.website || "https://ieltspredictiontest.com",
             "{{customerEmail}}": "alongia7@gmail.com",
+            "{{affiliateName}}": "Nguyễn Văn A",
+            "{{affiliateEmail}}": "affiliate@example.com",
+            "{{commissionAmount}}": "40.000 đ",
+            "{{orderTotal}}": "200.000 đ",
+            "{{payoutAmount}}": "500.000 đ",
+            "{{customLink}}": "https://ieltspredictiontest.com?ref=A123",
+            "{{rejectReason}}": "Thông tin thanh toán không chính xác hoặc không đủ số dư tối thiểu.",
         };
 
         if (templateType === "adminNotification") {
@@ -73,6 +80,57 @@ export default async function handler(
                 { orderTable, orderTableTitle: "Chi tiết đơn hàng" },
             );
 
+            return res.status(200).json({ success: true, html });
+        }
+
+        else if (templateType === "affiliateRegistered") {
+            const { affiliateRegistered } = config;
+            const body = replaceVariables(affiliateRegistered?.bodyHtml || "", sampleVars);
+            const html = buildEmailHtml(config, replaceVariables(affiliateRegistered?.headerTitle || "Đơn đăng ký Affiliate mới", sampleVars), body, sampleVars);
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "affiliateApproved") {
+            const { affiliateApproved } = config;
+            const body = replaceVariables(affiliateApproved?.bodyHtml || "", sampleVars);
+            const ctaButton = affiliateApproved?.ctaButton ? {
+                text: replaceVariables(affiliateApproved.ctaButton.text, sampleVars),
+                link: replaceVariables(affiliateApproved.ctaButton.link, sampleVars),
+            } : undefined;
+            const html = buildEmailHtml(config, replaceVariables(affiliateApproved?.headerTitle || "Chào mừng bạn gia nhập đội ngũ đối tác", sampleVars), body, sampleVars, { ctaButton });
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "affiliateRejected") {
+            const { affiliateRejected } = config;
+            const body = replaceVariables(affiliateRejected?.bodyHtml || "", sampleVars);
+            const html = buildEmailHtml(config, replaceVariables(affiliateRejected?.headerTitle || "Cảm ơn bạn đã quan tâm", sampleVars), body, sampleVars);
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "newCommission") {
+            const { newCommission } = config;
+            const body = replaceVariables(newCommission?.bodyHtml || "", sampleVars);
+            const ctaButton = newCommission?.ctaButton ? {
+                text: replaceVariables(newCommission.ctaButton.text, sampleVars),
+                link: replaceVariables(newCommission.ctaButton.link, sampleVars),
+            } : undefined;
+            const html = buildEmailHtml(config, replaceVariables(newCommission?.headerTitle || "Bạn vừa kiếm được hoa hồng!", sampleVars), body, sampleVars, { ctaButton });
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "payoutRequest") {
+            const { payoutRequest } = config;
+            const body = replaceVariables(payoutRequest?.bodyHtml || "", sampleVars);
+            const html = buildEmailHtml(config, replaceVariables(payoutRequest?.headerTitle || "Yêu cầu rút tiền mới", sampleVars), body, sampleVars);
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "payoutRejected") {
+            const { payoutRejected } = config;
+            const body = replaceVariables(payoutRejected?.bodyHtml || "", sampleVars);
+            const html = buildEmailHtml(config, replaceVariables(payoutRejected?.headerTitle || "Cập nhật yêu cầu rút tiền", sampleVars), body, sampleVars);
+            return res.status(200).json({ success: true, html });
+
+        } else if (templateType === "payoutCompleted") {
+            const { payoutCompleted } = config;
+            const body = replaceVariables(payoutCompleted?.bodyHtml || "", sampleVars);
+            const html = buildEmailHtml(config, replaceVariables(payoutCompleted?.headerTitle || "Thanh toán thành công", sampleVars), body, sampleVars);
             return res.status(200).json({ success: true, html });
         }
 

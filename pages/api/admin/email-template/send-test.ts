@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { requireAdmin } from "~lib/admin-auth";
-import { sendOrderConfirmEmail } from "~services/email";
 
 /**
  * Send Test Email API
@@ -23,8 +22,9 @@ export default async function handler(
     if (!user) return;
 
     try {
-        // Test emails may only be sent to the admin's own registered address,
-        // to prevent the endpoint from being used as a generic email sender.
+        const { type } = req.body;
+        
+        // Test emails may only be sent to the admin's own registered address
         const email = user.email;
         if (!email) {
             return res.status(400).json({
@@ -33,13 +33,59 @@ export default async function handler(
             });
         }
 
-        const success = await sendOrderConfirmEmail(
-            email,
-            "Học viên test",
-            "IELTS PREDICTION 99999999999",
-            200000,
-            3,
-        );
+        const {
+            sendOrderConfirmEmail,
+            sendAdminNotificationEmail,
+            sendAffiliateRegisteredEmail,
+            sendAffiliateStatusEmail,
+            sendNewCommissionEmail,
+            sendPayoutRequestEmail,
+            sendPayoutStatusEmail
+        } = await import("~services/email");
+
+        let success = false;
+
+        switch (type) {
+            case "adminNotification":
+                success = await sendAdminNotificationEmail(
+                    "IELTS PREDICTION TEST 123",
+                    "Học viên Test",
+                    "test@example.com",
+                    200000,
+                    3
+                );
+                break;
+            case "affiliateRegistered":
+                success = await sendAffiliateRegisteredEmail("Đối tác Test", "affiliate@test.com");
+                break;
+            case "affiliateApproved":
+                success = await sendAffiliateStatusEmail(email, "Đối tác Test", "approved");
+                break;
+            case "affiliateRejected":
+                success = await sendAffiliateStatusEmail(email, "Đối tác Test", "rejected");
+                break;
+            case "newCommission":
+                success = await sendNewCommissionEmail(email, "Đối tác Test", "ORDER-TEST-123", 200000, 40000);
+                break;
+            case "payoutRequest":
+                success = await sendPayoutRequestEmail("Đối tác Test", "affiliate@test.com", 500000);
+                break;
+            case "payoutRejected":
+                success = await sendPayoutStatusEmail(email, "Đối tác Test", 500000, "rejected", "Thông tin thanh toán không hợp lệ.");
+                break;
+            case "payoutCompleted":
+                success = await sendPayoutStatusEmail(email, "Đối tác Test", 500000, "completed");
+                break;
+            case "orderConfirmation":
+            default:
+                success = await sendOrderConfirmEmail(
+                    email,
+                    "Học viên test",
+                    "IELTS PREDICTION 99999999999",
+                    200000,
+                    3,
+                );
+        }
 
         if (success) {
             return res.status(200).json({

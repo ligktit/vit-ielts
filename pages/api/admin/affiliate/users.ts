@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { getAffiliateLinks, getCommissions, getAffiliateVisits } from "~services/affiliate";
+import { getAffiliateLinks, getCommissions, getAffiliateVisits, deleteAffiliate } from "~services/affiliate";
+import { sendAffiliateStatusEmail } from "~services/email";
 import { requireAdmin } from "~lib/admin-auth";
 
 export default async function handler(
@@ -88,6 +89,12 @@ export default async function handler(
         if (status) updateData.status = status;
         if (customLink !== undefined) updateData.custom_link = customLink;
         if (commissionRate !== undefined) updateData.commission_rate = Number(commissionRate);
+      } else if (action === "delete") {
+        await deleteAffiliate(supabaseAdmin, affiliateId);
+        return res.status(200).json({
+          success: true,
+          message: "Affiliate deleted successfully",
+        });
       } else {
         return res.status(400).json({ error: `Unknown action: ${action}` });
       }
@@ -101,6 +108,24 @@ export default async function handler(
 
       if (error) throw error;
 
+      // Notify affiliate of status change
+      if (action === "approve" || action === "reject") {
+        try {
+          const { data: aff } = await supabaseAdmin
+            .from("affiliates")
+            .select("*, users(email, name)")
+            .eq("id", affiliateId)
+            .single();
+          
+          if (aff && (aff as any).users) {
+            const u = (aff as any).users;
+            sendAffiliateStatusEmail(u.email, u.name || "User", action === "approve" ? "approved" : "rejected");
+          }
+        } catch (err) {
+          console.error("[Admin] Failed to send affiliate status email:", err);
+        }
+      }
+
       return res.status(200).json({
         success: true,
         affiliate: updated,
@@ -110,6 +135,26 @@ export default async function handler(
       console.error("Error updating affiliate:", error);
       return res.status(500).json({
         error: "Failed to update affiliate",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      const { id } = req.query;
+      if (!id) return res.status(400).json({ error: "ID is required" });
+
+      await deleteAffiliate(supabaseAdmin, id as string);
+
+      return res.status(200).json({
+        success: true,
+        message: "Affiliate deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting affiliate:", error);
+      return res.status(500).json({
+        error: "Failed to delete affiliate",
         message: error instanceof Error ? error.message : String(error),
       });
     }

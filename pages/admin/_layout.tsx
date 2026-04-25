@@ -28,6 +28,12 @@ import {
   HistoryOutlined,
   PictureOutlined,
   MailOutlined,
+  ShopOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  UserAddOutlined,
+  BgColorsOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
 import { message, Tooltip, Badge, ConfigProvider, theme as antdTheme } from "antd";
 // ═══ Types ═══
@@ -143,7 +149,20 @@ const MENU_SECTIONS: MenuSection[] = [
       },
       {
         key: "cms-email", icon: <MailOutlined />, label: "Email Template",
-        children: [{ key: "/admin/email-template", label: "Order Confirmation" }],
+        children: [
+          { key: "/admin/email-template?tab=brand", label: "Thương hiệu", icon: <ShopOutlined /> },
+          { key: "/admin/email-template?tab=orderConfirmation", label: "Xác nhận đơn hàng", icon: <ShoppingCartOutlined /> },
+          { key: "/admin/email-template?tab=adminNotification", label: "Thông báo Admin", icon: <BellOutlined /> },
+          { key: "/admin/email-template?tab=affiliateRegistered", label: "Affiliate đăng ký (Admin)", icon: <UserAddOutlined /> },
+          { key: "/admin/email-template?tab=affiliateApproval", label: "Duyệt Affiliate", icon: <CheckCircleOutlined /> },
+          { key: "/admin/email-template?tab=affiliateRejection", label: "Từ chối Affiliate", icon: <CloseCircleOutlined /> },
+          { key: "/admin/email-template?tab=newCommission", label: "Hoa hồng mới", icon: <DollarOutlined /> },
+          { key: "/admin/email-template?tab=payoutRequest", label: "Yêu cầu rút tiền (Admin)", icon: <BellOutlined /> },
+          { key: "/admin/email-template?tab=payoutRejected", label: "Rút tiền bị từ chối", icon: <CloseCircleOutlined /> },
+          { key: "/admin/email-template?tab=payoutCompleted", label: "Rút tiền thành công", icon: <CheckCircleOutlined /> },
+          { key: "/admin/email-template?tab=style", label: "Giao diện", icon: <BgColorsOutlined /> },
+          { key: "/admin/email-template?tab=variables", label: "Biến hỗ trợ", icon: <InfoCircleOutlined /> },
+        ],
       },
       {
         key: "cms-contact", icon: <GlobalOutlined />, label: "Contact Page",
@@ -232,9 +251,15 @@ function getBestMatch(currentPath: string): string | null {
 }
 
 function isItemActive(key: string, currentPath: string): boolean {
+  if (key === "/admin") return currentPath.split("?")[0] === "/admin";
+  
+  // If key has query params, do strict match
+  if (key.includes("?")) {
+    return currentPath === key;
+  }
+
   const path = currentPath.split("?")[0].split("#")[0];
-  if (key === "/admin") return path === "/admin";
-  return key === getBestMatch(currentPath);
+  return key === getBestMatch(path);
 }
 
 // ═══ Layout Component ═══
@@ -420,6 +445,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                 }`}
                                 onClick={() => handleNavigate(child.key)}
                               >
+                                {child.icon && <span className="admin-menu-item-icon" style={{ fontSize: 14 }}>{child.icon}</span>}
                                 <span className="admin-menu-item-label">{child.label}</span>
                               </button>
                             ))}

@@ -10,6 +10,7 @@ import {
   sendOrderConfirmEmail,
   sendAdminNotificationEmail,
   sendExpiredOrderPaymentAlert,
+  sendNewCommissionEmail,
 } from "~services/email";
 import { resolveAffiliateRef, createCommissionWithWaiting } from "~services/affiliate";
 import { completePayoutFromWebhook } from "~services/payout";
@@ -342,10 +343,10 @@ export default async function handler(
         const resolved = await resolveAffiliateRef(supabaseAdmin, order.affiliate_ref);
 
         if (resolved) {
-          // Get affiliate's commission rate
+          // Get affiliate's info
           const { data: affiliateData } = await supabaseAdmin
             .from("affiliates")
-            .select("commission_rate")
+            .select("commission_rate, users(email, name)")
             .eq("id", resolved.affiliateId)
             .maybeSingle();
 
@@ -355,7 +356,7 @@ export default async function handler(
             amount: order.amount,
             commissionRate: affiliateData?.commission_rate,
             buyerEmail: userEmail || undefined,
-            buyerIp: undefined, // Not available from webhook context
+            buyerIp: undefined,
           });
 
           if (result.isNew) {
@@ -363,6 +364,22 @@ export default async function handler(
               `[Sepay Webhook] ✔ Commission created: ${result.commission.commission_amount}đ` +
               (result.fraudFlag ? ` (flagged: ${result.fraudFlag})` : " (7-day waiting period)"),
             );
+
+            // Notify affiliate
+            try {
+              const affUser = (affiliateData as any)?.users;
+              if (affUser?.email) {
+                sendNewCommissionEmail(
+                  affUser.email,
+                  affUser.name || "Affiliate",
+                  order.order_id,
+                  order.amount,
+                  result.commission.commission_amount
+                );
+              }
+            } catch (emailErr) {
+              log.error(`[Sepay Webhook] ✗ Failed to send commission email:`, emailErr);
+            }
           } else {
             log(`[Sepay Webhook] Commission already exists for order ${order.order_id}`);
           }

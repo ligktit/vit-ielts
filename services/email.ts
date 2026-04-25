@@ -44,6 +44,43 @@ export type EmailTemplateConfig = {
         headerTitle: string;
         bodyHtml: string;
     };
+    affiliateRegistered: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+    };
+    affiliateApproved: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+        ctaButton?: { text: string; link: string };
+    };
+    affiliateRejected: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+    };
+    newCommission: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+        ctaButton?: { text: string; link: string };
+    };
+    payoutRequest: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+    };
+    payoutRejected: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+    };
+    payoutCompleted: {
+        subject: string;
+        headerTitle: string;
+        bodyHtml: string;
+    };
     style: {
         headerBgColor: string;
         headerBgGradient: string;
@@ -76,6 +113,13 @@ export const TEMPLATE_VARIABLES: Record<string, string> = {
     "{{brandEmail}}": "Email liên hệ",
     "{{brandWebsite}}": "Website",
     "{{customerEmail}}": "Email khách hàng",
+    "{{affiliateName}}": "Tên Affiliate",
+    "{{affiliateEmail}}": "Email Affiliate",
+    "{{commissionAmount}}": "Số tiền hoa hồng",
+    "{{orderTotal}}": "Tổng giá trị đơn hàng",
+    "{{payoutAmount}}": "Số tiền yêu cầu rút",
+    "{{rejectReason}}": "Lý do từ chối",
+    "{{customLink}}": "Link affiliate riêng",
 };
 
 // ============================================================
@@ -112,6 +156,49 @@ const DEFAULT_CONFIG: EmailTemplateConfig = {
         headerTitle: "Thông báo đơn hàng mới",
         bodyHtml: "Xác nhận thanh toán thành công!",
     },
+    affiliateRegistered: {
+        subject: "[Admin] Đơn đăng ký Affiliate mới từ {{affiliateName}}",
+        headerTitle: "Thông báo đăng ký đối tác",
+        bodyHtml: "Hệ thống vừa nhận được đơn đăng ký tham gia chương trình Affiliate mới.\n\n<strong>Thông tin chi tiết:</strong>\n- 👤 Họ tên: {{affiliateName}}\n- 📧 Email: {{affiliateEmail}}\n- 📅 Ngày đăng ký: {{purchaseDate}}\n\nVui lòng truy cập trang quản trị để xem xét hồ sơ và thực hiện duyệt đơn.",
+    },
+    affiliateApproved: {
+        subject: "Chúc mừng! Bạn đã chính thức trở thành đối tác của {{brandName}}",
+        headerTitle: "Chào mừng bạn gia nhập đội ngũ đối tác",
+        bodyHtml: "Xin chào <strong>{{affiliateName}}</strong>,\n\nChúng tôi rất vui mừng thông báo rằng đơn đăng ký tham gia chương trình Affiliate của bạn đã được phê duyệt thành công.\n\nBây giờ bạn đã có thể đăng nhập vào bảng điều khiển dành riêng cho Affiliate để lấy mã giới thiệu, theo dõi hoa hồng và bắt đầu hành trình cùng {{brandName}}.\n\nChúng tôi hy vọng sẽ cùng bạn tạo nên những kết quả tuyệt vời!",
+        ctaButton: {
+            text: "Truy cập Bảng điều khiển",
+            link: "https://ieltspredictiontest.com/account/affiliate",
+        },
+    },
+    affiliateRejected: {
+        subject: "Thông báo về đơn đăng ký Affiliate tại {{brandName}}",
+        headerTitle: "Cảm ơn bạn đã quan tâm",
+        bodyHtml: "Xin chào {{affiliateName}},\n\nCảm ơn bạn đã gửi đơn đăng ký tham gia chương trình Affiliate của {{brandName}}.\n\nSau khi xem xét kỹ lưỡng hồ sơ, rất tiếc chúng tôi chưa thể hợp tác với bạn trong đợt này. Mong bạn thông cảm vì tiêu chuẩn chọn lọc đối tác hiện tại của chúng tôi khá đặc thù.\n\nHồ sơ của bạn sẽ được lưu giữ và chúng tôi có thể liên hệ lại khi có chương trình phù hợp hơn trong tương lai.",
+    },
+    newCommission: {
+        subject: "🎉 Bạn vừa nhận được hoa hồng mới từ {{brandName}}!",
+        headerTitle: "Thông báo hoa hồng mới",
+        bodyHtml: "Xin chào <strong>{{affiliateName}}</strong>,\n\nChúc mừng bạn vừa có một lượt giới thiệu thành công!\n\n<strong>Chi tiết giao dịch:</strong>\n- 📦 Đơn hàng: {{orderId}}\n- 💰 Giá trị đơn: {{orderTotal}}\n- 💎 Hoa hồng của bạn: <strong>{{commissionAmount}}</strong>\n\nHoa hồng này đã được ghi nhận vào tài khoản của bạn dưới trạng thái <em>Chờ duyệt</em>. Cảm ơn bạn vì sự đồng hành tuyệt vời!",
+        ctaButton: {
+            text: "Kiểm tra số dư ngay",
+            link: "https://ieltspredictiontest.com/account/affiliate",
+        },
+    },
+    payoutRequest: {
+        subject: "[Admin] Yêu cầu thanh toán hoa hồng mới từ {{affiliateName}}",
+        headerTitle: "Yêu cầu rút tiền",
+        bodyHtml: "Hệ thống vừa nhận được yêu cầu rút tiền từ đối tác Affiliate.\n\n<strong>Thông tin yêu cầu:</strong>\n- 👤 Đối tác: {{affiliateName}}\n- 📧 Email: {{affiliateEmail}}\n- 💵 Số tiền yêu cầu: <strong>{{payoutAmount}}</strong>\n\nVui lòng kiểm tra thông tin ngân hàng và số dư khả dụng của đối tác trước khi thực hiện chuyển khoản.",
+    },
+    payoutRejected: {
+        subject: "Thông tin về yêu cầu rút tiền của bạn tại {{brandName}}",
+        headerTitle: "Cập nhật trạng thái yêu cầu",
+        bodyHtml: "Xin chào {{affiliateName}},\n\nYêu cầu rút tiền số tiền <strong>{{payoutAmount}}</strong> của bạn đã bị từ chối xử lý.\n\n<strong>Lý do từ chối:</strong>\n{{rejectReason}}\n\nSố dư tương ứng đã được hoàn lại vào tài khoản của bạn. Vui lòng kiểm tra lại thông tin và thực hiện yêu cầu mới nếu cần thiết.",
+    },
+    payoutCompleted: {
+        subject: "✅ {{brandName}} đã thanh toán hoa hồng cho bạn",
+        headerTitle: "Thanh toán thành công",
+        bodyHtml: "Xin chào {{affiliateName}},\n\nTin vui! Chúng tôi đã thực hiện chuyển khoản số tiền <strong>{{payoutAmount}}</strong> theo yêu cầu rút tiền của bạn.\n\nGiao dịch đã được hoàn tất. Vui lòng kiểm tra tài khoản ngân hàng của bạn trong vòng 24h làm việc.\n\nCảm ơn bạn đã luôn là đối tác tin cậy của {{brandName}}!",
+    },
     style: {
         headerBgColor: "#D94A56",
         headerBgGradient: "linear-gradient(135deg, #D94A56 0%, #c62828 100%)",
@@ -147,16 +234,29 @@ function replaceVariables(
  * Falls back to default config if not found.
  */
 async function getEmailConfig(): Promise<EmailTemplateConfig> {
-    try {
-        const config = await readConfig<EmailTemplateConfig>(
-            supabaseAdmin,
-            "email-template",
-        );
-        if (config) return config;
-    } catch {
-        // Silently fall back to defaults
-    }
-    return DEFAULT_CONFIG;
+    const dbConfig = await readConfig<EmailTemplateConfig>(
+        supabaseAdmin,
+        "email-template",
+    ).catch(() => null);
+
+    if (!dbConfig) return DEFAULT_CONFIG;
+
+    // Merge defaults with DB config to ensure new fields are populated
+    return {
+        ...DEFAULT_CONFIG,
+        ...dbConfig,
+        brand: { ...DEFAULT_CONFIG.brand, ...(dbConfig.brand || {}) },
+        orderConfirmation: { ...DEFAULT_CONFIG.orderConfirmation, ...(dbConfig.orderConfirmation || {}) },
+        adminNotification: { ...DEFAULT_CONFIG.adminNotification, ...(dbConfig.adminNotification || {}) },
+        affiliateRegistered: { ...DEFAULT_CONFIG.affiliateRegistered, ...(dbConfig.affiliateRegistered || {}) },
+        affiliateApproved: { ...DEFAULT_CONFIG.affiliateApproved, ...(dbConfig.affiliateApproved || {}) },
+        affiliateRejected: { ...DEFAULT_CONFIG.affiliateRejected, ...(dbConfig.affiliateRejected || {}) },
+        newCommission: { ...DEFAULT_CONFIG.newCommission, ...(dbConfig.newCommission || {}) },
+        payoutRequest: { ...DEFAULT_CONFIG.payoutRequest, ...(dbConfig.payoutRequest || {}) },
+        payoutRejected: { ...DEFAULT_CONFIG.payoutRejected, ...(dbConfig.payoutRejected || {}) },
+        payoutCompleted: { ...DEFAULT_CONFIG.payoutCompleted, ...(dbConfig.payoutCompleted || {}) },
+        style: { ...DEFAULT_CONFIG.style, ...(dbConfig.style || {}) },
+    };
 }
 
 /**
@@ -599,6 +699,174 @@ export async function sendExpiredOrderPaymentAlert(
         `[CẢNH BÁO] Thanh toán cho đơn đã expired — ${orderId}`,
         html,
     );
+}
+
+// ============================================================
+// Affiliate Emails
+// ============================================================
+
+/**
+ * Gửi email thông báo cho admin khi có người đăng ký Affiliate mới
+ */
+export async function sendAffiliateRegisteredEmail(
+    affiliateName: string,
+    affiliateEmail: string,
+): Promise<boolean> {
+    const config = await getEmailConfig();
+    const { affiliateRegistered } = config;
+    const adminEmail = process.env.ADMIN_EMAIL || config.brand.email || "admin@ieltspredictiontest.com";
+
+    const vars: Record<string, string> = {
+        "{{affiliateName}}": encode(affiliateName),
+        "{{affiliateEmail}}": encode(affiliateEmail),
+        "{{brandName}}": config.brand.name,
+        "{{brandPhone}}": config.brand.phone,
+        "{{brandEmail}}": config.brand.email,
+        "{{brandWebsite}}": config.brand.website,
+        "{{currentYear}}": String(new Date().getFullYear()),
+    };
+
+    const subject = replaceVariables(affiliateRegistered.subject, vars);
+    const body = replaceVariables(affiliateRegistered.bodyHtml, vars);
+    const html = buildEmailHtml(config, affiliateRegistered.headerTitle, body, vars);
+
+    return sendEmail(adminEmail, subject, html);
+}
+
+/**
+ * Gửi email thông báo kết quả duyệt Affiliate cho người dùng
+ */
+export async function sendAffiliateStatusEmail(
+    affiliateEmail: string,
+    affiliateName: string,
+    status: "approved" | "rejected",
+): Promise<boolean> {
+    const config = await getEmailConfig();
+    const template = status === "approved" ? config.affiliateApproved : config.affiliateRejected;
+
+    const vars: Record<string, string> = {
+        "{{affiliateName}}": encode(affiliateName),
+        "{{brandName}}": config.brand.name,
+        "{{brandPhone}}": config.brand.phone,
+        "{{brandEmail}}": config.brand.email,
+        "{{brandWebsite}}": config.brand.website,
+        "{{currentYear}}": String(new Date().getFullYear()),
+    };
+
+    const subject = replaceVariables(template.subject, vars);
+    const body = replaceVariables(template.bodyHtml, vars);
+    
+    const options: any = {};
+    if (status === "approved" && (template as any).ctaButton) {
+        options.ctaButton = {
+            text: replaceVariables((template as any).ctaButton.text, vars),
+            link: replaceVariables((template as any).ctaButton.link, vars),
+        };
+    }
+
+    const html = buildEmailHtml(config, template.headerTitle, body, vars, options);
+    return sendEmail(affiliateEmail, subject, html);
+}
+
+/**
+ * Gửi email thông báo khi Affiliate có hoa hồng mới
+ */
+export async function sendNewCommissionEmail(
+    affiliateEmail: string,
+    affiliateName: string,
+    orderId: string,
+    orderTotal: number,
+    commissionAmount: number,
+): Promise<boolean> {
+    const config = await getEmailConfig();
+    const { newCommission } = config;
+
+    const vars: Record<string, string> = {
+        "{{affiliateName}}": encode(affiliateName),
+        "{{orderId}}": encode(orderId),
+        "{{orderTotal}}": `${orderTotal.toLocaleString("vi-VN")} đ`,
+        "{{commissionAmount}}": `${commissionAmount.toLocaleString("vi-VN")} đ`,
+        "{{brandName}}": config.brand.name,
+        "{{brandPhone}}": config.brand.phone,
+        "{{brandEmail}}": config.brand.email,
+        "{{brandWebsite}}": config.brand.website,
+        "{{currentYear}}": String(new Date().getFullYear()),
+    };
+
+    const subject = replaceVariables(newCommission.subject, vars);
+    const body = replaceVariables(newCommission.bodyHtml, vars);
+
+    const options: any = {};
+    if (newCommission.ctaButton) {
+        options.ctaButton = {
+            text: replaceVariables(newCommission.ctaButton.text, vars),
+            link: replaceVariables(newCommission.ctaButton.link, vars),
+        };
+    }
+
+    const html = buildEmailHtml(config, newCommission.headerTitle, body, vars, options);
+    return sendEmail(affiliateEmail, subject, html);
+}
+
+/**
+ * Gửi email thông báo cho admin khi có yêu cầu rút tiền mới
+ */
+export async function sendPayoutRequestEmail(
+    affiliateName: string,
+    affiliateEmail: string,
+    amount: number,
+): Promise<boolean> {
+    const config = await getEmailConfig();
+    const { payoutRequest } = config;
+    const adminEmail = process.env.ADMIN_EMAIL || config.brand.email || "admin@ieltspredictiontest.com";
+
+    const vars: Record<string, string> = {
+        "{{affiliateName}}": encode(affiliateName),
+        "{{affiliateEmail}}": encode(affiliateEmail),
+        "{{payoutAmount}}": `${amount.toLocaleString("vi-VN")} đ`,
+        "{{brandName}}": config.brand.name,
+        "{{brandPhone}}": config.brand.phone,
+        "{{brandEmail}}": config.brand.email,
+        "{{brandWebsite}}": config.brand.website,
+        "{{currentYear}}": String(new Date().getFullYear()),
+    };
+
+    const subject = replaceVariables(payoutRequest.subject, vars);
+    const body = replaceVariables(payoutRequest.bodyHtml, vars);
+    const html = buildEmailHtml(config, payoutRequest.headerTitle, body, vars);
+
+    return sendEmail(adminEmail, subject, html);
+}
+
+/**
+ * Gửi email thông báo kết quả xử lý payout cho Affiliate
+ */
+export async function sendPayoutStatusEmail(
+    affiliateEmail: string,
+    affiliateName: string,
+    amount: number,
+    status: "completed" | "rejected",
+    rejectReason?: string,
+): Promise<boolean> {
+    const config = await getEmailConfig();
+    const template = status === "completed" ? config.payoutCompleted : config.payoutRejected;
+
+    const vars: Record<string, string> = {
+        "{{affiliateName}}": encode(affiliateName),
+        "{{payoutAmount}}": `${amount.toLocaleString("vi-VN")} đ`,
+        "{{rejectReason}}": encode(rejectReason || "Không có lý do cụ thể"),
+        "{{brandName}}": config.brand.name,
+        "{{brandPhone}}": config.brand.phone,
+        "{{brandEmail}}": config.brand.email,
+        "{{brandWebsite}}": config.brand.website,
+        "{{currentYear}}": String(new Date().getFullYear()),
+    };
+
+    const subject = replaceVariables(template.subject, vars);
+    const body = replaceVariables(template.bodyHtml, vars);
+    const html = buildEmailHtml(config, template.headerTitle, body, vars);
+
+    return sendEmail(affiliateEmail, subject, html);
 }
 
 // ============================================================

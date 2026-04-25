@@ -10,6 +10,7 @@
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import { AFFILIATE_COLUMNS, AFFILIATE_LINK_COLUMNS, AFFILIATE_VISIT_COLUMNS, COMMISSION_COLUMNS } from "./lib/columns";
+import { sendAffiliateRegisteredEmail, sendNewCommissionEmail } from "./email";
 
 // ============================================================
 // Types
@@ -88,6 +89,27 @@ const BOT_UA_PATTERNS = [
 ];
 
 // ============================================================
+// Helpers
+// ============================================================
+
+/**
+ * Lấy cấu hình affiliate từ site_settings
+ */
+async function getAffiliateConfig(supabaseAdmin: SupabaseClient) {
+    try {
+        const { data } = await supabaseAdmin
+            .from("site_settings")
+            .select("value")
+            .eq("key", "affiliate_config")
+            .maybeSingle();
+        
+        return data?.value || { commission_rate: 0.2 };
+    } catch {
+        return { commission_rate: 0.2 };
+    }
+}
+
+// ============================================================
 // Functions
 // ============================================================
 
@@ -122,6 +144,10 @@ export async function registerAffiliate(
         };
     }
 
+    // Get default commission rate from config
+    const config = await getAffiliateConfig(supabaseAdmin);
+    const defaultRate = config.commission_rate ?? DEFAULT_COMMISSION_RATE;
+
     // Create new affiliate
     const { data, error } = await supabaseAdmin
         .from("affiliates")
@@ -129,12 +155,27 @@ export async function registerAffiliate(
             user_id: userId,
             custom_link: customLink || null,
             status: "pending",
-            commission_rate: DEFAULT_COMMISSION_RATE,
+            commission_rate: defaultRate,
         })
         .select()
         .single();
 
     if (error) throw error;
+
+    // Notify admin
+    try {
+        const { data: userData } = await supabaseAdmin
+            .from("users")
+            .select("name, email")
+            .eq("id", userId)
+            .single();
+        
+        if (userData) {
+            sendAffiliateRegisteredEmail(userData.name || "User", userData.email || "");
+        }
+    } catch (err) {
+        console.error("[Affiliate] Failed to send registration email:", err);
+    }
 
     return {
         affiliate: data as Affiliate,
@@ -357,7 +398,12 @@ export async function createCommission(
     params: CreateCommissionParams,
 ) {
     const { affiliateId, orderId, amount, commissionRate } = params;
-    const rate = commissionRate ?? DEFAULT_COMMISSION_RATE;
+    
+    let rate = commissionRate;
+    if (rate === undefined) {
+        const config = await getAffiliateConfig(supabaseAdmin);
+        rate = config.commission_rate ?? DEFAULT_COMMISSION_RATE;
+    }
 
     // Check if commission already exists for this order
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -688,7 +734,12 @@ export async function createCommissionWithWaiting(
         buyerIp,
         waitingPeriodDays = DEFAULT_WAITING_PERIOD_DAYS,
     } = params;
-    const rate = commissionRate ?? DEFAULT_COMMISSION_RATE;
+    
+    let rate = commissionRate;
+    if (rate === undefined) {
+        const config = await getAffiliateConfig(supabaseAdmin);
+        rate = config.commission_rate ?? DEFAULT_COMMISSION_RATE;
+    }
 
     // Check if commission already exists for this order
     const { data: existing, error: fetchError } = await supabaseAdmin
@@ -734,6 +785,24 @@ export async function createCommissionWithWaiting(
         .single();
 
     if (error) throw error;
+
+    // Notify affiliate of new commission
+    if (!fraudFlag) {
+        try {
+            const { data: affData } = await supabaseAdmin
+                .from("affiliates")
+                .select("users(name, email)")
+                .eq("id", affiliateId)
+                .single();
+            
+            if (affData && (affData as any).users) {
+                const u = (affData as any).users;
+                sendNewCommissionEmail(u.email, u.name || "User", orderId, amount, commissionAmount);
+            }
+        } catch (err) {
+            console.error("[Affiliate] Failed to send commission email:", err);
+        }
+    }
 
     return { commission: data as Commission, isNew: true, fraudFlag };
 }
@@ -790,4 +859,27 @@ export async function processEligibleCommissions(
     }
 
     return { processed };
+}
+
+/**
+ * Xóa hoàn toàn một affiliate và các dữ liệu liên quan (links, visits, commissions, payouts)
+ * Lưu ý: affiliate_links có ON DELETE CASCADE nên sẽ tự động bị xóa.
+ * Các bảng khác cần xóa thủ công nếu không có CASCADE.
+ */
+export async function deleteAffiliate(supabaseAdmin: SupabaseClient, affiliateId: string) {
+    // 1. Xóa payouts
+    await supabaseAdmin.from("payouts").delete().eq("affiliate_id", affiliateId);
+    
+    // 2. Xóa affiliate_visits (vì có link_id tham chiếu tới affiliate_links)
+    // Cần xóa visits trước khi links bị xóa bởi CASCADE của affiliates
+    await supabaseAdmin.from("affiliate_visits").delete().eq("affiliate_id", affiliateId);
+    
+    // 3. Xóa commissions
+    await supabaseAdmin.from("commissions").delete().eq("affiliate_id", affiliateId);
+    
+    // 4. Xóa chính record affiliate (sẽ kéo theo affiliate_links bị xóa do CASCADE)
+    const { error } = await supabaseAdmin.from("affiliates").delete().eq("id", affiliateId);
+    
+    if (error) throw error;
+    return true;
 }

@@ -73,14 +73,30 @@ export default function AffiliateUsersPage() {
   const [affiliateDetail, setAffiliateDetail] = useState<AffiliateDetail | null>(null);
   const [customLink, setCustomLink] = useState("");
   const [commissionRate, setCommissionRate] = useState<number>(20);
+  const [globalCommissionRate, setGlobalCommissionRate] = useState<number>(20);
   const [modalVisible, setModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   useEffect(() => {
+    fetchGlobalConfig();
     fetchAffiliates();
   }, []);
+
+  const fetchGlobalConfig = async () => {
+    try {
+      const res = await fetch("/api/admin/affiliate/config");
+      const data = await res.json();
+      if (data.success && data.config) {
+        const rate = (data.config.commission_rate || 0.2) * 100;
+        setGlobalCommissionRate(rate);
+        setCommissionRate(rate);
+      }
+    } catch (error) {
+      console.error("Error fetching global config:", error);
+    }
+  };
 
   useEffect(() => {
     if (affiliates && affiliates.length >= 0) {
@@ -231,7 +247,11 @@ export default function AffiliateUsersPage() {
   const handleApprove = async (affiliate: AffiliateUser) => {
     setSelectedAffiliate(affiliate);
     setCustomLink(affiliate.customLink || "");
-    setCommissionRate(affiliate.commissionRate || 20);
+    setCommissionRate(
+      affiliate.commissionRate !== undefined
+        ? affiliate.commissionRate * 100
+        : globalCommissionRate
+    );
     setModalVisible(true);
   };
 
@@ -289,6 +309,32 @@ export default function AffiliateUsersPage() {
           }
         } catch (error) {
           message.error("Có lỗi xảy ra");
+        }
+      },
+    });
+  };
+
+  const handleDeleteAffiliate = (affiliate: AffiliateUser) => {
+    Modal.confirm({
+      title: "Xác nhận xóa affiliate",
+      content: `Bạn có chắc chắn muốn xóa affiliate ${affiliate.name || affiliate.id}? Mọi dữ liệu hoa hồng, link, lượt ghé thăm và yêu cầu rút tiền của affiliate này sẽ bị xóa vĩnh viễn.`,
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          const res = await fetch(`/api/admin/affiliate/users?id=${affiliate.id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (data.success) {
+            message.success("Đã xóa affiliate thành công");
+            fetchAffiliates();
+          } else {
+            message.error(data.error || "Xóa thất bại");
+          }
+        } catch (error) {
+          message.error("Có lỗi xảy ra khi xóa");
         }
       },
     });
@@ -401,13 +447,24 @@ export default function AffiliateUsersPage() {
               onClick={() => {
                 setSelectedAffiliate(record);
                 setCustomLink(record.customLink || "");
-                setCommissionRate(record.commissionRate || 20);
+                setCommissionRate(
+                  record.commissionRate !== undefined
+                    ? record.commissionRate * 100
+                    : globalCommissionRate
+                );
                 setModalVisible(true);
               }}
             >
               Sửa
             </Button>
           )}
+          <Button
+            danger
+            size="small"
+            onClick={() => handleDeleteAffiliate(record)}
+          >
+            Xóa
+          </Button>
         </Space>
       ),
     },
@@ -533,7 +590,12 @@ export default function AffiliateUsersPage() {
                       {affiliateDetail.affiliate.email || "-"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Mức hoa hồng">
-                      <strong className="text-blue-600">{affiliateDetail.affiliate.commissionRate || 20}%</strong>
+                      <strong className="text-blue-600">
+                        {affiliateDetail.affiliate.commissionRate !== undefined
+                          ? affiliateDetail.affiliate.commissionRate * 100
+                          : globalCommissionRate}
+                        %
+                      </strong>
                     </Descriptions.Item>
                     <Descriptions.Item label="Trạng thái">
                       <Tag

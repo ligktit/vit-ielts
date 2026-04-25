@@ -23,6 +23,16 @@ export default async function handler(
       }
 
       const { affiliate, isNew } = await registerAffiliate(supabaseAdmin, userId);
+      
+      // Notify admin of new registration
+      if (isNew) {
+        try {
+          const { sendAffiliateRegisteredEmail } = await import("~services/email");
+          sendAffiliateRegisteredEmail(name || "User", email || "N/A");
+        } catch (err) {
+          console.error("[Affiliate] Failed to send registration email:", err);
+        }
+      }
 
       // Update user email/name on users table if provided (optional enhancement)
       // This is handled by user service, not affiliate service
