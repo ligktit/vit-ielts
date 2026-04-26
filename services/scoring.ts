@@ -117,8 +117,13 @@ function scoreSelect(
 
     correctAnswersFromText.forEach(correctAnswerText => {
         const userAnswerIndex = answers[idx] as number;
-        const userAnswerText = optionsList[userAnswerIndex]?.option_text ?? null;
-        
+        const opt = optionsList[userAnswerIndex] as Record<string, unknown> | undefined;
+        // DB lưu list_of_options[i].option (camelCase rút gọn); test fixtures dùng option_text.
+        const userAnswerText =
+            (opt?.option_text as string | undefined) ??
+            (opt?.option as string | undefined) ??
+            null;
+
         if (userAnswerText?.trim().toLowerCase() === correctAnswerText.trim().toLowerCase()) {
             correct++;
         }
@@ -237,13 +242,19 @@ function scoreMatching(
     answers: UserAnswer[],
     answerIndex: number,
 ): { correct: number; total: number; nextIndex: number } {
-    const matchingData = question.matching_question;
+    const matchingData = question.matching_question as Record<string, unknown> | undefined;
     if (!matchingData) {
         return { correct: 0, total: 0, nextIndex: answerIndex + 1 };
     }
 
-    const layoutType = (matchingData.layout_type ?? "standard").trim().toLowerCase();
-    const answerOptions = matchingData.answer_options ?? [];
+    // DB lưu JSONB dạng camelCase; test fixtures dùng snake_case — đọc cả hai.
+    const layoutType = String(
+        (matchingData.layout_type ?? matchingData.layoutType ?? "standard"),
+    ).trim().toLowerCase();
+    const answerOptions = (matchingData.answer_options ?? matchingData.answerOptions ?? []) as Array<Record<string, unknown>>;
+    const getOptionText = (idx: number): string =>
+        String(answerOptions[idx]?.option_text ?? answerOptions[idx]?.optionText ?? "");
+
     const userAnswerObj: Record<string, string> =
         typeof answers[answerIndex] === "object" && answers[answerIndex] !== null
             ? (answers[answerIndex] as Record<string, string>)
@@ -255,7 +266,7 @@ function scoreMatching(
     if (layoutType === "standard") {
         // Standard: compare user-selected option text vs correctAnswer
         // @origin functions.php L1280–1310
-        const matchingItems = matchingData.matching_items ?? [];
+        const matchingItems = (matchingData.matching_items ?? matchingData.matchingItems ?? []) as Array<Record<string, unknown>>;
         total = matchingItems.length;
 
         matchingItems.forEach((item, index) => {
@@ -263,8 +274,8 @@ function scoreMatching(
             if (userOptionIndex == null) return;
 
             const optIdx = Number(userOptionIndex);
-            const userText = answerOptions[optIdx]?.option_text ?? "";
-            const correctText = item.correctAnswer ?? "";
+            const userText = getOptionText(optIdx);
+            const correctText = String(item.correctAnswer ?? item.correct_answer ?? "");
 
             if (userText.trim().toLowerCase() === correctText.trim().toLowerCase()) {
                 correct++;
@@ -273,7 +284,8 @@ function scoreMatching(
     } else if (layoutType === "summary") {
         // Summary: extract correct answers from summary_text via {}, compare with user selection
         // @origin functions.php L1312–1350
-        const correctAnswers = extractWords(matchingData.summary_text ?? "");
+        const summaryText = String(matchingData.summary_text ?? matchingData.summaryText ?? "");
+        const correctAnswers = extractWords(summaryText);
         total = correctAnswers.length;
 
         correctAnswers.forEach((correctText, gapIndex) => {
@@ -285,7 +297,7 @@ function scoreMatching(
             const optIdx = parseInt(parts[parts.length - 1], 10);
             if (isNaN(optIdx)) return;
 
-            const userText = answerOptions[optIdx]?.option_text ?? "";
+            const userText = getOptionText(optIdx);
             if (userText.trim().toLowerCase() === correctText.trim().toLowerCase()) {
                 correct++;
             }
@@ -304,7 +316,7 @@ function scoreMatching(
             const optIdx = parseInt(parts[parts.length - 1], 10);
             if (isNaN(optIdx)) return;
 
-            const userText = answerOptions[optIdx]?.option_text ?? "";
+            const userText = getOptionText(optIdx);
             if (userText.trim().toLowerCase() === correctText.trim().toLowerCase()) {
                 correct++;
             }
@@ -325,13 +337,14 @@ function scoreMatrix(
     answers: UserAnswer[],
     answerIndex: number,
 ): { correct: number; total: number; nextIndex: number } {
-    const matrixData = question.matrix_question;
+    const matrixData = question.matrix_question as Record<string, unknown> | undefined;
     if (!matrixData) {
         return { correct: 0, total: 0, nextIndex: answerIndex + 1 };
     }
 
-    const matrixItems = matrixData.matrix_items ?? [];
-    const categories = matrixData.matrix_categories ?? [];
+    // DB lưu JSONB dạng camelCase; test fixtures dùng snake_case — đọc cả hai.
+    const matrixItems = (matrixData.matrix_items ?? matrixData.matrixItems ?? []) as Array<Record<string, unknown>>;
+    const categories = (matrixData.matrix_categories ?? matrixData.matrixCategories ?? []) as Array<Record<string, unknown>>;
     const userAnswerObj: Record<string, string> =
         typeof answers[answerIndex] === "object" && answers[answerIndex] !== null
             ? (answers[answerIndex] as Record<string, string>)
@@ -341,16 +354,29 @@ function scoreMatrix(
     const total = matrixItems.length;
 
     matrixItems.forEach((item, rowIndex) => {
-        const userCategoryId = userAnswerObj[String(rowIndex)];
-        if (userCategoryId == null) return;
+        const userCategoryRaw = userAnswerObj[String(rowIndex)];
+        if (userCategoryRaw == null) return;
 
-        // User answer format: "cat-0-1" → last part is the category index
-        const parts = userCategoryId.split("-");
-        const catIdx = parseInt(parts[parts.length - 1], 10);
-        if (isNaN(catIdx)) return;
+        // User answer can be either:
+        //  - "cat-0-1" → last part is the category index (legacy id format), OR
+        //  - a direct letter like "A" / "B" (current client behavior, see calculateScore)
+        const userCategoryStr = String(userCategoryRaw).trim();
+        let userLetter = "";
+        if (userCategoryStr.includes("-")) {
+            const parts = userCategoryStr.split("-");
+            const catIdx = parseInt(parts[parts.length - 1], 10);
+            if (!isNaN(catIdx)) {
+                userLetter = String(
+                    categories[catIdx]?.category_letter ?? categories[catIdx]?.categoryLetter ?? "",
+                ).trim().toLowerCase();
+            }
+        } else {
+            userLetter = userCategoryStr.toLowerCase();
+        }
 
-        const userLetter = (categories[catIdx]?.category_letter ?? "").trim().toLowerCase();
-        const correctLetter = (item.correct_category_letter ?? "").trim().toLowerCase();
+        const correctLetter = String(
+            item.correct_category_letter ?? item.correctCategoryLetter ?? "",
+        ).trim().toLowerCase();
 
         if (userLetter !== "" && userLetter === correctLetter) {
             correct++;
@@ -358,6 +384,72 @@ function scoreMatrix(
     });
 
     return { correct, total, nextIndex: answerIndex + 1 };
+}
+
+/**
+ * Ước lượng tổng số sub-question slot mà UI sẽ render khi padded mode.
+ * Dùng để phát hiện answers array là "padded" hay "packed" (test fixtures).
+ */
+function estimateSubSlotCount(questions: ScoringQuestion[]): number {
+    let count = 0;
+    for (const q of questions) {
+        switch (q.type) {
+            case "radio": {
+                count += (q.list_of_questions ?? []).length || 1;
+                break;
+            }
+            case "select": {
+                const braces = extractWords(q.question_text || "").length;
+                count += braces || (q.list_of_questions ?? []).length || 1;
+                break;
+            }
+            case "fillup": {
+                const braces = extractWords(q.question_text || "").length;
+                count += braces || (q.explanations ?? []).length || 1;
+                break;
+            }
+            case "checkbox": {
+                const corr = (q.list_of_options ?? []).filter((o) => o.correct).length;
+                count += corr || 1;
+                break;
+            }
+            case "matrix": {
+                const md = q.matrix_question as Record<string, unknown> | undefined;
+                const items =
+                    (md?.matrix_items as unknown[] | undefined) ??
+                    (md?.matrixItems as unknown[] | undefined) ??
+                    [];
+                count += items.length || 1;
+                break;
+            }
+            case "matching": {
+                const md = q.matching_question as Record<string, unknown> | undefined;
+                const layout = String(
+                    (md?.layout_type ?? md?.layoutType ?? "standard") as string,
+                ).toLowerCase();
+                if (layout === "summary") {
+                    const text = String(
+                        (md?.summary_text ?? md?.summaryText ?? "") as string,
+                    );
+                    count += extractWords(text).length || 1;
+                } else if (layout === "heading") {
+                    count +=
+                        extractWords(q.associated_passage_content ?? "").length || 1;
+                } else {
+                    const items =
+                        (md?.matching_items as unknown[] | undefined) ??
+                        (md?.matchingItems as unknown[] | undefined) ??
+                        [];
+                    count += items.length || 1;
+                }
+                break;
+            }
+            default:
+                count += 1;
+                break;
+        }
+    }
+    return count;
 }
 
 // ---------------------------------------------------------------------------
@@ -414,6 +506,13 @@ export function calculateScore(
     let totalQuestions = 0;
     let answerIndex = 0;
 
+    // UI lưu answers theo dạng "padded": mỗi sub-question chiếm 1 slot, riêng
+    // matrix/matching/checkbox có dữ liệu ở slot đầu + (total-1) slot null.
+    // Test fixtures (legacy) lưu "packed": mỗi câu chiếm đúng 1 slot.
+    // Ước lượng tổng số sub-question kỳ vọng để chọn stride đúng cho từng mode.
+    const expectedSubSlots = estimateSubSlotCount(allQuestions);
+    const padded = safeAnswers.length >= expectedSubSlots && expectedSubSlots > 0;
+
     for (const question of allQuestions) {
         const qType = question.type;
         let result: { correct: number; total: number; nextIndex: number };
@@ -451,7 +550,17 @@ export function calculateScore(
 
         totalCorrect += result.correct;
         totalQuestions += result.total;
-        answerIndex = result.nextIndex;
+
+        // matrix/matching/checkbox chỉ chiếm 1 slot trong "packed",
+        // hoặc total slots trong "padded" — handler trả nextIndex theo packed mode,
+        // ở đây override theo mode thực tế của answers.
+        const isMultiSubGrouped =
+            qType === "matrix" || qType === "matching" || qType === "checkbox";
+        if (padded && isMultiSubGrouped) {
+            answerIndex += Math.max(result.total, 1);
+        } else {
+            answerIndex = result.nextIndex;
+        }
     }
 
     // Step 4: Count unanswered questions
