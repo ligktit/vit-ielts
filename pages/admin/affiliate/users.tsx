@@ -76,6 +76,8 @@ export default function AffiliateUsersPage() {
   const [globalCommissionRate, setGlobalCommissionRate] = useState<number>(20);
   const [modalVisible, setModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AffiliateUser | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -266,7 +268,8 @@ export default function AffiliateUsersPage() {
           action: "approve",
           affiliateId: selectedAffiliate.id,
           customLink: customLink || undefined,
-          commissionRate,
+          // DB lưu commission_rate dạng decimal (0.0–1.0); UI nhập theo % nên phải /100.
+          commissionRate: (commissionRate || 0) / 100,
         }),
       });
 
@@ -314,30 +317,32 @@ export default function AffiliateUsersPage() {
     });
   };
 
+  // Mở modal xóa (controlled) — không dùng Modal.confirm để tránh conflict
+  // với các modal khác đang mở trên cùng trang.
   const handleDeleteAffiliate = (affiliate: AffiliateUser) => {
-    Modal.confirm({
-      title: "Xác nhận xóa affiliate",
-      content: `Bạn có chắc chắn muốn xóa affiliate ${affiliate.name || affiliate.id}? Mọi dữ liệu hoa hồng, link, lượt ghé thăm và yêu cầu rút tiền của affiliate này sẽ bị xóa vĩnh viễn.`,
-      okText: "Xóa",
-      okType: "danger",
-      cancelText: "Hủy",
-      onOk: async () => {
-        try {
-          const res = await fetch(`/api/admin/affiliate/users?id=${affiliate.id}`, {
-            method: "DELETE",
-          });
-          const data = await res.json();
-          if (data.success) {
-            message.success("Đã xóa affiliate thành công");
-            fetchAffiliates();
-          } else {
-            message.error(data.error || "Xóa thất bại");
-          }
-        } catch (error) {
-          message.error("Có lỗi xảy ra khi xóa");
-        }
-      },
-    });
+    setDeleteTarget(affiliate);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/affiliate/users?id=${deleteTarget.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        message.success("Đã xóa affiliate thành công");
+        setDeleteTarget(null);
+        fetchAffiliates();
+      } else {
+        message.error(data.error || "Xóa thất bại");
+      }
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi xóa");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const columns: ColumnsType<AffiliateUser> = [
@@ -775,6 +780,29 @@ export default function AffiliateUsersPage() {
               </Tabs>
             </div>
           )}
+        </Modal>
+
+        {/* Modal xác nhận xóa (controlled) */}
+        <Modal
+          title="Xác nhận xóa affiliate"
+          open={!!deleteTarget}
+          onOk={handleConfirmDelete}
+          onCancel={() => {
+            if (!deleting) setDeleteTarget(null);
+          }}
+          okText="Xóa"
+          okType="danger"
+          cancelText="Hủy"
+          confirmLoading={deleting}
+          maskClosable={!deleting}
+          closable={!deleting}
+        >
+          <p>
+            Bạn có chắc chắn muốn xóa affiliate{" "}
+            <strong>{deleteTarget?.name || deleteTarget?.id}</strong>? Mọi dữ liệu
+            hoa hồng, link, lượt ghé thăm và yêu cầu rút tiền của affiliate này
+            sẽ bị xóa vĩnh viễn.
+          </p>
         </Modal>
       </Card>
     </AdminLayout>
