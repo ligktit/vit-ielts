@@ -44,7 +44,7 @@ export const ProLink = ({
       <button
         title={title}
         onClick={handleClick}
-        className={twMerge(props.className, "cursor-pointer")}
+        className={twMerge(props.className, "cursor-pointer text-left")}
       >
         {children}
       </button>
