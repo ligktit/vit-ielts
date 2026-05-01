@@ -409,7 +409,7 @@ export function MatchingQuestion({
                       // 2. Incorrect: Red text (strikethrough) + Green text
                       content = (
                         <>
-                          <span className="text-[#374151] line-through mr-1 font-bold opacity-70">
+                          <span className="text-red-500 line-through mr-1 font-bold">
                             {userAnswerText}
                           </span>
                           <span className="text-green-700 font-bold">
@@ -417,15 +417,15 @@ export function MatchingQuestion({
                           </span>
                         </>
                       );
-                      boxClasses = "border-[#374151]/30 bg-[#374151]/5";
+                      boxClasses = "border-red-500 bg-red-50";
                     } else {
                       // 3. Missed: Gray text
                       content = (
-                        <span className="text-[#374151]/60 font-bold">
+                        <span className="text-gray-500 font-bold">
                           {correctAnswerText}
                         </span>
                       );
-                      boxClasses = "border-[#374151]/20 bg-gray-50"; // Changed diff: Lighter border
+                      boxClasses = "border-gray-400 bg-gray-100";
                     }
 
                     // 4. Return component with dashed border AND BACKGROUND COLOR
@@ -1099,13 +1099,30 @@ export function MatchingQuestion({
                             userAnswerOptionIndex !== undefined
                               ? answerOptions[userAnswerOptionIndex]?.optionText
                               : undefined;
-                          const correctAnswerText = item.correctAnswer;
+
+                          // Resolve correctAnswer to optionText: if it's a single letter (A-H), look up by index
+                          const rawCorrect = (item.correctAnswer || "").trim();
+                          const letterMatch = rawCorrect.match(/^[A-Z]$/i);
+                          const correctOptionIndex = letterMatch
+                            ? rawCorrect.toUpperCase().charCodeAt(0) - 65
+                            : answerOptions.findIndex(
+                                (o: any) =>
+                                  (o.optionText || "").trim().toLowerCase() ===
+                                  rawCorrect.toLowerCase()
+                              );
+                          const correctAnswerText =
+                            correctOptionIndex >= 0 &&
+                            correctOptionIndex < answerOptions.length
+                              ? answerOptions[correctOptionIndex]?.optionText ||
+                                rawCorrect
+                              : rawCorrect;
 
                           const userDidAnswer = userAnswerText !== undefined;
                           const isCorrect =
                             userDidAnswer &&
-                            userAnswerText.trim().toLowerCase() ===
-                            correctAnswerText.trim().toLowerCase();
+                            (Number(userAnswerOptionIndex) === correctOptionIndex ||
+                              userAnswerText.trim().toLowerCase() ===
+                                correctAnswerText.trim().toLowerCase());
 
                           return (
                             <div
@@ -1125,7 +1142,7 @@ export function MatchingQuestion({
                                   isCorrect
                                     ? "border-green-500 bg-green-50"
                                     : !userDidAnswer
-                                      ? "border-gray-400 bg-gray-50"
+                                      ? "border-gray-400 bg-gray-100"
                                       : "border-red-500 bg-red-50",
                                   shouldBeBold ? "font-bold" : "font-normal"
                                 )}
@@ -1348,13 +1365,30 @@ export function MatchingQuestion({
                         userAnswerOptionIndex !== undefined
                           ? answerOptions[userAnswerOptionIndex]?.optionText
                           : undefined;
-                      const correctAnswerText = item.correctAnswer;
+
+                      // Resolve correctAnswer to optionText: if it's a single letter (A-H), look up by index
+                      const rawCorrect = (item.correctAnswer || "").trim();
+                      const letterMatch = rawCorrect.match(/^[A-Z]$/i);
+                      const correctOptionIndex = letterMatch
+                        ? rawCorrect.toUpperCase().charCodeAt(0) - 65
+                        : answerOptions.findIndex(
+                            (o: any) =>
+                              (o.optionText || "").trim().toLowerCase() ===
+                              rawCorrect.toLowerCase()
+                          );
+                      const correctAnswerText =
+                        correctOptionIndex >= 0 &&
+                        correctOptionIndex < answerOptions.length
+                          ? answerOptions[correctOptionIndex]?.optionText ||
+                            rawCorrect
+                          : rawCorrect;
 
                       const userDidAnswer = userAnswerText !== undefined;
                       const isCorrect =
                         userDidAnswer &&
-                        userAnswerText.trim().toLowerCase() ===
-                        correctAnswerText.trim().toLowerCase();
+                        (Number(userAnswerOptionIndex) === correctOptionIndex ||
+                          userAnswerText.trim().toLowerCase() ===
+                            correctAnswerText.trim().toLowerCase());
 
                       return (
                         <div
@@ -1374,7 +1408,7 @@ export function MatchingQuestion({
                               isCorrect
                                 ? "border-green-500 bg-green-50"
                                 : !userDidAnswer
-                                  ? "border-gray-200 bg-gray-50"
+                                  ? "border-gray-400 bg-gray-100"
                                   : "border-red-500 bg-red-50"
                             )}
                           >

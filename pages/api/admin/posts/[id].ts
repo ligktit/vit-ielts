@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "PUT") {
         try {
-            const { title, slug, content, excerpt, featured_image, status, pro_user_only, categories, seo, views } = req.body;
+            const { title, slug, content, excerpt, featured_image, status, pro_user_only, categories, seo, views, votes } = req.body;
             const updateData: Record<string, unknown> = {};
             if (title !== undefined) updateData.title = title;
             if (slug !== undefined) updateData.slug = slug;
@@ -34,6 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (excerpt !== undefined) updateData.excerpt = excerpt;
             if (featured_image !== undefined) updateData.featured_image = featured_image;
             if (views !== undefined) updateData.views = views;
+            if (votes !== undefined) updateData.votes = votes;
             if (status !== undefined) {
                 updateData.status = status;
                 if (status === "published") updateData.published_at = new Date().toISOString();

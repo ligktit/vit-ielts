@@ -629,13 +629,13 @@ function ReviewExplanation({
       );
     }
     return (
-      <div className="mb-[-15px] flex flex-row gap-2 leading-[20px] border text-center border-dashed border-[#374151] bg-[#374151]/5 text-[#374151] p-2 py-[1px] rounded-md prose prose-sm max-w-none">
-        <div className="line-through">
+      <div className="mb-[-15px] flex flex-row gap-2 leading-[20px] border text-center border-dashed border-red-500 bg-red-50 p-2 py-[1px] rounded-md prose prose-sm max-w-none">
+        <div className="text-red-500 line-through font-bold">
           <TextSelectionWrapper>
             {normalizeParseResult(parse(cleanedUserAnswer))}
           </TextSelectionWrapper>
         </div>
-        <div className="text-green-600">
+        <div className="text-green-600 font-bold">
           <TextSelectionWrapper>
             {normalizeParseResult(parse(cleanedCorrectAnswer))}
           </TextSelectionWrapper>
@@ -695,25 +695,23 @@ function ReviewExplanation({
 
               if (isUserSelected) {
                   if (isCorrectOption) {
-                    rowBgClass = "bg-green-100 text-green-600";
-                    rowBorderClass = "border-green-300";
+                    rowBgClass = "bg-[#d9ead3] text-green-600 font-semibold";
                     icon = (
                       <span className="material-symbols-rounded text-green-600 ml-auto">
                         check_circle
                       </span>
                     );
                   } else {
-                    rowBgClass = "rounded bg-[#374151]/10 text-[#374151]";
-                    rowBorderClass = "border-[#374151]/30";
+                    rowBgClass = "bg-[#dbe5fa] text-red-600 font-semibold";
                     icon = (
-                      <span className="material-symbols-rounded text-[#374151] ml-auto">
+                      <span className="material-symbols-rounded text-red-600 ml-auto">
                         cancel
                       </span>
                     );
                   }
               } else {
                 if (isCorrectOption) {
-                  textClass = "text-green-600";
+                  textClass = "text-green-600 font-semibold";
                 }
               }
 
@@ -846,6 +844,7 @@ function ReviewExplanation({
   // ▲▲▲ KẾT THÚC newPost ▲▲▲
 
   const [currentPassageIndex, setCurrentPassageIndex] = useState(0);
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
 
   const currentPassage = useMemo(() => {
     if (!newPost?.quizFields?.passages || !Array.isArray(newPost.quizFields.passages)) {
@@ -1159,6 +1158,122 @@ function ReviewExplanation({
       if (nextIndex < newPost.quizFields.passages.length) {
         setCurrentPassageIndex(nextIndex);
       }
+    }
+  };
+
+  const parseMaxOptionsFromText = (text: string | undefined | null): number => {
+    if (!text) return 1;
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes("two") || lowerText.includes("2")) return 2;
+    if (lowerText.includes("three") || lowerText.includes("3")) return 3;
+    if (lowerText.includes("four") || lowerText.includes("4")) return 4;
+    if (lowerText.includes("five") || lowerText.includes("5")) return 5;
+    return 1;
+  };
+
+  const handleScrollToQuestion = (index: number) => {
+    setActiveQuestionIndex(index);
+    let element = document.getElementById(`#question-no-${index + 1}`);
+    let targetQuestion: any = null;
+    let elementToScrollTo: HTMLElement | null = null;
+
+    for (const p of (newPost?.quizFields?.passages ?? [])) {
+      if (!p.questions) continue;
+      for (const q of p.questions) {
+        if (q.startIndex !== undefined) {
+          const questionType = q.type?.[0];
+          let questionCount;
+
+          const isHeading = questionType === 'matching' &&
+            String(q.matchingQuestion?.layoutType).trim().toLowerCase() === 'heading';
+
+          if (isHeading && p.passage_content) {
+            let gapCount = 0;
+            (p.passage_content || "").replace(/\{(.*?)\}/g, () => { gapCount++; return ''; });
+            questionCount = gapCount > 0 ? gapCount : 1;
+          } else {
+            const isCheckbox = questionType === 'checkbox';
+
+            if (isCheckbox) {
+              const textToParse = `${q.instructions || ""} ${q.question || ""} ${q.title || ""}`;
+              questionCount = parseMaxOptionsFromText(textToParse);
+            } else {
+              questionCount = countQuestion({ questions: [q] });
+            }
+          }
+
+          if (isNaN(questionCount) || questionCount < 1) {
+            questionCount = 1;
+          }
+
+          if (index >= q.startIndex && index < q.startIndex + questionCount) {
+            targetQuestion = q;
+            break;
+          }
+        }
+      }
+      if (targetQuestion) break;
+    }
+
+    if (!element && targetQuestion) {
+      const qElementId = `#question-no-${(targetQuestion.startIndex ?? 0) + 1}`;
+      element = document.getElementById(qElementId);
+    }
+
+    document.querySelectorAll('.active-quizz').forEach(el => {
+      el.classList.remove('active-quizz');
+    });
+
+    const targetTypes = ["fillup", "radio", "select", "checkbox"];
+    const currentType = targetQuestion?.type?.[0];
+
+    if (currentType && targetTypes.includes(currentType) && targetQuestion && targetQuestion.startIndex !== undefined) {
+      const relativeIndex = index - targetQuestion.startIndex;
+
+      if (currentType === 'fillup') {
+        const inputElement = document.getElementById(`#question-no-${index + 1}`);
+        if (inputElement) {
+          inputElement.classList.add('active-quizz');
+          elementToScrollTo = inputElement;
+        }
+      } else if (currentType === 'radio' || currentType === 'checkbox') {
+        if (element) {
+          const allWrappers = element.querySelectorAll('.ant-checkbox-wrapper, .ant-radio-wrapper');
+          if (allWrappers && allWrappers.length > relativeIndex) {
+            const subQuestionElement = allWrappers[relativeIndex];
+            if (subQuestionElement) {
+              subQuestionElement.classList.add('active-quizz');
+              elementToScrollTo = subQuestionElement as HTMLElement;
+            }
+          }
+        }
+      } else if (currentType === 'select') {
+        if (element) {
+          const allSubQuestions = element.querySelectorAll('[id^="#question-no-"]');
+          if (allSubQuestions.length > relativeIndex) {
+            const selectWrapper = allSubQuestions[relativeIndex];
+            const titleElement = selectWrapper.previousElementSibling;
+            if (titleElement && (titleElement.tagName === 'P' || titleElement.tagName === 'DIV')) {
+              titleElement.classList.add('active-quizz');
+              elementToScrollTo = titleElement as HTMLElement;
+            } else {
+              elementToScrollTo = selectWrapper as HTMLElement;
+            }
+          }
+        }
+      }
+    }
+
+    if (elementToScrollTo) {
+      elementToScrollTo.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    } else {
+      element?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   };
 
@@ -1705,8 +1820,8 @@ function ReviewExplanation({
     setIsNotesViewOpen,
     selectedTextSize,
     setSelectedTextSize,
-    activeQuestionIndex: 0,
-    setActiveQuestionIndex: () => {},
+    activeQuestionIndex,
+    setActiveQuestionIndex,
     items: { available: [] as any[] },
     setItems: () => {},
     activeId: null,
@@ -1861,7 +1976,16 @@ function ReviewExplanation({
                                     return (
                                       <div key={qi} className="flex flex-col items-center gap-2 flex-shrink-0">
                                         <div className={twMerge("w-full h-[3px] rounded-sm", barClass)} />
-                                        <span className="text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded">
+                                        <span 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleScrollToQuestion(qi);
+                                          }}
+                                          className={twMerge(
+                                            "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[16px] border-2 border-transparent rounded cursor-pointer",
+                                            activeQuestionIndex === qi && "font-semibold border-2 border-[#418FC6]"
+                                          )}
+                                        >
                                           {qi + 1}
                                         </span>
                                       </div>

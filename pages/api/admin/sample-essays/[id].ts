@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         try {
             const body = req.body;
             const updateData: Record<string, unknown> = {};
-            const fields = ["title", "slug", "content", "excerpt", "skill", "part", "question_type", "quarter", "year", "source", "topic", "task", "passage", "featured_image", "pro_user_only", "seo"];
+            const fields = ["title", "slug", "content", "excerpt", "skill", "part", "question_type", "quarter", "year", "source", "topic", "task", "passage", "featured_image", "pro_user_only", "seo", "views", "votes"];
             fields.forEach((f) => { if (body[f] !== undefined) updateData[f] = body[f]; });
             if (body.status !== undefined) {
                 updateData.status = body.status;

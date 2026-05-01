@@ -123,8 +123,25 @@ const processMatchingQuestion = (
       const userAnswerText = (userChoiceIndex !== undefined && userChoiceIndex !== null && answerOptions[userChoiceIndex])
         ? answerOptions[userChoiceIndex].optionText
         : null;
-      const correctAnswerText = item.correctAnswer;
-      const isCorrect = userAnswerText?.trim().toLowerCase() === correctAnswerText?.trim().toLowerCase();
+
+      // Resolve correctAnswer: if stored as a single letter (A-Z), treat it as an option index reference
+      const rawCorrect = (item.correctAnswer || '').trim();
+      const letterMatch = /^[A-Z]$/i.test(rawCorrect);
+      const correctOptionIndex = letterMatch
+        ? rawCorrect.toUpperCase().charCodeAt(0) - 65
+        : answerOptions.findIndex(
+            (o: any) => (o.optionText || '').trim().toLowerCase() === rawCorrect.toLowerCase()
+          );
+      const correctAnswerText =
+        correctOptionIndex >= 0 && correctOptionIndex < answerOptions.length
+          ? answerOptions[correctOptionIndex]?.optionText || rawCorrect
+          : rawCorrect;
+
+      const isCorrect =
+        userAnswerText !== null &&
+        (Number(userChoiceIndex) === correctOptionIndex ||
+          userAnswerText.trim().toLowerCase() === correctAnswerText.trim().toLowerCase());
+
       if (isCorrect) correct++;
       else if (userAnswerText !== null) incorrect++;
       details.push({ correct: isCorrect, userAnswer: userAnswerText, answer: correctAnswerText });

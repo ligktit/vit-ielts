@@ -58,33 +58,43 @@ function AnswerKeys({
                       // Số thứ tự = số bắt đầu + index tuyệt đối
                       const questionNumber = startingQuestionNumber + absoluteFlatIndex;
 
+                      const isMissed = !q.userAnswer || String(q.userAnswer).trim() === "";
+                      const isCorrect = q.correct;
+                      const isIncorrect = !isCorrect && !isMissed;
+
+                      let circleColor = "";
+                      if (isCorrect) circleColor = "bg-[#2b9d58]";
+                      else if (isIncorrect) circleColor = "bg-[#e24a29]";
+                      else circleColor = "bg-[#6c757d]";
+
                       return (
-                        <div key={itemIndex} className="flex space-x-2 items-start">
+                        <div key={itemIndex} className="flex space-x-3 items-start">
                           <span
                             className={twMerge(
-                              "w-7 h-7 text-white rounded-full flex justify-center items-center shrink-0 font-semibold",
-                              q.correct ? "bg-green-600" : "bg-[#374151]" // Nền xanh/xám đậm
+                              "mt-0.5 w-[26px] h-[26px] text-white rounded-full flex justify-center items-center shrink-0 font-bold text-[13px]",
+                              circleColor
                             )}
                           >
                             {questionNumber}
                           </span>
-                          <div className="flex flex-wrap items-center gap-x-2">
-                            {/* Hiển thị câu trả lời của người dùng */}
-                            <p className={!q.correct && q.userAnswer ? "line-through text-[#374151]" : ""}>
-                              {q.userAnswer ? (
-                                parse(removeFillHistoryCorrectTags(q.userAnswer))
-                              ) : (
-                                <span className="text-[#374151]/60 font-semibold">
-                                  Missed
+                          <div className=" items-center gap-x-1.5 text-[15px] leading-relaxed">
+                            {isCorrect ? (
+                              <span className="text-[#2b9d58] font-medium [&_p]:inline [&_div]:inline">
+                                {parse(removeFillHistoryCorrectTags(q.userAnswer))}
+                              </span>
+                            ) : (
+                              <>
+                                <span className={twMerge(
+                                  "[&_p]:inline [&_div]:inline",
+                                  isMissed ? "text-[#a0a5ab] font-medium" : "text-[#e24a29] font-medium"
+                                )}>
+                                  {isMissed ? "Missed" : parse(removeFillHistoryCorrectTags(q.userAnswer))}
                                 </span>
-                              )}
-                            </p>
-
-                            {/* Nếu sai, hiển thị đáp án đúng */}
-                            {!q.correct && (
-                              <p className="font-semibold text-green-600">
-                                {parse(removeFillHistoryCorrectTags(q.answer))}
-                              </p>
+                                <span className="text-gray-300"> | </span>
+                                <span className="text-[#2b9d58] font-medium [&_p]:inline [&_div]:inline">
+                                  {parse(removeFillHistoryCorrectTags(q.answer))}
+                                </span>
+                              </>
                             )}
                           </div>
                         </div>

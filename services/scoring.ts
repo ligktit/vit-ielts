@@ -275,9 +275,18 @@ function scoreMatching(
 
             const optIdx = Number(userOptionIndex);
             const userText = getOptionText(optIdx);
-            const correctText = String(item.correctAnswer ?? item.correct_answer ?? "");
+            const rawCorrect = String(item.correctAnswer ?? item.correct_answer ?? "").trim();
 
-            if (userText.trim().toLowerCase() === correctText.trim().toLowerCase()) {
+            // If correctAnswer is just a letter (A-Z), treat it as an option index reference
+            const letterMatch = /^[A-Z]$/i.test(rawCorrect);
+            const correctOptionIdx = letterMatch
+                ? rawCorrect.toUpperCase().charCodeAt(0) - 65
+                : -1;
+
+            if (
+                (correctOptionIdx >= 0 && optIdx === correctOptionIdx) ||
+                userText.trim().toLowerCase() === rawCorrect.toLowerCase()
+            ) {
                 correct++;
             }
         });
@@ -509,9 +518,13 @@ export function calculateScore(
     // UI lưu answers theo dạng "padded": mỗi sub-question chiếm 1 slot, riêng
     // matrix/matching/checkbox có dữ liệu ở slot đầu + (total-1) slot null.
     // Test fixtures (legacy) lưu "packed": mỗi câu chiếm đúng 1 slot.
-    // Ước lượng tổng số sub-question kỳ vọng để chọn stride đúng cho từng mode.
+    // Chọn mode bằng "khoảng cách": answers.length nào gần hơn — questionCount
+    // (packed) hay expectedSubSlots (padded). Tolerant với trailing nulls bị drop.
     const expectedSubSlots = estimateSubSlotCount(allQuestions);
-    const padded = safeAnswers.length >= expectedSubSlots && expectedSubSlots > 0;
+    const questionCount = allQuestions.length;
+    const distToPacked = Math.abs(safeAnswers.length - questionCount);
+    const distToPadded = Math.abs(safeAnswers.length - expectedSubSlots);
+    const padded = expectedSubSlots > 0 && distToPadded < distToPacked;
 
     for (const question of allQuestions) {
         const qType = question.type;

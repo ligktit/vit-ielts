@@ -87,8 +87,8 @@
   --admin-border-active: rgba(0, 0, 0, 0.15);
 
   --admin-text-primary: #1a1b2e;
-  --admin-text-secondary: #64748b;
-  --admin-text-muted: #94a3b8;
+  --admin-text-secondary: #334155;
+  --admin-text-muted: #64748b;
   --admin-text-inverse: #ffffff;
 
   --admin-glass-bg: rgba(255, 255, 255, 0.7);
@@ -251,7 +251,7 @@
   margin: 2px 8px;
   height: 40px;
   border-radius: var(--admin-radius-sm);
-  color: var(--admin-text-secondary);
+  color: var(--admin-text-primary);
   cursor: pointer;
   transition: all var(--admin-transition-fast);
   text-decoration: none;
@@ -294,7 +294,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.75;
+  opacity: 0.85;
   transition: opacity var(--admin-transition-fast);
 }
 
@@ -330,7 +330,7 @@
   margin: 2px 8px;
   height: 40px;
   border-radius: var(--admin-radius-sm);
-  color: var(--admin-text-secondary);
+  color: var(--admin-text-primary);
   cursor: pointer;
   transition: all var(--admin-transition-fast);
   font-size: 13.5px;

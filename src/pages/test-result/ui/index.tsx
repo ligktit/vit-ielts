@@ -48,10 +48,13 @@ export function PageTestResult({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const numericScore = useMemo(() => {
-    const parsedScore = Number(
-      testResult.testResultFields.score ?? scoreData.score,
-    );
-    return Number.isFinite(parsedScore) ? parsedScore : 0;
+    // Prefer live scoreData (recomputed each load) over potentially stale saved score
+    // to ensure that scoring fixes are reflected without requiring resubmission.
+    const liveScore = Number(scoreData.score);
+    if (Number.isFinite(liveScore) && liveScore > 0) return liveScore;
+    const savedScore = Number(testResult.testResultFields.score);
+    if (Number.isFinite(savedScore)) return savedScore;
+    return 0;
   }, [scoreData.score, testResult.testResultFields.score]);
 
   const timeSpent = useMemo(() => {

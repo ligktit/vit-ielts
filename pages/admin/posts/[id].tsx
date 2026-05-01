@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Form, Input, Select, Switch, Button, message, Spin, Popover, Space, Tag, InputNumber } from "antd";
-import { ArrowLeftOutlined, SaveOutlined, SendOutlined, GlobalOutlined, PictureOutlined, TagsOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, SaveOutlined, SendOutlined, GlobalOutlined, TagsOutlined, StarFilled } from "@ant-design/icons";
 import AdminLayout from "../_layout";
 import { useRouter } from "next/router";
 import { withAdmin } from "@/shared/hoc/withAdmin";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
 import BlogEditor from "@/features/admin-post/BlogEditor";
+import { ImageUpload } from "@/shared/ui/image-upload";
 
 const { TextArea } = Input;
 
@@ -18,6 +19,34 @@ function toSlug(title: string): string {
         .replace(/[^a-z0-9\s-]/g, "")
         .trim()
         .replace(/\s+/g, "-");
+}
+
+/**
+ * Generate a synthetic votes array that produces the desired average rating.
+ * Each vote has a fake user_id and a rate (1-5).
+ */
+function generateVotesArray(avgRating: number, count: number): { user_id: string; rate: number }[] {
+    if (count <= 0 || avgRating <= 0) return [];
+    const clampedRating = Math.min(5, Math.max(0, avgRating));
+    const votes: { user_id: string; rate: number }[] = [];
+    
+    if (count === 1) {
+        votes.push({ user_id: `admin-seed-0`, rate: Math.round(clampedRating) || 1 });
+        return votes;
+    }
+    
+    // Fill n-1 votes with rounded rating, adjust last to hit exact average
+    const baseRate = Math.round(clampedRating) || 1;
+    const targetSum = clampedRating * count;
+    const baseSum = baseRate * (count - 1);
+    let lastRate = Math.round(targetSum - baseSum);
+    lastRate = Math.min(5, Math.max(1, lastRate));
+
+    for (let i = 0; i < count - 1; i++) {
+        votes.push({ user_id: `admin-seed-${i}`, rate: baseRate });
+    }
+    votes.push({ user_id: `admin-seed-${count - 1}`, rate: lastRate });
+    return votes;
 }
 
 export default function AdminPostEditorPage() {
@@ -54,7 +83,6 @@ export default function AdminPostEditorPage() {
     const slug = Form.useWatch("slug", form);
     const seo_meta_title = Form.useWatch(["seo", "meta_title"], form);
     const seo_meta_description = Form.useWatch(["seo", "meta_description"], form);
-    const featured_image = Form.useWatch("featured_image", form);
 
     const displayTitle = seo_meta_title || title || "Your Blog Post Title";
     const displayDesc = seo_meta_description || "Meta description goes here...";
@@ -70,9 +98,16 @@ export default function AdminPostEditorPage() {
             const res = await fetch(`/api/admin/posts/${id}`);
             const json = await res.json();
             if (json.success) {
+                // Compute rating & vote_count from votes array for the UI
+                const votes = json.data.votes ?? [];
+                const voteCount = votes.length;
+                const avgRate = voteCount > 0 ? votes.reduce((s: number, v: any) => s + v.rate, 0) / voteCount : 0;
+
                 form.setFieldsValue({
                     ...json.data,
-                    seo: json.data.seo || {}
+                    seo: json.data.seo || {},
+                    _rating: Number(avgRate.toFixed(1)),
+                    _vote_count: voteCount,
                 });
             } else {
                 message.error("Lỗi khi tải bài viết");
@@ -91,11 +126,20 @@ export default function AdminPostEditorPage() {
             const currentStatus = form.getFieldValue("status");
             const finalStatus = targetStatus || currentStatus || "draft";
             
+            // Generate votes array from admin-set rating & vote_count
+            const rating = values._rating ?? 0;
+            const voteCount = values._vote_count ?? 0;
+            const votes = generateVotesArray(rating, voteCount);
+
+            // Remove UI-only fields before sending
+            const { _rating, _vote_count, ...rest } = values;
+
             const body = {
-                ...values,
+                ...rest,
                 pro_user_only: form.getFieldValue("pro_user_only") ?? false,
                 status: finalStatus,
-                seo: values.seo || {}
+                seo: values.seo || {},
+                votes,
             };
 
             const url = isNew ? "/api/admin/posts" : `/api/admin/posts/${id}`;
@@ -155,6 +199,8 @@ export default function AdminPostEditorPage() {
                     status: "draft", 
                     pro_user_only: false, 
                     views: 0,
+                    _rating: 0,
+                    _vote_count: 0,
                     categories: [],
                     seo: {} 
                 }}
@@ -222,6 +268,14 @@ export default function AdminPostEditorPage() {
                             <Form.Item name="views" label="Views">
                                 <InputNumber min={0} precision={0} style={{ width: "100%" }} />
                             </Form.Item>
+
+                            <Form.Item name="_rating" label={<span><StarFilled style={{ color: '#faad14', marginRight: 4 }} />Rating (0-5 sao)</span>}>
+                                <InputNumber min={0} max={5} step={0.1} precision={1} style={{ width: "100%" }} />
+                            </Form.Item>
+
+                            <Form.Item name="_vote_count" label="Số lượt vote">
+                                <InputNumber min={0} precision={0} style={{ width: "100%" }} />
+                            </Form.Item>
                             
                             <Form.Item name="pro_user_only" valuePropName="checked" className="mb-0">
                                 <Switch checkedChildren="ON" unCheckedChildren="OFF" />
@@ -274,18 +328,9 @@ export default function AdminPostEditorPage() {
                         </AdminGlassCard>
 
                         <AdminGlassCard title="Featured Image">
-                            <Form.Item name="featured_image" className="mb-4">
-                                <Input prefix={<PictureOutlined />} placeholder="Nhập URL hình ảnh..." />
+                            <Form.Item name="featured_image" className="mb-0">
+                                <ImageUpload />
                             </Form.Item>
-                            {featured_image ? (
-                                <div className="mt-2 rounded-lg overflow-hidden border border-dashed border-gray-600 relative pt-[56.25%] bg-black/20">
-                                    <img src={featured_image} alt="Featured preview" className="absolute top-0 left-0 w-full h-full object-cover" />
-                                </div>
-                            ) : (
-                                <div className="mt-2 rounded-lg border border-dashed border-gray-600 h-32 flex items-center justify-center text-gray-500 bg-black/20 text-sm">
-                                    Chưa có hình ảnh
-                                </div>
-                            )}
                         </AdminGlassCard>
                     </div>
                 </div>

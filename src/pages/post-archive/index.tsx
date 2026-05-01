@@ -18,7 +18,7 @@ function mapToIPost(post: Post) {
     title: post.title,
     excerpt: post.excerpt || "",
     content: post.content || "",
-    date: post.published_at || post.created_at,
+    date: post.published_at || post.created_at || "",
     hasAccess: true,
     featuredImage: post.featured_image
       ? {
@@ -27,7 +27,7 @@ function mapToIPost(post: Post) {
             altText: post.title,
           },
         }
-      : undefined,
+      : null,
     categories: {
       edges: (post.categories || []).map((cat: string) => ({
         node: {
@@ -71,6 +71,7 @@ export const getServerSideProps = async (
   return {
     props: {
       category: {
+        name: category,
         slug: category,
         link: `/${category.toLowerCase().replace(/\s+/g, "-")}`,
         seo: {

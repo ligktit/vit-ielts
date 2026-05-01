@@ -90,10 +90,23 @@ export type SingleSampleEssay = {
   title: string;
   date: string;
   skill?: string | null;
+  excerpt?: string;
   featuredImage?: {
     node: {
       sourceUrl: string;
       altText: string;
+    };
+  };
+  author?: {
+    node?: {
+      name?: string;
+      userData?: {
+        avatar?: {
+          node?: {
+            sourceUrl?: string;
+          };
+        };
+      };
     };
   };
   sampleEssayFields: {

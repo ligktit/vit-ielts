@@ -33,6 +33,7 @@ interface AffiliateUser {
   customLink?: string;
   emailNotifications: boolean;
   commissionRate?: number;
+  commission_rate?: number;
 }
 
 interface AffiliateLink {
@@ -591,7 +592,7 @@ export const PageAffiliate = () => {
               <Card>
                 <Statistic
                   title="Tỷ lệ hoa hồng"
-                  value={affiliate?.commissionRate ? affiliate.commissionRate * 100 : 20}
+                  value={affiliate?.commission_rate !== undefined ? affiliate.commission_rate * 100 : 20}
                   suffix="%"
                 />
               </Card>
@@ -867,7 +868,7 @@ export const PageAffiliate = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Mức hoa hồng:</span>
                 <span className="font-bold text-blue-600">
-                  {affiliate.commissionRate || 20}%
+                  {affiliate?.commission_rate !== undefined ? affiliate.commission_rate * 100 : 20}%
                 </span>
               </div>
               <div className="flex justify-between">

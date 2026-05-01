@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 quarter: body.quarter, year: body.year, source: body.source,
                 topic: body.topic, task: body.task, passage: body.passage,
                 featured_image: body.featured_image, status: body.status || "draft",
-                pro_user_only: body.pro_user_only || false, views: 0, votes: [], seo: body.seo || {},
+                pro_user_only: body.pro_user_only || false, views: typeof body.views === "number" ? body.views : 0, votes: Array.isArray(body.votes) ? body.votes : [], seo: body.seo || {},
                 published_at: body.status === "published" ? new Date().toISOString() : null,
             }).select().single();
             if (error) throw error;

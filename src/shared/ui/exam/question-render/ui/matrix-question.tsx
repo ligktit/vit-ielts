@@ -109,8 +109,8 @@ export const MatrixQuestion = ({
   );
 
   const StaticQuestionGridJSX = (
-    <div className="border px-[16px] py-[36px]">
-      <table className="w-full border-collapse text-black text-[15px]">
+    <div className="border px-[16px] py-[36px] overflow-x-auto matrixboard">
+      <table className="w-full border-collapse text-black text-[15px] min-w-max">
         <thead>
           <tr>
             <th className="w-[50px] border-b-2 border-black"></th>
@@ -147,18 +147,16 @@ export const MatrixQuestion = ({
                   let cellBgClass = "";
 
                   if (isCorrectAnswer) {
-                    if (isUserCorrect) {
-                      cellContent = <span className="material-symbols-rounded text-green-500">check_circle</span>;
-                      cellBgClass = "bg-green-100";
-                    } else if (!userDidAnswer) {
-                      cellContent = <span className="material-symbols-rounded text-[#374151]/40">check_circle</span>;
-                      cellBgClass = "bg-[#374151]/5";
+                    if (!userDidAnswer) {
+                      cellContent = <span className="material-symbols-rounded text-gray-500">check_circle</span>;
+                      cellBgClass = "bg-gray-100";
                     } else {
                       cellContent = <span className="material-symbols-rounded text-green-500">check_circle</span>;
+                      cellBgClass = "bg-green-100";
                     }
                   } else if (isUserAnswer) {
-                    cellContent = <span className="material-symbols-rounded text-[#374151]">cancel</span>;
-                    cellBgClass = "bg-[#374151]/10";
+                    cellContent = <span className="material-symbols-rounded text-red-500">cancel</span>;
+                    cellBgClass = "bg-red-100";
                   }
 
                   return (
@@ -325,11 +323,16 @@ export const MatrixQuestion = ({
         {InstructionsTextOnly}
 
         {/* Row 2: Media + Table Side-by-Side */}
-        <div className="flex flex-col lg:flex-row items-start gap-8">
-          <div className="w-fit max-w-[50%] shrink-0">
+        <div className={twMerge(
+          "flex items-start",
+          readOnly ? "flex-row flex-nowrap gap-4 w-full" : "flex-col lg:flex-row gap-8"
+        )}>
+          <div className={twMerge(
+            readOnly ? "w-[40%] shrink-0 [&_img]:max-w-full [&_img]:h-auto [&_img]:object-contain" : "w-fit max-w-[50%] shrink-0"
+          )}>
             {MediaOnly}
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 w-full">
             {MatrixTableContent}
           </div>
         </div>

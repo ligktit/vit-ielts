@@ -6,10 +6,63 @@ import { createServerSupabase } from "~supabase/server";
 import { getSampleEssays, getSampleEssayBySlug, getRelatedSampleEssays } from "~services/sample-essay";
 import { readConfig } from "~services/cms-config";
 import type { SampleEssayBannerConfig } from "./ui/archive/types";
-import type { SampleEssayFilters } from "~services/types/database";
+import type { SampleEssayFilters, SampleEssay as SampleEssayDB } from "~services/types/database";
+import type { SingleSampleEssay } from "./api";
 import { isAdminRole } from "~lib/parseRoles";
 
 export * from "./ui";
+
+/**
+ * Transform Supabase SampleEssay (snake_case flat) → SingleSampleEssay (WordPress-legacy shape)
+ * so that the existing PageSingle UI component renders correctly.
+ */
+function transformSampleEssayToLegacy(essay: SampleEssayDB): SingleSampleEssay {
+  const seo = essay.seo as any ?? {};
+
+  return {
+    id: essay.id,
+    slug: essay.slug,
+    title: essay.title,
+    date: essay.published_at ?? essay.created_at ?? "",
+    skill: essay.skill,
+    content: essay.content ?? "",
+    excerpt: essay.excerpt ?? "",
+    featuredImage: essay.featured_image
+      ? {
+          node: {
+            sourceUrl: essay.featured_image,
+            altText: essay.title,
+          },
+        }
+      : null,
+    sampleEssayFields: {
+      quarter: [essay.quarter ?? "", essay.quarter ?? ""],
+    },
+    speakingSampleEssayFields: {
+      part: [essay.part ?? "", essay.part ?? ""],
+      questionType: [essay.question_type ?? ""],
+    },
+    writingSampleEssayFields: {
+      topic: [essay.topic ?? ""],
+      task: [essay.task ?? "", essay.task ?? ""],
+    },
+    postMeta: {
+      views: essay.views ?? 0,
+      proUserOnly: essay.pro_user_only ?? false,
+    },
+    seo: {
+      title: seo.meta_title ?? essay.title,
+      metaDesc: seo.meta_description ?? essay.excerpt ?? "",
+      breadcrumbs: [
+        { text: "Trang chủ", url: "/" },
+        { text: essay.skill === "writing" ? "Writing Sample" : essay.skill === "speaking" ? "Speaking Sample" : "Sample Essay", url: essay.skill === "writing" ? "/ielts-writing-sample" : essay.skill === "speaking" ? "/ielts-speaking-sample" : "/" },
+        { text: essay.title, url: `/${essay.slug}` },
+      ],
+      ...(seo || {}),
+    },
+    hasAccess: true,
+  };
+}
 
 /**
  * SSR for sample essay archive pages.
@@ -185,8 +238,9 @@ export const getServerSidePropsSingle = async (
 
   return {
     props: {
-      sampleEssay: essay,
+      sampleEssay: transformSampleEssayToLegacy(essay),
       relatedEssays: JSON.parse(JSON.stringify(relatedEssays)),
     },
   };
 };
+
