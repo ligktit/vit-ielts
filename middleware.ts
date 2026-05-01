@@ -54,7 +54,11 @@ export async function middleware(request: NextRequest) {
 
   // Errors here (e.g. user signed out elsewhere) are non-fatal — we just
   // pass through and let downstream auth checks redirect if needed.
-  await supabase.auth.getUser().catch(() => undefined);
+  // We MUST skip this on /auth/callback, otherwise getUser() will clear the
+  // PKCE code_verifier cookie before the client has a chance to exchange it!
+  if (!request.nextUrl.pathname.startsWith("/auth/callback")) {
+    await supabase.auth.getUser().catch(() => undefined);
+  }
 
   // ─── 2. Affiliate tracking ─────────────────────────────────────────────
   const ref = request.nextUrl.searchParams.get("ref");
