@@ -170,6 +170,10 @@ export const Header = () => {
           key: "3",
           label: <Link href={ROUTES.ACCOUNT.ORDER_HISTORY}>Order History</Link>,
         },
+        {
+          key: "affiliate",
+          label: <Link href={ROUTES.ACCOUNT.AFFILIATE}>Affiliate</Link>,
+        },
         ...(currentUser?.roles?.nodes?.[0]?.name === "administrator"
           ? [
             { type: "divider" as const },
@@ -364,6 +368,10 @@ export const Header = () => {
           {
             label: "Order History",
             href: ROUTES.ACCOUNT.ORDER_HISTORY,
+          },
+          {
+            label: "Affiliate",
+            href: ROUTES.ACCOUNT.AFFILIATE,
           },
           ...(currentUser?.roles?.nodes?.[0]?.name === "administrator"
             ? [
