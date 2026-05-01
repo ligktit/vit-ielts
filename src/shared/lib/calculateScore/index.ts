@@ -237,7 +237,7 @@ const processRadioQuestion = (
 
   subQuestions.forEach(subQ => {
     if (currentAnswerIndex >= answers.length) {
-      console.warn(`>>> [Radio] Cảnh báo: Thiếu câu trả lời cho sub-question tại index ${currentAnswerIndex}`);
+      // console.warn(`>>> [Radio] Cảnh báo: Thiếu câu trả lời cho sub-question tại index ${currentAnswerIndex}`);
       details.push({ correct: false, userAnswer: null, answer: subQ.options?.[subQ.correct ?? 0]?.content ?? 'N/A' });
       currentAnswerIndex++;
       return;
@@ -280,7 +280,7 @@ const processSelectQuestion = (
     const subQuestions = question.list_of_questions;
     subQuestions.forEach(subQ => {
       if (currentAnswerIndex >= answers.length) {
-        console.warn(`>>> [Select] Cảnh báo: Thiếu câu trả lời cho sub-question tại index ${currentAnswerIndex}`);
+        // console.warn(`>>> [Select] Cảnh báo: Thiếu câu trả lời cho sub-question tại index ${currentAnswerIndex}`);
         details.push({ correct: false, userAnswer: null, answer: subQ.options?.[subQ.correct ?? 0]?.content ?? 'N/A' });
         currentAnswerIndex++;
         return;
@@ -302,12 +302,12 @@ const processSelectQuestion = (
     });
     return { details, correct: correctCount, incorrect: incorrectCount, total: subQuestions.length, questionIndex: currentAnswerIndex };
   } else if (total === 0) {
-    console.warn(`>>> [Select] Cảnh báo: Không tìm thấy đáp án đúng dạng {} trong text câu hỏi.`);
+    // console.warn(`>>> [Select] Cảnh báo: Không tìm thấy đáp án đúng dạng {} trong text câu hỏi.`);
   }
 
   correctAnswersFromText.forEach(correctAnswerText => {
     if (currentAnswerIndex >= answers.length) {
-      console.warn(`>>> [Select] Cảnh báo: Thiếu câu trả lời cho select tại index ${currentAnswerIndex}`);
+      // console.warn(`>>> [Select] Cảnh báo: Thiếu câu trả lời cho select tại index ${currentAnswerIndex}`);
       details.push({ correct: false, userAnswer: null, answer: correctAnswerText });
       currentAnswerIndex++;
       return;
@@ -344,7 +344,7 @@ const processFillupQuestion = (
     const total = correctAnswersFromText.length;
     correctAnswersFromText.forEach(correctWordWithOptions => {
       if (currentAnswerIndex >= answers.length) {
-        console.warn(`>>> [Fillup-Text] Cảnh báo: Thiếu câu trả lời cho fillup tại index ${currentAnswerIndex}`);
+        // console.warn(`>>> [Fillup-Text] Cảnh báo: Thiếu câu trả lời cho fillup tại index ${currentAnswerIndex}`);
         details.push({ correct: false, userAnswer: null, answer: correctWordWithOptions.replace(/\|/g, ' / ') });
         currentAnswerIndex++;
         return;
@@ -375,12 +375,12 @@ const processFillupQuestion = (
     const total = correctAnswersFromExplanations.length;
 
     if (total === 0) {
-      console.warn(`>>> [Fillup-Exp] Cảnh báo: Không tìm thấy đáp án đúng trong explanations.`);
+      // console.warn(`>>> [Fillup-Exp] Cảnh báo: Không tìm thấy đáp án đúng trong explanations.`);
     }
 
     correctAnswersFromExplanations.forEach(exp => {
       if (currentAnswerIndex >= answers.length) {
-        console.warn(`>>> [Fillup-Exp] Cảnh báo: Thiếu câu trả lời cho fillup tại index ${currentAnswerIndex}`);
+        // console.warn(`>>> [Fillup-Exp] Cảnh báo: Thiếu câu trả lời cho fillup tại index ${currentAnswerIndex}`);
         details.push({ correct: false, userAnswer: null, answer: exp.content });
         currentAnswerIndex++;
         return;
@@ -418,7 +418,7 @@ const processCheckboxQuestion = (
 ): { details: QuestionDetail[]; correct: number; incorrect: number; total: number; questionIndex: number } => {
   const details: QuestionDetail[] = [];
   if (answerIndex >= answers.length) {
-    console.warn(`>>> [Checkbox] Cảnh báo: Thiếu câu trả lời cho checkbox tại answerIndex ${answerIndex}`);
+    // console.warn(`>>> [Checkbox] Cảnh báo: Thiếu câu trả lời cho checkbox tại answerIndex ${answerIndex}`);
     const correctOptions = question.list_of_options?.filter(opt => opt.correct) || [];
     const total = correctOptions.length || 1;
     details.push({
