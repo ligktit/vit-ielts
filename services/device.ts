@@ -65,7 +65,25 @@ export async function checkDevice(
     const devices: DeviceMap = profile?.devices ?? {};
     const entry = devices[deviceType];
 
-    if (!entry || entry.device_id !== deviceId) return false;
+    // If slot is empty, register the device automatically
+    if (!entry) {
+        devices[deviceType] = {
+            device_id: deviceId,
+            server_hash: createServerHash(options?.ip, options?.userAgent),
+        };
+        // Fire-and-forget: Supabase JS v2 builders are lazy thenables, so we
+        // MUST call .then() to actually trigger the request. Without it the
+        // update never fires and the device slot stays empty forever.
+        void supabase
+            .from("users")
+            .update({ devices })
+            .eq("id", user.id)
+            .then(() => undefined);
+        return true;
+    }
+
+    // If it doesn't match the existing device_id, return false (user logged in elsewhere)
+    if (entry.device_id !== deviceId) return false;
 
     // If server_hash is stored and server context is available, do secondary check
     if (entry.server_hash && options) {

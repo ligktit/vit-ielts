@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import { createAdminClient } from "~supabase/admin-client";
 import {
   DashboardOutlined,
@@ -421,14 +422,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <div key={item.key}>
                       {collapsed ? (
                         <Tooltip title={item.label} placement="right">
-                          <button
+                          <Link
+                            href={item.children?.[0]?.key || "#"}
                             className={`admin-submenu-trigger ${hasActive ? "open" : ""}`}
-                            onClick={() => {
-                              if (item.children?.[0]) handleNavigate(item.children[0].key);
-                            }}
+                            onClick={() => setMobileOpen(false)}
                           >
                             <span className="admin-menu-item-icon">{item.icon}</span>
-                          </button>
+                          </Link>
                         </Tooltip>
                       ) : (
                         <>
@@ -442,16 +442,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                           </button>
                           <div className={`admin-submenu-list ${isOpen ? "open" : ""}`}>
                             {item.children.map((child) => (
-                              <button
+                              <Link
                                 key={child.key}
+                                href={child.key}
                                 className={`admin-menu-item ${
                                   isItemActive(child.key, router.asPath) ? "active" : ""
                                 }`}
-                                onClick={() => handleNavigate(child.key)}
+                                onClick={() => setMobileOpen(false)}
                               >
                                 {child.icon && <span className="admin-menu-item-icon" style={{ fontSize: 14 }}>{child.icon}</span>}
                                 <span className="admin-menu-item-label">{child.label}</span>
-                              </button>
+                              </Link>
                             ))}
                           </div>
                         </>
@@ -465,25 +466,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 if (collapsed) {
                   return (
                     <Tooltip key={item.key} title={item.label} placement="right">
-                      <button
+                      <Link
+                        href={item.key}
                         className={`admin-menu-item ${isActive ? "active" : ""}`}
-                        onClick={() => handleNavigate(item.key)}
+                        onClick={() => setMobileOpen(false)}
                       >
                         <span className="admin-menu-item-icon">{item.icon}</span>
-                      </button>
+                      </Link>
                     </Tooltip>
                   );
                 }
 
                 return (
-                  <button
+                  <Link
                     key={item.key}
+                    href={item.key}
                     className={`admin-menu-item ${isActive ? "active" : ""}`}
-                    onClick={() => handleNavigate(item.key)}
+                    onClick={() => setMobileOpen(false)}
                   >
                     <span className="admin-menu-item-icon">{item.icon}</span>
                     <span className="admin-menu-item-label">{item.label}</span>
-                  </button>
+                  </Link>
                 );
               })}
             </div>

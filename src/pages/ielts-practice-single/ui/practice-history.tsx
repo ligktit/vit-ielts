@@ -28,7 +28,7 @@ export function PracticeHistoryWidget({ post }: { post: IPracticeSingle }) {
         const supabase = createClient();
         const { data } = await supabase
           .from("test_results")
-          .select("id, score, created_at, started_at, submitted_at, answers, test_part")
+          .select("id, score, created_at, submitted_at, answers, test_part")
           .eq("quiz_id", post.id)
           .eq("user_id", currentUser.id)
           .eq("status", "published")

@@ -74,10 +74,19 @@ export const QuizListing = ({
         }
 
         const quizIds = [...new Set(results.map((result: any) => result.quiz_id))];
+        // Select only columns that calculateScore actually needs. Avoid
+        // passages(*, questions(*)) — the SELECT * variant pulls every column
+        // including audio_start/audio_end/title/etc. and was hitting Postgres'
+        // 8s statement_timeout on prod. The slim version below cuts payload
+        // and per-row work without changing displayed data.
         const { data: quizzes } = await supabase
           .from("quizzes")
           .select(
-            "id, title, slug, skill, type, score_type, status, time_minutes, passages(*, questions(*))",
+            `id, title, slug, skill, type, score_type, status, time_minutes,
+             passages(content, sort_order,
+               questions(type, question_text, list_of_questions, list_of_options,
+                         matching_question, matrix_question, explanations, sort_order)
+             )`,
           )
           .in("id", quizIds)
           .eq("status", "published");
@@ -96,9 +105,9 @@ export const QuizListing = ({
                 id: result.id,
                 status: result.status === "published" ? "publish" : result.status,
                 testResultFields: {
-                  dateTaken: result.started_at
-                    ? String(dayjs(result.started_at).unix())
-                    : null,
+                  // test_results has no started_at column — use created_at as
+                  // the proxy for "when the user started the attempt".
+                  dateTaken: String(dayjs(result.created_at).unix()),
                   dateSubmitted: result.submitted_at
                     ? String(dayjs(result.submitted_at).unix())
                     : String(dayjs(result.created_at).unix()),

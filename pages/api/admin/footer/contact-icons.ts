@@ -1,20 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { createServerSupabase } from "~lib/supabase/server";
+import { supabaseAdmin } from "~supabase/admin";
+import { requireAdmin } from "~lib/admin-auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const supabase = createServerSupabase({ req, res } as any);
-
-  // Check auth
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-  if (authError || !user) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  const user = await requireAdmin(req, res);
+  if (!user) return;
 
   // Fetch current general_settings
-  const { data, error: fetchError } = await supabase
+  const { data, error: fetchError } = await supabaseAdmin
     .from("site_settings")
     .select("value")
     .eq("key", "general_settings")
@@ -44,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { facebook, zalo } = req.body;
     const newSettings = { ...currentSettings, facebook, zalo };
 
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await supabaseAdmin
       .from("site_settings")
       .upsert(
         { key: "general_settings", value: newSettings },

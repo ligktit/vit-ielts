@@ -17,6 +17,19 @@ import type { NextRequest } from "next/server";
 
 const AFFILIATE_COOKIE_NAME = "affiliate_ref";
 const COOKIE_MAX_AGE_DAYS = 30;
+// Hard cap on the auth-refresh round trip. If Supabase is slow / unreachable,
+// we'd rather pass through with a stale cookie than let the whole request
+// hang up to the Edge runtime's 25s timeout (MIDDLEWARE_INVOCATION_TIMEOUT).
+const AUTH_REFRESH_TIMEOUT_MS = 2000;
+
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  for (const cookie of request.cookies.getAll()) {
+    if (cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token")) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export async function middleware(request: NextRequest) {
   // Build the response we will eventually return. Both the affiliate logic
@@ -26,38 +39,48 @@ export async function middleware(request: NextRequest) {
   });
 
   // ─── 1. Refresh Supabase session ───────────────────────────────────────
-  // Calling getUser() forces @supabase/ssr to validate the access token
-  // and, if expired, swap in a fresh pair using the refresh token. The new
-  // cookies are written via setAll below.
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
+  // Skip entirely for anonymous visitors (no auth cookie) — there is nothing
+  // to refresh, and most traffic is anonymous. Also skip on /auth/callback,
+  // otherwise getUser/getSession would clear the PKCE code_verifier cookie
+  // before the client can exchange it.
+  const shouldRefresh =
+    hasSupabaseAuthCookie(request) &&
+    !request.nextUrl.pathname.startsWith("/auth/callback");
 
-  // Errors here (e.g. user signed out elsewhere) are non-fatal — we just
-  // pass through and let downstream auth checks redirect if needed.
-  // We MUST skip this on /auth/callback, otherwise getUser() will clear the
-  // PKCE code_verifier cookie before the client has a chance to exchange it!
-  if (!request.nextUrl.pathname.startsWith("/auth/callback")) {
-    await supabase.auth.getUser().catch(() => undefined);
+  if (shouldRefresh) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) => {
+              request.cookies.set(name, value);
+            });
+            response = NextResponse.next({
+              request: { headers: request.headers },
+            });
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options);
+            });
+          },
+        },
+      }
+    );
+
+    // Race the refresh against a short timeout so a slow/unreachable Supabase
+    // never blocks the response. On timeout we pass through with the existing
+    // (possibly soon-to-expire) cookies; downstream getServerSideProps will
+    // refresh again on its own.
+    await Promise.race([
+      supabase.auth.getSession().catch(() => undefined),
+      new Promise<void>((resolve) =>
+        setTimeout(resolve, AUTH_REFRESH_TIMEOUT_MS)
+      ),
+    ]);
   }
 
   // ─── 2. Affiliate tracking ─────────────────────────────────────────────
@@ -101,9 +124,12 @@ export const config = {
     /*
      * Run on every page request EXCEPT:
      * - api routes (they refresh their own session via createApiSupabase)
-     * - _next internals
+     * - _next internals — including _next/data (the JSON payload for client-side
+     *   navigation). Those requests still hit getServerSideProps, which runs
+     *   its own auth refresh via createServerSupabase, so refreshing in
+     *   middleware here is duplicate work that doubles Supabase auth load.
      * - static assets
      */
-    "/((?!api|_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|eot)$).*)",
+    "/((?!api|_next/static|_next/image|_next/data|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|eot)$).*)",
   ],
 };

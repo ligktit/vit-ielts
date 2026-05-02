@@ -163,9 +163,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       // SIGNED_IN fired on a tab whose SSR pageProps say "no viewer" —
       // happens when the user logs in in another tab. Reload so SSR data
       // matches the new session.
+      //
+      // Loop breaker: when SSR can't see the session for any reason
+      // (cookie chunking, statement timeout returning null masterData,
+      // middleware refresh failure), reloading does NOT fix hasViewer and
+      // the listener fires again on every reload — runaway hundreds of
+      // reloads. Cool down for 5s after each reload so we surface the
+      // problem instead of looping.
       if (event === "SIGNED_IN" && !hasViewer && session?.user) {
         if (typeof window === "undefined") return;
         if (isPublicAuthPath(window.location.pathname)) return;
+        const RELOAD_KEY = "_auth_signin_reload_at";
+        const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0);
+        if (Date.now() - last < 5000) return;
+        sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
         window.location.reload();
       }
     });

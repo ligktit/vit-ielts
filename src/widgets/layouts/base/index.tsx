@@ -4,6 +4,7 @@ import { Header } from "./ui/header";
 import { ClipboardEvent, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useDeviceID } from "@/shared/hooks";
 import { toast } from "react-toastify";
+import { checkDevice } from "~services/device";
 import { createClient } from "~supabase/client";
 
 const DeviceChecker = () => {
@@ -18,10 +19,7 @@ const DeviceChecker = () => {
     if (!deviceId || !isSignedIn) return;
     try {
       const supabase = createClient();
-      const { data: result } = await supabase.rpc("check_device", {
-        device_id: deviceId,
-        device_type: getDeviceType(),
-      });
+      const result = await checkDevice(supabase, deviceId, getDeviceType() as any);
       setData({ checkDevice: result });
     } catch (error) {
       console.error("CheckDevice Error:", error);
@@ -87,11 +85,12 @@ export const BaseLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <>
-      {/* ======================================================================== */}
-      {/* === BƯỚC 2: ĐẶT "THẰNG GÁC CỔNG" VÀO ĐÚNG CHỖ === */}
-      {/* === Nó sẽ chỉ chạy trên các trang đã đăng nhập, không còn gây lỗi ở trang redirect nữa === */}
-      {/* ======================================================================== */}
-      <DeviceChecker />
+      {/* DeviceChecker tạm tắt: legacy `users.devices` rows từ thời RPC
+          `check_device` đang chứa device_id không khớp với FingerprintJS
+          visitorId hiện tại, khiến mọi user cũ bị đá ra ngay khi login. Bật
+          lại sau khi migrate data và làm logic lenient (overwrite slot thay
+          vì kick out). */}
+      {/* <DeviceChecker /> */}
       {/* === SECTION: Header (Top Bar + Navigation) === */}
       <Header />
       {/* === SECTION: Main Content === */}
