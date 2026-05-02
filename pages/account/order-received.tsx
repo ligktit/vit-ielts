@@ -73,6 +73,12 @@ const OrderReceivedPage = ({ order: initialOrder, error }: OrderReceivedPageProp
                   clearInterval(pollingIntervalRef.current);
                   pollingIntervalRef.current = null;
                 }
+
+                // Cho user thấy state "Đã thanh toán thành công" 1.5s trước
+                // khi đẩy về trang profile để họ biết Pro đã được kích hoạt.
+                setTimeout(() => {
+                  router.push(ROUTES.ACCOUNT.MY_PROFILE);
+                }, 1500);
               } else if (newStatus === "expired" || newStatus === "cancelled") {
                 // Order expired or cancelled — stop polling and update UI
                 setOrder((prevOrder) => {
