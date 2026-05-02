@@ -131,7 +131,10 @@ const MENU_SECTIONS: MenuSection[] = [
       },
       {
         key: "cms-footer", icon: <GlobalOutlined />, label: "Footer",
-        children: [{ key: "/admin/footer/cta-banner", label: "CTA Banner" }],
+        children: [
+          { key: "/admin/footer/cta-banner", label: "CTA Banner" },
+          { key: "/admin/footer/contact-icons", label: "Contact Icons" },
+        ],
       },
       {
         key: "cms-account", icon: <UserOutlined />, label: "Account Pages",
@@ -197,6 +200,7 @@ const BREADCRUMB_MAP: Record<string, string> = {
   "/admin/media": "Media Library",
   "/admin/email-template": "Email Template",
   "/admin/contact": "Contact Config",
+  "/admin/footer/contact-icons": "Contact Icons",
 };
 
 // ═══ Helper: resolve breadcrumbs ═══
