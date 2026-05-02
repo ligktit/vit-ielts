@@ -38,32 +38,25 @@ interface SepayWebhookPayload {
 }
 
 // ============================================================
-// Signature Verification (Blocker #1)
+// Authorization (SePay "API Key" scheme)
 // ============================================================
 
 /**
- * Verify HMAC-SHA256 signature from Sepay webhook.
- * Uses timing-safe comparison to prevent timing attacks.
+ * SePay's "Api Key" auth scheme: it sends the secret directly in the
+ * Authorization header as `Apikey <SECRET>`. We compare against the
+ * configured secret with a timing-safe equality check.
+ *
+ * The earlier HMAC-SHA256 implementation never matched because
+ *   (a) SePay does not sign the body, and
+ *   (b) Next.js' default bodyParser meant we were HMAC-ing a
+ *       re-stringified object, not the original bytes.
  */
-function verifyWebhookSignature(
-  rawBody: string,
-  signature: string,
-  secret: string,
-): boolean {
-  const expected = crypto
-    .createHmac("sha256", secret)
-    .update(rawBody, "utf8")
-    .digest("hex");
-
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, "hex"),
-      Buffer.from(expected, "hex"),
-    );
-  } catch {
-    // Buffers of different lengths → signature is invalid
-    return false;
-  }
+function verifyApiKey(authHeader: string, secret: string): boolean {
+  const expected = `Apikey ${secret}`;
+  const a = Buffer.from(authHeader, "utf8");
+  const b = Buffer.from(expected, "utf8");
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 // ============================================================
@@ -87,16 +80,10 @@ export default async function handler(
     return res.status(500).json({ error: "Webhook misconfigured" });
   }
 
-  const signature =
-    (req.headers["x-sepay-signature"] as string) ||
-    (req.headers["authorization"] as string) ||
-    "";
+  const authHeader = (req.headers["authorization"] as string) || "";
 
-  const rawBody =
-    typeof req.body === "string" ? req.body : JSON.stringify(req.body);
-
-  if (!signature || !verifyWebhookSignature(rawBody, signature, webhookSecret)) {
-    log.error("[Sepay Webhook] Invalid or missing signature");
+  if (!verifyApiKey(authHeader, webhookSecret)) {
+    log.error("[Sepay Webhook] Invalid or missing Authorization header");
     return res.status(401).json({ error: "Invalid webhook signature" });
   }
 
