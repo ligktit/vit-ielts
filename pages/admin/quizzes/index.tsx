@@ -886,7 +886,6 @@ export default function AdminQuizzesPage() {
             title: "Title",
             dataIndex: "title",
             key: "title",
-            ellipsis: true,
             render: (title: string, record) => (
                 <a onClick={() => router.push(`/admin/quizzes/${record.id}`)} className="font-medium">
                     {title}

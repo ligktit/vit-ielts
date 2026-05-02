@@ -282,22 +282,22 @@ function QuizEditor({ quizId }: { quizId?: string }) {
             <div className="quiz-editor-page max-w-[1200px] mx-auto pb-20">
                 {/* ═══ STICKY TOP BAR ═══ */}
                 <div className="quiz-editor-topbar">
-                    <div className="flex items-center">
+                    <div className="quiz-editor-topbar-left">
                         <Button
                             icon={<ArrowLeftOutlined />}
                             onClick={() => router.push("/admin/quizzes")}
                             type="text"
-                            className="mr-2 text-gray-400 hover:text-gray-800"
+                            className="mr-2 text-gray-400 hover:text-gray-800 shrink-0"
                         />
-                        <div className="w-12 h-12 mr-4 flex items-center justify-center bg-gray-50 rounded-lg">
+                        <div className="w-12 h-12 mr-4 flex items-center justify-center bg-gray-50 rounded-lg shrink-0">
                             {currentSkill === "listening" ? (
                                 <img src="/assets/figma/icons/listen%201.svg" alt="Listening" className="w-8 h-8 opacity-70" />
                             ) : (
                                 <img src="/assets/figma/icons/reading-book%201.svg" alt="Reading" className="w-8 h-8 opacity-70" />
                             )}
                         </div>
-                        <div className="flex flex-col">
-                            <h1 className="text-2xl font-semibold m-0 text-gray-800">
+                        <div className="flex flex-col min-w-0 flex-1">
+                            <h1 className="text-2xl font-semibold m-0 text-gray-800" style={{ wordBreak: "break-word", lineHeight: 1.3 }}>
                                 {currentTitle || (isNew ? "Tạo Quiz mới" : "Chỉnh sửa Quiz")}
                                 {currentType && (
                                     <>
@@ -306,13 +306,13 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                                     </>
                                 )}
                                 {currentPro && (
-                                    <span className="bg-[#ff2a55] text-white font-semibold text-xs py-0.5 rounded px-1 ml-2 uppercase align-middle">
+                                    <span className="bg-[#ff2a55] text-white font-semibold text-xs py-0.5 rounded px-1 ml-2 uppercase align-middle whitespace-nowrap">
                                         Pro
                                     </span>
                                 )}
                             </h1>
                             {/* Meta statuses like published, dirty, last saved underneath title for utility */}
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 {currentStatus === "published" ? (
                                     <Tag color="green" bordered={false}>Đã xuất bản</Tag>
                                 ) : (
@@ -328,7 +328,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="quiz-editor-topbar-right">
                         {/* Always show Save as Primary per screenshot, with Save icon */}
                         <Button
                             type={isDirty || isNew ? "primary" : "default"}
@@ -416,6 +416,30 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                 .quiz-editor-topbar-left {
                     display: flex;
                     align-items: center;
+                    gap: 8px;
+                    min-width: 0;
+                    flex: 1;
+                }
+                .quiz-editor-topbar-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                }
+                @media (max-width: 768px) {
+                    .quiz-editor-topbar {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        padding: 12px 16px;
+                    }
+                    .quiz-editor-topbar-left {
+                        width: 100%;
+                    }
+                    .quiz-editor-topbar-right {
+                        width: 100%;
+                        justify-content: flex-end;
+                        margin-top: 8px;
+                    }
                 }
             `}</style>
         </AdminLayout>
