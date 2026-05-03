@@ -29,26 +29,18 @@ export const normalizeSectionBadge = (
   }
 
   const partStr = String(rawPart).toLowerCase().trim();
-  
-  // Extract number from string (e.g. "passage1" -> 1, "task-2" -> 2)
+
+  // Extract number from string (e.g. "passage1" -> 1, "task-2" -> 2).
+  // The new admin form (QuizEditorForm) saves 1-indexed values directly,
+  // so a stored "3" already means Passage 3 — do NOT shift by +1. The old
+  // 0-indexed shift (for legacy WordPress data) caused "Passage 3" in
+  // admin to render as "Passage 4" on the listing card.
   const numMatch = partStr.match(/\d+/);
   let num = numMatch ? parseInt(numMatch[0], 10) : 0;
-  
-  /**
-   * IMPORTANT: Handling legacy/CMS 0-indexing
-   * If the CMS outputs "0", "1", "2" to mean Part 1, Part 2, Part 3,
-   * we must shift it to 1-based indexing IF the raw string is just the number "0" or "1"
-   * and there isn't a string prefix that implies 1-based.
-   */
-  if (partStr === "0" || partStr === "1" || partStr === "2" || partStr === "3") {
-    // Usually 0-indexed in some arrays from DB
-    // e.g. "0" -> Part 1
-    num = parseInt(partStr, 10) + 1;
-  } else if (num === 0) {
-    num = 1; // Fallback
-  }
 
-  const colorIndex = (Math.min(Math.max(num, 1), 5)) as 1 | 2 | 3 | 4 | 5;
+  if (num < 1) num = 1; // 0 / missing / unparseable → Part 1
+
+  const colorIndex = (Math.min(num, 5)) as 1 | 2 | 3 | 4 | 5;
 
   return {
     label: `${prefix} ${num}`,
