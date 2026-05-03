@@ -1782,7 +1782,7 @@ function ReviewExplanation({
       !currentPassage.questions ||
       currentPassage.questions.length === 0
     ) {
-      return { partLabel: "", partNumber: 0, questionRange: "" };
+      return { partLabel: "", partNumber: 0, questionRange: "", customTitle: "" };
     }
     const partLabel =
       quiz.quizFields.skill[0] === "reading" ? "Passage" : "Part";
@@ -1796,8 +1796,15 @@ function ReviewExplanation({
       questionCountInPassage <= 1
         ? `${startQuestion}`
         : `${startQuestion}-${endQuestion}`;
-    return { partLabel, partNumber, questionRange };
-  }, [currentPassage, quiz.quizFields.skill]);
+    // Practice quizzes are single-passage extracts (e.g. just Passage 3 of an
+    // IELTS test), so the quiz's passages array has length 1 and partIndex is
+    // always 0 — that would render "Passage 1" no matter which passage the
+    // admin picked. Fall back to the per-passage title (admin types e.g.
+    // "Passage 3" when creating it), matching the take-the-test display.
+    const isPractice = quiz.quizFields.type?.[0] === "practice";
+    const customTitle = isPractice ? ((currentPassage as any).title ?? "") : "";
+    return { partLabel, partNumber, questionRange, customTitle };
+  }, [currentPassage, quiz.quizFields.skill, quiz.quizFields.type]);
 
   // Minimal ExamContext value for review mode (enables TextSelectionProvider + Notepad)
   const reviewExamContextValue = useMemo(() => ({
@@ -1934,7 +1941,7 @@ function ReviewExplanation({
                 <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
                   <div className="p-[16px]">
                     <div className="font-bold text-gray-800 text-base md:text-lg leading-tight">
-                      {passageInfo.partLabel} {passageInfo.partNumber}
+                      {passageInfo.customTitle || `${passageInfo.partLabel} ${passageInfo.partNumber}`}
                     </div>
                     <div className="text-[#000] text-base">
                       Read the text and answer questions {passageInfo.questionRange}
@@ -1950,6 +1957,10 @@ function ReviewExplanation({
                     {passages.map((passage: any, idx: number) => {
                       const isCurrent = idx === currentPassageIndex;
                       const info = passagesFooterInfo[idx] ?? { questions: [], total: 0, answered: 0 };
+                      const isPracticeFooter = quiz.quizFields.type?.[0] === "practice";
+                      const passageDisplayLabel =
+                        (isPracticeFooter && passage.title) ||
+                        `${passageLabel} ${((passage.originalPartIndex ?? idx) as number) + 1}`;
                       return (
                         <div
                           key={idx}
@@ -1961,7 +1972,7 @@ function ReviewExplanation({
                               <div className="flex items-center gap-[5px] h-full">
                                 <div className="flex items-center border-t-[3px] border-gray-200 pt-2">
                                   <span className="font-semibold text-[16px] text-[#000] whitespace-nowrap pl-[20px] pr-[30px]">
-                                    {passageLabel} {idx + 1}
+                                    {passageDisplayLabel}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1 overflow-x-auto py-1">
@@ -1997,7 +2008,7 @@ function ReviewExplanation({
                           ) : (
                             <div className="flex items-center gap-3 h-full w-full justify-center pt-[10px]">
                               <span className="pl-[20px] text-[16px] text-gray-700 whitespace-nowrap">
-                                {passageLabel} {idx + 1}
+                                {passageDisplayLabel}
                               </span>
                               <span className="text-[16px] text-gray-500 whitespace-nowrap">
                                 {info.answered} of {info.total}
