@@ -147,16 +147,35 @@ export async function getExamCollections(
     }
 
     // -----------------------------------------------------------------------
-    // Step 2: Find mock_tests containing those quizzes (DB-side JSONB filter)
-    // Uses RPC to avoid loading ALL mock_tests into memory
-    // Origin: WP_Query post_type=mock_test, meta_query OR practice_test_$_reading/listening
+    // Step 2: Find mock_tests containing those quizzes.
+    //
+    // Originally this called the `get_mock_tests_by_quiz_ids` RPC, which casts
+    // every reading_test_id / listening_test_id to UUID inside its WHERE
+    // clause. If any practice_tests entry has an empty-string id, the cast
+    // throws "invalid input syntax for type uuid" and the whole call fails
+    // — so a single malformed entry takes down the entire library page.
+    //
+    // The mock_tests table is small (a handful of rows), so we do the
+    // containment filter in JS instead. Empty / null ids simply don't match
+    // and the page keeps working.
     // -----------------------------------------------------------------------
-    const { data: filteredMockTests, error: mockError } = await supabase
-        .rpc("get_mock_tests_by_quiz_ids", { p_quiz_ids: matchedQuizIds });
+    const { data: allMockTests, error: mockError } = await supabase
+        .from("mock_tests")
+        .select("id, title, slug, practice_tests, created_at");
 
     if (mockError) throw mockError;
 
-    let filteredMockTestIds = (filteredMockTests ?? []).map((mt: MockTest) => mt.id);
+    const matchedQuizIdSet = new Set(matchedQuizIds);
+    const filteredMockTests: MockTest[] = ((allMockTests ?? []) as MockTest[]).filter((mt) =>
+        Array.isArray(mt.practice_tests) &&
+        mt.practice_tests.some(
+            (pt) =>
+                (pt?.reading_test_id && matchedQuizIdSet.has(pt.reading_test_id)) ||
+                (pt?.listening_test_id && matchedQuizIdSet.has(pt.listening_test_id))
+        )
+    );
+
+    let filteredMockTestIds = filteredMockTests.map((mt) => mt.id);
 
     if (filteredMockTestIds.length === 0) {
         return buildEmptyResponse(page, pageSize);
@@ -206,12 +225,18 @@ export async function getExamCollections(
                 (q) => q.id as string
             );
             if (matchingQuizIds.length > 0) {
-                const { data: mtFromQuiz } = await supabase.rpc(
-                    "get_mock_tests_by_quiz_ids",
-                    { p_quiz_ids: matchingQuizIds }
-                );
-                for (const mt of (mtFromQuiz ?? []) as MockTest[]) {
-                    wordMtIds.add(mt.id);
+                // JS filter (same reasoning as Step 2 — avoid the RPC's
+                // strict UUID cast on potentially dirty practice_tests).
+                const matchingQuizIdSet = new Set(matchingQuizIds);
+                for (const mt of filteredMockTests) {
+                    const has = mt.practice_tests?.some(
+                        (pt) =>
+                            (pt?.reading_test_id &&
+                                matchingQuizIdSet.has(pt.reading_test_id)) ||
+                            (pt?.listening_test_id &&
+                                matchingQuizIdSet.has(pt.listening_test_id))
+                    );
+                    if (has) wordMtIds.add(mt.id);
                 }
             }
 
