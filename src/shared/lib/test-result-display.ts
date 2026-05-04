@@ -350,7 +350,13 @@ export const formatResultLabel = ({
   answers?: unknown;
 }) => {
   if (isBandScoreDisplay({ quizType, scoreType })) {
-    return formatBandScore(storedScore ?? scoreResult?.score);
+    // Prefer the live recalculated score over a stored 0 — older test
+    // results were submitted with the broken practice-quiz scoring (every
+    // answer counted as missed) and saved score=0 to DB. Falling back to
+    // storedScore here would override the corrected client-side score.
+    const liveScore = Number(scoreResult?.score);
+    const liveValid = Number.isFinite(liveScore) && liveScore > 0;
+    return formatBandScore(liveValid ? liveScore : storedScore);
   }
 
   const normalizedAnswers = normalizeStoredAnswers(answers);

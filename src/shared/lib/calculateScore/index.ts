@@ -507,7 +507,17 @@ export const calculateScore = (
   }
   const validTestPart = Array.isArray(testPart) ? testPart : [];
 
-  let totalQuestions = 0; // Tổng số câu hỏi con (1, 2, 3... 40)
+  // `totalQuestions` doubles as the answer-array offset *and* the running
+  // question number for "Question X to Y" range labels. For practice quizzes
+  // that inherit a `start_question_number` from the parent full test
+  // (Passage 3 → 27..40), it gets shifted to 26 before that passage so the
+  // scorer reads answers from the right slots.
+  //
+  // `totalScored` tracks the actual count of scored questions, independent
+  // of any offset, so the band-score math and the returned `total_questions`
+  // stay correct (14 for a 14-question practice quiz, not 40).
+  let totalQuestions = 0;
+  let totalScored = 0;
   let correctCount = 0;
   let incorrectCount = 0;
   const details: Record<string, PassageScoreDetails> = {};
@@ -520,6 +530,16 @@ export const calculateScore = (
     const passageDetails: QuestionDetail[] = [];
     let passageTotalQuestions = 0;
     const originalPassageIndex = quizData.quizFields.passages.findIndex(p => p === passage);
+
+    const explicitStart = (passage as { start_question_number?: number | string | null })
+      .start_question_number;
+    const explicitStartNumber =
+      explicitStart != null && !isNaN(Number(explicitStart))
+        ? Number(explicitStart)
+        : null;
+    if (explicitStartNumber !== null && explicitStartNumber > 0) {
+      totalQuestions = explicitStartNumber - 1;
+    }
 
     const startQuestionIndex = totalQuestions + 1;
 
@@ -559,9 +579,12 @@ export const calculateScore = (
       passageDetails.push(...result.details);
 
       if (questionType === 'radio' || questionType === 'select' || questionType === 'fillup') {
+        const delta = result.questionIndex - totalQuestions;
         totalQuestions = result.questionIndex;
+        totalScored += delta;
       } else {
         totalQuestions += result.total;
+        totalScored += result.total;
       }
 
     }); // Kết thúc lặp qua questions
@@ -575,19 +598,19 @@ export const calculateScore = (
     };
   }); // Kết thúc lặp qua passages
 
-  const scoreValue = totalQuestions > 0 ? (correctCount / totalQuestions) * 9 : 0;
+  const scoreValue = totalScored > 0 ? (correctCount / totalScored) * 9 : 0;
   let roundedScore = roundIELTSScore(scoreValue).toFixed(1);
 
   // Use official IELTS band score lookup for full tests (40 questions)
   const quizType = Array.isArray(quizData.quizFields.type) ? quizData.quizFields.type[0] : quizData.quizFields.type;
   const skill = Array.isArray(quizData.quizFields.skill) ? quizData.quizFields.skill[0] : quizData.quizFields.skill;
 
-  if (isFullTestType(quizType) && totalQuestions === 40) {
+  if (isFullTestType(quizType) && totalScored === 40) {
     const bandScore = lookupBandScore(correctCount, skill, quizType);
     roundedScore = bandScore.toFixed(1);
   }
 
-  const missedCount = totalQuestions - correctCount - incorrectCount;
+  const missedCount = totalScored - correctCount - incorrectCount;
 
 
 
@@ -595,10 +618,10 @@ export const calculateScore = (
     score: roundedScore,
     details,
     correctAns: correctCount,
-    correctPercent: totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0,
+    correctPercent: totalScored > 0 ? Math.round((correctCount / totalScored) * 100) : 0,
     incorrect: incorrectCount,
     missed: missedCount < 0 ? 0 : missedCount,
-    total_questions: totalQuestions,
+    total_questions: totalScored,
   };
 
   return finalResult;
