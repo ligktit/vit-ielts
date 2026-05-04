@@ -102,9 +102,22 @@ export async function getExamCollections(
     const page = filters.page || 1;
     const pageSize = Math.min(filters.pageSize || 10, 100);
 
+    // Split the search input into words so "test 28" matches "Cam 19 Test 28"
+    // even if the words appear non-contiguously. Each word must match SOMEWHERE
+    // (mock_test title, collection title, or contained quiz title) for the
+    // mock_test to qualify.
+    const searchWords = filters.search
+        ? filters.search
+              .split(/\s+/)
+              .map((w) => sanitizeFilterValue(w))
+              .filter((w) => w.length > 0)
+        : [];
+
     // -----------------------------------------------------------------------
-    // Step 1: Query quizzes matching filters (type != 'practice')
-    // Origin: WP_Query post_type=quiz, meta_query type != practice
+    // Step 1: Query quizzes matching `type` + `questionForm`. The `search`
+    // filter is applied separately below — searching only quiz.title misses
+    // the case where the user types "28" looking for the mock test "Test 28"
+    // (whose name lives on mock_tests.title, not on the inner quizzes).
     // -----------------------------------------------------------------------
     let quizQuery = supabase
         .from("quizzes")
@@ -114,9 +127,6 @@ export async function getExamCollections(
 
     if (filters.type) {
         quizQuery = quizQuery.eq("type", filters.type);
-    }
-    if (filters.search) {
-        quizQuery = quizQuery.ilike("title", `%${sanitizeFilterValue(filters.search)}%`);
     }
     if (filters.questionForm) {
         // questionForm is comma-separated in DB; use ilike for partial match
@@ -131,7 +141,7 @@ export async function getExamCollections(
 
     const matchedQuizIds = (matchedQuizzes ?? []).map((q) => q.id as string);
 
-    // No matching quizzes → empty response
+    // No matching quizzes (after type/questionForm) → empty response
     if (matchedQuizIds.length === 0) {
         return buildEmptyResponse(page, pageSize);
     }
@@ -146,10 +156,121 @@ export async function getExamCollections(
 
     if (mockError) throw mockError;
 
-    const filteredMockTestIds = (filteredMockTests ?? []).map((mt: MockTest) => mt.id);
+    let filteredMockTestIds = (filteredMockTests ?? []).map((mt: MockTest) => mt.id);
 
     if (filteredMockTestIds.length === 0) {
         return buildEmptyResponse(page, pageSize);
+    }
+
+    // -----------------------------------------------------------------------
+    // Step 2.5: Apply the `search` filter across three title sources so the
+    // user can find a test by typing what they actually see on screen:
+    //   • mock_tests.title — e.g. "Cam 19 Test 3"
+    //   • mock_test_collections.title — e.g. "[PREMIUM] Bộ Đề Thi Máy 2026"
+    //   • quizzes.title — e.g. "Reading Passage 1: ..."
+    // For a mock_test to qualify, EVERY word in the search must hit at least
+    // one of those sources (so "test 28" finds "Cam 19 Test 28" even though
+    // the title doesn't contain the substring "test 28" verbatim).
+    // -----------------------------------------------------------------------
+    if (searchWords.length > 0) {
+        const idsPerWord: Set<string>[] = [];
+
+        for (const word of searchWords) {
+            const pattern = `%${word}%`;
+            const wordMtIds = new Set<string>();
+
+            const [mtByTitle, collByTitle, quizByTitle] = await Promise.all([
+                supabase.from("mock_tests").select("id").ilike("title", pattern),
+                supabase
+                    .from("mock_test_collections")
+                    .select("mock_test_ids")
+                    .ilike("title", pattern),
+                supabase
+                    .from("quizzes")
+                    .select("id")
+                    .eq("status", "published")
+                    .neq("type", "practice")
+                    .ilike("title", pattern)
+                    .in("id", matchedQuizIds),
+            ]);
+
+            for (const row of mtByTitle.data ?? []) {
+                if (row.id) wordMtIds.add(row.id as string);
+            }
+            for (const row of collByTitle.data ?? []) {
+                for (const id of (row as any).mock_test_ids ?? []) {
+                    if (id) wordMtIds.add(id as string);
+                }
+            }
+            const matchingQuizIds = (quizByTitle.data ?? []).map(
+                (q) => q.id as string
+            );
+            if (matchingQuizIds.length > 0) {
+                const { data: mtFromQuiz } = await supabase.rpc(
+                    "get_mock_tests_by_quiz_ids",
+                    { p_quiz_ids: matchingQuizIds }
+                );
+                for (const mt of (mtFromQuiz ?? []) as MockTest[]) {
+                    wordMtIds.add(mt.id);
+                }
+            }
+
+            // Range expansion: if the word is purely numeric, also match
+            // titles that describe a range and contain the number — e.g.
+            // "(Test 21-40)" should match the search "28" because 28 falls
+            // inside [21, 40]. Without this, users searching by test number
+            // get nothing because individual tests aren't stored as their
+            // own row; they're entries inside a mock_test's practice_tests
+            // JSONB.
+            const wordNumber = /^\d+$/.test(word) ? parseInt(word, 10) : null;
+            if (wordNumber !== null) {
+                const [allMt, allColl] = await Promise.all([
+                    supabase.from("mock_tests").select("id, title"),
+                    supabase
+                        .from("mock_test_collections")
+                        .select("mock_test_ids, title"),
+                ]);
+                const rangeRegex = /(\d+)\s*[-–—]\s*(\d+)/g;
+                const numberInAnyRange = (title: string): boolean => {
+                    for (const m of title.matchAll(rangeRegex)) {
+                        const lo = Math.min(parseInt(m[1], 10), parseInt(m[2], 10));
+                        const hi = Math.max(parseInt(m[1], 10), parseInt(m[2], 10));
+                        if (wordNumber >= lo && wordNumber <= hi) return true;
+                    }
+                    return false;
+                };
+                for (const mt of allMt.data ?? []) {
+                    if (numberInAnyRange(String((mt as any).title || ""))) {
+                        wordMtIds.add(mt.id as string);
+                    }
+                }
+                for (const coll of allColl.data ?? []) {
+                    if (numberInAnyRange(String((coll as any).title || ""))) {
+                        for (const id of (coll as any).mock_test_ids ?? []) {
+                            if (id) wordMtIds.add(id as string);
+                        }
+                    }
+                }
+            }
+
+            idsPerWord.push(wordMtIds);
+        }
+
+        // Intersect across all words: every word must match somewhere.
+        const qualifyingMtIds = idsPerWord.reduce(
+            (acc, set) => new Set([...acc].filter((id) => set.has(id))),
+            idsPerWord[0]
+        );
+
+        // Intersect with the type/questionForm-filtered mock_test set so the
+        // search respects the other filters (user picked academic+listening).
+        filteredMockTestIds = filteredMockTestIds.filter((id) =>
+            qualifyingMtIds.has(id)
+        );
+
+        if (filteredMockTestIds.length === 0) {
+            return buildEmptyResponse(page, pageSize);
+        }
     }
 
     // -----------------------------------------------------------------------

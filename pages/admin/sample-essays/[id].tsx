@@ -275,10 +275,12 @@ export default function AdminSampleEssayEditorPage() {
                                 <InputNumber min={0} precision={0} style={{ width: "100%" }} />
                             </Form.Item>
                             
-                            <Form.Item name="pro_user_only" valuePropName="checked" className="mb-0">
-                                <Switch checkedChildren="ON" unCheckedChildren="OFF" />
-                                <span style={{ marginLeft: 8 }}>Chỉ dành cho Pro User</span>
-                            </Form.Item>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="mb-0">
+                                <Form.Item name="pro_user_only" valuePropName="checked" noStyle>
+                                    <Switch checkedChildren="ON" unCheckedChildren="OFF" />
+                                </Form.Item>
+                                <span>Chỉ dành cho Pro User</span>
+                            </div>
                         </AdminGlassCard>
 
                         <AdminGlassCard title="Featured Image">
