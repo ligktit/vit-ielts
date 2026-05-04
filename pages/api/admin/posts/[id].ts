@@ -3,6 +3,14 @@ import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
 import { logActivity, getClientIP } from "~services/activity-log";
 
+// Editor pastes images as base64 data URLs which inflate the JSON body
+// well past Next.js' 1MB default. Bump the limit so the update can complete.
+export const config = {
+    api: {
+        bodyParser: { sizeLimit: "20mb" },
+    },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = await requireAdmin(req, res);
     if (!user) return;
@@ -46,7 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { data, error } = await supabaseAdmin.from("posts").update(updateData).eq("id", id).select().single();
             if (error) throw error;
 
-            await logActivity(supabaseAdmin, {
+            // Fire-and-forget: don't make the user wait for activity logging.
+            void logActivity(supabaseAdmin, {
                 userId: user.id,
                 userEmail: user.email ?? undefined,
                 action: status === "published" ? "publish" : "update",
@@ -54,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 entityId: id,
                 entityTitle: title || data?.title,
                 ipAddress: getClientIP(req),
-            });
+            }).catch(() => undefined);
 
             return res.status(200).json({ success: true, data });
         } catch (error) {

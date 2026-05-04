@@ -2,6 +2,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
 
+// Editor pastes images as base64 data URLs which inflate the JSON body
+// well past Next.js' 1MB default. Bump the limit so the save can complete.
+export const config = {
+    api: {
+        bodyParser: { sizeLimit: "20mb" },
+    },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = await requireAdmin(req, res);
     if (!user) return;
@@ -14,7 +22,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const from = (pageNum - 1) * size;
             const to = from + size - 1;
 
-            let query = supabaseAdmin.from("sample_essays").select("*", { count: "exact" });
+            // Slim listing select — admin table only renders title/skill/part/
+            // status/pro/views/created_at, so skipping the heavy `content`
+            // (HTML, often with base64 images) cuts the response from MB to
+            // KB and makes the list page snappy again.
+            let query = supabaseAdmin
+                .from("sample_essays")
+                .select(
+                    "id, title, slug, skill, part, question_type, quarter, year, source, topic, task, featured_image, status, pro_user_only, views, votes, published_at, created_at",
+                    { count: "exact" },
+                );
             if (search && typeof search === "string") query = query.ilike("title", `%${search}%`);
             if (status && typeof status === "string") query = query.eq("status", status);
             if (skill && typeof skill === "string") query = query.eq("skill", skill);

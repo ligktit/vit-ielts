@@ -4,6 +4,14 @@ import { createQuiz } from "~services/quiz";
 import { requireAdmin } from "~lib/admin-auth";
 import { logActivity, getClientIP } from "~services/activity-log";
 
+// Quiz payload includes nested passages + questions with rich HTML content
+// (and sometimes pasted base64 images). Bump past Next.js' 1MB default.
+export const config = {
+    api: {
+        bodyParser: { sizeLimit: "20mb" },
+    },
+};
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
@@ -57,7 +65,7 @@ export default async function handler(
             const input = req.body;
             const quiz = await createQuiz(supabaseAdmin, input);
 
-            await logActivity(supabaseAdmin, {
+            void logActivity(supabaseAdmin, {
                 userId: user.id,
                 userEmail: user.email ?? undefined,
                 action: "create",
@@ -66,7 +74,7 @@ export default async function handler(
                 entityTitle: input.title,
                 metadata: { skill: input.skill, type: input.type },
                 ipAddress: getClientIP(req),
-            });
+            }).catch(() => undefined);
 
             return res.status(200).json({ success: true, data: quiz });
         } catch (error) {

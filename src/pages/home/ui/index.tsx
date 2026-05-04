@@ -65,12 +65,14 @@ export const PageHome = ({
 
       {/* === SECTION: Practice Tests Carousel === */}
       <div data-section="practice-tests" className="w-full bg-white flex flex-col gap-8 pb-10 pt-4 px-4 sm:px-6">
-        <PracticeSection
+        {/* Tạm ẩn section "IELTS Online Test" ở trang chủ — bật lại bằng cách
+            uncomment khối PracticeSection bên dưới. */}
+        {/* <PracticeSection
           title="IELTS Online Test"
           viewMoreLink={ROUTES.EXAM.ARCHIVE}
           items={examQuizzes}
           useExamModal={true}
-        />
+        /> */}
 
         {/* === SECTION: Mock Collections (bộ đề thi thử) === */}
         <MockCollectionSection collections={mockCollections} />

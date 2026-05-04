@@ -205,11 +205,11 @@ function Header({ post }: { post: IPracticeSingle }) {
 
                   <div className="flex items-center">
                     <span className={`font-medium text-sm ${timer && timer.asSeconds() < 0 ? 'text-gray-400' : 'text-dark'}`}>
-                      {timer ? (
-                        timer.asSeconds() < 0
+                      {Number(post.quizFields.time) < 0
+                        ? "No time limit"
+                        : timer
                           ? `${Math.ceil(timer.asSeconds() / 60)} minutes remaining`
-                          : `${Math.ceil(timer.asSeconds() / 60)} minutes remaining`
-                      ) : "0 minutes remaining"}
+                          : "0 minutes remaining"}
                     </span>
                   </div>
                 </div>

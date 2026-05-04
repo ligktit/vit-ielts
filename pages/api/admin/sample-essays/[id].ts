@@ -2,6 +2,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
 
+// Editor pastes images as base64 data URLs which inflate the JSON body
+// well past Next.js' 1MB default. Bump the limit so the update can complete.
+export const config = {
+    api: {
+        bodyParser: { sizeLimit: "20mb" },
+    },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = await requireAdmin(req, res);
     if (!user) return;

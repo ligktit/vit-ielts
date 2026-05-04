@@ -41,7 +41,9 @@ export const SendEmailSchema = z.object({
 export const StartTestSchema = z.object({
     quizId: z.string().uuid(),
     testPart: z.array(z.number().int().min(0)).optional(),
-    testTime: z.number().int().min(0).optional(),
+    // -1 is the "No limit" sentinel from the practice mode picker —
+    // downstream timer treats negative test_time as "no countdown".
+    testTime: z.number().int().optional(),
     testMode: z.string().optional(),
     retake: z.boolean().optional(),
 });

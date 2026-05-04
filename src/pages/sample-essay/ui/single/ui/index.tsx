@@ -19,6 +19,7 @@ import type { SampleEssay } from "~services/types/database";
 import { Splide, SplideSlide, SplideTrack } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css/core";
 import type { Splide as SplideType } from "@splidejs/splide";
+import { useAuth } from "@/appx/providers";
 
 export const PageSingle = ({
   sampleEssay: post,
@@ -39,6 +40,8 @@ export const PageSingle = ({
   const fallbackImage = useContentImageFallback();
   const splideRef = useRef<any>(null);
   const [copied, setCopied] = useState(false);
+  const { currentUser } = useAuth();
+  const viewerIsPro = Boolean(currentUser?.userData?.isPro);
 
   const handleCopyLink = () => {
     const url = window.location.href;
@@ -321,27 +324,29 @@ export const PageSingle = ({
                 }}
               >
                 <SplideTrack>
-                  {relatedEssays.slice(0, 8).map((essay) => (
-                    <SplideSlide key={essay.id} className="pb-8 pt-[14px] px-1">
-                      <TestCard
-                        image={essay.featured_image ?? undefined}
-                        title={essay.title}
-                        skill={essay.skill as any}
-                        isPro={
-                          essay.pro_user_only ||
-                          (essay as any).proUserOnly ||
-                          false
-                        }
-                        isLocked={
-                          essay.pro_user_only ||
-                          (essay as any).proUserOnly ||
-                          false
-                        }
-                        href={ROUTES.SAMPLE_ESSAY.SINGLE(essay.slug)}
-                        actionText="Xem thêm"
-                      />
-                    </SplideSlide>
-                  ))}
+                  {relatedEssays.slice(0, 8).map((essay) => {
+                    const essayIsPro =
+                      essay.pro_user_only ||
+                      (essay as any).proUserOnly ||
+                      false;
+                    return (
+                      <SplideSlide key={essay.id} className="pb-8 pt-[14px] px-1">
+                        <TestCard
+                          image={essay.featured_image ?? undefined}
+                          title={essay.title}
+                          skill={essay.skill as any}
+                          isPro={essayIsPro}
+                          // Lock icon should reflect whether the *current viewer*
+                          // would be blocked, not just whether the content is
+                          // gated. Pro users with active access shouldn't see
+                          // a lock on related Pro essays.
+                          isLocked={essayIsPro && !viewerIsPro}
+                          href={ROUTES.SAMPLE_ESSAY.SINGLE(essay.slug)}
+                          actionText="Xem thêm"
+                        />
+                      </SplideSlide>
+                    );
+                  })}
                 </SplideTrack>
               </Splide>
 

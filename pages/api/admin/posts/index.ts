@@ -3,6 +3,14 @@ import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
 import { logActivity, getClientIP } from "~services/activity-log";
 
+// Editor pastes images as base64 data URLs which inflate the JSON body
+// well past Next.js' 1MB default. Bump the limit so the save can complete.
+export const config = {
+    api: {
+        bodyParser: { sizeLimit: "20mb" },
+    },
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = await requireAdmin(req, res);
     if (!user) return;
@@ -15,7 +23,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const from = (pageNum - 1) * size;
             const to = from + size - 1;
 
-            let query = supabaseAdmin.from("posts").select("*", { count: "exact" });
+            // Slim listing select — see sample-essays for rationale. Admin's
+            // post list table doesn't display `content`, so excluding the
+            // HTML body cuts the response size dramatically.
+            let query = supabaseAdmin
+                .from("posts")
+                .select(
+                    "id, title, slug, excerpt, featured_image, status, pro_user_only, views, votes, categories, published_at, created_at",
+                    { count: "exact" },
+                );
             if (search && typeof search === "string") query = query.ilike("title", `%${search}%`);
             if (status && typeof status === "string") query = query.eq("status", status);
             query = query.order("created_at", { ascending: false }).range(from, to);
@@ -40,7 +56,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }).select().single();
             if (error) throw error;
 
-            await logActivity(supabaseAdmin, {
+            // Fire-and-forget: don't make the user wait for activity logging
+            // before getting their save confirmation.
+            void logActivity(supabaseAdmin, {
                 userId: user.id,
                 userEmail: user.email ?? undefined,
                 action: "create",
@@ -48,7 +66,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 entityId: data?.id,
                 entityTitle: title,
                 ipAddress: getClientIP(req),
-            });
+            }).catch(() => undefined);
 
             return res.status(200).json({ success: true, data });
         } catch (error) {
