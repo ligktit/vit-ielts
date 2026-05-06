@@ -312,11 +312,10 @@ export const isFullTestQuizType = (quizType: string | null | undefined) =>
 
 const isBandScoreDisplay = ({
   quizType,
-  scoreType,
 }: {
   quizType: string | null | undefined;
   scoreType?: string | null;
-}) => scoreType === "band" || (scoreType == null && isFullTestQuizType(quizType));
+}) => isFullTestQuizType(quizType);
 
 export const getResultToneClassName = (
   quizType: string | null | undefined,

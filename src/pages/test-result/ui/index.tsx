@@ -121,7 +121,6 @@ export function PageTestResult({
   };
 
   const isBandResult =
-    scoreType === "band" ||
     quizType === "exam" ||
     quizType === "academic" ||
     quizType === "general";
