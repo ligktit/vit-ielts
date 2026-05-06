@@ -10,10 +10,6 @@ import type { TestimonialsConfig, FAQConfig } from "@/shared/types/admin-config"
 import { useAppContext } from "@/appx/providers";
 import { useMemo } from "react";
 
-const AffiliateTracker = dynamic(
-  () => import("@/widgets/affiliate-tracker").then((mod) => mod.default),
-  { ssr: false }
-);
 
 import type { SubscriptionBannerConfig } from "@/shared/types/admin-config";
 
@@ -37,7 +33,6 @@ export const PageSubscription = ({ testimonialsConfig, faqConfig, bannerConfig }
 
   return (
     <>
-      <AffiliateTracker />
       {/* === SECTION: Subscription Banner === */}
       <HeroBanner
         title={bannerConfig.title || "Subscription"}

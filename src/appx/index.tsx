@@ -15,6 +15,12 @@ import { BProgress } from "@bprogress/core";
 
 
 dayjs.locale("vi");
+import dynamic from "next/dynamic";
+
+const AffiliateTracker = dynamic(
+  () => import("@/widgets/affiliate-tracker").then((mod) => mod.default),
+  { ssr: false }
+);
 
 import { unstableSetRender } from "antd";
 import { createRoot } from "react-dom/client";
@@ -141,6 +147,7 @@ export default function App({
               />
               <link rel="manifest" href="/site.webmanifest" />
             </Head>
+            <AffiliateTracker />
             <Component {...pageProps} />
             <ToastContainer
               position="top-right"

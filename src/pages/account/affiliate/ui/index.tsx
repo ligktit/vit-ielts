@@ -178,7 +178,7 @@ export const PageAffiliate = () => {
         if (visitsData.success) setVisits(visitsData.visits);
         if (bankData.success && bankData.bankInfo) {
           setBankInfo(bankData.bankInfo);
-          bankForm.setFielValue({
+          bankForm.setFieldsValue({
             accountHolder: bankData.bankInfo.account_holder,
             accountNumber: bankData.bankInfo.account_number,
             bankName: bankData.bankInfo.bank_name,
@@ -468,7 +468,18 @@ export const PageAffiliate = () => {
       title: "Link",
       dataIndex: "link_id",
       key: "link_id",
-      render: (linkId?: string) => linkId ? `Link ${linkId.substring(0, 8)}` : "-",
+      render: (linkId?: string) => {
+        if (!linkId) return "-";
+        const matchedLink = links.find((l) => l.id === linkId);
+        if (matchedLink) {
+          return matchedLink.customLink ? (
+            <Tag color="processing">ref={matchedLink.customLink}</Tag>
+          ) : (
+            <Tag color="default">Mặc định</Tag>
+          );
+        }
+        return `Link ${linkId.substring(0, 8)}`;
+      },
     },
     {
       title: "Thời gian",

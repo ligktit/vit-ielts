@@ -9,9 +9,12 @@ const AFFILIATE_COOKIE_EXPIRY_DAYS = 60;
 
 const AffiliateTracker = () => {
   const router = useRouter();
-  const { ref } = router.query;
 
   useEffect(() => {
+    // Parse directly from window.location for maximum reliability
+    const searchParams = new URLSearchParams(window.location.search);
+    const ref = searchParams.get("ref");
+
     if (ref && typeof ref === "string") {
       // Save affiliate ref to cookie
       Cookies.set(AFFILIATE_COOKIE_NAME, ref, {
@@ -22,7 +25,7 @@ const AffiliateTracker = () => {
       // Record visit
       recordVisit(ref);
     }
-  }, [ref]);
+  }, [router.asPath]); // Run when path/query changes
 
   const recordVisit = async (affiliateCode: string) => {
     try {
