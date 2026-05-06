@@ -228,21 +228,19 @@ export default function QuestionModal({ open, initialData, onCancel, onSave }: Q
                             label: "Question",
                             children: (
                                 <div className="space-y-4 pt-2">
-                                    <div>
+                                    {localData.type !== "fillup" && (
+                                        <div>
                                             <p className="font-medium mb-2">
                                                 Instructions <span className="text-gray-400 font-normal text-xs ml-1">(optional)</span>
                                             </p>
                                             <RichTextEditor
                                                 value={localData.instructions ?? ""}
                                                 onChange={(html) => handleUpdate("instructions", html)}
-                                                placeholder={
-                                                    localData.type === "fillup"
-                                                        ? "E.g. Complete the notes below. Choose NO MORE THAN TWO WORDS from the passage for each answer."
-                                                        : "E.g. Do the following statements agree with the information given in the reading passage?"
-                                                }
+                                                placeholder="E.g. Do the following statements agree with the information given in the reading passage?"
                                                 height={180}
                                             />
                                         </div>
+                                    )}
 
                                     {activeTemplate ? (
                                         <div>

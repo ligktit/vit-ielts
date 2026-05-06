@@ -73,18 +73,16 @@ function QuestionEditorInner({ question: q, onUpdate }: QuestionEditorProps) {
                 </Col>
             </Row>
 
-            <Form.Item label="Instructions">
-                <RichTextEditor
-                    value={q.instructions ?? ""}
-                    onChange={(html) => onUpdate("instructions", html)}
-                    placeholder={
-                        q.type === "fillup"
-                            ? "E.g. Complete the notes below. Choose NO MORE THAN TWO WORDS from the passage for each answer."
-                            : "Nhập hướng dẫn..."
-                    }
-                    height={160}
-                />
-            </Form.Item>
+            {q.type !== "fillup" && (
+                <Form.Item label="Instructions">
+                    <RichTextEditor
+                        value={q.instructions ?? ""}
+                        onChange={(html) => onUpdate("instructions", html)}
+                        placeholder="Nhập hướng dẫn..."
+                        height={160}
+                    />
+                </Form.Item>
+            )}
 
             <Form.Item label="Question Text">
                 <RichTextEditor
