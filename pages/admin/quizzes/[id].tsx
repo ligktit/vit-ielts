@@ -285,7 +285,13 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                     <div className="quiz-editor-topbar-left">
                         <Button
                             icon={<ArrowLeftOutlined />}
-                            onClick={() => router.push("/admin/quizzes")}
+                            onClick={() => {
+                                if (typeof window !== "undefined" && window.history.length > 1) {
+                                    router.back();
+                                } else {
+                                    router.push("/admin/quizzes");
+                                }
+                            }}
                             type="text"
                             className="mr-2 text-gray-400 hover:text-gray-800 shrink-0"
                         />
