@@ -41,6 +41,8 @@ export function PageResetPassword() {
     const verify = async () => {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
+      const tokenHash = params.get("token_hash") || params.get("token");
+      const otpType = params.get("type"); // expected "recovery"
       const errParam = params.get("error_description") || params.get("error");
 
       if (errParam) {
@@ -51,6 +53,24 @@ export function PageResetPassword() {
         return;
       }
 
+      // OTP / token-hash flow — works cross-device because verification is
+      // server-side and doesn't rely on a code_verifier in localStorage.
+      if (tokenHash && otpType === "recovery") {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: "recovery",
+        });
+        if (cancelled) return;
+        if (error) {
+          setErrorMsg(error.message);
+          setStage("invalid");
+          return;
+        }
+        setStage("ready");
+        return;
+      }
+
+      // PKCE flow — only works on the same browser that initiated the request.
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         if (cancelled) return;
