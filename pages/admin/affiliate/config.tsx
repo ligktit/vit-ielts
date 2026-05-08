@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, Form, InputNumber, Button, Switch, message, Typography, Space, Divider } from "antd";
 import { SaveOutlined, ReloadOutlined } from "@ant-design/icons";
 import AdminLayout from "../_layout";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 import type { GetServerSideProps } from "next";
 
 const { Title, Text } = Typography;
@@ -239,4 +239,4 @@ const AdminAffiliateConfigPage = () => {
 
 export default AdminAffiliateConfigPage;
 
-export const getServerSideProps: GetServerSideProps = withAdmin;
+export const getServerSideProps: GetServerSideProps = withFullAdmin;

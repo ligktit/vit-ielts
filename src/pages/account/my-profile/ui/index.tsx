@@ -52,13 +52,19 @@ export const PageMyProfile = () => {
         .single();
 
       if (profile) {
+        const isProActive =
+          Boolean(profile.is_pro) &&
+          (profile.pro_expiration_date
+            ? dayjs(profile.pro_expiration_date).isAfter(dayjs())
+            : false);
         setUserData({
           viewer: {
             id: profile.id,
             name: profile.name || "",
             email: profile.email || "",
             userData: {
-              isPro: profile.is_pro,
+              isPro: isProActive,
+              proExpirationDate: profile.pro_expiration_date,
               gender: profile.gender ? [profile.gender] : ["male"],
               dateOfBirth: profile.date_of_birth,
               phoneNumber: profile.phone_number || "",
@@ -168,6 +174,25 @@ export const PageMyProfile = () => {
                 <UserAccountTypeBadge isPro={data.viewer.userData.isPro} />
               </h3>
               <p className="text-gray-500">{data.viewer.email}</p>
+              {data.viewer.userData.proExpirationDate && (
+                <p className="text-sm mt-1">
+                  {data.viewer.userData.isPro ? (
+                    <span className="text-gray-500">
+                      Hết hạn Pro:{" "}
+                      <span className="font-medium text-[#2D3142]">
+                        {dayjs(data.viewer.userData.proExpirationDate).format("DD/MM/YYYY")}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-[#D94A56]">
+                      Pro đã hết hạn ngày{" "}
+                      <span className="font-medium">
+                        {dayjs(data.viewer.userData.proExpirationDate).format("DD/MM/YYYY")}
+                      </span>
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex -m-2 flex-wrap">

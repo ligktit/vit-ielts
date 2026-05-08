@@ -2,13 +2,13 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { getAffiliateLinks, getCommissions, getAffiliateVisits, deleteAffiliate } from "~services/affiliate";
 import { sendAffiliateStatusEmail } from "~services/email";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireFullAdmin } from "~lib/admin-auth";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const user = await requireAdmin(req, res);
+  const user = await requireFullAdmin(req, res);
   if (!user) return;
 
   if (req.method === "GET") {

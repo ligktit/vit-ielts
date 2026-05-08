@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireFullAdmin } from "~lib/admin-auth";
 import { getPayouts } from "~services/payout";
 import type { PayoutStatus } from "~services/payout";
 
@@ -12,7 +12,7 @@ export default async function handler(
     return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
-  const user = await requireAdmin(req, res);
+  const user = await requireFullAdmin(req, res);
   if (!user) return;
 
   try {

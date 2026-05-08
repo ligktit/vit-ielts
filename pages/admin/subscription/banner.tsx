@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Input, Form, Card, Space, message } from "antd";
 import type { SubscriptionBannerConfig } from "@/shared/types/admin-config";
 import AdminLayout from "../_layout";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 
 function SubscriptionPageHeaderPage() {
   const [saving, setSaving] = useState(false);
@@ -103,4 +103,4 @@ function SubscriptionPageHeaderPage() {
 
 export default SubscriptionPageHeaderPage;
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

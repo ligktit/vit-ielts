@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
+import { isFullAdmin } from "~lib/parseRoles";
 
 type DailyPoint = { date: string; value: number };
 type SkillPoint = { skill: string; value: number };
@@ -46,6 +47,12 @@ export default async function handler(
         // Admin auth check
         const user = await requireAdmin(req, res);
         if (!user) return;
+        const { data: profile } = await supabaseAdmin
+            .from("users")
+            .select("roles")
+            .eq("id", user.id)
+            .maybeSingle();
+        const fullAdmin = isFullAdmin(profile?.roles);
         // Today start (UTC)
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
@@ -212,11 +219,11 @@ export default async function handler(
                 proUsers: proUsersRes.count ?? 0,
                 todayUsers: todayUsersRes.count ?? 0,
                 totalTestsTaken,
-                monthlyRevenue,
-                recentOrders: enrichedOrders,
+                monthlyRevenue: fullAdmin ? monthlyRevenue : 0,
+                recentOrders: fullAdmin ? enrichedOrders : [],
                 topQuizzes: topQuizzesRes.data ?? [],
                 chartNewUsers,
-                chartRevenue,
+                chartRevenue: fullAdmin ? chartRevenue : [],
                 chartSkills,
             },
         });

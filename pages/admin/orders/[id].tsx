@@ -4,7 +4,7 @@ import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined } from "@an
 import AdminLayout from "../_layout";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 
 const formatPrice = (amount: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
@@ -135,4 +135,4 @@ export default function AdminOrderDetailPage() {
     );
 }
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

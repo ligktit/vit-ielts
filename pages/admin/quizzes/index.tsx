@@ -13,6 +13,7 @@ import AdminLayout from "../_layout";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { withAdmin } from "@/shared/hoc/withAdmin";
+import { useAdminPermissions } from "@/shared/hooks";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
 
 const { TextArea } = Input;
@@ -798,6 +799,7 @@ function AddToMockTestModal({
 // ---------------------------------------------------------------------------
 export default function AdminQuizzesPage() {
     const router = useRouter();
+    const { canDelete } = useAdminPermissions();
     // Hydrate pagination + filter state from the URL so navigating into an
     // edit page and back (or sharing/reopening the URL) keeps the same view —
     // previously every navigation reset to page 1, making the editor have to
@@ -983,9 +985,11 @@ export default function AdminQuizzesPage() {
                             Mock Test
                         </Button>
                     </Tooltip>
-                    <Popconfirm title="Xóa quiz này?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Hủy">
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="Xóa quiz này?" onConfirm={() => handleDelete(record.id)} okText="Xóa" cancelText="Hủy">
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

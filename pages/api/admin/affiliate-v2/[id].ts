@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireFullAdmin } from "~lib/admin-auth";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const user = await requireAdmin(req, res);
+    const user = await requireFullAdmin(req, res);
     if (!user) return;
 
     const { id } = req.query;

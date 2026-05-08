@@ -12,6 +12,7 @@ import AdminLayout from "../_layout";
 import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { withAdmin } from "@/shared/hoc/withAdmin";
+import { useAdminPermissions } from "@/shared/hooks";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
 
 const { Text } = Typography;
@@ -111,6 +112,7 @@ function AddMockTestModal({
 // ---------------------------------------------------------------------------
 export default function AdminMockTestsPage() {
     const router = useRouter();
+    const { canDelete } = useAdminPermissions();
     const [rows, setRows] = useState<MockTestRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
@@ -200,16 +202,18 @@ export default function AdminMockTestsPage() {
                         icon={<EditOutlined />}
                         onClick={() => router.push(`/admin/mock-tests/${record.id}`)}
                     />
-                    <Popconfirm
-                        title="Xóa mock test này?"
-                        description="Hành động này không thể hoàn tác."
-                        onConfirm={() => handleDelete(record.id)}
-                        okText="Xóa"
-                        cancelText="Hủy"
-                        okButtonProps={{ danger: true }}
-                    >
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="Xóa mock test này?"
+                            description="Hành động này không thể hoàn tác."
+                            onConfirm={() => handleDelete(record.id)}
+                            okText="Xóa"
+                            cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

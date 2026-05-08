@@ -29,5 +29,29 @@ export function parseRoles(roles: unknown, fallback = "subscriber"): string[] {
 
 export function isAdminRole(roles: unknown): boolean {
     const parsed = parseRoles(roles);
+    return parsed.includes("administrator")
+        || parsed.includes("admin")
+        || parsed.includes("editor");
+}
+
+/**
+ * Full admin = administrator only. Editors are admin-lite:
+ * they can read/edit content but cannot delete, view revenue,
+ * or change payment configuration.
+ */
+export function isFullAdmin(roles: unknown): boolean {
+    const parsed = parseRoles(roles);
     return parsed.includes("administrator") || parsed.includes("admin");
+}
+
+export function canDelete(roles: unknown): boolean {
+    return isFullAdmin(roles);
+}
+
+export function canViewRevenue(roles: unknown): boolean {
+    return isFullAdmin(roles);
+}
+
+export function canConfigurePayments(roles: unknown): boolean {
+    return isFullAdmin(roles);
 }

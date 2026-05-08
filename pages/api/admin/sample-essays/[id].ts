@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireAdmin, requireFullAdmin } from "~lib/admin-auth";
 
 // Editor pastes images as base64 data URLs which inflate the JSON body
 // well past Next.js' 1MB default. Bump the limit so the update can complete.
@@ -51,6 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "DELETE") {
+        if (!await requireFullAdmin(req, res)) return;
         try {
             const { error } = await supabaseAdmin.from("sample_essays").delete().eq("id", id);
             if (error) throw error;

@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { withAdmin } from "@/shared/hoc/withAdmin";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
+import { useAdminPermissions } from "@/shared/hooks";
 
 const { Text } = Typography;
 
@@ -241,6 +242,7 @@ function CollectionMockTestList({
 // ---------------------------------------------------------------------------
 export default function ExamLibraryPage() {
     const router = useRouter();
+    const { canDelete } = useAdminPermissions();
 
     // Collections (paginated)
     const [collections, setCollections] = useState<CollectionRow[]>([]);
@@ -507,6 +509,7 @@ export default function ExamLibraryPage() {
             title: "Collection",
             dataIndex: "title",
             key: "title",
+            ellipsis: true,
             render: (title, record) => (
                 <span
                     style={{ fontWeight: 600, cursor: "pointer", color: "var(--admin-primary)" }}
@@ -522,12 +525,14 @@ export default function ExamLibraryPage() {
             key: "slug",
             ellipsis: true,
             width: 200,
+            responsive: ["lg"],
             render: (s) => <Text type="secondary" style={{ fontSize: 12 }}>{s}</Text>,
         },
         {
             title: "Mock Tests",
             key: "count",
             width: 120,
+            responsive: ["md"],
             render: (_, record) => (
                 <Tag color="purple">{record.mock_test_ids?.length ?? 0} bộ đề</Tag>
             ),
@@ -537,12 +542,14 @@ export default function ExamLibraryPage() {
             dataIndex: "created_at",
             key: "created_at",
             width: 120,
+            responsive: ["lg"],
             render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
             title: "Trang chủ",
             key: "homepage",
             width: 110,
+            responsive: ["sm"],
             render: (_, record) => {
                 const isOn = homepageIds.includes(record.id);
                 return (
@@ -569,15 +576,17 @@ export default function ExamLibraryPage() {
                         icon={<EditOutlined />}
                         onClick={() => router.push(`/admin/mock-test-collections/${record.id}`)}
                     />
-                    <Popconfirm
-                        title="Xóa collection này?"
-                        description="Các Mock Tests bên trong sẽ không bị xóa."
-                        onConfirm={() => deleteCollection(record.id)}
-                        okText="Xóa" cancelText="Hủy"
-                        okButtonProps={{ danger: true }}
-                    >
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="Xóa collection này?"
+                            description="Các Mock Tests bên trong sẽ không bị xóa."
+                            onConfirm={() => deleteCollection(record.id)}
+                            okText="Xóa" cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -589,6 +598,7 @@ export default function ExamLibraryPage() {
             title: "Mock Test",
             dataIndex: "title",
             key: "title",
+            ellipsis: true,
             render: (title, record) => (
                 <a onClick={() => router.push(`/admin/mock-tests/${record.id}`)} style={{ fontWeight: 500 }}>
                     {title}
@@ -599,6 +609,7 @@ export default function ExamLibraryPage() {
             title: "Practice Tests",
             key: "count",
             width: 140,
+            responsive: ["md"],
             render: (_, record) => (
                 <Tag color="blue">{record.practice_tests?.length ?? 0} bài</Tag>
             ),
@@ -608,6 +619,7 @@ export default function ExamLibraryPage() {
             dataIndex: "created_at",
             key: "created_at",
             width: 120,
+            responsive: ["lg"],
             render: (d) => dayjs(d).format("DD/MM/YYYY"),
         },
         {
@@ -621,14 +633,16 @@ export default function ExamLibraryPage() {
                         icon={<EditOutlined />}
                         onClick={() => router.push(`/admin/mock-tests/${record.id}`)}
                     />
-                    <Popconfirm
-                        title="Xóa mock test này?"
-                        onConfirm={() => deleteMockTest(record.id)}
-                        okText="Xóa" cancelText="Hủy"
-                        okButtonProps={{ danger: true }}
-                    >
-                        <Button size="small" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
+                    {canDelete && (
+                        <Popconfirm
+                            title="Xóa mock test này?"
+                            onConfirm={() => deleteMockTest(record.id)}
+                            okText="Xóa" cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button size="small" danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    )}
                 </Space>
             ),
         },

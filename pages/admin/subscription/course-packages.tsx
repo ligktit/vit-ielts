@@ -13,7 +13,7 @@ import {
 } from "antd";
 import type { CoursePackagesConfig } from "@/shared/types/admin-config";
 import AdminLayout from "../_layout";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 
 const { Panel } = Collapse;
 
@@ -560,4 +560,4 @@ export default function CoursePackagesPage() {
   );
 }
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

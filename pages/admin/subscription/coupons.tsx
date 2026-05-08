@@ -37,7 +37,7 @@ type Coupon = {
   createdAt: string;
   updatedAt: string;
 };
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 
 export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -297,4 +297,4 @@ export default function CouponsPage() {
   );
 }
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

@@ -7,7 +7,7 @@ import { EyeOutlined, DollarOutlined, UserOutlined, CheckOutlined } from "@ant-d
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../_layout";
 import dayjs from "dayjs";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 
 const formatPrice = (amount: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
@@ -81,16 +81,16 @@ export default function AdminAffiliatePage() {
 
     const affColumns: ColumnsType<AffiliateRow> = [
         {
-            title: "User", key: "user",
+            title: "User", key: "user", width: 220,
             render: (_, r) => (
                 <div>
                     <div className="text-sm font-semibold" style={{ color: "var(--admin-text-primary)" }}>{r.user?.name ?? "—"}</div>
-                    {r.user?.email && <div className="text-xs font-semibold text-blue-600">{r.user.email}</div>}
+                    {r.user?.email && <div className="text-xs font-semibold text-blue-600 break-all">{r.user.email}</div>}
                     <span className="font-mono text-xs mt-1 block" style={{ color: "var(--admin-text-secondary)" }}>ID: {r.user_id?.substring(0, 12) ?? "—"}...</span>
                 </div>
             ),
         },
-        { title: "Link", dataIndex: "custom_link", key: "custom_link", render: (v: string | null) => v ?? "—" },
+        { title: "Link", dataIndex: "custom_link", key: "custom_link", width: 160, ellipsis: true, render: (v: string | null) => v ?? "—" },
         {
             title: "Status", dataIndex: "status", key: "status", width: 110,
             render: (s: string) => {
@@ -115,26 +115,26 @@ export default function AdminAffiliatePage() {
 
     const commColumns: ColumnsType<CommissionRow> = [
         {
-            title: "Affiliate", dataIndex: "affiliate_id", key: "affiliate_id",
+            title: "Affiliate", dataIndex: "affiliate_id", key: "affiliate_id", width: 200, ellipsis: true,
             render: (v: string | null) => (
                 <span className="font-mono text-xs break-all">{v ?? "—"}</span>
             ),
         },
         {
-            title: "Order", dataIndex: "order_id", key: "order_id",
+            title: "Order", dataIndex: "order_id", key: "order_id", width: 200, ellipsis: true,
             render: (v: string | null) => (
                 <span className="font-mono text-xs break-all">{v ?? "—"}</span>
             ),
         },
         { title: "Amount", dataIndex: "amount", key: "amount", width: 120, render: (v: number | null) => v ? formatPrice(v) : "—" },
-        { title: "Commission", dataIndex: "commission_amount", key: "commission_amount", width: 120, render: (v: number | null) => v ? <span className="font-bold text-green-600">{formatPrice(v)}</span> : "—" },
+        { title: "Commission", dataIndex: "commission_amount", key: "commission_amount", width: 130, render: (v: number | null) => v ? <span className="font-bold text-green-600">{formatPrice(v)}</span> : "—" },
         {
             title: "Status", dataIndex: "status", key: "status", width: 110,
             render: (s: string) => <Tag color={s === "paid" ? "green" : s === "pending" ? "orange" : "red"}>{s}</Tag>,
         },
         { title: "Ngày", dataIndex: "created_at", key: "created_at", width: 120, render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
         {
-            title: "", key: "actions", width: 100,
+            title: "", key: "actions", width: 110,
             render: (_, r) => r.status === "pending" ? (
                 <Button type="primary" size="small" onClick={() => handlePayCommission(r.id)}>Thanh toán</Button>
             ) : null,
@@ -150,11 +150,11 @@ export default function AdminAffiliatePage() {
         <AdminLayout>
             <h1 className="text-2xl font-bold mb-4">Affiliate Management</h1>
 
-            <Row gutter={16} className="mb-4">
-                <Col span={6}><Card><Statistic title="Tổng Affiliates" value={affiliates.length} prefix={<UserOutlined />} /></Card></Col>
-                <Col span={6}><Card><Statistic title="Đang chờ duyệt" value={affiliates.filter(a => a.status === "pending").length} valueStyle={{ color: "#faad14" }} /></Card></Col>
-                <Col span={6}><Card><Statistic title="Tổng hoa hồng" value={totalCommissions} prefix="₫" valueStyle={{ color: "#3f8600" }} /></Card></Col>
-                <Col span={6}><Card><Statistic title="Chờ thanh toán" value={pendingCommissions} prefix="₫" valueStyle={{ color: "#cf1322" }} /></Card></Col>
+            <Row gutter={[16, 16]} className="mb-4">
+                <Col xs={12} md={6}><Card><Statistic title="Tổng Affiliates" value={affiliates.length} prefix={<UserOutlined />} /></Card></Col>
+                <Col xs={12} md={6}><Card><Statistic title="Đang chờ duyệt" value={affiliates.filter(a => a.status === "pending").length} valueStyle={{ color: "#faad14" }} /></Card></Col>
+                <Col xs={12} md={6}><Card><Statistic title="Tổng hoa hồng" value={totalCommissions} prefix="₫" valueStyle={{ color: "#3f8600" }} /></Card></Col>
+                <Col xs={12} md={6}><Card><Statistic title="Chờ thanh toán" value={pendingCommissions} prefix="₫" valueStyle={{ color: "#cf1322" }} /></Card></Col>
             </Row>
 
             <Tabs
@@ -163,12 +163,12 @@ export default function AdminAffiliatePage() {
                     {
                         key: "affiliates",
                         label: `Affiliates (${affiliates.length})`,
-                        children: <Table columns={affColumns} dataSource={affiliates} rowKey="id" pagination={{ pageSize: 15 }} />,
+                        children: <Table columns={affColumns} dataSource={affiliates} rowKey="id" pagination={{ pageSize: 15 }} scroll={{ x: "max-content" }} />,
                     },
                     {
                         key: "commissions",
                         label: `Commissions (${commissions.length})`,
-                        children: <Table columns={commColumns} dataSource={commissions} rowKey="id" pagination={{ pageSize: 15 }} />,
+                        children: <Table columns={commColumns} dataSource={commissions} rowKey="id" pagination={{ pageSize: 15 }} scroll={{ x: "max-content" }} />,
                     },
                 ]}
             />
@@ -176,4 +176,4 @@ export default function AdminAffiliatePage() {
     );
 }
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

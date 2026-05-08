@@ -28,7 +28,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { formatPrice } from "@/pages/subscription/ui/subscription-plans/pricing";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 import { GetServerSideProps } from "next";
 
 
@@ -486,36 +486,34 @@ export default function AffiliateUsersPage() {
             </div>
           </div>
         }
-        extra={
-          <Space>
-            <Input
-              placeholder="Tìm kiếm User ID, Affiliate ID..."
-              prefix={<SearchOutlined />}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              style={{ width: 250 }}
-              allowClear
-            />
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 150 }}
-            >
-              <Option value="all">Tất cả</Option>
-              <Option value="pending">Chờ duyệt</Option>
-              <Option value="approved">Đã duyệt</Option>
-              <Option value="rejected">Đã từ chối</Option>
-            </Select>
-          </Space>
-        }
       >
+        <Space wrap style={{ marginBottom: 16, width: "100%" }}>
+          <Input
+            placeholder="Tìm kiếm User ID, Affiliate ID..."
+            prefix={<SearchOutlined />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ width: 250, maxWidth: "100%" }}
+            allowClear
+          />
+          <Select
+            value={statusFilter}
+            onChange={setStatusFilter}
+            style={{ width: 150 }}
+          >
+            <Option value="all">Tất cả</Option>
+            <Option value="pending">Chờ duyệt</Option>
+            <Option value="approved">Đã duyệt</Option>
+            <Option value="rejected">Đã từ chối</Option>
+          </Select>
+        </Space>
         <Table
           columns={columns}
           dataSource={filteredAffiliates}
           rowKey="id"
           loading={loading}
           pagination={{ pageSize: 20, showSizeChanger: true }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: "max-content" }}
         />
 
         {/* Modal for Approve/Edit */}
@@ -809,5 +807,5 @@ export default function AffiliateUsersPage() {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = withAdmin;
+export const getServerSideProps: GetServerSideProps = withFullAdmin;
 

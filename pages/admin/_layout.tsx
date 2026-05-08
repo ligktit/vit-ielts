@@ -37,6 +37,7 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { message, Tooltip, Badge, ConfigProvider, theme as antdTheme } from "antd";
+import { useAdminPermissions } from "@/shared/hooks";
 // ═══ Types ═══
 type MenuItemDef = {
   key: string;
@@ -272,8 +273,29 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+/** Menu keys hidden from editor accounts (revenue + payment config) */
+const EDITOR_HIDDEN_KEYS = new Set<string>([
+  "/admin/orders",
+  "/admin/coupons",
+  "affiliate-group",
+  "cms-subscription",
+]);
+
+function filterMenuForRole(sections: MenuSection[], canSeeAll: boolean): MenuSection[] {
+  if (canSeeAll) return sections;
+  return sections.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !EDITOR_HIDDEN_KEYS.has(item.key)),
+  })).filter((section) => section.items.length > 0);
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
+  const { isFullAdmin: canSeeAll } = useAdminPermissions();
+  const visibleSections = useMemo(
+    () => filterMenuForRole(MENU_SECTIONS, canSeeAll),
+    [canSeeAll]
+  );
   const [collapsed, setCollapsed] = useState(false);
   const [openSubmenus, setOpenSubmenus] = useState<Set<string>>(new Set());
   const [theme, setTheme] = useState<"dark" | "light">("light");
@@ -406,7 +428,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Menu */}
         <nav className="admin-sidebar-menu">
-          {MENU_SECTIONS.map((section, sIdx) => (
+          {visibleSections.map((section, sIdx) => (
             <div key={section.title}>
               {sIdx > 0 && <div className="admin-menu-divider" />}
               <div className="admin-menu-section">{section.title}</div>

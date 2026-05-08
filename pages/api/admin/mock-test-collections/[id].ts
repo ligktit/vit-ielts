@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireAdmin, requireFullAdmin } from "~lib/admin-auth";
 import { logActivity, getClientIP } from "~services/activity-log";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -86,6 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // DELETE /api/admin/mock-test-collections/[id]
     // ────────────────────────────────────────────────
     if (req.method === "DELETE") {
+        if (!await requireFullAdmin(req, res)) return;
         try {
             const { error } = await supabaseAdmin
                 .from("mock_test_collections")

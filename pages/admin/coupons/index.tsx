@@ -7,7 +7,7 @@ import { PlusOutlined, DeleteOutlined, EditOutlined, TagOutlined } from "@ant-de
 import type { ColumnsType } from "antd/es/table";
 import AdminLayout from "../_layout";
 import dayjs from "dayjs";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
 
 const formatPrice = (amount: number) =>
@@ -86,31 +86,31 @@ export default function AdminCouponsPage() {
     };
 
     const columns: ColumnsType<CouponRow> = [
-        { title: "Mã", dataIndex: "code", key: "code", render: (c: string) => <span className="font-mono font-bold text-blue-600">{c}</span> },
+        { title: "Mã", dataIndex: "code", key: "code", width: 140, ellipsis: true, render: (c: string) => <span className="font-mono font-bold text-blue-600">{c}</span> },
         {
-            title: "Loại", dataIndex: "type", key: "type", width: 100,
+            title: "Loại", dataIndex: "type", key: "type", width: 80,
             render: (t: string) => <Tag color={t === "percent" ? "purple" : "blue"}>{t === "percent" ? "%" : "₫"}</Tag>,
         },
         {
             title: "Giá trị", key: "value", width: 130,
             render: (_, r) => r.type === "percent" ? `${r.value}%` : formatPrice(r.value),
         },
-        { title: "Đã dùng / Max", key: "uses", width: 110, render: (_, r) => `${r.current_uses} / ${r.max_uses ?? "∞"}` },
+        { title: "Đã dùng / Max", key: "uses", width: 120, responsive: ["md"], render: (_, r) => `${r.current_uses} / ${r.max_uses ?? "∞"}` },
         {
-            title: "Active", dataIndex: "is_active", key: "is_active", width: 80,
+            title: "Active", dataIndex: "is_active", key: "is_active", width: 80, responsive: ["sm"],
             render: (v: boolean) => <Tag color={v ? "green" : "default"}>{v ? "ON" : "OFF"}</Tag>,
         },
         {
-            title: "Hết hạn", dataIndex: "expires_at", key: "expires_at", width: 120,
+            title: "Hết hạn", dataIndex: "expires_at", key: "expires_at", width: 120, responsive: ["md"],
             render: (d: string | null) => {
                 if (!d) return "—";
                 const expired = new Date(d) < new Date();
                 return <span className={expired ? "text-red-500" : ""}>{dayjs(d).format("DD/MM/YYYY")}</span>;
             },
         },
-        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at", width: 120, render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
+        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at", width: 120, responsive: ["lg"], render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
         {
-            title: "", key: "actions", width: 120,
+            title: "", key: "actions", width: 100,
             render: (_, r) => (
                 <Space size="small">
                     <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(r)} />
@@ -130,7 +130,7 @@ export default function AdminCouponsPage() {
                 actions={<Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>Tạo mới</Button>}
             />
             <AdminGlassCard>
-                <Table columns={columns} dataSource={coupons} rowKey="id" loading={loading} pagination={{ pageSize: 15, showSizeChanger: true }} />
+                <Table columns={columns} dataSource={coupons} rowKey="id" loading={loading} pagination={{ pageSize: 15, showSizeChanger: true }} scroll={{ x: "max-content" }} />
                 <Modal
                     title={editing ? "Sửa mã giảm giá" : "Tạo mã giảm giá mới"}
                     open={modalVisible} onOk={handleSubmit} onCancel={() => setModalVisible(false)}
@@ -164,4 +164,4 @@ export default function AdminCouponsPage() {
     );
 }
 
-export const getServerSideProps = withAdmin;
+export const getServerSideProps = withFullAdmin;

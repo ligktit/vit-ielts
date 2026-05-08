@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { readConfig, writeConfig } from "~services/cms-config";
 import { supabaseAdmin } from "~supabase/admin";
 import type { SubscriptionBannerConfig } from "@/shared/types/admin-config";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireFullAdmin } from "~lib/admin-auth";
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,7 +24,7 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      const user = await requireAdmin(req, res);
+      const user = await requireFullAdmin(req, res);
       if (!user) return;
 
       const body = req.body as SubscriptionBannerConfig;

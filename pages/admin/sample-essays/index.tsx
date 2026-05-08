@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { withAdmin } from "@/shared/hoc/withAdmin";
 import { AdminPageHeader, AdminGlassCard } from "@/widgets/admin";
+import { useAdminPermissions } from "@/shared/hooks";
 
 type EssayRow = {
     id: string;
@@ -22,6 +23,7 @@ type EssayRow = {
 
 export default function AdminSampleEssaysPage() {
     const router = useRouter();
+    const { canDelete } = useAdminPermissions();
     const [essays, setEssays] = useState<EssayRow[]>([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
@@ -69,26 +71,29 @@ export default function AdminSampleEssaysPage() {
 
     const columns: ColumnsType<EssayRow> = [
         { title: "Tiêu đề", dataIndex: "title", key: "title", ellipsis: true, render: (t: string, r) => <a onClick={() => router.push(`/admin/sample-essays/${r.id}`)} className="font-medium">{t}</a> },
-        { title: "Skill", dataIndex: "skill", key: "skill", width: 90, render: (s: string | null) => s ? <Tag>{s}</Tag> : "—" },
-        { title: "Part", dataIndex: "part", key: "part", width: 80 },
-        { title: "Status", dataIndex: "status", key: "status", width: 100, render: (s: string) => <Tag color={s === "published" ? "green" : "default"}>{s}</Tag> },
+        { title: "Skill", dataIndex: "skill", key: "skill", width: 90, responsive: ["sm"], render: (s: string | null) => s ? <Tag>{s}</Tag> : "—" },
+        { title: "Part", dataIndex: "part", key: "part", width: 80, responsive: ["md"] },
+        { title: "Status", dataIndex: "status", key: "status", width: 100, responsive: ["sm"], render: (s: string) => <Tag color={s === "published" ? "green" : "default"}>{s}</Tag> },
         {
             title: "Pro",
             dataIndex: "pro_user_only",
             key: "pro_user_only",
             width: 70,
+            responsive: ["md"],
             render: (v: boolean, r) => (
                 <Switch size="small" checked={v} onChange={(checked) => handleTogglePro(r.id, checked)} />
             ),
         },
-        { title: "Views", dataIndex: "views", key: "views", width: 70 },
-        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at", width: 120, render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
+        { title: "Views", dataIndex: "views", key: "views", width: 70, responsive: ["lg"] },
+        { title: "Ngày tạo", dataIndex: "created_at", key: "created_at", width: 120, responsive: ["lg"], render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
         {
-            title: "", key: "actions", width: 120,
+            title: "", key: "actions", width: 100,
             render: (_, r) => (
                 <Space size="small">
                     <Button size="small" icon={<EditOutlined />} onClick={() => router.push(`/admin/sample-essays/${r.id}`)} />
-                    <Popconfirm title="Xóa?" onConfirm={() => handleDelete(r.id)}><Button size="small" danger icon={<DeleteOutlined />} /></Popconfirm>
+                    {canDelete && (
+                        <Popconfirm title="Xóa?" onConfirm={() => handleDelete(r.id)}><Button size="small" danger icon={<DeleteOutlined />} /></Popconfirm>
+                    )}
                 </Space>
             ),
         },
@@ -112,6 +117,7 @@ export default function AdminSampleEssaysPage() {
                 <Table columns={columns} dataSource={essays} rowKey="id" loading={loading}
                     onChange={(p: TablePaginationConfig) => { setPage(p.current ?? 1); setPageSize(p.pageSize ?? 20); }}
                     pagination={{ current: page, pageSize, total, showSizeChanger: true, showTotal: (t) => `Tổng ${t} bài` }}
+                    scroll={{ x: "max-content" }}
                 />
             </AdminGlassCard>
         </AdminLayout>

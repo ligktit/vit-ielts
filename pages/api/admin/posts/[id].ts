@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireAdmin, requireFullAdmin } from "~lib/admin-auth";
 import { logActivity, getClientIP } from "~services/activity-log";
 
 // Editor pastes images as base64 data URLs which inflate the JSON body
@@ -103,6 +103,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "DELETE") {
+        if (!await requireFullAdmin(req, res)) return;
         try {
             const { error } = await supabaseAdmin.from("posts").delete().eq("id", id);
             if (error) throw error;

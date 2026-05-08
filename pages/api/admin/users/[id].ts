@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
-import { requireAdmin } from "~lib/admin-auth";
+import { requireAdmin, requireFullAdmin } from "~lib/admin-auth";
 
 export default async function handler(
     req: NextApiRequest,
@@ -93,6 +93,7 @@ export default async function handler(
     }
 
     if (req.method === "DELETE") {
+        if (!await requireFullAdmin(req, res)) return;
         try {
             // Delete from Supabase Auth (this usually cascades to public.users but we do both to be safe)
             const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);

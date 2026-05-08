@@ -57,7 +57,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
         >
             <Form form={form} layout="vertical" className="mt-4">
                 <Row gutter={16}>
-                    <Col span={isListening ? 12 : 16}>
+                    <Col xs={24} md={isListening ? 12 : 16}>
                         <Form.Item
                             name="title"
                             label="Title"
@@ -68,7 +68,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                     </Col>
                     {isListening && (
                         <>
-                            <Col span={3}>
+                            <Col xs={12} md={3}>
                                 <Form.Item
                                     name="audio_start"
                                     label="Audio Start"
@@ -77,7 +77,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                                     <MMSSInput placeholder="0:40" />
                                 </Form.Item>
                             </Col>
-                            <Col span={3}>
+                            <Col xs={12} md={3}>
                                 <Form.Item
                                     name="audio_end"
                                     label="Audio End"
@@ -88,7 +88,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                             </Col>
                         </>
                     )}
-                    <Col span={isListening ? 6 : 8}>
+                    <Col xs={24} md={isListening ? 6 : 8}>
                         <Form.Item name="start_question_number" label="Start question no">
                             <InputNumber placeholder="Mặc định: 1" min={1} className="w-full" />
                         </Form.Item>

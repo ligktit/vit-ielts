@@ -330,6 +330,12 @@ export default function AdminUsersPage() {
                             Admin
                         </Tag>
                     );
+                if (r.includes("editor"))
+                    return (
+                        <Tag color="blue" icon={<SafetyCertificateOutlined />}>
+                            Editor
+                        </Tag>
+                    );
                 return <Tag color="default">Subscriber</Tag>;
             },
         },
@@ -552,6 +558,7 @@ export default function AdminUsersPage() {
                                     options={[
                                         { value: "all", label: "Tất cả role" },
                                         { value: "administrator", label: "Quản trị viên" },
+                                        { value: "editor", label: "Editor" },
                                         { value: "subscriber", label: "Subscriber" },
                                     ]}
                                 />
@@ -764,7 +771,8 @@ export default function AdminUsersPage() {
                         <Select
                             options={[
                                 { value: "subscriber", label: "Subscriber" },
-                                { value: "administrator", label: "Quản trị viên" },
+                                { value: "editor", label: "Editor (admin hạn chế: không xóa, không xem doanh thu, không sửa thanh toán)" },
+                                { value: "administrator", label: "Quản trị viên (toàn quyền)" },
                             ]}
                         />
                     </Form.Item>

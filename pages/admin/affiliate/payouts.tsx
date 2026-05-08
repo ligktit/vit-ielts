@@ -11,7 +11,7 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import AdminLayout from "../_layout";
-import { withAdmin } from "@/shared/hoc/withAdmin";
+import { withFullAdmin } from "@/shared/hoc/withAdmin";
 import type { GetServerSideProps } from "next";
 
 const { TextArea } = Input;
@@ -199,7 +199,7 @@ const AdminPayoutsPage = () => {
       title: "Ngày tạo",
       dataIndex: "created_at",
       key: "created_at",
-      width: 120,
+      width: 140,
       render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
       sorter: (a: PayoutRow, b: PayoutRow) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
@@ -351,7 +351,7 @@ const AdminPayoutsPage = () => {
               onChange: setPage,
               showSizeChanger: false,
             }}
-            scroll={{ x: 1100 }}
+            scroll={{ x: "max-content" }}
           />
         </Card>
 
@@ -578,4 +578,4 @@ const AdminPayoutsPage = () => {
 
 export default AdminPayoutsPage;
 
-export const getServerSideProps: GetServerSideProps = withAdmin;
+export const getServerSideProps: GetServerSideProps = withFullAdmin;

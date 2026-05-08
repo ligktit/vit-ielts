@@ -18,6 +18,7 @@ import AdminLayout from "./_layout";
 import dayjs from "dayjs";
 import { withAdmin } from "@/shared/hoc/withAdmin";
 import { AdminStatCard, AdminGlassCard } from "@/widgets/admin";
+import { useAdminPermissions } from "@/shared/hooks";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import {
@@ -119,6 +120,7 @@ function ChartTooltip({ active, payload, label, formatter }: any) {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { canViewRevenue } = useAdminPermissions();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -404,32 +406,34 @@ export default function AdminDashboard() {
       </div>
 
       {/* ═══ Revenue Card ═══ */}
-      <div className="admin-revenue-card admin-animate-in" style={{ marginBottom: 24 }}>
-        <div>
-          <div className="admin-revenue-label">
-            <DollarOutlined style={{ marginRight: 6 }} />
-            Doanh thu tháng này
+      {canViewRevenue && (
+        <div className="admin-revenue-card admin-animate-in" style={{ marginBottom: 24 }}>
+          <div>
+            <div className="admin-revenue-label">
+              <DollarOutlined style={{ marginRight: 6 }} />
+              Doanh thu tháng này
+            </div>
+            <div className="admin-revenue-value">
+              {formatPrice(data?.monthlyRevenue ?? 0)}
+            </div>
           </div>
-          <div className="admin-revenue-value">
-            {formatPrice(data?.monthlyRevenue ?? 0)}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 8,
+              background: "rgba(34, 197, 94, 0.1)",
+              color: "var(--admin-accent-green)",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            <RiseOutlined /> Đang cập nhật
           </div>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "6px 12px",
-            borderRadius: 8,
-            background: "rgba(34, 197, 94, 0.1)",
-            color: "var(--admin-accent-green)",
-            fontSize: 13,
-            fontWeight: 600,
-          }}
-        >
-          <RiseOutlined /> Đang cập nhật
-        </div>
-      </div>
+      )}
 
       {/* ═══════════════════════════════════════════════ */}
       {/* ═══ CHARTS SECTION ═══ */}
@@ -437,7 +441,7 @@ export default function AdminDashboard() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: canViewRevenue ? "1fr 1fr" : "1fr",
           gap: 20,
           marginBottom: 24,
         }}
@@ -491,6 +495,7 @@ export default function AdminDashboard() {
         </AdminGlassCard>
 
         {/* ── Chart 2: Revenue (Bar) ── */}
+        {canViewRevenue && (
         <AdminGlassCard
           title={
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -533,31 +538,34 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </AdminGlassCard>
+        )}
       </div>
 
       {/* ── Row 2: Recent Orders (full width) ── */}
-      <AdminGlassCard
-        title="Đơn hàng gần đây"
-        extra={
-          <button
-            className="admin-quick-action-btn"
-            style={{ fontSize: 12, padding: "4px 10px" }}
-            onClick={() => router.push("/admin/orders")}
-          >
-            Xem tất cả →
-          </button>
-        }
-        style={{ marginBottom: 24 }}
-      >
-        <Table
-          columns={orderColumns}
-          dataSource={data?.recentOrders ?? []}
-          rowKey="order_id"
-          pagination={false}
-          size="small"
-          scroll={{ x: 900 }}
-        />
-      </AdminGlassCard>
+      {canViewRevenue && (
+        <AdminGlassCard
+          title="Đơn hàng gần đây"
+          extra={
+            <button
+              className="admin-quick-action-btn"
+              style={{ fontSize: 12, padding: "4px 10px" }}
+              onClick={() => router.push("/admin/orders")}
+            >
+              Xem tất cả →
+            </button>
+          }
+          style={{ marginBottom: 24 }}
+        >
+          <Table
+            columns={orderColumns}
+            dataSource={data?.recentOrders ?? []}
+            rowKey="order_id"
+            pagination={false}
+            size="small"
+            scroll={{ x: 900 }}
+          />
+        </AdminGlassCard>
+      )}
 
       {/* ── Row 3: Donut Chart + Top Quizzes (2-col grid) ── */}
       <div

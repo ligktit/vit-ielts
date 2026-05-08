@@ -1,6 +1,6 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { createAdminServerSupabase } from "~supabase/server";
-import { isAdminRole } from "~lib/parseRoles";
+import { isAdminRole, isFullAdmin } from "~lib/parseRoles";
 
 /**
  * SSR guard — redirects non-admin users.
@@ -86,3 +86,39 @@ export function withAdminData(
     }
   };
 }
+
+/**
+ * SSR guard for pages that should be visible only to *full* administrators
+ * (not editors). Use on revenue, payment-config, and similar sensitive pages.
+ */
+export const withFullAdmin: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const supabase = createAdminServerSupabase(context);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      redirect: {
+        destination: `/admin/login?redirect=${encodeURIComponent(context.resolvedUrl)}`,
+        statusCode: 302,
+      },
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("roles")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!isFullAdmin(profile?.roles)) {
+    return {
+      redirect: { destination: "/admin", statusCode: 302 },
+    };
+  }
+
+  return { props: {} };
+};

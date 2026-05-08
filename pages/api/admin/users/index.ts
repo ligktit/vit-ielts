@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { supabaseAdmin } from "~supabase/admin";
 import { requireAdmin } from "~lib/admin-auth";
+import { isFullAdmin } from "~lib/parseRoles";
 
 export default async function handler(
     req: NextApiRequest,
@@ -128,9 +129,27 @@ export default async function handler(
     if (req.method === "POST") {
         try {
             const { email, password, name, phone_number, roles } = req.body;
-            
+
             if (!email || !password) {
                 return res.status(400).json({ success: false, error: "Email and password are required" });
+            }
+
+            // Privilege guard: only full admins can grant admin/editor role.
+            const requestedRoles = Array.isArray(roles) ? roles : [];
+            const grantsAdminAccess = requestedRoles.some(
+                (r) => r === "administrator" || r === "admin" || r === "editor"
+            );
+            if (grantsAdminAccess) {
+                const { data: callerProfile } = await supabaseAdmin
+                    .from("users")
+                    .select("roles")
+                    .eq("id", user.id)
+                    .maybeSingle();
+                if (!isFullAdmin(callerProfile?.roles)) {
+                    return res
+                        .status(403)
+                        .json({ success: false, error: "Forbidden — only full admin can grant admin roles" });
+                }
             }
 
             // 1. Create user in Supabase Auth
