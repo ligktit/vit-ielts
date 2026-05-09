@@ -202,15 +202,48 @@ export const ExamProvider = ({
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
 
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || "Submit failed");
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error || `Submit failed (HTTP ${response.status})`);
       }
 
-      await router.push(ROUTES.TEST_RESULT(testID));
+      // Hard-navigate so a render error on the result page can't trap the
+      // user on /take-the-test with their submission already persisted.
+      // router.push has been observed to fail silently in production,
+      // leaving students staring at the test screen with no feedback.
+      const target = ROUTES.TEST_RESULT(testID);
+      try {
+        await router.push(target);
+      } catch {
+        window.location.href = target;
+        return;
+      }
+      // Belt-and-suspenders: if router.push resolved but didn't actually
+      // change the URL within 1.5s, force a hard nav.
+      setTimeout(() => {
+        if (typeof window !== "undefined" && window.location.pathname.startsWith("/take-the-test")) {
+          window.location.href = target;
+        }
+      }, 1500);
     } catch (error: any) {
       console.error("Submit Failed in Handler:", error);
+      // Surface to the server log too so we can correlate with student reports.
+      try {
+        void fetch("/api/log-client-error", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: `submit-failed: ${error?.message ?? String(error)}`,
+            stack: error?.stack,
+            url: typeof window !== "undefined" ? window.location.href : undefined,
+            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+          }),
+          keepalive: true,
+        }).catch(() => undefined);
+      } catch {
+        // swallow
+      }
       notification.error({
         message: "Submission Error",
         description: error?.message || "Failed to submit test. Please check your internet connection.",

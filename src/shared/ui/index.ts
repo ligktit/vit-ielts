@@ -7,3 +7,4 @@ export { default as Empty } from './empty';
 export * from './text-selection';
 export * from './pro-link';
 export * from './pro-badge';
+export * from './error-boundary';

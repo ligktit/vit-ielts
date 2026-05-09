@@ -25,6 +25,7 @@ const AffiliateTracker = dynamic(
 import { unstableSetRender } from "antd";
 import { createRoot } from "react-dom/client";
 import { ProContentModal } from "@/shared/ui/pro-content";
+import { AppErrorBoundary } from "@/shared/ui/error-boundary";
 import { MaintenancePage } from "./maintenance";
 
 const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === "true";
@@ -171,18 +172,20 @@ export default function App({
   );
 
   return (
-    <ProgressProvider
-      color="oklch(60.987% 0.17833 19.421)"
-      options={{ showSpinner: false }}
-      shallowRouting
-    >
-      {pageProps.masterData ? (
-        <AppProvider masterData={pageProps.masterData}>
-          <AuthProvider>{ChildrenComponent}</AuthProvider>
-        </AppProvider>
-      ) : (
-        <>{ChildrenComponent}</>
-      )}
-    </ProgressProvider>
+    <AppErrorBoundary>
+      <ProgressProvider
+        color="oklch(60.987% 0.17833 19.421)"
+        options={{ showSpinner: false }}
+        shallowRouting
+      >
+        {pageProps.masterData ? (
+          <AppProvider masterData={pageProps.masterData}>
+            <AuthProvider>{ChildrenComponent}</AuthProvider>
+          </AppProvider>
+        ) : (
+          <>{ChildrenComponent}</>
+        )}
+      </ProgressProvider>
+    </AppErrorBoundary>
   );
 }
