@@ -128,11 +128,17 @@ export default async function handler(
                 .limit(10),
 
             // ═══ CHART: New users per day (last 30 days) ═══
+            // PostgREST defaults to 1000 rows. With a recent traffic spike
+            // (~360 signups in one day) the 30-day window easily blows past
+            // that and the oldest 1000 rows win — newest days get dropped
+            // and the chart falsely shows 0 for the last few days. Set an
+            // explicit range so we get every row in the window.
             supabaseAdmin
                 .from("users")
                 .select("created_at")
                 .gte("created_at", thirtyDaysISO)
-                .order("created_at", { ascending: true }),
+                .order("created_at", { ascending: false })
+                .range(0, 49999),
 
             // ═══ CHART: Revenue per day (last 30 days, completed orders) ═══
             supabaseAdmin
@@ -140,13 +146,15 @@ export default async function handler(
                 .select("amount, created_at")
                 .eq("status", "completed")
                 .gte("created_at", thirtyDaysISO)
-                .order("created_at", { ascending: true }),
+                .order("created_at", { ascending: false })
+                .range(0, 49999),
 
             // ═══ CHART: Tests by skill ═══
             supabaseAdmin
                 .from("quizzes")
                 .select("skill, tests_taken")
-                .gt("tests_taken", 0),
+                .gt("tests_taken", 0)
+                .range(0, 49999),
         ]);
 
         // Calculate total tests taken
