@@ -11,6 +11,6 @@
 -- ============================================================================
 
 UPDATE quizzes
-SET published_at = COALESCE(published_at, updated_at, created_at)
+SET published_at = created_at
 WHERE status = 'published'
   AND published_at IS NULL;
