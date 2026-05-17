@@ -46,7 +46,7 @@ export function PageLogin({ loginConfig }: PageLoginProps) {
     }).catch(() => {
       setError("email", {
         type: "manual",
-        message: "Số điện thoại / email hoặc mật khẩu không đúng.",
+        message: "Email hoặc mật khẩu không đúng.",
       });
     });
   };
@@ -73,10 +73,10 @@ export function PageLogin({ loginConfig }: PageLoginProps) {
           <form className="w-full flex flex-col gap-[30px]" onSubmit={handleSubmit(onSubmit)}>
             
             <div className="w-full flex flex-col gap-[10px]">
-              {/* Phone Number / Email */}
+              {/* Email */}
               <div className="w-full flex flex-col items-start gap-[10px]">
                 <label htmlFor="email" className="font-noto-sans font-bold text-[16px] leading-[22px] text-[#191D24]">
-                  Số điện thoại
+                  Email
                 </label>
                 <Controller
                   control={control}
@@ -86,14 +86,16 @@ export function PageLogin({ loginConfig }: PageLoginProps) {
                     <input
                       {...field}
                       id="email"
-                      type="text"
-                      placeholder="Nhập số điện thoại của bạn"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      placeholder="Nhập email của bạn"
                       className="w-full box-border border border-[#BDBDBD] rounded-[12px] h-[40px] px-[18px] font-noto-sans font-normal text-[14px] text-[#374151] outline-none focus:border-[#D94A56] transition-colors"
                     />
                   )}
                 />
                 {errors.email && (
-                  <span className="text-red-500 text-sm">{errors.email.message || "Vui lòng nhập số điện thoại hoặc email"}</span>
+                  <span className="text-red-500 text-sm">{errors.email.message || "Vui lòng nhập email"}</span>
                 )}
               </div>
 

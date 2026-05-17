@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { Table, Tag, Button, Space, Input, Select, message, Popconfirm, Switch } from "antd";
-import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, FileTextOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, CopyOutlined, FileTextOutlined } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import AdminLayout from "../_layout";
 import { useRouter } from "next/router";
@@ -52,6 +52,23 @@ export default function AdminSampleEssaysPage() {
         catch { message.error("Error"); }
     };
 
+    const handleClone = async (id: string) => {
+        try {
+            const res = await fetch(`/api/admin/sample-essays/${id}/clone`, { method: "POST" });
+            const json = await res.json();
+            if (json.success) {
+                message.success("Đã tạo bản sao");
+                if (json.data?.id) {
+                    router.push(`/admin/sample-essays/${json.data.id}`);
+                } else {
+                    fetchEssays();
+                }
+            } else {
+                message.error(json.error || "Không thể tạo bản sao");
+            }
+        } catch { message.error("Error"); }
+    };
+
     const handleTogglePro = async (id: string, pro_user_only: boolean) => {
         try {
             const res = await fetch(`/api/admin/sample-essays/${id}`, {
@@ -87,10 +104,11 @@ export default function AdminSampleEssaysPage() {
         { title: "Views", dataIndex: "views", key: "views", width: 70, responsive: ["lg"] },
         { title: "Ngày tạo", dataIndex: "created_at", key: "created_at", width: 120, responsive: ["lg"], render: (d: string) => dayjs(d).format("DD/MM/YYYY") },
         {
-            title: "", key: "actions", width: 100,
+            title: "", key: "actions", width: 130,
             render: (_, r) => (
                 <Space size="small">
-                    <Button size="small" icon={<EditOutlined />} onClick={() => router.push(`/admin/sample-essays/${r.id}`)} />
+                    <Button size="small" icon={<EditOutlined />} title="Chỉnh sửa" onClick={() => router.push(`/admin/sample-essays/${r.id}`)} />
+                    <Button size="small" icon={<CopyOutlined />} title="Tạo bản sao" onClick={() => handleClone(r.id)} />
                     {canDelete && (
                         <Popconfirm title="Xóa?" onConfirm={() => handleDelete(r.id)}><Button size="small" danger icon={<DeleteOutlined />} /></Popconfirm>
                     )}
