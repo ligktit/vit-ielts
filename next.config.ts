@@ -16,11 +16,14 @@ const nextConfig: NextConfig = {
   // transpilePackages (Next refuses to have a package in both lists) and we
   // don't need it external. Only the redux runtime deps need this escape
   // hatch since they're the ones the tracer drops.
-  serverExternalPackages: ["@reduxjs/toolkit", "react-redux"],
+  serverExternalPackages: ["@reduxjs/toolkit", "react-redux", "redux", "reselect", "immer"],
   outputFileTracingIncludes: {
     "/admin": [
       "./node_modules/@reduxjs/toolkit/**/*",
       "./node_modules/react-redux/**/*",
+      "./node_modules/redux/**/*",
+      "./node_modules/reselect/**/*",
+      "./node_modules/immer/**/*",
       "./node_modules/recharts/**/*",
     ],
   },
