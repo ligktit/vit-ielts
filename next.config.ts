@@ -4,29 +4,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   devIndicators: false,
-  // Recharts 3.x ships @reduxjs/toolkit + react-redux as runtime deps with an
-  // ESM-only export (redux-toolkit.modern.mjs). Next.js' file-tracing on the
-  // Vercel serverless build was silently dropping that bundle, so SSR for
-  // /admin (which renders Recharts charts) crashed with "Cannot find module
-  // '@reduxjs/toolkit/dist/redux-toolkit.modern.mjs'" and cascaded a 500 to
-  // /admin/login (which 302s to /admin for already-signed-in admins).
-  // Listing the packages here tells Next to leave them as runtime `require`s
-  // and include their full node_modules tree in the function bundle.
-  // Recharts itself is left to Next's normal bundling — it conflicts with
-  // transpilePackages (Next refuses to have a package in both lists) and we
-  // don't need it external. Only the redux runtime deps need this escape
-  // hatch since they're the ones the tracer drops.
-  serverExternalPackages: ["@reduxjs/toolkit", "react-redux", "redux", "reselect", "immer"],
-  outputFileTracingIncludes: {
-    "/admin": [
-      "./node_modules/@reduxjs/toolkit/**/*",
-      "./node_modules/react-redux/**/*",
-      "./node_modules/redux/**/*",
-      "./node_modules/reselect/**/*",
-      "./node_modules/immer/**/*",
-      "./node_modules/recharts/**/*",
-    ],
-  },
   images: {
     remotePatterns: [
       {
