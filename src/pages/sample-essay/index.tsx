@@ -202,6 +202,20 @@ export const getServerSidePropsSingle = async (
     year: essay.year ?? null,
   }).catch(() => []);
 
+  // Sidebar: latest 6 essays of the same skill (excluding current)
+  const sidebarEssaysQuery = supabase
+    .from("sample_essays")
+    .select("id, slug, title, featured_image")
+    .eq("status", "published")
+    .neq("id", essay.id)
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  const sidebarEssaysResult = essay.skill
+    ? await sidebarEssaysQuery.eq("skill", essay.skill)
+    : await sidebarEssaysQuery;
+  const sidebarEssays = sidebarEssaysResult.data ?? [];
+
   // Check Pro access
   if (essay.pro_user_only) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -240,6 +254,7 @@ export const getServerSidePropsSingle = async (
     props: {
       sampleEssay: transformSampleEssayToLegacy(essay),
       relatedEssays: JSON.parse(JSON.stringify(relatedEssays)),
+      sidebarEssays: JSON.parse(JSON.stringify(sidebarEssays)),
     },
   };
 };

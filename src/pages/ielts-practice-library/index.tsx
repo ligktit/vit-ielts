@@ -3,19 +3,39 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import type { PracticeLibraryBannerConfig } from "./ui/types";
 import { createServerSupabase } from "~supabase/server";
 import { readConfig } from "~services/cms-config";
-import { getQuizFilterOptions } from "~services/quiz";
+import { getQuizFilterOptions, getQuizzes } from "~services/quiz";
+import type { Quiz, SkillType } from "~services/types/database";
 
 export { PageIELTSPracticeLibrary } from "./ui";
+
+const PAGE_SIZE = 9;
+
+const getSingleQueryValue = (value: string | string[] | undefined) => {
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+};
 
 export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
   withMasterData,
   async (context: GetServerSidePropsContext) => {
-    const { resolvedUrl } = context;
-    const skill = resolvedUrl.split("/").at(-1);
+    const { resolvedUrl, query } = context;
+    const lastSegment = resolvedUrl.split("?")[0].split("/").at(-1);
+    const skill: SkillType = lastSegment === "listening" ? "listening" : "reading";
     const supabase = createServerSupabase(context);
 
-    // Parallel: filter data + banner config
-    const [quizFilterData, bannerConfig] = await Promise.all([
+    const size = Number(getSingleQueryValue(query.size) || PAGE_SIZE);
+    const page = Number(getSingleQueryValue(query.page) || 1);
+    const search = getSingleQueryValue(query.search) || undefined;
+    const source = getSingleQueryValue(query.source) || undefined;
+    const part = getSingleQueryValue(query.part) || undefined;
+    const quarter = getSingleQueryValue(query.quarter) || undefined;
+    const year = getSingleQueryValue(query.year) || undefined;
+    const questionFormRaw = query.question_form;
+    const questionForm = Array.isArray(questionFormRaw)
+      ? questionFormRaw.flatMap((item) => item.split(",")).filter(Boolean).join(",")
+      : (questionFormRaw || "").toString().split(",").filter(Boolean).join(",") || undefined;
+
+    const [quizFilterData, bannerConfig, quizzesResult] = await Promise.all([
       getQuizFilterOptions(supabase).catch(() => ({
         years: [],
         sources: [],
@@ -25,6 +45,18 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       readConfig<PracticeLibraryBannerConfig>(supabase, "ielts-practice-library/banner").catch(
         () => null
       ),
+      getQuizzes(supabase, {
+        skill,
+        type: "practice",
+        search,
+        source,
+        part,
+        quarter,
+        year,
+        questionForm,
+        page,
+        pageSize: size,
+      }).catch(() => ({ data: [] as Quiz[], count: 0 })),
     ]);
 
     const defaultBannerConfig: PracticeLibraryBannerConfig = {
@@ -64,12 +96,16 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
       props: {
         quizFilterData: {
           ...quizFilterData,
-          // Keep the skill in the response for UI filtering
           skill: skill || null,
         },
         bannerConfig: {
           listening: bannerConfig?.listening ?? defaultBannerConfig.listening,
           reading: bannerConfig?.reading ?? defaultBannerConfig.reading,
+        },
+        initialQuizzes: {
+          data: quizzesResult.data,
+          count: quizzesResult.count,
+          pageSize: size,
         },
       },
     };

@@ -1,13 +1,9 @@
-import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import _ from "lodash";
-import { createClient } from "~supabase/client";
-import { getQuizzes } from "~services/quiz";
-import type { Quiz, SkillType } from "~services/types/database";
+import type { Quiz } from "~services/types/database";
 import { Container } from "@/shared/ui";
-import { IPracticeTest, IPracticeTestResponses } from "@/entities/practice-test";
+import { IPracticeTest } from "@/entities/practice-test";
 import { QuizLibraryNav } from "@/widgets";
 import type { PracticeLibraryBannerConfig } from "./types";
 import { Filter } from "./filter";
@@ -28,19 +24,6 @@ export type FilterFormValues = {
 };
 
 const PAGE_SIZE = 9;
-
-const DEFAULT_VALUES: FilterFormValues = {
-  progress: "" as FilterFormValues["progress"],
-  question_form: [],
-  sort: "newest",
-  search: "",
-  page: 1,
-  size: PAGE_SIZE,
-  quarter: "",
-  year: "",
-  source: "",
-  part: "",
-};
 
 const SORT_OPTIONS: Array<{ label: string; value: FilterFormValues["sort"] }> = [
   { label: "Newest", value: "newest" },
@@ -87,27 +70,69 @@ const buildPages = (current: number, total: number) => {
     .sort((left, right) => left - right);
 };
 
-export const PageIELTSPracticeLibrary = ({
-  quizFilterData,
-  bannerConfig,
-}: {
+const mapQuizToEdge = (quiz: Quiz): { node: IPracticeTest } => ({
+  node: {
+    id: quiz.id,
+    title: quiz.title,
+    slug: quiz.slug,
+    featuredImage: quiz.featured_image
+      ? { node: { sourceUrl: quiz.featured_image, altText: quiz.title } }
+      : undefined,
+    quizFields: {
+      skill: [quiz.skill, quiz.skill] as IPracticeTest["quizFields"]["skill"],
+      type: [quiz.type, quiz.type] as IPracticeTest["quizFields"]["type"],
+      passages: [],
+      part: quiz.part || "0",
+      quarter: quiz.quarter || "",
+      source: quiz.source || "",
+      year: quiz.year || "",
+      testsTaken: quiz.tests_taken || 0,
+      proUserOnly: quiz.pro_user_only || false,
+    },
+  },
+});
+
+interface PageProps {
   quizFilterData: {
     years: Array<string>;
     sources: Array<string>;
     parts: Array<string>;
   };
   bannerConfig: PracticeLibraryBannerConfig;
-}) => {
+  initialQuizzes: {
+    data: Quiz[];
+    count: number;
+    pageSize: number;
+  };
+}
+
+export const PageIELTSPracticeLibrary = ({
+  quizFilterData,
+  bannerConfig,
+  initialQuizzes,
+}: PageProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [data, setData] = useState<IPracticeTestResponses | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [called, setCalled] = useState(false);
-  const [currentPageSize, setCurrentPageSize] = useState(PAGE_SIZE);
+  const [navigating, setNavigating] = useState(false);
   const router = useRouter();
 
-  const methods = useForm<FilterFormValues>({
-    defaultValues: DEFAULT_VALUES,
-  });
+  const initialValues = useMemo<FilterFormValues>(
+    () => ({
+      progress: getSingleQueryValue(router.query.progress) as FilterFormValues["progress"],
+      question_form: getArrayQueryValue(router.query.question_form),
+      sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
+      search: getSingleQueryValue(router.query.search),
+      page: Number(getSingleQueryValue(router.query.page) || 1),
+      size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
+      quarter: getSingleQueryValue(router.query.quarter),
+      year: getSingleQueryValue(router.query.year),
+      source: getSingleQueryValue(router.query.source),
+      part: getSingleQueryValue(router.query.part),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const methods = useForm<FilterFormValues>({ defaultValues: initialValues });
 
   const {
     watch,
@@ -124,76 +149,25 @@ export const PageIELTSPracticeLibrary = ({
 
   const bannerData = skill === "listening" ? bannerConfig.listening : bannerConfig.reading;
 
-  const getData = useCallback(async (params: Record<string, unknown>) => {
-    setLoading(true);
-    setCalled(true);
+  // Skeleton during SSR navigation
+  useEffect(() => {
+    const start = (url: string) => {
+      if (url.split("?")[0] === router.pathname) setNavigating(true);
+    };
+    const end = () => setNavigating(false);
+    router.events.on("routeChangeStart", start);
+    router.events.on("routeChangeComplete", end);
+    router.events.on("routeChangeError", end);
+    return () => {
+      router.events.off("routeChangeStart", start);
+      router.events.off("routeChangeComplete", end);
+      router.events.off("routeChangeError", end);
+    };
+  }, [router.events, router.pathname]);
 
-    try {
-      const supabase = createClient();
-      const pagination = params.offsetPagination as { offset: number; size: number } | undefined;
-      const page = pagination ? Math.floor(pagination.offset / pagination.size) + 1 : 1;
-      const pageSize = pagination?.size || PAGE_SIZE;
-
-      setCurrentPageSize(pageSize);
-
-      const result = await getQuizzes(supabase, {
-        skill: (params.skill as SkillType) || undefined,
-        type: "practice",
-        search: (params.search as string) || undefined,
-        source: (params.source as string) || undefined,
-        part: (params.part as string) || undefined,
-        quarter: (params.quarter as string) || undefined,
-        year: (params.year as string) || undefined,
-        questionForm: ((params.question_form as string[]) || []).join(",") || undefined,
-        page,
-        pageSize,
-      });
-
-      const edges: Array<{ node: IPracticeTest }> = (result.data || []).map((quiz: Quiz) => ({
-        node: {
-          id: quiz.id,
-          title: quiz.title,
-          slug: quiz.slug,
-          featuredImage: quiz.featured_image
-            ? { node: { sourceUrl: quiz.featured_image, altText: quiz.title } }
-            : undefined,
-          quizFields: {
-            skill: [quiz.skill, quiz.skill] as IPracticeTest["quizFields"]["skill"],
-            type: [
-              quiz.type,
-              quiz.type,
-            ] as IPracticeTest["quizFields"]["type"],
-            passages: [],
-            part: quiz.part || "0",
-            quarter: quiz.quarter || "",
-            source: quiz.source || "",
-            year: quiz.year || "",
-            testsTaken: quiz.tests_taken || 0,
-            proUserOnly: quiz.pro_user_only || false,
-          },
-        },
-      }));
-
-      setData({
-        quizzes: {
-          edges,
-          pageInfo: {
-            offsetPagination: {
-              total: result.count || 0,
-            },
-          },
-        },
-      } as IPracticeTestResponses);
-    } catch (error) {
-      console.error("Error fetching practice tests:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Sync form ← URL (handles back/forward + resets isDirty after our pushes)
   useEffect(() => {
     if (!router.isReady) return;
-
     reset({
       progress: getSingleQueryValue(router.query.progress) as FilterFormValues["progress"],
       question_form: getArrayQueryValue(router.query.question_form),
@@ -208,41 +182,9 @@ export const PageIELTSPracticeLibrary = ({
     });
   }, [reset, router.isReady, router.query]);
 
-  useEffect(() => {
-    const size = Number(getSingleQueryValue(router.query.size) || PAGE_SIZE);
-    const page = Number(getSingleQueryValue(router.query.page) || 1);
-    const offset = (page - 1) * size;
-    const params: Record<string, unknown> = {
-      search: getSingleQueryValue(router.query.search),
-      offsetPagination: { offset, size },
-      question_form: getArrayQueryValue(router.query.question_form),
-      skill,
-      source: getSingleQueryValue(router.query.source),
-      part: getSingleQueryValue(router.query.part),
-      quarter: getSingleQueryValue(router.query.quarter),
-      year: getSingleQueryValue(router.query.year),
-    };
-
-    switch (getSingleQueryValue(router.query.sort) || "newest") {
-      case "oldest":
-        _.set(params, "orderby", [{ field: "DATE", order: "ASC" }]);
-        break;
-      case "a-z":
-        _.set(params, "orderby", [{ field: "TITLE", order: "ASC" }]);
-        break;
-      case "z-a":
-        _.set(params, "orderby", [{ field: "TITLE", order: "DESC" }]);
-        break;
-      default:
-        _.set(params, "orderby", [{ field: "DATE", order: "DESC" }]);
-        break;
-    }
-
-    getData(params);
-  }, [getData, router.query, skill]);
-
   const values = watch();
 
+  // Sync form → URL; non-shallow so SSR refetches with new filters
   useEffect(() => {
     if (!isDirty) return;
 
@@ -262,21 +204,21 @@ export const PageIELTSPracticeLibrary = ({
 
     if (JSON.stringify(nextQuery) === JSON.stringify(currentQuery)) return;
 
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: nextQuery,
-      },
+    router.push(
+      { pathname: router.pathname, query: nextQuery },
       undefined,
-      { shallow: true, scroll: false }
+      { scroll: false },
     );
   }, [getValues, isDirty, router, values]);
 
-  const items = data?.quizzes.edges ?? [];
+  const items = useMemo(
+    () => (initialQuizzes.data || []).map(mapQuizToEdge),
+    [initialQuizzes.data],
+  );
   const suggestions = items.slice(0, 4);
   const currentPage = Number(getSingleQueryValue(router.query.page) || 1);
-  const total = data?.quizzes.pageInfo.offsetPagination.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / currentPageSize));
+  const total = initialQuizzes.count || 0;
+  const totalPages = Math.max(1, Math.ceil(total / initialQuizzes.pageSize));
   const visiblePages = buildPages(currentPage, totalPages);
   const goToPage = (page: number) => {
     setValue("page", page, { shouldDirty: true });
@@ -322,7 +264,7 @@ export const PageIELTSPracticeLibrary = ({
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {loading
+              {navigating
                 ? Array.from({ length: 4 }).map((_, index) => (
                     <div
                       key={index}
@@ -343,7 +285,7 @@ export const PageIELTSPracticeLibrary = ({
               <h2 className="font-noto-sans text-3xl font-extrabold text-[#2D3142]">
                 IELTS Practice
               </h2>
-              
+
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <QuizLibraryNav />
 
@@ -386,7 +328,7 @@ export const PageIELTSPracticeLibrary = ({
               </aside>
 
               <div className="space-y-10">
-                {loading ? (
+                {navigating ? (
                   <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {Array.from({ length: PAGE_SIZE }).map((_, index) => (
                       <div
@@ -401,7 +343,7 @@ export const PageIELTSPracticeLibrary = ({
                       <PracticeCard key={node.id || index} item={node} />
                     ))}
                   </div>
-                ) : called ? (
+                ) : (
                   <div className="rounded-[30px] border border-dashed border-[rgba(0,0,0,0.1)] bg-[#FAF7EB]/50 px-6 py-16 text-center">
                     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#242938]/40">
                       No results
@@ -413,7 +355,7 @@ export const PageIELTSPracticeLibrary = ({
                       Clear a few filters or search with a broader keyword to explore more test pages.
                     </p>
                   </div>
-                ) : null}
+                )}
 
                 {totalPages > 1 && (
                   <div className="flex flex-wrap items-center justify-center gap-[8px] pt-4">

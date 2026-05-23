@@ -1,6 +1,6 @@
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import { createServerSupabase } from "~supabase/server";
-import { getPostBySlug } from "~services/post";
+import { getPostBySlug, getPosts } from "~services/post";
 import { ROUTES } from "@/shared/routes";
 import { isAdminRole } from "~lib/parseRoles";
 import type { Post, VoteEntry } from "~services/types/database";
@@ -137,9 +137,43 @@ export const getServerSideProps = async (
     userId = user?.id;
   }
 
+  // Similar posts: prefer same category, pad with latest if fewer than 4
+  const primaryCategory = post.categories?.[0];
+  const [sameCategoryResult, latestForSimilarResult, latestForSidebarResult] =
+    await Promise.allSettled([
+      primaryCategory
+        ? getPosts(supabase, { category: primaryCategory, page: 1, pageSize: 8 })
+        : Promise.resolve({ data: [] as Post[], count: 0, page: 1, pageSize: 8, totalPages: 0 }),
+      getPosts(supabase, { page: 1, pageSize: 12 }),
+      getPosts(supabase, { page: 1, pageSize: 7 }),
+    ]);
+
+  const sameCategory =
+    sameCategoryResult.status === "fulfilled" ? sameCategoryResult.value.data : [];
+  const latestForSimilar =
+    latestForSimilarResult.status === "fulfilled" ? latestForSimilarResult.value.data : [];
+  const latestForSidebar =
+    latestForSidebarResult.status === "fulfilled" ? latestForSidebarResult.value.data : [];
+
+  const usedIds = new Set<string>([String(post.id)]);
+  const sameCategoryFiltered = sameCategory.filter((p) => !usedIds.has(String(p.id)));
+  sameCategoryFiltered.forEach((p) => usedIds.add(String(p.id)));
+
+  let similarPosts: Post[];
+  if (sameCategoryFiltered.length >= 4) {
+    similarPosts = sameCategoryFiltered.slice(0, 4);
+  } else {
+    const extras = latestForSimilar.filter((p) => !usedIds.has(String(p.id)));
+    similarPosts = [...sameCategoryFiltered, ...extras].slice(0, 4);
+  }
+
+  const relatedPosts = latestForSidebar.filter((p) => String(p.id) !== String(post.id));
+
   return {
     props: {
       post: transformPostToLegacy(post, userId),
+      similarPosts: JSON.parse(JSON.stringify(similarPosts)),
+      relatedPosts: JSON.parse(JSON.stringify(relatedPosts)),
     },
   };
 };

@@ -17,8 +17,22 @@ import {
   useContentImageFallback,
 } from "@/shared/lib/content-image";
 import { ProBadge } from "@/shared/ui/pro-badge";
+import type { Post } from "~services/types/database";
 
-export const PageSingle = ({ post }: { post: IPost & { pro_user_only?: boolean; author?: { node?: { name?: string; userData?: { avatar?: { node?: { sourceUrl?: string } } } } } } }) => {
+type SidebarOrSimilarPost = Pick<
+  Post,
+  "id" | "title" | "slug" | "featured_image" | "pro_user_only" | "categories" | "created_at" | "views"
+>;
+
+export const PageSingle = ({
+  post,
+  similarPosts = [],
+  relatedPosts = [],
+}: {
+  post: IPost & { pro_user_only?: boolean; author?: { node?: { name?: string; userData?: { avatar?: { node?: { sourceUrl?: string } } } } } };
+  similarPosts?: SidebarOrSimilarPost[];
+  relatedPosts?: SidebarOrSimilarPost[];
+}) => {
   // Hỗ trợ cả raw Post (snake_case) và IPost (camelCase postMeta)
   const isProPost = (post as any).pro_user_only || post.postMeta?.proUserOnly || false;
   const fallbackImage = useContentImageFallback();
@@ -278,17 +292,14 @@ export const PageSingle = ({ post }: { post: IPost & { pro_user_only?: boolean; 
             {/* Right Column: Related items */}
             <div className="w-full lg:w-[280px] shrink-0 relative z-10">
               <div className="sticky top-35 space-y-8">
-                <RelatedPost post={post} />
+                <RelatedPost relatedPosts={relatedPosts} />
               </div>
             </div>
           </div>
         </Container>
 
         {/* === SECTION: Similar Posts === */}
-        <SimilarPostsSection
-          currentPostId={post.id}
-          categories={post.categories as any}
-        />
+        <SimilarPostsSection posts={similarPosts} />
       </div>
     </>
   );

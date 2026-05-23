@@ -1,13 +1,9 @@
-import Link from "next/link";
 import { ROUTES } from "@/shared/routes";
 import { FormProvider, useForm } from "react-hook-form";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import _ from "lodash";
-import { createClient } from "~supabase/client";
 import { PostCard } from "./post-card";
 import type { Post } from "~services/types/database";
-import { getPosts } from "~services/post";
 import dayjs from "dayjs";
 import { Container } from "@/shared/ui";
 import type { PracticeLibraryBannerConfig } from "./types";
@@ -22,13 +18,6 @@ export type FilterFormValues = {
 };
 
 const PAGE_SIZE = 9;
-
-const DEFAULT_VALUES: FilterFormValues = {
-  sort: "newest",
-  search: "",
-  page: 1,
-  size: PAGE_SIZE,
-};
 
 const SORT_OPTIONS: Array<{ label: string; value: FilterFormValues["sort"] }> = [
   { label: "Newest", value: "newest" },
@@ -61,21 +50,32 @@ const buildPages = (current: number, total: number) => {
     .sort((left, right) => left - right);
 };
 
-export const PageIELTSPrediction = ({
-  bannerConfig,
-}: {
+interface PageProps {
   bannerConfig: PracticeLibraryBannerConfig;
-}) => {
+  initialPosts: {
+    data: Post[];
+    count: number;
+    pageSize: number;
+  };
+}
+
+export const PageIELTSPrediction = ({ bannerConfig, initialPosts }: PageProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
-  const [called, setCalled] = useState(false);
-  const [currentPageSize, setCurrentPageSize] = useState(PAGE_SIZE);
+  const [navigating, setNavigating] = useState(false);
   const router = useRouter();
 
-  const methods = useForm<FilterFormValues>({
-    defaultValues: DEFAULT_VALUES,
-  });
+  const initialValues = useMemo<FilterFormValues>(
+    () => ({
+      sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
+      search: getSingleQueryValue(router.query.search),
+      page: Number(getSingleQueryValue(router.query.page) || 1),
+      size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const methods = useForm<FilterFormValues>({ defaultValues: initialValues });
 
   const {
     watch,
@@ -85,54 +85,25 @@ export const PageIELTSPrediction = ({
     formState: { isDirty },
   } = methods;
 
-  const skill = useMemo(() => {
-    const routeSkill = router.pathname.split("/").pop();
-    return routeSkill === "listening" ? "listening" : "reading";
-  }, [router.pathname]);
-
   const bannerData = bannerConfig.reading || bannerConfig.listening;
 
-  const getData = useCallback(async (params: Record<string, unknown>) => {
-    setLoading(true);
-    setCalled(true);
-
-    try {
-      const supabase = createClient();
-      const pagination = params.offsetPagination as { offset: number; size: number } | undefined;
-      const page = pagination ? Math.floor(pagination.offset / pagination.size) + 1 : 1;
-      const pageSize = pagination?.size || PAGE_SIZE;
-
-      setCurrentPageSize(pageSize);
-
-      const result = await getPosts(supabase, {
-        category: "IELTS Prediction",
-        search: (params.search as string) || undefined,
-        page,
-        pageSize,
-      });
-
-      setData({
-        posts: {
-          edges: (result.data || []).map((post: Post) => ({
-            node: post,
-          })),
-          pageInfo: {
-            offsetPagination: {
-              total: result.count || 0,
-            },
-          },
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(() => {
+    const start = (url: string) => {
+      if (url.split("?")[0] === router.pathname) setNavigating(true);
+    };
+    const end = () => setNavigating(false);
+    router.events.on("routeChangeStart", start);
+    router.events.on("routeChangeComplete", end);
+    router.events.on("routeChangeError", end);
+    return () => {
+      router.events.off("routeChangeStart", start);
+      router.events.off("routeChangeComplete", end);
+      router.events.off("routeChangeError", end);
+    };
+  }, [router.events, router.pathname]);
 
   useEffect(() => {
     if (!router.isReady) return;
-
     reset({
       sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
       search: getSingleQueryValue(router.query.search),
@@ -140,34 +111,6 @@ export const PageIELTSPrediction = ({
       size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
     });
   }, [reset, router.isReady, router.query]);
-
-  useEffect(() => {
-    const size = Number(getSingleQueryValue(router.query.size) || PAGE_SIZE);
-    const page = Number(getSingleQueryValue(router.query.page) || 1);
-    const offset = (page - 1) * size;
-    const params: Record<string, unknown> = {
-      search: getSingleQueryValue(router.query.search),
-      offsetPagination: { offset, size },
-      skill,
-    };
-
-    switch (getSingleQueryValue(router.query.sort) || "newest") {
-      case "oldest":
-        _.set(params, "orderby", [{ field: "DATE", order: "ASC" }]);
-        break;
-      case "a-z":
-        _.set(params, "orderby", [{ field: "TITLE", order: "ASC" }]);
-        break;
-      case "z-a":
-        _.set(params, "orderby", [{ field: "TITLE", order: "DESC" }]);
-        break;
-      default:
-        _.set(params, "orderby", [{ field: "DATE", order: "DESC" }]);
-        break;
-    }
-
-    getData(params);
-  }, [getData, router.query, skill]);
 
   const values = watch();
 
@@ -184,21 +127,21 @@ export const PageIELTSPrediction = ({
 
     if (JSON.stringify(nextQuery) === JSON.stringify(currentQuery)) return;
 
-    router.replace(
-      {
-        pathname: router.pathname,
-        query: nextQuery,
-      },
+    router.push(
+      { pathname: router.pathname, query: nextQuery },
       undefined,
-      { shallow: true, scroll: false }
+      { scroll: false },
     );
   }, [getValues, isDirty, router, values]);
 
-  const items = data?.posts?.edges ?? [];
+  const items = useMemo(
+    () => (initialPosts.data || []).map((post) => ({ node: post })),
+    [initialPosts.data],
+  );
 
   const currentPage = Number(getSingleQueryValue(router.query.page) || 1);
-  const total = data?.posts?.pageInfo.offsetPagination.total || 0;
-  const totalPages = Math.max(1, Math.ceil(total / currentPageSize));
+  const total = initialPosts.count || 0;
+  const totalPages = Math.max(1, Math.ceil(total / initialPosts.pageSize));
   const visiblePages = buildPages(currentPage, totalPages);
   const goToPage = (page: number) => {
     setValue("page", page, { shouldDirty: true });
@@ -225,7 +168,7 @@ export const PageIELTSPrediction = ({
               <h2 className="font-noto-sans text-3xl font-extrabold text-[#2D3142]">
                 IELTS Prediction
               </h2>
-              
+
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-end">
 
                 <div className="flex flex-wrap items-center gap-3">
@@ -267,7 +210,7 @@ export const PageIELTSPrediction = ({
               </aside>
 
               <div className="space-y-10">
-                {loading ? (
+                {navigating ? (
                   <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                     {Array.from({ length: PAGE_SIZE }).map((_, index) => (
                       <div
@@ -278,7 +221,7 @@ export const PageIELTSPrediction = ({
                   </div>
                 ) : items.length ? (
                   <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map(({ node }: { node: Post }, index: number) => (
+                    {items.map(({ node }, index) => (
                       <PostCard
                         key={node.id || index}
                         image={node.featured_image || undefined}
@@ -289,7 +232,7 @@ export const PageIELTSPrediction = ({
                       />
                     ))}
                   </div>
-                ) : called ? (
+                ) : (
                   <div className="rounded-[30px] border border-dashed border-[rgba(0,0,0,0.1)] bg-[#FAF7EB]/50 px-6 py-16 text-center">
                     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#242938]/40">
                       No results
@@ -301,7 +244,7 @@ export const PageIELTSPrediction = ({
                       Clear a few filters or search with a broader keyword to explore more test pages.
                     </p>
                   </div>
-                ) : null}
+                )}
 
                 {totalPages > 1 && (
                   <div className="flex flex-wrap items-center justify-center gap-[8px] pt-4">

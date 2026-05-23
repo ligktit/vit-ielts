@@ -3,19 +3,39 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import type { PracticeLibraryBannerConfig } from "./ui/types";
 import { createServerSupabase } from "~supabase/server";
 import { readConfig } from "~services/cms-config";
+import { getPosts } from "~services/post";
+import type { Post } from "~services/types/database";
 
 export { PageIELTSPrediction } from "./ui";
+
+const PAGE_SIZE = 9;
+
+const getSingleQueryValue = (value: string | string[] | undefined) => {
+  if (Array.isArray(value)) return value[0] || "";
+  return value || "";
+};
 
 export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
   withMasterData,
   async (context: GetServerSidePropsContext) => {
-    const { resolvedUrl } = context;
-    const skill = resolvedUrl.split("/").at(-1);
     const supabase = createServerSupabase(context);
+    const { query } = context;
 
-    const bannerConfig = await readConfig<PracticeLibraryBannerConfig>(supabase, "ielts-prediction/banner").catch(
-      () => null
-    );
+    const size = Number(getSingleQueryValue(query.size) || PAGE_SIZE);
+    const page = Number(getSingleQueryValue(query.page) || 1);
+    const search = getSingleQueryValue(query.search) || undefined;
+
+    const [bannerConfig, postsResult] = await Promise.all([
+      readConfig<PracticeLibraryBannerConfig>(supabase, "ielts-prediction/banner").catch(
+        () => null
+      ),
+      getPosts(supabase, {
+        category: "IELTS Prediction",
+        search,
+        page,
+        pageSize: size,
+      }).catch(() => ({ data: [] as Post[], count: 0 })),
+    ]);
 
     const defaultBannerConfig: PracticeLibraryBannerConfig = {
       listening: {
@@ -55,6 +75,11 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         bannerConfig: {
           listening: bannerConfig?.listening ?? defaultBannerConfig.listening,
           reading: bannerConfig?.reading ?? defaultBannerConfig.reading,
+        },
+        initialPosts: {
+          data: postsResult.data,
+          count: postsResult.count,
+          pageSize: size,
         },
       },
     };

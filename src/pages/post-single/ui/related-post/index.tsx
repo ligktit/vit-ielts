@@ -1,82 +1,34 @@
-import { IPost } from "@/shared/types";
 import Link from "next/link";
 import Image from "next/image";
-import { Skeleton } from "antd";
-import { useEffect, useState } from "react";
-import { createClient } from "~supabase/client";
-import { getPosts } from "~services/post";
 import { resolveContentImage, useContentImageFallback } from "@/shared/lib/content-image";
 import dayjs from "dayjs";
 import { PostCard } from "@/pages/ielts-prediction/ui/post-card";
+import type { Post } from "~services/types/database";
 
-function RelatedPost({ post }: { post: IPost }) {
+type SidebarPost = Pick<
+  Post,
+  "id" | "title" | "slug" | "featured_image" | "pro_user_only" | "created_at"
+>;
+
+function RelatedPost({ relatedPosts }: { relatedPosts: SidebarPost[] }) {
   const fallbackImage = useContentImageFallback();
-  const [relatedPosts, setRelatedPosts] = useState<IPost[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchRelated = async () => {
-      try {
-        const supabase = createClient();
-        const result = await getPosts(supabase, {
-          page: 1,
-          pageSize: 7,
-        });
-        // Map and filter out current post
-        const mapped = (result.data || []).filter((p: any) => p.id !== post.id).map((p: any) => ({
-          ...p,
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          date: p.created_at,
-          content: p.content || "",
-          link: `/blog/${p.slug}`,
-          featuredImage: p.featured_image
-            ? { node: { sourceUrl: p.featured_image, altText: p.title } }
-            : undefined,
-          categories: { edges: p.categories?.map((c: any) => ({ node: { name: c.name, link: `/category/${c.slug}` } })) || [] },
-          postMeta: { views: p.views || 0, proUserOnly: p.pro_user_only || false },
-        })) as unknown as IPost[];
-        setRelatedPosts(mapped);
-      } catch (error) {
-        console.error("Error fetching related posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRelated();
-  }, [post.id]);
+  if (!relatedPosts.length) return null;
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <h3 className="font-bold text-lg text-[#2D3142]">Bài viết nổi bật</h3>
-        <Skeleton.Image active className="!w-full !h-[200px]" />
-        <Skeleton active paragraph={{ rows: 2 }} />
-      </div>
-    );
-  }
-
-  if (!relatedPosts.length) {
-    return null;
-  }
+  const featured = relatedPosts[0];
 
   return (
     <>
-      {relatedPosts.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="font-bold text-lg text-[#2D3142]">
-            Bài viết nổi bật
-          </h3>
-          <PostCard
-            title={relatedPosts[0].title}
-            image={relatedPosts[0].featuredImage?.node?.sourceUrl}
-            href={relatedPosts[0].link}
-            date={relatedPosts[0].date ? dayjs(relatedPosts[0].date).format("DD/MM/YYYY") : undefined}
-            isPro={relatedPosts[0].postMeta?.proUserOnly}
-          />
-        </div>
-      )}
+      <div className="space-y-4">
+        <h3 className="font-bold text-lg text-[#2D3142]">Bài viết nổi bật</h3>
+        <PostCard
+          title={featured.title}
+          image={featured.featured_image ?? undefined}
+          href={`/blog/${featured.slug}`}
+          date={featured.created_at ? dayjs(featured.created_at).format("DD/MM/YYYY") : undefined}
+          isPro={!!featured.pro_user_only}
+        />
+      </div>
 
       {relatedPosts.length > 1 && (
         <div className="space-y-4 mt-8">
@@ -85,15 +37,15 @@ function RelatedPost({ post }: { post: IPost }) {
           </h3>
 
           <div className="space-y-4">
-            {relatedPosts.slice(1, 7).map((rel, idx) => (
+            {relatedPosts.slice(1, 7).map((rel) => (
               <Link
-                key={idx}
-                href={rel.link}
+                key={rel.id}
+                href={`/blog/${rel.slug}`}
                 className="flex gap-3 group items-center"
               >
                 <div className="w-[100px] h-[65px] relative rounded-lg overflow-hidden shrink-0 border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
                   <Image
-                    src={resolveContentImage(rel.featuredImage?.node?.sourceUrl, fallbackImage)}
+                    src={resolveContentImage(rel.featured_image ?? undefined, fallbackImage)}
                     alt={rel.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform"

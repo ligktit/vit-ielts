@@ -24,6 +24,7 @@ import { useAuth } from "@/appx/providers";
 export const PageSingle = ({
   sampleEssay: post,
   relatedEssays = [],
+  sidebarEssays = [],
 }: {
   sampleEssay: SingleSampleEssay;
   relatedEssays?: Pick<
@@ -36,6 +37,7 @@ export const PageSingle = ({
     | "excerpt"
     | "pro_user_only"
   >[];
+  sidebarEssays?: Pick<SampleEssay, "id" | "slug" | "title" | "featured_image">[];
 }) => {
   const fallbackImage = useContentImageFallback();
   const splideRef = useRef<any>(null);
@@ -274,7 +276,7 @@ export const PageSingle = ({
             {/* Right Column: Related items */}
             <div className="w-full lg:w-[280px] shrink-0 relative z-10">
               <div className="sticky top-35 space-y-8">
-                <RelatedEssays currentId={post.id} skill={post.skill} />
+                <RelatedEssays essays={sidebarEssays} skill={post.skill} />
               </div>
             </div>
           </div>

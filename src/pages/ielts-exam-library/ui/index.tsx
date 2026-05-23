@@ -1,17 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { Container } from "@/shared/ui";
 import { QuizLibraryNav, SEOHeader } from "@/widgets";
-import { createClient } from "~supabase/client";
-import { getExamCollections } from "~services/exam-collection";
 import { ExamLibraryHeroBanner } from "./hero-banner";
 import { Filter } from "./filter";
-import { ExamItem } from "./exam-item";
 import { ExamCollection } from "./exam-collection";
 import type { ExamLibraryHeroConfig } from "./types";
-import type { IExamCollection, IExamCollectionResponse } from "../api";
+import type { ExamCollectionResponse } from "~services/types/database";
 import { BatchResultsProvider } from "./batch-results-context";
 
 export type FilterFormValues = {
@@ -25,16 +22,6 @@ export type FilterFormValues = {
 };
 
 const PAGE_SIZE = 5;
-
-const DEFAULT_VALUES: FilterFormValues = {
-  type: "academic",
-  skill: "reading",
-  collection: "",
-  sort: "newest",
-  search: "",
-  page: 1,
-  size: PAGE_SIZE,
-};
 
 const SORT_OPTIONS: Array<{ label: string; value: FilterFormValues["sort"] }> = [
   { label: "Newest", value: "newest" },
@@ -52,96 +39,81 @@ const buildPages = (current: number, total: number) => {
 
 interface PageIELTSExamLibraryProps {
   heroConfig: ExamLibraryHeroConfig;
+  initialData: ExamCollectionResponse;
 }
 
-type FlatExam = IExamCollection["data"]["reading"][number]["exams"][number] & {
-  skill: "reading" | "listening";
-  collectionTitle: string;
-};
-
-export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) => {
+export const PageIELTSExamLibrary = ({
+  heroConfig,
+  initialData,
+}: PageIELTSExamLibraryProps) => {
   const router = useRouter();
-  const methods = useForm<FilterFormValues>({ defaultValues: DEFAULT_VALUES });
+
+  // Derive initial form values from the URL so back/forward and direct links
+  // hydrate the form correctly. SSR has already resolved data based on the
+  // same query, so the form just mirrors the server state.
+  const initialValues = useMemo<FilterFormValues>(
+    () => ({
+      type: (router.query.type as FilterFormValues["type"]) || "academic",
+      skill: (router.query.skill as FilterFormValues["skill"]) || "reading",
+      collection: (router.query.collection as string) || "",
+      sort: (router.query.sort as FilterFormValues["sort"]) || "newest",
+      search: (router.query.search as string) || "",
+      page: Number(router.query.page) || 1,
+      size: PAGE_SIZE,
+    }),
+    // initialValues are seeded once per SSR navigation; the form mutates after
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const methods = useForm<FilterFormValues>({ defaultValues: initialValues });
   const {
     watch,
     setValue,
+    reset,
     formState: { isDirty },
   } = methods;
 
-  const [data, setData] = useState<IExamCollectionResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [called, setCalled] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [pageInfo, setPageInfo] = useState<{ total: number; totalPages: number } | null>(null);
-
   const values = watch();
 
-  const getData = useCallback(async (params: Record<string, unknown>) => {
-    setLoading(true);
-    setCalled(true);
-    try {
-      const supabase = createClient();
-      const result = await getExamCollections(supabase, {
-        type:
-          params.type && params.type !== "all"
-            ? (params.type as "academic" | "general")
-            : undefined,
-        search: (params.search as string) || undefined,
-        page: (params.page as number) || 1,
-        pageSize: PAGE_SIZE,
-      });
-      setData({
-        examCollection: {
-          data: result.data,
-          pageInfo: result.pageInfo,
-        },
-      } as unknown as IExamCollectionResponse);
-      setPageInfo({ total: result.pageInfo.total, totalPages: result.pageInfo.totalPages });
-    } catch (error) {
-      console.error("Error fetching exam collections:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [navigating, setNavigating] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Sync form ← router query (and push defaults to URL on first visit)
+  // Skeleton state during SSR navigation triggered by filter changes
+  useEffect(() => {
+    const start = (url: string) => {
+      if (url.split("?")[0] === router.pathname) setNavigating(true);
+    };
+    const end = () => setNavigating(false);
+    router.events.on("routeChangeStart", start);
+    router.events.on("routeChangeComplete", end);
+    router.events.on("routeChangeError", end);
+    return () => {
+      router.events.off("routeChangeStart", start);
+      router.events.off("routeChangeComplete", end);
+      router.events.off("routeChangeError", end);
+    };
+  }, [router.events, router.pathname]);
+
+  // After every URL change (including the ones we trigger ourselves),
+  // reset the form to mirror the URL and clear isDirty. This makes
+  // back/forward navigation work, and resets the dirty flag so the next
+  // user interaction can fire the form→URL effect again.
   useEffect(() => {
     if (!router.isReady) return;
-    const q = router.query;
-
-    // First visit: no type/skill in URL → push defaults to URL
-    if (!q.type && !q.skill) {
-      router.replace(
-        { pathname: router.pathname, query: { ...q, type: "academic", skill: "reading" } },
-        undefined,
-        { shallow: true, scroll: false }
-      );
-      return;
-    }
-
-    methods.reset({
-      type: (q.type as FilterFormValues["type"]) || "academic",
-      skill: (q.skill as FilterFormValues["skill"]) || "reading",
-      collection: (q.collection as string) || "",
-      sort: (q.sort as FilterFormValues["sort"]) || "newest",
-      search: (q.search as string) || "",
-      page: Number(q.page) || 1,
+    reset({
+      type: (router.query.type as FilterFormValues["type"]) || "academic",
+      skill: (router.query.skill as FilterFormValues["skill"]) || "reading",
+      collection: (router.query.collection as string) || "",
+      sort: (router.query.sort as FilterFormValues["sort"]) || "newest",
+      search: (router.query.search as string) || "",
+      page: Number(router.query.page) || 1,
       size: PAGE_SIZE,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, router.query]);
 
-  // Fetch when relevant query params change (including page)
-  useEffect(() => {
-    if (!router.isReady) return;
-    getData({
-      type: router.query.type || "academic",
-      search: router.query.search || "",
-      page: Number(router.query.page) || 1,
-    });
-  }, [getData, router.isReady, router.query.type, router.query.search, router.query.page]);
-
-  // Sync form → router query
+  // Sync form → URL; non-shallow so SSR re-runs and props refresh
   useEffect(() => {
     if (!isDirty) return;
     const q: Record<string, string> = {};
@@ -156,8 +128,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
     const nextQ = JSON.stringify(q);
     if (currentQ === nextQ) return;
 
-    router.replace({ pathname: router.pathname, query: q }, undefined, {
-      shallow: true,
+    router.push({ pathname: router.pathname, query: q }, undefined, {
       scroll: false,
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,8 +136,6 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
 
   // Group exams by collection, filtering individual exams by search term
   const groupedCollections = useMemo(() => {
-    if (!data?.examCollection?.data) return [];
-    
     const map = new Map<string, any>();
     const skillParam = values.skill || "all";
 
@@ -174,7 +143,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
     const searchWords = values.search
       ? values.search.toLowerCase().split(/\s+/).filter((w) => w.length > 0)
       : [];
-    
+
     // Client-side filter: keep only exams whose title matches ALL search words.
     // When a search like "28" matched a collection via range detection (e.g.
     // "Test 21-40"), the server returns all exams inside that collection. We
@@ -184,21 +153,21 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
       const title = (exam.title || "").toLowerCase();
       return searchWords.every((word) => title.includes(word));
     };
-    
+
     if (skillParam === "all" || skillParam === "reading") {
-       (data.examCollection.data.reading || []).forEach(col => {
+       (initialData.data.reading || []).forEach(col => {
            if (values.collection && col.title !== values.collection) return;
            const mappedExams = col.exams
              .map((e: any) => ({ ...e, skill: "reading" }))
              .filter(examMatchesSearch);
            if (mappedExams.length > 0) {
-             map.set(col.id, { ...col, exams: mappedExams }); 
+             map.set(col.id, { ...col, exams: mappedExams });
            }
        });
     }
-    
+
     if (skillParam === "all" || skillParam === "listening") {
-       (data.examCollection.data.listening || []).forEach(col => {
+       (initialData.data.listening || []).forEach(col => {
            if (values.collection && col.title !== values.collection) return;
            const mappedExams = col.exams
              .map((e: any) => ({ ...e, skill: "listening" }))
@@ -211,30 +180,25 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
            }
        });
     }
-    
+
     return Array.from(map.values());
-  }, [data, values.skill, values.collection, values.search]);
+  }, [initialData, values.skill, values.collection, values.search]);
 
   const currentPage = values.page || 1;
-  const totalPages = pageInfo?.totalPages ?? 1;
+  const totalPages = initialData.pageInfo?.totalPages ?? 1;
   const visiblePages = buildPages(currentPage, totalPages);
-  // Server already returns only the current page of collections
   const pagedCols = groupedCollections;
   const goToPage = (page: number) => {
     setValue("page", page, { shouldDirty: true });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Unique collection titles for filter sidebar
   const availableCollections = useMemo<string[]>(() => {
-    if (!data?.examCollection?.data) return [];
-    const readingCols = (data.examCollection.data.reading || []).map((c) => c.title);
-    const listeningCols = (data.examCollection.data.listening || []).map((c) => c.title);
-    const all = [...readingCols, ...listeningCols];
-    return Array.from(new Set(all));
-  }, [data]);
+    const readingCols = (initialData.data.reading || []).map((c) => c.title);
+    const listeningCols = (initialData.data.listening || []).map((c) => c.title);
+    return Array.from(new Set([...readingCols, ...listeningCols]));
+  }, [initialData]);
 
-  // Collect all visible quiz IDs for batch results fetching
   const allQuizIds = useMemo(() => {
     const ids: string[] = [];
     for (const col of pagedCols) {
@@ -309,7 +273,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
               {/* List */}
               <BatchResultsProvider quizIds={allQuizIds}>
               <div className="space-y-12 min-w-0">
-                {loading ? (
+                {navigating ? (
                   <div className="space-y-12">
                     {Array.from({ length: PAGE_SIZE }).map((_, i) => (
                       <ExamCollection key={i} loading={true} />
@@ -321,7 +285,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                       <ExamCollection key={col.id} data={col} />
                     ))}
                   </div>
-                ) : called ? (
+                ) : (
                   <div className="rounded-[30px] border border-dashed border-[rgba(0,0,0,0.1)] bg-[#FAF7EB]/50 px-6 py-16 text-center">
                     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#242938]/40">
                       No results
@@ -333,7 +297,7 @@ export const PageIELTSExamLibrary = ({ heroConfig }: PageIELTSExamLibraryProps) 
                       Clear a few filters or search with a broader keyword to explore more tests.
                     </p>
                   </div>
-                ) : null}
+                )}
 
                 {/* Pagination */}
                 {totalPages > 1 && (
