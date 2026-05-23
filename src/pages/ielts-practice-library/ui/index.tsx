@@ -183,6 +183,7 @@ export const PageIELTSPracticeLibrary = ({
   }, [reset, router.isReady, router.query]);
 
   const values = watch();
+  const valuesSignature = JSON.stringify(createQueryPayload(values));
 
   // Sync form → URL; non-shallow so SSR refetches with new filters
   useEffect(() => {
@@ -209,7 +210,11 @@ export const PageIELTSPracticeLibrary = ({
       undefined,
       { scroll: false },
     );
-  }, [getValues, isDirty, router, values]);
+  // Depend on the stringified query — watch() returns a fresh object on
+  // every render, so depending on `values` directly would re-run this
+  // effect each render and keep pushing while SSR navigation is in flight.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valuesSignature, isDirty]);
 
   const items = useMemo(
     () => (initialQuizzes.data || []).map(mapQuizToEdge),

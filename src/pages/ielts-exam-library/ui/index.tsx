@@ -131,8 +131,11 @@ export const PageIELTSExamLibrary = ({
     router.push({ pathname: router.pathname, query: q }, undefined, {
       scroll: false,
     });
+  // Depend on primitive values, not the watch() object — watch() returns a
+  // new reference every render, which would fire this effect every render
+  // and keep pushing while SSR navigation is still in flight.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, isDirty]);
+  }, [values.type, values.skill, values.collection, values.search, values.sort, values.page, isDirty]);
 
   // Group exams by collection, filtering individual exams by search term
   const groupedCollections = useMemo(() => {

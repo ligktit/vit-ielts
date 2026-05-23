@@ -132,7 +132,10 @@ export const PageIELTSPrediction = ({ bannerConfig, initialPosts }: PageProps) =
       undefined,
       { scroll: false },
     );
-  }, [getValues, isDirty, router, values]);
+  // Primitive deps avoid the watch()-new-ref-every-render loop while SSR
+  // navigation is in flight.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.sort, values.search, values.page, values.size, isDirty]);
 
   const items = useMemo(
     () => (initialPosts.data || []).map((post) => ({ node: post })),
