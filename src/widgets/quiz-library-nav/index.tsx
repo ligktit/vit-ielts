@@ -82,7 +82,7 @@ function QuizLibraryNav() {
   };
 
   return (
-    <div className="flex items-center gap-4 flex-wrap">
+    <div className="flex items-center gap-1.5 sm:gap-2 xl:gap-4 flex-wrap">
       {navigationItems.map((item, index) => {
         const active = isActive(item.link);
         return (
@@ -93,14 +93,14 @@ function QuizLibraryNav() {
           >
             <div
               className={twMerge(
-                "flex items-center justify-center gap-4 h-[50px] py-[15px] px-[20px] rounded-[25px] border transition-colors",
+                "flex items-center justify-center gap-1.5 sm:gap-2 xl:gap-4 h-[36px] sm:h-[40px] xl:h-[50px] py-[6px] sm:py-[10px] xl:py-[15px] px-[8px] sm:px-[12px] xl:px-[20px] rounded-[25px] border transition-colors whitespace-nowrap [&_img]:w-[14px] [&_img]:h-[14px] sm:[&_img]:w-[16px] sm:[&_img]:h-[16px] xl:[&_img]:w-[22px] xl:[&_img]:h-[22px]",
                 active
                   ? "bg-primary-500 border-primary text-white"
                   : "bg-white border-[#191D22] text-[#191D22] hover:bg-gray-50"
               )}
             >
               {item.icon(active)}
-              <p className="text-base font-medium">{item.label}</p>
+              <p className="text-[11px] sm:text-[12px] xl:text-base font-medium">{item.label}</p>
             </div>
           </a>
         );

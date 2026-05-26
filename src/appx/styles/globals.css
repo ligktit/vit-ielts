@@ -803,3 +803,162 @@ br {
   border: none !important;
   box-shadow: none !important;
 }
+
+/* ==========================================================================
+   Exam footer — keep the right-side nav (prev / next / submit) visible at
+   every viewport width. When the active passage's question palette is wider
+   than the available row width (e.g. Passage 2/3 with 2-digit numbers on a
+   narrow viewport) the palette area must scroll horizontally instead of
+   pushing the right-side buttons off the screen. These rules are no-ops on
+   wide viewports where the content already fits.
+   ========================================================================== */
+footer.fixed > div > .flex-grow.mr-10,
+footer.shrink-0 > .flex-grow.mr-\[110px\] {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  justify-content: flex-start;
+  scrollbar-width: thin;
+}
+footer.fixed > div > .flex-grow.mr-10 > div,
+footer.shrink-0 > .flex-grow.mr-\[110px\] > div {
+  flex-shrink: 0;
+  width: auto;
+}
+
+/* ==========================================================================
+   Mobile scale-down for exam panels (take-the-test + review explanation).
+   The Splitter stays horizontal at every viewport — on phones we keep the
+   desktop layout but shrink fonts, padding, and images so passage + questions
+   still fit side-by-side.
+   ========================================================================== */
+@media (max-width: 767px) {
+  /* Passage + questions text */
+  #iel-take-test-main .prose-sm,
+  #iel-take-test-main .prose-sm p,
+  #iel-take-test-main .prose-sm li,
+  #iel-take-test-main .prose-sm span,
+  #iel-test-result-explanation .prose-sm,
+  #iel-test-result-explanation .prose-sm p,
+  #iel-test-result-explanation .prose-sm li,
+  #iel-test-result-explanation .prose-sm span {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  #iel-take-test-main .prose-sm h1,
+  #iel-take-test-main .prose-sm h2,
+  #iel-take-test-main .prose-sm h3,
+  #iel-take-test-main .prose-sm h4,
+  #iel-test-result-explanation .prose-sm h1,
+  #iel-test-result-explanation .prose-sm h2,
+  #iel-test-result-explanation .prose-sm h3,
+  #iel-test-result-explanation .prose-sm h4 {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+
+  /* Passage panel padding */
+  #iel-take-test-main .prose-sm.max-w-none,
+  #iel-test-result-explanation .prose-sm.max-w-none {
+    padding: 8px !important;
+    padding-bottom: 80px !important;
+  }
+
+  /* Questions panel padding */
+  #iel-take-test-main .p-6,
+  #iel-test-result-explanation .p-6 {
+    padding: 8px !important;
+    padding-bottom: 80px !important;
+  }
+
+  /* Passage info banner (Passage X / Read the text…) */
+  #iel-take-test-main > .border,
+  #iel-test-result-explanation > .border {
+    margin: 8px !important;
+  }
+  #iel-take-test-main > .border > .p-\[16px\],
+  #iel-test-result-explanation > .border > .p-\[16px\] {
+    padding: 8px !important;
+  }
+  #iel-take-test-main > .border .font-bold,
+  #iel-test-result-explanation > .border .font-bold {
+    font-size: 13px !important;
+  }
+  #iel-take-test-main > .border .text-base,
+  #iel-test-result-explanation > .border .text-base {
+    font-size: 12px !important;
+  }
+
+  /* Images in passage scale to panel width */
+  #iel-take-test-main img,
+  #iel-test-result-explanation img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Question label inputs / radios / fillups — keep tappable but smaller */
+  #iel-take-test-main .text-\[16px\],
+  #iel-test-result-explanation .text-\[16px\] {
+    font-size: 12px !important;
+  }
+  #iel-take-test-main .text-\[14px\],
+  #iel-test-result-explanation .text-\[14px\] {
+    font-size: 11px !important;
+  }
+
+  /* Ant Splitter handle — make it draggable with a thumb on phone */
+  #iel-take-test-main .ant-splitter-bar,
+  #iel-test-result-explanation .ant-splitter-bar {
+    flex-basis: 6px !important;
+  }
+
+  /* Exam footer — compact so the question palette still fits */
+  footer.fixed .text-\[16px\] {
+    font-size: 12px !important;
+  }
+  footer.fixed .text-\[18px\] {
+    font-size: 13px !important;
+  }
+  footer.fixed .pl-\[20px\] {
+    padding-left: 8px !important;
+  }
+  footer.fixed .pr-\[30px\] {
+    padding-right: 12px !important;
+  }
+  footer.fixed .mr-10 {
+    margin-right: 8px !important;
+  }
+  footer.fixed .w-\[80px\] {
+    width: 56px !important;
+  }
+  footer.fixed .h-\[53px\] {
+    height: 44px !important;
+  }
+  footer.fixed .w-\[55px\] {
+    width: 40px !important;
+  }
+  footer.fixed .h-\[55px\] {
+    height: 40px !important;
+  }
+
+  /* Pin the prev/next floating buttons inside the viewport instead of
+     letting their absolute right offset hang off the right edge. */
+  footer.fixed .right-\[35px\] {
+    right: 8px !important;
+  }
+
+  /* Header — tighter spacing on phone */
+  header.py-2 .title-wrap h2 {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+  header.py-2 .title-wrap .text-sm {
+    font-size: 11px !important;
+  }
+  header.py-2 .space-x-3 > * + *,
+  header.py-2 .md\:space-x-6 > * + * {
+    margin-left: 8px !important;
+  }
+}
+

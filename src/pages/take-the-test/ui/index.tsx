@@ -685,7 +685,7 @@ export function PageTakeTheTest() {
                     onDragEnd={handleDragEnd}
                   >
                     <div className="flex h-full flex-grow min-h-0">
-                      <Splitter layout={isMobileView ? "vertical" : undefined}>
+                      <Splitter>
                         {post.quizFields.skill[0] === "reading" && (
                           <Splitter.Panel min="20%" max="80%">
                             <div className="prose-sm max-w-none p-[16px] pt-[30px] pb-[120px] bg-white h-full overflow-y-auto text-[#000]">

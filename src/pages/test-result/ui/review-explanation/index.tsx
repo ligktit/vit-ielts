@@ -537,7 +537,6 @@ function ReviewExplanation({
     }
   }, [mappedAnswers, methods]);
 
-  const [isMobileView, setIsMobileView] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   // State for review mode notes/highlights (mirrors ExamContext)
@@ -843,17 +842,6 @@ function ReviewExplanation({
       }
     }
   }, [mappedAnswers, newPost, countSubQuestions]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768);
-    };
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   useEffect(() => {
     if (!fullPage) return;
@@ -1796,7 +1784,6 @@ function ReviewExplanation({
 
   const splitter = (
     <Splitter
-      layout={isMobileView ? "vertical" : undefined}
       className={fullPage ? "flex-1 min-h-0" : "h-[600px] border-t"}
     >
         {/* PANEL 1 (BÊN TRÁI) */}
