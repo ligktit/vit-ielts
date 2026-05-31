@@ -496,7 +496,7 @@ function Footer() {
                   key={info.partIndex}
                   onClick={() => part.setCurrent(info.partIndex)}
                   className={twMerge(
-                    "flex flex-col cursor-pointer mt-[-1px] md:flex-1 md:min-w-0",
+                    "flex flex-col cursor-pointer mt-[-1px] md:flex-1 md:min-w-auto",
                     isCurrent ? "flex-grow min-w-0" : "flex-shrink-0"
                   )}
                 >
