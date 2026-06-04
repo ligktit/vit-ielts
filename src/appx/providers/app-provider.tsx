@@ -69,6 +69,8 @@ export type MasterData = {
       proSkills?: string[] | null;
     };
   } | null;
+  /** True when at least one published "Blog" post exists — hides the Blog menu when false. */
+  hasBlogPosts?: boolean;
   // userCredentials removed — Supabase Auth manages session internally
 };
 

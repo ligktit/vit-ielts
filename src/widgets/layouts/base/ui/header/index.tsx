@@ -93,6 +93,8 @@ export const Header = () => {
 
   const { isSignedIn, signOut, currentUser } = useAuth();
   const { masterData } = useAppContext();
+  // Only show the Blog menu when there's at least one published Blog post.
+  const hasBlogPosts = Boolean(masterData?.hasBlogPosts);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -126,7 +128,11 @@ export const Header = () => {
       label: <Link href={ROUTES.SUBSCRIPTION}>Subscription</Link>,
     };
 
-    const menu = [...cmsMenuItems, blogMenuItem, subscriptionMenuItem];
+    const menu = [
+      ...cmsMenuItems,
+      ...(hasBlogPosts ? [blogMenuItem] : []),
+      subscriptionMenuItem,
+    ];
 
     if (isSignedIn) {
       menu.push(
@@ -193,6 +199,7 @@ export const Header = () => {
     masterData.menuData,
     router.asPath,
     signOut,
+    hasBlogPosts,
   ]);
 
   useEffect(() => {
@@ -250,10 +257,10 @@ export const Header = () => {
       });
     return [
       ...cmsItems,
-      { label: "Blog", href: ROUTES.BLOG.ARCHIVE },
+      ...(hasBlogPosts ? [{ label: "Blog", href: ROUTES.BLOG.ARCHIVE }] : []),
       { label: "Subscription", href: ROUTES.SUBSCRIPTION },
     ];
-  }, [masterData.menuData, activeKey, router.pathname]);
+  }, [masterData.menuData, activeKey, router.pathname, hasBlogPosts]);
 
   return (
     <>

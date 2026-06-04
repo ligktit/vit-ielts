@@ -21,15 +21,24 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
     const supabase = createServerSupabase(context);
 
     // Parallel queries for performance
-    const [userResult, settingsResult, menusResult] = await Promise.all([
+    const [userResult, settingsResult, menusResult, blogResult] = await Promise.all([
         supabase.auth.getUser(),
         supabase.from("site_settings").select("key, value"),
         supabase.from("menus").select("location, items"),
+        // Cheap existence check: is there at least one published "Blog" post?
+        // Drives whether the Blog menu item is shown in the header.
+        supabase
+            .from("posts")
+            .select("id")
+            .filter("categories", "cs", JSON.stringify(["Blog"]))
+            .eq("status", "published")
+            .limit(1),
     ]);
 
     const user = userResult.data?.user ?? null;
     const settings = settingsResult.data ?? [];
     const menus = menusResult.data ?? [];
+    const hasBlogPosts = (blogResult.data?.length ?? 0) > 0;
 
     // Fetch user profile if signed in
     let viewer: MasterData["viewer"] | null = null;
@@ -132,6 +141,7 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
                 },
                 menuData,
                 viewer: viewer ?? null,
+                hasBlogPosts,
             },
         },
     };
