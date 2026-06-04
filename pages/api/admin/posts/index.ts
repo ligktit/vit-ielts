@@ -46,12 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === "POST") {
         try {
-            const { title, slug, content, excerpt, featured_image, status, pro_user_only, categories, seo, views, votes } = req.body;
+            const { title, slug, content, excerpt, featured_image, status, pro_user_only, categories, skill, tags, is_featured, seo, views, votes } = req.body;
             if (!title || !slug) return res.status(400).json({ success: false, error: "title and slug required" });
 
             const { data, error } = await supabaseAdmin.from("posts").insert({
                 title, slug, content, excerpt, featured_image, status: status || "draft",
                 pro_user_only: pro_user_only || false, categories: categories || [], seo: seo || {},
+                skill: skill || null, tags: Array.isArray(tags) ? tags : [], is_featured: is_featured || false,
                 views: typeof views === "number" ? views : 0, votes: Array.isArray(votes) ? votes : [], published_at: status === "published" ? new Date().toISOString() : null,
             }).select().single();
             if (error) throw error;

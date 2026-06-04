@@ -195,14 +195,17 @@ export default function AdminPostEditorPage() {
             <Form 
                 form={form} 
                 layout="vertical" 
-                initialValues={{ 
-                    status: "draft", 
-                    pro_user_only: false, 
+                initialValues={{
+                    status: "draft",
+                    pro_user_only: false,
                     views: 0,
                     _rating: 0,
                     _vote_count: 0,
                     categories: [],
-                    seo: {} 
+                    skill: undefined,
+                    tags: [],
+                    is_featured: false,
+                    seo: {}
                 }}
             >
                 <div className="admin-post-editor-layout">
@@ -285,7 +288,7 @@ export default function AdminPostEditorPage() {
                             </div>
                         </AdminGlassCard>
 
-                        <AdminGlassCard title="Phân loại">
+                        <AdminGlassCard title="Danh mục">
                             <Form.Item
                                 name="categories"
                                 label={
@@ -327,6 +330,45 @@ export default function AdminPostEditorPage() {
                                     }}
                                 />
                             </Form.Item>
+                        </AdminGlassCard>
+
+                        <AdminGlassCard title="Phân loại bài viết">
+                            <Form.Item
+                                name="skill"
+                                label="Kỹ năng (Skill)"
+                                extra="Quyết định bài nằm ở section nào & bộ lọc Skills."
+                            >
+                                <Select
+                                    allowClear
+                                    placeholder="Chọn kỹ năng..."
+                                    options={[
+                                        { value: "listening", label: "Listening" },
+                                        { value: "reading", label: "Reading" },
+                                        { value: "writing", label: "Writing" },
+                                        { value: "speaking", label: "Speaking" },
+                                    ]}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="tags"
+                                label="Tags / Từ khóa (#)"
+                                extra="Hiển thị dạng #chip và gom vào 'Popular Keywords'. Gõ Enter để thêm."
+                            >
+                                <Select
+                                    mode="tags"
+                                    placeholder="Multiple Choice, Note-taking, Synonyms..."
+                                    style={{ width: "100%" }}
+                                    tokenSeparators={[","]}
+                                />
+                            </Form.Item>
+
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }} className="mb-0">
+                                <Form.Item name="is_featured" valuePropName="checked" noStyle>
+                                    <Switch checkedChildren="ON" unCheckedChildren="OFF" />
+                                </Form.Item>
+                                <span>Featured Article (bài nổi bật trên cùng)</span>
+                            </div>
                         </AdminGlassCard>
 
                         <AdminGlassCard title="Featured Image">

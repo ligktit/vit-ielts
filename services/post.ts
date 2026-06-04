@@ -64,7 +64,7 @@ export async function getPosts(
 
     let query = supabase
         .from("posts")
-        .select("id, title, slug, excerpt, featured_image, status, pro_user_only, views, categories, published_at, created_at", { count: "exact" })
+        .select("id, title, slug, excerpt, featured_image, status, pro_user_only, views, categories, skill, tags, is_featured, published_at, created_at", { count: "exact" })
         .eq("status", "published");
 
     // Filter by category (JSONB array contains)
@@ -74,6 +74,21 @@ export async function getPosts(
             "cs",
             JSON.stringify([filters.category])
         );
+    }
+
+    // Filter by skill (listening/reading/writing/speaking)
+    if (filters.skill) {
+        query = query.eq("skill", filters.skill);
+    }
+
+    // Filter by tag (JSONB array contains)
+    if (filters.tag) {
+        query = query.filter("tags", "cs", JSON.stringify([filters.tag]));
+    }
+
+    // Featured only
+    if (filters.featured) {
+        query = query.eq("is_featured", true);
     }
 
     if (filters.search) {

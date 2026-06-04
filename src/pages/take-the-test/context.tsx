@@ -258,6 +258,8 @@ export const ExamProvider = ({
             stack: error?.stack,
             url: typeof window !== "undefined" ? window.location.href : undefined,
             userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+            testId: testID,
+            quizId: post?.id,
           }),
           keepalive: true,
         }).catch(() => undefined);

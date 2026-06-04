@@ -12,8 +12,7 @@ import { MasterData, MenuItem, useAppContext, useAuth } from "@/appx/providers";
 import { ItemType } from "antd/es/menu/interface";
 import _ from "lodash";
 import { Header as DSHeader, type HeaderNavItem } from "@/shared/ui/ds";
-import { FacebookRoundedIcon, ZaloIcon } from "@/shared/ui/icons";
-import type { TopBarConfig } from "./types";
+import { AnnouncementBar } from "./announcement-bar";
 
 /**
  * Mapping from menu item labels to correct Next.js routes.
@@ -94,7 +93,6 @@ export const Header = () => {
 
   const { isSignedIn, signOut, currentUser } = useAuth();
   const { masterData } = useAppContext();
-  const [topBarConfig, setTopBarConfig] = useState<TopBarConfig | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -110,35 +108,6 @@ export const Header = () => {
     allSettings: { generalSettingsTitle },
   } = masterData;
 
-  // Fetch Top Bar config on mount
-  useEffect(() => {
-    const fetchTopBarConfig = async () => {
-      try {
-        const res = await fetch("/api/admin/header/top-bar");
-        if (res.ok) {
-          const data = await res.json();
-          setTopBarConfig(data);
-        }
-      } catch {
-        // Use default config if fetch fails
-        setTopBarConfig({
-          facebookFollowers: "500k Followers",
-          phoneNumber: "",
-          promotionalBanner: {
-            buttonText: "Hot",
-            emoji: "👋",
-            text: "Intro price. Get {siteName} for Big Sale -95% off.",
-          },
-          socialLinks: {
-            enabled: true,
-            customLinks: [],
-          },
-        });
-      }
-    };
-    fetchTopBarConfig();
-  }, []);
-
   const menuDataMapped = useMemo(() => {
     if (!masterData?.menuData["main-menu"]) return [];
     const menuData = masterData.menuData;
@@ -147,13 +116,17 @@ export const Header = () => {
       <Link href={item.uri || "#"}>{item.label}</Link>
     ))!;
 
-    // Add subscription link to the menu
+    // Add Blog + subscription links to the menu
+    const blogMenuItem = {
+      key: "blog",
+      label: <Link href={ROUTES.BLOG.ARCHIVE}>Blog</Link>,
+    };
     const subscriptionMenuItem = {
       key: "subscription",
       label: <Link href={ROUTES.SUBSCRIPTION}>Subscription</Link>,
     };
 
-    const menu = [...cmsMenuItems, subscriptionMenuItem];
+    const menu = [...cmsMenuItems, blogMenuItem, subscriptionMenuItem];
 
     if (isSignedIn) {
       menu.push(
@@ -253,33 +226,6 @@ export const Header = () => {
     }
   }, [masterData.menuData, router.pathname]);
 
-  const topBarSocialLinks = [
-    {
-      icon: <FacebookRoundedIcon className="w-4 h-4" />,
-      url: facebook,
-      name: "Facebook",
-    },
-    {
-      icon: <ZaloIcon className="w-4 h-4" />,
-      url: zalo,
-      name: "Zalo",
-    },
-    {
-      icon: (
-        <Image
-          src="/mail.webp"
-          alt="mail"
-          width={16}
-          height={16}
-          unoptimized
-          className="w-4 h-4"
-        />
-      ),
-      url: email ? `mailto:${email}` : null,
-      name: "Email",
-    },
-  ].filter((item) => Boolean(item.url));
-
   const dsNavItems: HeaderNavItem[] = useMemo(() => {
     if (!masterData?.menuData["main-menu"]) return [];
     const cmsItems = masterData.menuData["main-menu"]
@@ -302,54 +248,17 @@ export const Header = () => {
           }))
         };
       });
-    return [...cmsItems, { label: "Subscription", href: ROUTES.SUBSCRIPTION }];
+    return [
+      ...cmsItems,
+      { label: "Blog", href: ROUTES.BLOG.ARCHIVE },
+      { label: "Subscription", href: ROUTES.SUBSCRIPTION },
+    ];
   }, [masterData.menuData, activeKey, router.pathname]);
 
   return (
     <>
-      {/* === SECTION: Header Top Bar === */}
-      <div data-section="header-topbar" className="bg-[#192335] text-white text-sm !hidden" style={{ backgroundColor: "#192335" }}>
-        <Container className="py-2">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-4 sm:gap-6 flex-wrap">
-              {facebook && topBarConfig && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <FacebookRoundedIcon className="w-4 h-4 shrink-0" />
-                  <span className="text-xs wrap-break-word line-clamp-1 max-w-[150px]">
-                    {topBarConfig.facebookFollowers}
-                  </span>
-                </div>
-              )}
-              {(topBarConfig?.phoneNumber || phoneNumber) && (
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="material-symbols-rounded text-[17px]! shrink-0">phone</span>
-                  <span className="text-xs wrap-break-word line-clamp-1 max-w-[150px]">
-                    {topBarConfig?.phoneNumber || phoneNumber}
-                  </span>
-                </div>
-              )}
-            </div>
-            {topBarConfig?.promotionalBanner && (
-              <div className="flex items-center gap-2 flex-wrap justify-center min-w-0 flex-1">
-                <Button className="bg-[#2563eb] border-none text-white rounded-md h-6 px-2 text-xs font-bold shrink-0" style={{ backgroundColor: "#2563eb" }}>
-                  <span className="truncate max-w-[80px]">{topBarConfig.promotionalBanner.buttonText}</span>
-                </Button>
-                <span className="text-xl shrink-0">{topBarConfig.promotionalBanner.emoji}</span>
-                <span className="text-xs wrap-break-word line-clamp-1 min-w-0 flex-1 max-w-[300px]">
-                  {topBarConfig.promotionalBanner.text?.replace("{siteName}", generalSettingsTitle || "Histudy")}
-                </span>
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              {topBarSocialLinks.map((social, index) => (
-                <Link key={index} href={social.url || "#"} target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300 transition-colors" title={social.name}>
-                  {social.icon}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </div>
+      {/* === SECTION: Announcement Bar (red scrolling ticker) === */}
+      <AnnouncementBar />
 
       {/* === SECTION: Header Navigation === */}
       <DSHeader

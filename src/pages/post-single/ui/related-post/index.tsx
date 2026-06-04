@@ -37,7 +37,7 @@ function RelatedPost({ relatedPosts }: { relatedPosts: SidebarPost[] }) {
           </h3>
 
           <div className="space-y-4">
-            {relatedPosts.slice(1, 7).map((rel) => (
+            {relatedPosts.slice(1, 4).map((rel) => (
               <Link
                 key={rel.id}
                 href={`/blog/${rel.slug}`}

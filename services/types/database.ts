@@ -245,6 +245,12 @@ export type Post = {
     votes: VoteEntry[];
     seo: Record<string, unknown>;
     categories: string[];
+    /** IELTS skill the article is about: listening | reading | writing | speaking. */
+    skill: string | null;
+    /** Topic keywords shown as #chips and aggregated into "Popular Keywords". */
+    tags: string[];
+    /** Marks the article shown in the "Featured Article" hero. */
+    is_featured: boolean;
     published_at: string | null;
     created_at: string;
 };
@@ -371,6 +377,12 @@ export type QuizFilters = {
 
 export type PostFilters = {
     category?: string;
+    /** Filter by IELTS skill (listening/reading/writing/speaking). */
+    skill?: string;
+    /** Filter to posts that contain this tag. */
+    tag?: string;
+    /** Filter to featured posts only. */
+    featured?: boolean;
     search?: string;
     page?: number;
     pageSize?: number;

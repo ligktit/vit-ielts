@@ -1,5 +1,6 @@
 // file: index.tsx
 
+import Head from "next/head";
 import { Button, ConfigProvider, Splitter, Collapse, Tooltip, Modal } from "antd";
 import { IPracticeSingle, ITestResult } from "../../api";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -2008,9 +2009,23 @@ function ReviewExplanation({
   }
 
   return (
-    <div id="iel-test-result-explanation" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
-      {splitter}
-    </div>
+    <>
+      {/* See take-the-test: in-browser auto-translation mutates React-managed
+          DOM and triggers "insertBefore on Node" / removeChild crashes. The
+          review screen renders the same passages/questions, so disable it here
+          too. */}
+      <Head>
+        <meta name="google" content="notranslate" />
+      </Head>
+      <div
+        id="iel-test-result-explanation"
+        translate="no"
+        className="notranslate"
+        style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}
+      >
+        {splitter}
+      </div>
+    </>
   );
 }
 

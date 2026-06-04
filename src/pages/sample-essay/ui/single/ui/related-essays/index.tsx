@@ -39,7 +39,7 @@ function RelatedEssays({
         <div className="space-y-4">
           <h3 className="font-bold text-lg text-[#2D3142]">Có thể bạn quan tâm</h3>
           <div className="space-y-4">
-            {essays.slice(1, 7).map((essay) => (
+            {essays.slice(1, 4).map((essay) => (
               <Link
                 key={essay.id}
                 href={ROUTES.SAMPLE_ESSAY.SINGLE(essay.slug)}

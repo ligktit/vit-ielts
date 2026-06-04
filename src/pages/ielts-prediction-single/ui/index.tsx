@@ -347,7 +347,7 @@ export function PageIELTSPredictionSingle({ post }: { post: IPracticeSingle }) {
                         </h3>
 
                         <div className="space-y-4">
-                          {post.relatedPracticeQuizzes.slice(1, 7).map((rel, idx) => (
+                          {post.relatedPracticeQuizzes.slice(1, 4).map((rel, idx) => (
                             <Link
                               key={idx}
                               href={ROUTES.PREDICTION.SINGLE(rel.slug)}

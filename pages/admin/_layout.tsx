@@ -129,7 +129,9 @@ const MENU_SECTIONS: MenuSection[] = [
       },
       {
         key: "cms-header", icon: <MenuOutlined />, label: "Header",
-        children: [{ key: "/admin/header/top-bar", label: "Top Bar" }],
+        children: [
+          { key: "/admin/header/announcement-bar", label: "Thanh thông báo (chạy)" },
+        ],
       },
       {
         key: "cms-footer", icon: <GlobalOutlined />, label: "Footer",

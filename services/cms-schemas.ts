@@ -244,12 +244,29 @@ const LegalContentSchema = z.object({
 export const TermsOfUseSchema = LegalContentSchema;
 export const PrivacyPolicySchema = LegalContentSchema;
 
-// ─── Top Bar (Header) ────────────────────────────────────────────────────
-export const TopBarSchema = z.object({
-    text: z.string(),
-    link: z.string().optional(),
-    visible: z.boolean().optional(),
-}).passthrough(); // Allow additional props from TopBarConfig
+// ─── Header Announcement Bar (red scrolling ticker) ──────────────────────
+export const AnnouncementBarSchema = z.object({
+    enabled: z.boolean(),
+    backgroundColor: z.string(),
+    textColor: z.string(),
+    speedSeconds: z.number(),
+    items: z.array(
+        z.object({
+            text: z.string(),
+            url: z.string().optional(),
+        }),
+    ),
+    rightLink: z.object({
+        enabled: z.boolean(),
+        badge: z.string(),
+        label: z.string(),
+        url: z.string(),
+    }),
+    settingsIcon: z.object({
+        enabled: z.boolean(),
+        url: z.string(),
+    }),
+});
 
 // ─── Sample Essay Page Header ────────────────────────────────────────────
 export const SampleEssayBannerSchema = z.object({
@@ -333,7 +350,7 @@ export const CMS_SECTION_SCHEMAS: Record<string, z.ZodType> = {
     "subscription/faq": FAQSchema,
 
     // Header / Footer
-    "header/top-bar": TopBarSchema,
+    "header/announcement-bar": AnnouncementBarSchema,
     "footer/cta-banner": FooterCtaBannerSchema,
 
     // Account pages

@@ -8,7 +8,10 @@ import type { Post } from "~services/types/database";
 
 export { PageIELTSPrediction } from "./ui";
 
-const PAGE_SIZE = 9;
+// The blog redesign groups all posts by skill on a single page (featured hero
+// + per-skill sections) with client-side filtering, so we fetch a large batch
+// up front instead of paginating 9 at a time.
+const PAGE_SIZE = 100;
 
 const getSingleQueryValue = (value: string | string[] | undefined) => {
   if (Array.isArray(value)) return value[0] || "";

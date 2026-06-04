@@ -70,7 +70,7 @@ export const Header = ({
       <div
         id="navbar-container"
         data-component-name="NavbarContainer"
-        className="flex items-center justify-between max-w-[1360px] mx-auto px-4 md:px-[20px] py-3 md:py-[15px] rounded-full bg-white/50 shadow-[0_4px_10px_rgba(0,0,0,0.25)] backdrop-blur-[7.5px] pointer-events-auto"
+        className="flex items-center justify-between max-w-[1360px] mx-auto px-4 md:px-[20px] py-3 md:py-[15px] rounded-full bg-white/50 shadow-[0_4px_10px_rgba(0,0,0,0.25)] backdrop-blur-[7.5px] pointer-events-auto mt-3"
       >
 
         {/* Logo */}
@@ -91,7 +91,7 @@ export const Header = ({
               <li key={item.href} className={`relative ${hasChildren ? 'group' : ''}`}>
                 <a
                   href={item.href}
-                  className={`inline-flex items-center no-underline transition-colors duration-150 gap-[16px] text-center font-['Noto_Sans',sans-serif] text-[14px] font-bold py-[15px] px-[20px] ${item.active ? 'text-[var(--color-primary-500)]' : 'text-[#191D24] hover:text-[var(--color-primary-500)]'
+                  className={`inline-flex items-center no-underline transition-colors duration-150 gap-[16px] text-center font-['Noto_Sans',sans-serif] text-[14px] font-bold py-[15px] px-[16px] ${item.active ? 'text-[var(--color-primary-500)]' : 'text-[#191D24] hover:text-[var(--color-primary-500)]'
                     }`}
                 >
                   {item.label}

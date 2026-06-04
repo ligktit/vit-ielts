@@ -1022,3 +1022,22 @@ footer.shrink-0 > .flex-grow.mr-\[110px\] > div {
     margin-left: 8px !important;
   }
 }
+
+/* ── Announcement bar (red scrolling ticker above the header) ──────────────
+   Defined here (not styled-jsx) because the app runs Turbopack, where the
+   component-scoped <style jsx> did not inject reliably. Speed is passed from
+   the component via the --marquee-duration CSS variable; hovering pauses it. */
+@keyframes announcement-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.announcement-marquee {
+  animation: announcement-marquee var(--marquee-duration, 30s) linear infinite;
+}
+.announcement-scroller:hover .announcement-marquee {
+  animation-play-state: paused;
+}

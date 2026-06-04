@@ -93,7 +93,8 @@ export const Footer = () => {
       href: ROUTES.PRACTICE.ARCHIVE_READING,
     },
     { label: "Sample Essays", href: "/sample-essay" },
-    { label: "Blog", href: "/post" },
+    { label: "IELTS Prediction", href: ROUTES.PREDICTION.ARCHIVE },
+    { label: "Blog", href: ROUTES.BLOG.ARCHIVE },
   ];
 
   const companyLinks = [

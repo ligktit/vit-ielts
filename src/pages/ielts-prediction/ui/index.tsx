@@ -1,54 +1,15 @@
-import { ROUTES } from "@/shared/routes";
-import { FormProvider, useForm } from "react-hook-form";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
-import { PostCard } from "./post-card";
-import type { Post } from "~services/types/database";
-import dayjs from "dayjs";
+import { ROUTES } from "@/shared/routes";
 import { Container } from "@/shared/ui";
+import type { Post } from "~services/types/database";
 import type { PracticeLibraryBannerConfig } from "./types";
-import { Filter } from "./filter";
+import { ArticleCard } from "./article-card";
+import { FeaturedArticle } from "./featured-article";
+import { BlogSidebar, type SkillFilter } from "./blog-sidebar";
+import { SKILL_ORDER, SKILL_META } from "./skills";
 import { HeroSection } from "./hero-section";
-
-export type FilterFormValues = {
-  sort: "newest" | "oldest" | "a-z" | "z-a";
-  search: string;
-  page: number;
-  size: number;
-};
-
-const PAGE_SIZE = 9;
-
-const SORT_OPTIONS: Array<{ label: string; value: FilterFormValues["sort"] }> = [
-  { label: "Newest", value: "newest" },
-  { label: "Oldest", value: "oldest" },
-  { label: "A-Z", value: "a-z" },
-  { label: "Z-A", value: "z-a" },
-];
-
-const createQueryPayload = (values: FilterFormValues) => {
-  const query: Record<string, string> = {};
-
-  if (values.sort !== "newest") query.sort = values.sort;
-  if (values.search) query.search = values.search;
-  if (values.page > 1) query.page = String(values.page);
-  if (values.size !== PAGE_SIZE) query.size = String(values.size);
-
-  return query;
-};
-
-const getSingleQueryValue = (value: string | string[] | undefined) => {
-  if (Array.isArray(value)) return value[0] || "";
-  return value || "";
-};
-
-const buildPages = (current: number, total: number) => {
-  if (total <= 1) return [1];
-  const pages = new Set<number>([1, total, current, current - 1, current + 1]);
-  return Array.from(pages)
-    .filter((page) => page >= 1 && page <= total)
-    .sort((left, right) => left - right);
-};
+import { SkillCarousel } from "./skill-carousel";
 
 interface PageProps {
   bannerConfig: PracticeLibraryBannerConfig;
@@ -57,277 +18,231 @@ interface PageProps {
     count: number;
     pageSize: number;
   };
+  /** Breadcrumb label under the hero (e.g. "IELTS Prediction" or "Blog"). */
+  breadcrumbLabel?: string;
 }
 
-export const PageIELTSPrediction = ({ bannerConfig, initialPosts }: PageProps) => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [navigating, setNavigating] = useState(false);
-  const router = useRouter();
+const DEFAULT_SECTION_CAP = 3;
+const MAX_KEYWORDS = 8;
 
-  const initialValues = useMemo<FilterFormValues>(
-    () => ({
-      sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
-      search: getSingleQueryValue(router.query.search),
-      page: Number(getSingleQueryValue(router.query.page) || 1),
-      size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+const SectionHeader = ({
+  label,
+  onSeeMore,
+}: {
+  label: string;
+  onSeeMore?: () => void;
+}) => (
+  <div className="mb-6 flex items-center justify-between border-b border-[#E5E7EB] pb-3">
+    <div className="flex items-center gap-3">
+      <span className="h-6 w-1.5 rounded bg-primary-500" />
+      <h2 className="text-[24px] font-extrabold text-[#1F2430]">{label}</h2>
+    </div>
+    {onSeeMore && (
+      <button
+        type="button"
+        onClick={onSeeMore}
+        className="inline-flex items-center gap-0 rounded-md bg-primary-50 py-1 pl-3 pr-1 text-[12px] font-semibold text-primary-500 transition-opacity hover:opacity-80 cursor-pointer"
+      >
+        Xem thêm
+        <span className="material-symbols-rounded text-[14px]">chevron_right</span>
+      </button>
+    )}
+  </div>
+)
 
-  const methods = useForm<FilterFormValues>({ defaultValues: initialValues });
-
-  const {
-    watch,
-    reset,
-    setValue,
-    getValues,
-    formState: { isDirty },
-  } = methods;
-
+export const PageIELTSPrediction = ({
+  bannerConfig,
+  initialPosts,
+  breadcrumbLabel = "IELTS Prediction",
+}: PageProps) => {
+  const posts = useMemo(() => initialPosts.data || [], [initialPosts.data]);
   const bannerData = bannerConfig.reading || bannerConfig.listening;
 
-  useEffect(() => {
-    const start = (url: string) => {
-      if (url.split("?")[0] === router.pathname) setNavigating(true);
-    };
-    const end = () => setNavigating(false);
-    router.events.on("routeChangeStart", start);
-    router.events.on("routeChangeComplete", end);
-    router.events.on("routeChangeError", end);
-    return () => {
-      router.events.off("routeChangeStart", start);
-      router.events.off("routeChangeComplete", end);
-      router.events.off("routeChangeError", end);
-    };
-  }, [router.events, router.pathname]);
+  const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (!router.isReady) return;
-    reset({
-      sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
-      search: getSingleQueryValue(router.query.search),
-      page: Number(getSingleQueryValue(router.query.page) || 1),
-      size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
+  // Skill filter is kept in the URL (?skill=...) via shallow routing so the
+  // browser Back button returns to the unfiltered page instead of leaving it.
+  const skillParam = router.query.skill;
+  const skill: SkillFilter =
+    typeof skillParam === "string" && (SKILL_ORDER as readonly string[]).includes(skillParam)
+      ? (skillParam as SkillFilter)
+      : "all";
+
+  const changeSkill = (next: SkillFilter) => {
+    const query = { ...router.query };
+    if (next === "all") delete query.skill;
+    else query.skill = next;
+    router.push({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+      scroll: false,
     });
-  }, [reset, router.isReady, router.query]);
+  };
 
-  const values = watch();
-
+  // Scroll to top whenever the skill filter changes — covers both clicking a
+  // filter and using the browser Back/Forward buttons (which only change the
+  // ?skill query, not trigger changeSkill). Skip the very first render.
+  const didMountRef = useRef(false);
   useEffect(() => {
-    if (!isDirty) return;
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (typeof window !== "undefined") {
+      // behavior:"instant" bypasses the global `scroll-behavior: smooth` so the
+      // page jumps straight to the top instead of animating.
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+    }
+  }, [skill]);
 
-    const nextQuery = createQueryPayload(getValues());
-    const currentQuery = createQueryPayload({
-      sort: (getSingleQueryValue(router.query.sort) as FilterFormValues["sort"]) || "newest",
-      search: getSingleQueryValue(router.query.search),
-      page: Number(getSingleQueryValue(router.query.page) || 1),
-      size: Number(getSingleQueryValue(router.query.size) || PAGE_SIZE),
-    });
+  // Aggregate the most-used tags into the "Popular Keywords" list.
+  const popularKeywords = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const post of posts) {
+      for (const tag of post.tags || []) {
+        if (!tag) continue;
+        counts.set(tag, (counts.get(tag) || 0) + 1);
+      }
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_KEYWORDS)
+      .map(([tag]) => tag);
+  }, [posts]);
 
-    if (JSON.stringify(nextQuery) === JSON.stringify(currentQuery)) return;
+  const isFiltering =
+    skill !== "all" || selectedKeywords.length > 0 || search.trim() !== "";
 
-    router.push(
-      { pathname: router.pathname, query: nextQuery },
-      undefined,
-      { scroll: false },
-    );
-  // Primitive deps avoid the watch()-new-ref-every-render loop while SSR
-  // navigation is in flight.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.sort, values.search, values.page, values.size, isDirty]);
+  const matchesFilters = (post: Post) => {
+    if (skill !== "all" && post.skill !== skill) return false;
+    if (
+      selectedKeywords.length > 0 &&
+      !(post.tags || []).some((t) => selectedKeywords.includes(t))
+    ) {
+      return false;
+    }
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      const hay = `${post.title} ${post.excerpt || ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  };
 
-  const items = useMemo(
-    () => (initialPosts.data || []).map((post) => ({ node: post })),
-    [initialPosts.data],
+  const filtered = useMemo(
+    () => posts.filter(matchesFilters),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [posts, skill, selectedKeywords, search],
   );
 
-  const currentPage = Number(getSingleQueryValue(router.query.page) || 1);
-  const total = initialPosts.count || 0;
-  const totalPages = Math.max(1, Math.ceil(total / initialPosts.pageSize));
-  const visiblePages = buildPages(currentPage, totalPages);
-  const goToPage = (page: number) => {
-    setValue("page", page, { shouldDirty: true });
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const featured = useMemo(
+    () => posts.find((p) => p.is_featured) || posts[0] || null,
+    [posts],
+  );
+
+  // Group the (filtered) posts by skill, preserving the canonical order.
+  const sections = useMemo(() => {
+    return SKILL_ORDER.map((key) => ({
+      key,
+      label: SKILL_META[key].label,
+      posts: filtered.filter((p) => p.skill === key),
+    })).filter((s) => s.posts.length > 0);
+  }, [filtered]);
+
+  const showFeatured = !isFiltering && featured;
+
+  const toggleKeyword = (kw: string) =>
+    setSelectedKeywords((prev) =>
+      prev.includes(kw) ? prev.filter((k) => k !== kw) : [...prev, kw],
+    );
+
+  const clearAll = () => {
+    setSearch("");
+    setSelectedKeywords([]);
+    changeSkill("all");
   };
-  const handleSortChange = (nextSort: FilterFormValues["sort"]) => {
-    setValue("sort", nextSort, { shouldDirty: true });
-    setValue("page", 1, { shouldDirty: true });
-  };
+
+  const href = (post: Post) => ROUTES.PREDICTION.SINGLE(post.slug);
 
   return (
-    <FormProvider {...methods}>
-      <div className="min-h-screen bg-white pb-20">
-        <HeroSection
-          title={bannerData.title}
-          skillLabel="IELTS Prediction"
-        />
-
-        <section className="mt-12 px-4 sm:px-6">
-        <Container>
-          {/* === SECTION: IELTS Practice === */}
-          <section id="ipl-practice" data-section="ipl-practice">
-            <div className="mb-10 flex flex-col gap-6">
-              <h2 className="font-noto-sans text-3xl font-extrabold text-[#2D3142]">
-                IELTS Prediction
-              </h2>
-
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-end">
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setDrawerOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[rgba(0,0,0,0.1)] bg-white px-4 py-3 text-sm font-bold text-[#242938] transition hover:bg-gray-50 lg:hidden"
-                  >
-                    <span className="material-symbols-rounded text-base">tune</span>
-                    Filter
-                  </button>
-                  <div className="relative min-w-[11rem]">
-                    <select
-                      value={values.sort}
-                      onChange={(event) =>
-                        handleSortChange(event.target.value as FilterFormValues["sort"])
-                      }
-                      className="w-full appearance-none rounded-full border border-[rgba(0,0,0,0.1)] bg-white px-5 py-3 pr-11 text-sm font-semibold text-[#242938] outline-none transition hover:bg-gray-50"
-                    >
-                      {SORT_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="material-symbols-rounded pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#242938]/60">
-                      keyboard_arrow_down
-                    </span>
-                  </div>
-                </div>
-              </div>
+    <>
+      <HeroSection title={bannerData.title} skillLabel={breadcrumbLabel} />
+      <div className="min-h-screen bg-white pb-20 pt-18">
+      <Container>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[300px_minmax(0,1fr)]">
+          {/* Sidebar */}
+          <aside>
+            <div className="lg:sticky lg:top-[100px]">
+              <BlogSidebar
+                search={search}
+                onSearchChange={setSearch}
+                skill={skill}
+                onSkillChange={changeSkill}
+                keywords={popularKeywords}
+                selectedKeywords={selectedKeywords}
+                onToggleKeyword={toggleKeyword}
+                onClear={clearAll}
+              />
             </div>
+          </aside>
 
-            <div className="grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-[60px] xl:gap-[80px]">
-              <aside className="hidden lg:block">
-                <div className="sticky top-[100px]">
-                  <Filter />
-                </div>
-              </aside>
+          {/* Main */}
+          <main className="min-w-0 space-y-12">
+            {showFeatured && featured && (
+              <section>
+                <SectionHeader label="Featured Article" />
+                <FeaturedArticle post={featured} href={href(featured)} />
+              </section>
+            )}
 
-              <div className="space-y-10">
-                {navigating ? (
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {Array.from({ length: PAGE_SIZE }).map((_, index) => (
-                      <div
-                        key={index}
-                        className="h-[400px] w-full max-w-[356px] animate-pulse rounded-[30px] bg-black/5"
-                      />
-                    ))}
-                  </div>
-                ) : items.length ? (
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map(({ node }, index) => (
-                      <PostCard
-                        key={node.id || index}
-                        image={node.featured_image || undefined}
-                        title={node.title}
-                        date={node.published_at ? dayjs(node.published_at).format("DD/MM/YYYY") : undefined}
-                        isPro={node.pro_user_only}
-                        href={ROUTES.PREDICTION.SINGLE(node.slug)}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-[30px] border border-dashed border-[rgba(0,0,0,0.1)] bg-[#FAF7EB]/50 px-6 py-16 text-center">
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#242938]/40">
-                      No results
-                    </p>
-                    <h3 className="mt-3 font-noto-sans text-2xl font-extrabold text-[#242938]">
-                      No practice tests matched the current filters.
-                    </h3>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#242938]/60">
-                      Clear a few filters or search with a broader keyword to explore more test pages.
-                    </p>
-                  </div>
-                )}
-
-                {totalPages > 1 && (
-                  <div className="flex flex-wrap items-center justify-center gap-[8px] pt-4">
-                    {/* Previous Button */}
-                    <button
-                      type="button"
-                      disabled={currentPage <= 1}
-                      onClick={() => goToPage(Math.max(1, currentPage - 1))}
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
-                    >
-                      <span className="material-symbols-rounded text-xl">chevron_left</span>
-                    </button>
-
-                    {/* Page Numbers */}
-                    {visiblePages.map((page, index, array) => {
-                      const isGap = index > 0 && page - array[index - 1] > 1;
-                      return (
-                        <div key={page} className="flex items-center gap-[8px]">
-                          {isGap && (
-                            <div className="flex h-[32px] w-[32px] items-end justify-center pb-1 text-black/30 font-bold tracking-widest leading-none">
-                              ...
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => goToPage(page)}
-                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
-                              page === currentPage
-                                ? "bg-primary-500 text-white"
-                                : "text-[#2D3142] hover:bg-gray-100"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        </div>
-                      );
-                    })}
-
-                    {/* Next Button */}
-                    <button
-                      type="button"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
-                    >
-                      <span className="material-symbols-rounded text-xl">chevron_right</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        </Container>
-        </section>
-
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
-            <div className="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto bg-white p-5 shadow-2xl">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#2D3142]/40">
-                    Filters
-                  </p>
-                  <h3 className="mt-1 font-noto-sans text-2xl font-extrabold text-[#2D3142]">
-                    Refine results
-                  </h3>
-                </div>
+            {sections.length > 0 ? (
+              sections.map((section) => {
+                // In the all-skills view, a section with more than one row of
+                // posts becomes a carousel (like the homepage); otherwise a
+                // simple grid. The filtered view always shows the full grid.
+                const useCarousel = skill === "all" && section.posts.length > DEFAULT_SECTION_CAP;
+                return (
+                  <section key={section.key}>
+                    <SectionHeader
+                      label={section.label}
+                      // "Xem thêm" only in the all-skills view; clicking filters
+                      // to that skill (shows all its posts as a grid).
+                      onSeeMore={skill === "all" ? () => changeSkill(section.key) : undefined}
+                    />
+                    {useCarousel ? (
+                      <SkillCarousel posts={section.posts} href={href} />
+                    ) : (
+                      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                        {section.posts.map((post) => (
+                          <ArticleCard key={post.id} post={post} href={href(post)} />
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-dashed border-[#D1D5DB] bg-white px-6 py-16 text-center">
+                <h3 className="text-[20px] font-bold text-[#1F2430]">
+                  Không tìm thấy bài viết phù hợp
+                </h3>
+                <p className="mt-2 text-[14px] text-[#6A7282]">
+                  Thử xoá bớt bộ lọc hoặc tìm với từ khoá khác.
+                </p>
                 <button
                   type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(0,0,0,0.1)] text-[#2D3142]"
+                  onClick={clearAll}
+                  className="mt-5 rounded-full bg-primary-500 px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-90"
                 >
-                  <span className="material-symbols-rounded">close</span>
+                  Clear All Filters
                 </button>
               </div>
-              <Filter mobile onClose={() => setDrawerOpen(false)} />
-            </div>
-          </div>
-        )}
+            )}
+          </main>
+        </div>
+      </Container>
       </div>
-    </FormProvider>
+    </>
   );
 };

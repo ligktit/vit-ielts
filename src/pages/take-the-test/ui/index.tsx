@@ -1,5 +1,6 @@
 // file: .../pages/take-the-test/ui/index.tsx (FULL CODE ĐÃ SỬA)
 
+import Head from "next/head";
 import { BlankLayout } from "@/widgets/layouts";
 import Header from "./header";
 import { Splitter, notification } from "antd";
@@ -582,14 +583,6 @@ export function PageTakeTheTest() {
     getQuestionStartIndex,
   };
 
-  if (!currentPassage) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading passage or passage not found...
-      </div>
-    );
-  }
-
   useEffect(() => {
     document.documentElement.className = "";
     document.documentElement.classList.add(`text-size-${selectedTextSize}`);
@@ -649,10 +642,31 @@ export function PageTakeTheTest() {
     }
   }, [currentPassage]);
 
+  // Guard placed AFTER all hooks: an early return before the useEffect calls
+  // above would call fewer hooks on the render where currentPassage is missing,
+  // tripping React's "Rendered fewer hooks than expected" crash (→ the
+  // app-level ErrorBoundary's "Tải lại trang" screen).
+  if (!currentPassage) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading passage or passage not found...
+      </div>
+    );
+  }
+
   return (
     <>
+      {/* Block in-browser auto-translation (Google Translate / Chrome) on the
+          test UI. Translate rewrites text nodes inside React-managed DOM, and
+          a subsequent React update then throws "Failed to execute 'insertBefore'
+          on 'Node'" / removeChild NotFoundError — which crashes the whole page
+          to the app ErrorBoundary ("Tải lại trang"). IELTS passages must be read
+          in English anyway, so disabling translation here is also correct UX. */}
+      <Head>
+        <meta name="google" content="notranslate" />
+      </Head>
       {/* Render AudioPlayer outside TextSelectionProvider to prevent unmounting */}
-      <form onSubmit={handleSubmit(handleSubmitAnswer)}>
+      <form onSubmit={handleSubmit(handleSubmitAnswer)} translate="no" className="notranslate">
         {/* flex ROW: left column + notepad sidebar side by side */}
         <div className="flex h-screen">
           {/* 🔥 TextSelectionProvider wraps left column + Notepad for full-height sidebar */}

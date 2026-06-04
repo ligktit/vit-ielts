@@ -252,18 +252,22 @@ export function MatchingQuestion({
   readOnly?: boolean;
 }) {
   const matchingData = question.matchingQuestion;
-  if (!matchingData || !matchingData.layoutType) {
-    return null;
-  }
 
+  // Hooks must run unconditionally and BEFORE any early return — otherwise the
+  // render that returns null calls fewer hooks and React crashes with
+  // "Rendered fewer hooks than expected" (→ app ErrorBoundary "Tải lại trang").
   const methods = useFormContext<AnswerFormValues>();
   const { activeQuestionIndex, setActiveQuestionIndex, post } = useExamContext();
-  const { answerOptions = [] } = matchingData;
+  const answerOptions = matchingData?.answerOptions ?? [];
 
   const allOptionIds = useMemo(
     () => answerOptions.map((_, i) => `option-${startIndex}-${i}`),
     [answerOptions, startIndex]
   );
+
+  if (!matchingData || !matchingData.layoutType) {
+    return null;
+  }
 
   // FIX: Xử lý `layoutType` có thể là mảng hoặc string
   const layoutValue = matchingData.layoutType;

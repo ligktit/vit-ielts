@@ -37,6 +37,11 @@ export const ROUTES = {
     SINGLE: (slug: string) => `/${slug}`,
   },
 
+  BLOG: {
+    ARCHIVE: "/blog",
+    SINGLE: (slug: string) => `/blog/${slug}`,
+  },
+
   CHECKOUT: "/account/checkout",
   ORDER_RECEIVED: "/account/order-received",
 

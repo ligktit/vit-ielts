@@ -192,6 +192,3 @@ export interface SampleEssayBannerConfig {
     backgroundColor: string;
   };
 }
-
-// Re-export TopBarConfig từ header types
-export type { TopBarConfig } from "@/widgets/layouts/base/ui/header/types";
