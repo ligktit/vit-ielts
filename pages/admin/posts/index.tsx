@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Table, Tag, Button, Space, Input, Select, message, Popconfirm, Switch } from "antd";
+import { Table, Button, Space, Input, Select, message, Popconfirm, Switch } from "antd";
 import { PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import AdminLayout from "../_layout";
@@ -54,6 +54,24 @@ export default function AdminPostsPage() {
         } catch { message.error("Error"); }
     };
 
+    const handleToggleStatus = async (id: string, checked: boolean) => {
+        const status = checked ? "published" : "draft";
+        try {
+            const res = await fetch(`/api/admin/posts/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status }),
+            });
+            const json = await res.json();
+            if (json.success) {
+                message.success(checked ? "Đã hiện bài (Published)" : "Đã ẩn bài (Draft)");
+                setPosts(prev => prev.map(item => item.id === id ? { ...item, status } : item));
+            } else {
+                message.error(json.error || "Lỗi");
+            }
+        } catch { message.error("Error"); }
+    };
+
     const handleTogglePro = async (id: string, pro_user_only: boolean) => {
         try {
             const res = await fetch(`/api/admin/posts/${id}`, {
@@ -73,7 +91,21 @@ export default function AdminPostsPage() {
 
     const columns: ColumnsType<PostRow> = [
         { title: "Tiêu đề", dataIndex: "title", key: "title", ellipsis: true, render: (t: string, r) => <a onClick={() => router.push(`/admin/posts/${r.id}`)} className="font-medium">{t}</a> },
-        { title: "Status", dataIndex: "status", key: "status", width: 100, responsive: ["sm"], render: (s: string) => <Tag color={s === "published" ? "green" : "default"}>{s}</Tag> },
+        {
+            title: "Hiện/Ẩn",
+            dataIndex: "status",
+            key: "status",
+            width: 110,
+            render: (s: string, r) => (
+                <Switch
+                    size="small"
+                    checked={s === "published"}
+                    checkedChildren="Hiện"
+                    unCheckedChildren="Ẩn"
+                    onChange={(checked) => handleToggleStatus(r.id, checked)}
+                />
+            ),
+        },
         { title: "Views", dataIndex: "views", key: "views", width: 80, responsive: ["md"] },
         {
             title: "Pro",

@@ -75,27 +75,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === "PATCH") {
-        // Lightweight toggle — chỉ cập nhật pro_user_only mà không cần full body
+        // Lightweight toggles — pro_user_only and/or status — without full body
         try {
-            const { pro_user_only } = req.body;
-            if (typeof pro_user_only !== "boolean") {
-                return res.status(400).json({ success: false, error: "pro_user_only must be a boolean" });
+            const { pro_user_only, status } = req.body;
+            const updateData: Record<string, unknown> = {};
+            if (typeof pro_user_only === "boolean") updateData.pro_user_only = pro_user_only;
+            if (status === "published" || status === "draft") {
+                updateData.status = status;
+                if (status === "published") updateData.published_at = new Date().toISOString();
+            }
+            if (Object.keys(updateData).length === 0) {
+                return res.status(400).json({ success: false, error: "Nothing to update (pro_user_only or status required)" });
             }
             const { data, error } = await supabaseAdmin
                 .from("posts")
-                .update({ pro_user_only })
+                .update(updateData)
                 .eq("id", id)
-                .select("id, pro_user_only")
+                .select("id, pro_user_only, status")
                 .single();
             if (error) throw error;
 
             await logActivity(supabaseAdmin, {
                 userId: user.id,
                 userEmail: user.email ?? undefined,
-                action: "update",
+                action: status ? (status === "published" ? "publish" : "unpublish") : "update",
                 entityType: "post",
                 entityId: id,
-                entityTitle: `[PRO toggle → ${pro_user_only}]`,
+                entityTitle: status ? `[status → ${status}]` : `[PRO toggle → ${pro_user_only}]`,
                 ipAddress: getClientIP(req),
             });
 
