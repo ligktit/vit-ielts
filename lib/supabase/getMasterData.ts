@@ -2,31 +2,50 @@ import { createServerSupabase } from "./server";
 import { GetServerSidePropsContext } from "next";
 import { MasterData } from "@/appx/providers";
 import { parseRoles } from "~lib/parseRoles";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * SSR master data fetcher — replaces withMasterData.tsx
  *
- * Queries Supabase for:
- * - Current user session + profile
- * - Site settings (websiteOptions, allSettings)
- * - Menu data
+ * Runs on EVERY page, so it's the hottest query path. Two load optimizations
+ * (added after a bot crawl melted Supabase by triggering per-page auth + DB
+ * calls):
  *
- * Returns MasterData shape compatible with existing AppProvider consumers.
+ *  1. Global data (site_settings, menus, hasBlogPosts) is identical for every
+ *     visitor, so it's cached in-process for GLOBAL_TTL_MS. On a cache hit a
+ *     page makes ZERO global DB queries. On refresh failure we serve the last
+ *     good value (resilient during Supabase blips).
+ *
+ *  2. Auth is resolved WITHOUT a network call to `/auth/v1/user`:
+ *     - Anonymous requests (no Supabase auth cookie) skip auth entirely — so a
+ *       bot/crawler triggers no GoTrue calls at all.
+ *     - Authenticated requests use getSession() (decodes the cookie the
+ *       middleware already refreshed) instead of getUser() (which hit
+ *       /auth/v1/user on every single page and was the source of the storm).
  *
  * @origin src/shared/hoc/withMasterData.tsx
  */
-export async function getMasterData(context: GetServerSidePropsContext): Promise<{
-    props: { masterData: MasterData };
-}> {
-    const supabase = createServerSupabase(context);
 
-    // Parallel queries for performance
-    const [userResult, settingsResult, menusResult, blogResult] = await Promise.all([
-        supabase.auth.getUser(),
+type GlobalData = {
+    settingsMap: Record<string, unknown>;
+    menuData: Record<string, unknown[]>;
+    hasBlogPosts: boolean;
+};
+
+const GLOBAL_TTL_MS = 60_000;
+let globalCache: { data: GlobalData; expires: number } | null = null;
+
+async function getGlobalData(supabase: SupabaseClient): Promise<GlobalData> {
+    const now = Date.now();
+    if (globalCache && globalCache.expires > now) {
+        return globalCache.data;
+    }
+
+    const [settingsResult, menusResult, blogResult] = await Promise.all([
         supabase.from("site_settings").select("key, value"),
         supabase.from("menus").select("location, items"),
-        // Cheap existence check: is there at least one published "Blog" post?
-        // Drives whether the Blog menu item is shown in the header.
+        // Cheap existence check: is there ≥1 published "Blog" post? (drives the
+        // Blog menu visibility)
         supabase
             .from("posts")
             .select("id")
@@ -35,12 +54,50 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
             .limit(1),
     ]);
 
-    const user = userResult.data?.user ?? null;
-    const settings = settingsResult.data ?? [];
-    const menus = menusResult.data ?? [];
-    const hasBlogPosts = (blogResult.data?.length ?? 0) > 0;
+    // If any global query failed, don't poison the cache — serve the last good
+    // value if we have one, otherwise fall through with whatever came back.
+    const anyError = settingsResult.error || menusResult.error || blogResult.error;
+    if (anyError && globalCache) {
+        return globalCache.data;
+    }
 
-    // Fetch user profile if signed in
+    const data: GlobalData = {
+        settingsMap: Object.fromEntries(
+            (settingsResult.data ?? []).map((s) => [s.key, s.value])
+        ),
+        menuData: Object.fromEntries(
+            (menusResult.data ?? []).map((m) => [m.location, m.items ?? []])
+        ),
+        hasBlogPosts: (blogResult.data?.length ?? 0) > 0,
+    };
+
+    if (!anyError) {
+        globalCache = { data, expires: now + GLOBAL_TTL_MS };
+    }
+    return data;
+}
+
+/** True when the request carries a Supabase auth cookie (sb-*-auth-token). */
+function hasSupabaseAuthCookie(context: GetServerSidePropsContext): boolean {
+    return Object.keys(context.req.cookies ?? {}).some(
+        (name) => name.startsWith("sb-") && name.includes("-auth-token")
+    );
+}
+
+export async function getMasterData(context: GetServerSidePropsContext): Promise<{
+    props: { masterData: MasterData };
+}> {
+    const supabase = createServerSupabase(context);
+
+    // Resolve auth WITHOUT a /auth/v1/user network call. Anonymous traffic
+    // (the bulk, incl. bots) skips auth completely.
+    const authPromise = hasSupabaseAuthCookie(context)
+        ? supabase.auth.getSession().then((r) => r.data.session?.user ?? null).catch(() => null)
+        : Promise.resolve(null);
+
+    const [user, global] = await Promise.all([authPromise, getGlobalData(supabase)]);
+
+    // Fetch user profile only when signed in.
     let viewer: MasterData["viewer"] | null = null;
     if (user) {
         const { data: profile } = await supabase
@@ -81,15 +138,8 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
         }
     }
 
-    // Build settings map: key → value
-    const settingsMap = Object.fromEntries(
-        settings.map((s) => [s.key, s.value])
-    );
-
-    // Build menu map: location → items
-    const menuData = Object.fromEntries(
-        menus.map((m) => [m.location, m.items ?? []])
-    );
+    const settingsMap = global.settingsMap;
+    const menuData = global.menuData;
 
     // Map site_settings to legacy MasterData shape
     // TODO(migration): Flatten this structure when frontend pages are migrated
@@ -139,9 +189,9 @@ export async function getMasterData(context: GetServerSidePropsContext): Promise
                     generalSettingsTitle:
                         (settingsMap["site_title"] as string) ?? "IELTS Prediction",
                 },
-                menuData,
+                menuData: menuData as MasterData["menuData"],
                 viewer: viewer ?? null,
-                hasBlogPosts,
+                hasBlogPosts: global.hasBlogPosts,
             },
         },
     };

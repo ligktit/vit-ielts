@@ -353,7 +353,7 @@
 
 .admin-submenu-arrow {
   margin-left: auto;
-  font-size: 10px;
+  font-size: 20px;
   transition: transform var(--admin-transition-fast);
   opacity: 0.5;
 }
