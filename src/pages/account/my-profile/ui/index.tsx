@@ -115,7 +115,7 @@ export const PageMyProfile = () => {
       const updateData: Record<string, any> = {};
 
       if (dirtyFields.name) updateData.name = formData.name;
-      if (dirtyFields.email) updateData.email = formData.email;
+      // Email is display-only (cannot be edited here) — never written.
       if (dirtyFields.gender) updateData.gender = formData.gender;
       if (dirtyFields.phoneNumber) updateData.phone_number = formData.phoneNumber;
       if (dirtyFields.date_of_birth) updateData.date_of_birth = formData.date_of_birth?.format("YYYY-MM-DD");
@@ -241,32 +241,19 @@ export const PageMyProfile = () => {
             <div className="p-2 w-full md:w-1/2">
               <label htmlFor="email" className="block font-medium mb-2">
                 <span>Email</span>
-                <span className="text-red-500">*</span>
               </label>
               <Controller
                 control={control}
                 name="email"
-                rules={{
-                  required: { value: true, message: "Email is required" },
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
-                  },
-                }}
                 render={({ field }) => (
                   <Input
                     size="large"
                     {...field}
-                    placeholder="Please enter Email"
-                    status={errors.email ? "error" : ""}
+                    disabled
+                    placeholder="Email"
                   />
                 )}
               />
-              {errors.email && (
-                <span className="text-red-500 block mt-1">
-                  {errors.email.message}
-                </span>
-              )}
             </div>
             <div className="p-2 w-full md:w-1/2">
               <label htmlFor="phoneNumber" className="block font-medium mb-2">
