@@ -120,12 +120,28 @@ export const PageMyProfile = () => {
       if (dirtyFields.phoneNumber) updateData.phone_number = formData.phoneNumber;
       if (dirtyFields.date_of_birth) updateData.date_of_birth = formData.date_of_birth?.format("YYYY-MM-DD");
 
-      const { error } = await supabase
-        .from("users")
-        .update(updateData)
-        .eq("id", formData.id);
+      // Update profile fields only when something actually changed (an empty
+      // update would be a wasted write — and breaks "password only" saves).
+      if (Object.keys(updateData).length > 0) {
+        const { error } = await supabase
+          .from("users")
+          .update(updateData)
+          .eq("id", formData.id);
+        if (error) throw error;
+      }
 
-      if (error) throw error;
+      // Change the auth password if a new one was entered. This was missing —
+      // the form collected the password but never called Supabase Auth, so the
+      // save reported success while the password never changed.
+      if (dirtyFields.password && formData.password) {
+        const { error: pwError } = await supabase.auth.updateUser({
+          password: formData.password,
+        });
+        if (pwError) throw pwError;
+        // Clear the fields so they're not re-submitted / left on screen.
+        setValue("password", "");
+        setValue("confirm_password", "");
+      }
 
       await fetchProfile();
       toast.success("Profile updated successfully");
