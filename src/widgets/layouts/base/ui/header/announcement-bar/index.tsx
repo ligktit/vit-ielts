@@ -118,23 +118,20 @@ export const AnnouncementBar = () => {
       }}
       translate="no"
     >
-      {/* The scrolling area only covers the LEFT HALF of the screen (left edge
-          → centre); inside it a seamless marquee keeps the left half filled
-          with repeating items, scrolling right→left. The right half is left
-          empty (the spacer below). */}
-      <div className="announcement-scroller w-[50vw] shrink-0 items-center overflow-hidden">
+      {/* The scrolling area fills all the width up to the Zalo block on the
+          right; inside it a seamless marquee keeps it filled with repeating
+          items, scrolling right→left. */}
+      <div className="announcement-scroller flex min-w-0 flex-1 items-center overflow-hidden">
         <div
           className="announcement-marquee flex w-max flex-nowrap items-center"
           style={{ "--marquee-duration": `${speed}s` } as CSSProperties}
         >
           {/* Two identical halves (each repeats the items enough to overfill
-              the left half); animating -50% loops seamlessly. */}
+              the width); animating -50% loops seamlessly. */}
           <TickerSequence items={half} />
           <TickerSequence items={half} ariaHidden />
         </div>
       </div>
-      {/* Empty right half. */}
-      <div className="flex-1" />
 
       {(right?.enabled || gear?.enabled) && (
         <div className="z-[1] flex flex-none items-center gap-3.5 pl-4">
