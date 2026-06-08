@@ -12,6 +12,10 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { deriveSubmissionStatus, isSubmitted } from "./lib/classroomStatus";
 import { safeParseJsonb } from "./lib/safeParseJsonb";
 import { isAdminRole } from "~lib/parseRoles";
+import {
+    toLegacyQuizForScore,
+    calculateStoredScoreResult,
+} from "@/shared/lib/test-result-display";
 import type {
     Classroom,
     ClassroomMemberWithUser,
@@ -229,7 +233,12 @@ export async function getClassroom(
 export async function updateClassroom(
     supabase: SupabaseClient,
     classroomId: string,
-    patch: { name?: string; description?: string | null; status?: "active" | "closed" }
+    patch: {
+        name?: string;
+        description?: string | null;
+        status?: "active" | "closed";
+        image_url?: string | null;
+    }
 ): Promise<Classroom> {
     const { data, error } = await supabase
         .from("classrooms")
@@ -608,7 +617,7 @@ export async function getAssignmentDetail(
         };
     }
 
-    const [usersRes, resultsRes] = await Promise.all([
+    const [usersRes, resultsRes, displayRes] = await Promise.all([
         supabase.from("users").select("id, name, email, avatar_url").in("id", targetIds),
         supabase
             .from("test_results")
@@ -618,8 +627,16 @@ export async function getAssignmentDetail(
             .not("submitted_at", "is", null)
             .in("user_id", targetIds)
             .order("submitted_at", { ascending: false }),
+        supabase
+            .from("classroom_members")
+            .select("user_id, display_name")
+            .eq("classroom_id", a.classroom_id)
+            .in("user_id", targetIds),
     ]);
 
+    const displayById = new Map(
+        (displayRes.data ?? []).map((m) => [m.user_id, m.display_name as string | null])
+    );
     const usersById = new Map(
         (usersRes.data ?? []).map((u) => [u.id, u as { id: string; name: string | null; email: string; avatar_url: string | null }])
     );
@@ -650,7 +667,7 @@ export async function getAssignmentDetail(
 
         return {
             student_id: sid,
-            name: u?.name ?? null,
+            name: displayById.get(sid) || u?.name || null,
             email: u?.email ?? "",
             avatar_url: u?.avatar_url ?? null,
             status,
@@ -962,7 +979,7 @@ export async function getClassroomTracking(
 
     const { data: studentRows } = await supabase
         .from("classroom_members")
-        .select("user_id, users(name, email, avatar_url)")
+        .select("user_id, display_name, users(name, email, avatar_url, is_pro, pro_expiration_date)")
         .eq("classroom_id", classroomId)
         .eq("role", "student")
         .eq("status", "active")
@@ -999,9 +1016,19 @@ export async function getClassroomTracking(
         subsetTargets.set(t.assignment_id, set);
     }
 
+    const nowMs = Date.now();
     const now = nowIso();
     const rows: TrackingRow[] = students.map((s) => {
-        const u = (s.users ?? {}) as { name?: string | null; email?: string; avatar_url?: string | null };
+        const u = (s.users ?? {}) as {
+            name?: string | null;
+            email?: string;
+            avatar_url?: string | null;
+            is_pro?: boolean | null;
+            pro_expiration_date?: string | null;
+        };
+        const isPro = Boolean(
+            u.is_pro && u.pro_expiration_date && new Date(u.pro_expiration_date).getTime() > nowMs
+        );
         const cells: TrackingCell[] = [];
         const bands: number[] = [];
         let submitted = 0;
@@ -1037,9 +1064,10 @@ export async function getClassroomTracking(
 
         return {
             student_id: s.user_id,
-            name: u.name ?? null,
+            name: (s.display_name as string | null) || u.name || null,
             email: u.email ?? "",
             avatar_url: u.avatar_url ?? null,
+            is_pro: isPro,
             cells,
             submitted_count: submitted,
             total_count: applicable,
@@ -1058,7 +1086,11 @@ export type StudentHistoryAttempt = {
     quiz_title: string;
     quiz_skill: string;
     quiz_source: string | null;
+    quiz_type: string | null;
     score: number | null;
+    /** correct answers (for practice "X/Y" display) */
+    total_correct: number | null;
+    total_questions: number | null;
     submitted_at: string | null;
     test_time: number | null;
     duration_min: number | null;
@@ -1081,7 +1113,7 @@ export async function getStudentHistory(
 ): Promise<StudentHistory> {
     const { data: memberRow } = await supabase
         .from("classroom_members")
-        .select("user_id, joined_at, users(name, email, avatar_url), classrooms(name)")
+        .select("user_id, joined_at, display_name, users(name, email, avatar_url), classrooms(name)")
         .eq("classroom_id", classroomId)
         .eq("user_id", studentId)
         .eq("status", "active")
@@ -1094,7 +1126,7 @@ export async function getStudentHistory(
     const student = memberRow
         ? {
               id: studentId,
-              name: u?.name ?? null,
+              name: (memberRow.display_name as string | null) || u?.name || null,
               email: u?.email ?? "",
               avatar_url: u?.avatar_url ?? null,
           }
@@ -1116,9 +1148,20 @@ export async function getStudentHistory(
     const quizIds = [...new Set((assignments ?? []).map((a) => a.quiz_id))];
     if (!quizIds.length) return empty;
 
+    // Full quiz structure → recompute the score live (same as /test-result),
+    // because stored totalCorrect/score can be stale from older scoring runs.
+    const { data: quizFull } = await supabase
+        .from("quizzes")
+        .select(
+            "id, type, passages(content, sort_order, start_question_number, questions(type, question_text, list_of_questions, list_of_options, explanations, matching_question, matrix_question, sort_order))"
+        )
+        .in("id", quizIds);
+    const legacyByQuiz = new Map<string, ReturnType<typeof toLegacyQuizForScore>>();
+    (quizFull ?? []).forEach((q) => legacyByQuiz.set(q.id, toLegacyQuizForScore(q)));
+
     const { data: results } = await supabase
         .from("test_results")
-        .select("id, quiz_id, score, submitted_at, test_time, time_left, quizzes(title, skill, source)")
+        .select("id, quiz_id, score, submitted_at, test_time, time_left, answers, test_part, quizzes(title, skill, source, type)")
         .eq("user_id", studentId)
         .eq("status", "published")
         .in("quiz_id", quizIds)
@@ -1127,7 +1170,28 @@ export async function getStudentHistory(
     const bands: number[] = [];
     const durations: number[] = [];
     const attempts: StudentHistoryAttempt[] = (results ?? []).map((r) => {
-        const quiz = (r.quizzes ?? {}) as { title?: string; skill?: string; source?: string | null };
+        const quiz = (r.quizzes ?? {}) as {
+            title?: string;
+            skill?: string;
+            source?: string | null;
+            type?: string | null;
+        };
+        const stored = safeParseJsonb<{ totalCorrect?: number; totalQuestions?: number }>(r.answers) ?? {};
+        const legacy = legacyByQuiz.get(r.quiz_id);
+        const sr = legacy
+            ? calculateStoredScoreResult({ quiz: legacy, answers: r.answers, testPart: r.test_part })
+            : null;
+        const liveBand = sr ? Number(sr.score) : NaN;
+        const totalCorrect = sr ? sr.correctAns : stored.totalCorrect ?? null;
+        const totalQuestions = sr ? sr.total_questions : stored.totalQuestions ?? null;
+        // Prefer the live band when it's valid (>0); else the stored score.
+        const band =
+            Number.isFinite(liveBand) && liveBand > 0
+                ? liveBand
+                : typeof r.score === "number"
+                    ? r.score
+                    : null;
+
         let durationMin: number | null = null;
         if (r.test_time) {
             let remaining = 0;
@@ -1137,7 +1201,7 @@ export async function getStudentHistory(
             }
             durationMin = Math.max(0, Math.round((r.test_time * 60 - remaining) / 60));
         }
-        if (typeof r.score === "number") bands.push(r.score);
+        if (typeof band === "number") bands.push(band);
         if (durationMin != null) durations.push(durationMin);
         return {
             test_result_id: r.id,
@@ -1145,7 +1209,10 @@ export async function getStudentHistory(
             quiz_title: quiz.title ?? "",
             quiz_skill: quiz.skill ?? "",
             quiz_source: quiz.source ?? null,
-            score: r.score,
+            quiz_type: quiz.type ?? null,
+            total_correct: typeof totalCorrect === "number" ? totalCorrect : null,
+            total_questions: typeof totalQuestions === "number" ? totalQuestions : null,
+            score: band,
             submitted_at: r.submitted_at,
             test_time: r.test_time,
             duration_min: durationMin,

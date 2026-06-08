@@ -12,6 +12,7 @@ export type Classroom = {
     invite_code: string;
     owner_id: string;
     status: ClassroomStatus;
+    image_url: string | null;
     created_at: string;
 };
 
@@ -163,6 +164,7 @@ export type TrackingRow = {
     name: string | null;
     email: string;
     avatar_url: string | null;
+    is_pro: boolean;
     cells: TrackingCell[];
     submitted_count: number;
     total_count: number;

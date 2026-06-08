@@ -5,6 +5,10 @@ import dayjs from "dayjs";
 import { ClassroomLayout } from "@/widgets/layouts";
 import type { StudentHistory } from "~services/classroom";
 import { ROUTES } from "@/shared/routes";
+import {
+  formatResultLabel,
+  isFullTestQuizType,
+} from "@/shared/lib/test-result-display";
 
 type Props = { classroomId: string; history: StudentHistory };
 
@@ -143,13 +147,33 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
                     ) : null}
                   </div>
                   <div>
-                    {a.score != null ? (
-                      <span className="text-[15px] font-bold text-[#D94A56]">{a.score}</span>
-                    ) : (
-                      <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[13px] font-medium text-[#6A7282]">
-                        Chờ chấm
-                      </span>
-                    )}
+                    {(() => {
+                      const label = formatResultLabel({
+                        quizType: a.quiz_type,
+                        storedScore: a.score,
+                        answers: {
+                          answers: [],
+                          totalCorrect: a.total_correct,
+                          totalQuestions: a.total_questions,
+                        },
+                      });
+                      if (label == null) {
+                        return (
+                          <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[13px] font-medium text-[#6A7282]">
+                            Chờ chấm
+                          </span>
+                        );
+                      }
+                      return (
+                        <span
+                          className={`text-[15px] font-bold ${
+                            isFullTestQuizType(a.quiz_type) ? "text-[#D94A56]" : "text-[#16A34A]"
+                          }`}
+                        >
+                          {label}
+                        </span>
+                      );
+                    })()}
                   </div>
                   <div className="text-[14px] text-[#191D24]">
                     {a.duration_min != null ? `${a.duration_min} phút` : "—"}

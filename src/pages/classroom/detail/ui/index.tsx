@@ -53,6 +53,13 @@ const tintFor = (key: string) =>
   AVATAR_TINTS[[...key].reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_TINTS.length];
 const initial = (name: string | null, email: string) =>
   (name || email || "?").trim().charAt(0).toUpperCase();
+// Class avatar initials: first letter of the first two words (e.g. "IELTS 2" → "I2").
+const classInitials = (name: string) => {
+  const t = (name || "").trim();
+  return (
+    (t.charAt(0).toUpperCase() + (t.split(/\s+/)[1]?.charAt(0).toUpperCase() ?? "")) || "L"
+  );
+};
 
 // ── stat card — exact Figma tokens (44px icon box, 28px value, tint bg) ──
 const STAT_TINTS: Record<string, [string, string]> = {
@@ -135,15 +142,13 @@ const MemberRow = ({
             <span className="truncate">{name}</span>
           )}
           {isCurrentUser ? <span className="font-normal text-[#6A7282]">(Bạn)</span> : null}
-          {m.is_pro ? (
-            <span className="rounded-full bg-[#FEF3C7] px-2 py-0.5 text-[11px] font-bold text-[#B45309]">
-              PRO
-            </span>
-          ) : (
-            <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[11px] font-bold text-[#6A7282]">
-              FREE
-            </span>
-          )}
+          <span
+            className={`inline-flex h-[19px] items-center rounded-full px-2 text-[10px] font-bold uppercase tracking-widest ${
+              m.is_pro ? "bg-[#D94A56] text-white" : "bg-[#F3F4F6] text-[#6A7282]"
+            }`}
+          >
+            {m.is_pro ? "PRO" : "FREE"}
+          </span>
         </div>
         <div className="truncate text-[13px] text-[#6A7282]">{m.email || "—"}</div>
       </div>
@@ -623,7 +628,9 @@ export const PageClassroomDetail = ({
       message.error(
         msg.includes("USER_NOT_FOUND")
           ? "Không tìm thấy người dùng với email này."
-          : "Không thêm được thành viên."
+          : msg.includes("STUDENT_LIMIT_REACHED")
+            ? "Lớp đã đạt giới hạn 50 học viên."
+            : "Không thêm được thành viên."
       );
     } finally {
       setAdding(false);
@@ -685,11 +692,31 @@ export const PageClassroomDetail = ({
   const [editOpen, setEditOpen] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
+  const [editImage, setEditImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const openEdit = () => {
     setEditName(classroom.name);
     setEditDesc(classroom.description || "");
+    setEditImage(classroom.image_url ?? null);
     setEditOpen(true);
+  };
+
+  const handlePickImage = async (file: File | null) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/classroom/upload-image", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok || !data.path) throw new Error(data.message || "Upload thất bại");
+      setEditImage(data.path);
+    } catch (e) {
+      message.error(e instanceof Error ? e.message : "Không tải được ảnh.");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -702,6 +729,7 @@ export const PageClassroomDetail = ({
       const updated = await updateClassroom(supabase, classroom.id, {
         name: editName.trim(),
         description: editDesc.trim() || null,
+        image_url: editImage,
       });
       setClassroom(updated);
       message.success("Đã cập nhật thông tin lớp");
@@ -798,8 +826,13 @@ export const PageClassroomDetail = ({
       await approveJoinRequest(supabase, classroom.id, userId);
       message.success("Đã duyệt học sinh vào lớp");
       refresh();
-    } catch {
-      message.error("Không duyệt được yêu cầu.");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "";
+      message.error(
+        msg.includes("STUDENT_LIMIT_REACHED")
+          ? "Lớp đã đạt giới hạn 50 học viên."
+          : "Không duyệt được yêu cầu."
+      );
     }
   };
 
@@ -861,13 +894,21 @@ export const PageClassroomDetail = ({
       {/* ── Class header card ── */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-[13px] border border-[#E5E7EB] bg-white p-6 shadow-[0_2px_8px_0_rgba(0,0,0,0.04)]">
         <div className="flex items-start gap-4">
-          <span
-            className="flex h-14 w-14 items-center justify-center rounded-[13px] border text-[20px] font-bold"
-            style={{ background: "#E0EBFF", borderColor: "#C6D7F5", color: "#2A5BB1" }}
-          >
-            {classroom.name.trim().charAt(0).toUpperCase()}
-            {classroom.name.trim().split(/\s+/)[1]?.charAt(0).toUpperCase() ?? ""}
-          </span>
+          {classroom.image_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={classroom.image_url}
+              alt=""
+              className="h-14 w-14 flex-shrink-0 rounded-[13px] border border-[#C6D7F5] object-cover"
+            />
+          ) : (
+            <span
+              className="flex h-14 w-14 items-center justify-center rounded-[13px] border text-[20px] font-bold"
+              style={{ background: "#E0EBFF", borderColor: "#C6D7F5", color: "#2A5BB1" }}
+            >
+              {classInitials(classroom.name)}
+            </span>
+          )}
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-[24px] font-bold leading-9 text-[#181C23]">{classroom.name}</h2>
@@ -1942,6 +1983,41 @@ export const PageClassroomDetail = ({
         <h3 className="text-[20px] font-bold text-[#191D24]">Sửa thông tin lớp</h3>
         <div className="mt-5 space-y-4">
           <div>
+            <label className="mb-1.5 block text-[13px] font-bold text-[#191D24]">Ảnh lớp</label>
+            <div className="flex items-center gap-4">
+              <span
+                className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-[13px] border text-[22px] font-bold"
+                style={{ background: "#E0EBFF", borderColor: "#C6D7F5", color: "#2A5BB1" }}
+              >
+                {editImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={editImage} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  classInitials(editName)
+                )}
+              </span>
+              <div className="flex items-center gap-2">
+                <label className="cursor-pointer rounded-[10px] border border-[#E5E7EB] px-4 py-2 text-[13px] font-bold text-[#374151] hover:bg-gray-50">
+                  {uploadingImage ? "Đang tải…" : editImage ? "Đổi ảnh" : "Tải ảnh lên"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handlePickImage(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                {editImage ? (
+                  <button
+                    onClick={() => setEditImage(null)}
+                    className="rounded-[10px] px-3 py-2 text-[13px] font-bold text-[#6A7282] hover:bg-gray-50"
+                  >
+                    Xóa ảnh
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+          <div>
             <label className="mb-1.5 block text-[13px] font-bold text-[#191D24]">
               Tên lớp <span className="text-[#D94A56]">*</span>
             </label>
@@ -1975,7 +2051,7 @@ export const PageClassroomDetail = ({
           </button>
           <button
             onClick={handleSaveEdit}
-            disabled={submitting}
+            disabled={submitting || uploadingImage}
             className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b] disabled:opacity-60"
           >
             {submitting ? "Đang lưu…" : "Lưu"}

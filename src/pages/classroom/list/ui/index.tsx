@@ -86,12 +86,21 @@ const ClassRow = ({ c, showRoleBadge }: { c: ClassroomSummary; showRoleBadge: bo
   return (
     <div className={`${ROW_GRID} border-b border-[#F3F4F6] px-2 py-4 last:border-0`}>
       <div className="flex min-w-0 items-center gap-3">
-        <span
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base font-bold"
-          style={{ background: `${tint}1A`, color: tint }}
-        >
-          {initials(c.name)}
-        </span>
+        {c.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={c.image_url}
+            alt=""
+            className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <span
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base font-bold"
+            style={{ background: `${tint}1A`, color: tint }}
+          >
+            {initials(c.name)}
+          </span>
+        )}
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Link
@@ -240,7 +249,12 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
       message.success("Đã tạo lớp thành công!");
       router.push(ROUTES.CLASSROOM.DETAIL(classroom.id));
     } catch (e) {
-      message.error(e instanceof Error ? e.message : "Không tạo được lớp.");
+      const msg = e instanceof Error ? e.message : "";
+      message.error(
+        msg.includes("CLASS_LIMIT_REACHED")
+          ? "Bạn đã đạt giới hạn 10 lớp học."
+          : "Không tạo được lớp."
+      );
       setSubmitting(false);
     }
   };
@@ -358,15 +372,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
 
       {/* Action buttons */}
       <div className="flex flex-wrap gap-3">
-        {isTeacher ? (
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="inline-flex items-center gap-2 rounded-[10px] bg-[#D94A56] px-6 py-3 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
-          >
-            <span className="material-symbols-rounded text-[20px]">add</span>
-            Tạo lớp mới
-          </button>
-        ) : null}
+        {/* Testing phase: any account can create a class (max 10, server-enforced). */}
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="inline-flex items-center gap-2 rounded-[10px] bg-[#D94A56] px-6 py-3 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
+        >
+          <span className="material-symbols-rounded text-[20px]">add</span>
+          Tạo lớp mới
+        </button>
         <button
           onClick={() => setJoinOpen(true)}
           className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[#D94A56] bg-white px-6 py-3 text-[15px] font-bold text-[#D94A56] hover:bg-[#FCE8EA]"
@@ -402,14 +415,12 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
               tạo lớp mới hoặc tham gia bằng mã mời để bắt đầu
             </p>
             <div className="mt-6 flex gap-3">
-              {isTeacher ? (
-                <button
-                  onClick={() => setCreateOpen(true)}
-                  className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
-                >
-                  Tạo lớp ngay
-                </button>
-              ) : null}
+              <button
+                onClick={() => setCreateOpen(true)}
+                className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
+              >
+                Tạo lớp ngay
+              </button>
               <button
                 onClick={() => setJoinOpen(true)}
                 className="rounded-[10px] border-[1.5px] border-[#D94A56] bg-white px-6 py-2.5 text-[15px] font-bold text-[#D94A56] hover:bg-[#FCE8EA]"

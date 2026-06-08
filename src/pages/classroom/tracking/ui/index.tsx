@@ -93,8 +93,19 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
             {(r.name || r.email || "?").charAt(0).toUpperCase()}
           </Avatar>
           <div className="min-w-0">
-            <div className="truncate font-medium text-[#2D3142]">{r.name || r.email}</div>
-            <div className="truncate text-xs font-normal text-[#6A7282]">{r.email}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="truncate text-[15px] font-bold text-[#191D24]">
+                {r.name || r.email}
+              </span>
+              <span
+                className={`inline-flex h-[19px] flex-shrink-0 items-center rounded-full px-2 text-[10px] font-bold uppercase tracking-widest ${
+                  r.is_pro ? "bg-[#D94A56] text-white" : "bg-[#F3F4F6] text-[#6A7282]"
+                }`}
+              >
+                {r.is_pro ? "PRO" : "FREE"}
+              </span>
+            </div>
+            <div className="truncate text-[13px] font-normal text-[#6A7282]">{r.email}</div>
           </div>
         </Link>
       ),
