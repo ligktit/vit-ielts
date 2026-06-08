@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {
-  Button,
-  DatePicker,
-  Dropdown,
-  Modal,
-  Tag,
-  TimePicker,
-  message,
-} from "antd";
+import { DatePicker, Dropdown, Modal, Tag, TimePicker, message } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { createClient } from "~supabase/client";
 import { ClassroomLayout } from "@/widgets/layouts";
@@ -21,7 +13,9 @@ import {
   updateAssignmentDueAt,
   deleteClassroom,
   regenerateInviteCode,
+  updateClassroom,
   removeMember,
+  updateMemberDisplayName,
   approveJoinRequest,
   rejectJoinRequest,
 } from "~services/classroom";
@@ -104,6 +98,7 @@ const MemberRow = ({
   canManage,
   historyHref,
   onRemove,
+  onRename,
 }: {
   m: ClassroomMemberWithUser;
   isClassOwner: boolean;
@@ -111,9 +106,12 @@ const MemberRow = ({
   canManage: boolean;
   historyHref?: string | null;
   onRemove: (m: ClassroomMemberWithUser) => void;
+  onRename: (m: ClassroomMemberWithUser) => void;
 }) => {
   const [bg, fg] = tintFor(m.user_id);
-  const name = m.name || m.email || "Thành viên";
+  const name = m.display_name || m.name || m.email || "Thành viên";
+  const canRemove = canManage && !isClassOwner && !isCurrentUser;
+  const showMenu = canManage && !isCurrentUser;
   return (
     <div className="flex items-center gap-[10px] px-5 py-4">
       {m.avatar_url ? (
@@ -124,35 +122,59 @@ const MemberRow = ({
           className="flex h-12 w-12 items-center justify-center rounded-full text-base font-bold"
           style={{ background: bg, color: fg }}
         >
-          {initial(m.name, m.email)}
+          {initial(m.display_name || m.name, m.email)}
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[15px] font-bold text-[#191D24]">
+        <div className="flex flex-wrap items-center gap-1.5 text-[15px] font-bold text-[#191D24]">
           {historyHref ? (
-            <Link href={historyHref} className="hover:text-[#D94A56]">
+            <Link href={historyHref} className="truncate hover:text-[#D94A56]">
               {name}
             </Link>
           ) : (
-            name
+            <span className="truncate">{name}</span>
           )}
-          {isCurrentUser ? <span className="ml-1 font-normal text-[#6A7282]">(Bạn)</span> : null}
+          {isCurrentUser ? <span className="font-normal text-[#6A7282]">(Bạn)</span> : null}
+          {m.is_pro ? (
+            <span className="rounded-full bg-[#FEF3C7] px-2 py-0.5 text-[11px] font-bold text-[#B45309]">
+              PRO
+            </span>
+          ) : (
+            <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[11px] font-bold text-[#6A7282]">
+              FREE
+            </span>
+          )}
         </div>
         <div className="truncate text-[13px] text-[#6A7282]">{m.email || "—"}</div>
       </div>
       <span className="inline-flex h-7 items-center gap-1.5 rounded-full bg-[#E5F8EC] px-2 text-[13px] font-medium text-[#16A34A]">
         <span className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" /> Đã tham gia
       </span>
-      {canManage && !isClassOwner && !isCurrentUser ? (
-        <button
-          onClick={() => onRemove(m)}
-          className="inline-flex items-center gap-2 rounded-[8px] border border-[#E5E7EB] px-3.5 py-1 text-[14px] font-semibold text-[#374151] hover:bg-gray-50"
+      {showMenu ? (
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: [
+              { key: "rename", label: "Sửa tên" },
+              ...(canRemove
+                ? [
+                    { type: "divider" as const },
+                    { key: "remove", label: "Xóa khỏi lớp", danger: true },
+                  ]
+                : []),
+            ],
+            onClick: ({ key }) => {
+              if (key === "rename") onRename(m);
+              else if (key === "remove") onRemove(m);
+            },
+          }}
         >
-          <span className="material-symbols-rounded text-[18px]">delete</span>
-          Xóa
-        </button>
+          <button className="flex h-8 w-8 items-center justify-center rounded-[8px] text-[#6A7282] hover:bg-gray-100">
+            <span className="material-symbols-rounded text-[20px]">more_vert</span>
+          </button>
+        </Dropdown>
       ) : (
-        <span className="w-7" />
+        <span className="w-8" />
       )}
     </div>
   );
@@ -610,6 +632,33 @@ export const PageClassroomDetail = ({
 
   const [confirmRemove, setConfirmRemove] = useState<ClassroomMemberWithUser | null>(null);
   const [confirmReject, setConfirmReject] = useState<ClassroomMemberWithUser | null>(null);
+  const [renameMember, setRenameMember] = useState<ClassroomMemberWithUser | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+
+  const openRename = (m: ClassroomMemberWithUser) => {
+    setRenameMember(m);
+    setRenameValue(m.display_name || m.name || "");
+  };
+
+  const handleSaveRename = async () => {
+    if (!renameMember) return;
+    setSubmitting(true);
+    try {
+      await updateMemberDisplayName(
+        supabase,
+        classroom.id,
+        renameMember.user_id,
+        renameValue.trim() || null
+      );
+      message.success("Đã cập nhật tên trong lớp");
+      setRenameMember(null);
+      refresh();
+    } catch {
+      message.error("Không cập nhật được tên.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const doRemove = async (m: ClassroomMemberWithUser) => {
     setConfirmRemove(null);
@@ -629,6 +678,38 @@ export const PageClassroomDetail = ({
       message.success("Đã đổi mã mời");
     } catch {
       message.error("Không đổi được mã mời.");
+    }
+  };
+
+  // Edit class info modal
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+
+  const openEdit = () => {
+    setEditName(classroom.name);
+    setEditDesc(classroom.description || "");
+    setEditOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editName.trim()) {
+      message.error("Vui lòng nhập tên lớp.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const updated = await updateClassroom(supabase, classroom.id, {
+        name: editName.trim(),
+        description: editDesc.trim() || null,
+      });
+      setClassroom(updated);
+      message.success("Đã cập nhật thông tin lớp");
+      setEditOpen(false);
+    } catch {
+      message.error("Không cập nhật được thông tin lớp.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -834,9 +915,11 @@ export const PageClassroomDetail = ({
                   { key: "t", label: "Sao chép link mời giáo viên" },
                   { type: "divider" },
                   { key: "r", label: "Đổi mã mời" },
+                  { key: "edit", label: "Sửa thông tin lớp" },
                 ],
                 onClick: ({ key }) => {
-                  if (key === "qr") setQrOpen(true);
+                  if (key === "edit") openEdit();
+                  else if (key === "qr") setQrOpen(true);
                   else if (key === "s") copy(studentLink, "s");
                   else if (key === "t") copy(teacherLink, "t");
                   else if (key === "r") handleRegenerate();
@@ -848,11 +931,7 @@ export const PageClassroomDetail = ({
               </button>
             </Dropdown>
           </div>
-        ) : (
-          <Link href={ROUTES.CLASSROOM.MY_ASSIGNMENTS}>
-            <Button type="primary">Bài tập của tôi</Button>
-          </Link>
-        )}
+        ) : null}
       </div>
 
       {/* ── Metrics (teacher) ── */}
@@ -992,6 +1071,7 @@ export const PageClassroomDetail = ({
                             : null
                         }
                         onRemove={setConfirmRemove}
+                        onRename={openRename}
                       />
                     ))}
                   </div>
@@ -1801,6 +1881,104 @@ export const PageClassroomDetail = ({
             className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
           >
             Từ chối
+          </button>
+        </div>
+      </Modal>
+
+      {/* ── Rename member (per-class display name) ── */}
+      <Modal
+        open={!!renameMember}
+        onCancel={() => setRenameMember(null)}
+        footer={null}
+        closable={false}
+        width={440}
+        centered
+        styles={{ content: { borderRadius: 16, padding: 28 } }}
+      >
+        <h3 className="text-[20px] font-bold text-[#191D24]">Sửa tên trong lớp</h3>
+        <p className="mt-2 text-[14px] text-[#6A7282]">
+          Tên này chỉ hiển thị trong lớp, không đổi tên tài khoản của thành viên.
+        </p>
+        <div className="mt-5">
+          <label className="mb-1.5 block text-[13px] font-bold text-[#191D24]">Tên hiển thị</label>
+          <input
+            value={renameValue}
+            maxLength={120}
+            onChange={(e) => setRenameValue(e.target.value)}
+            placeholder={renameMember?.name || "Nhập tên hiển thị"}
+            className="w-full rounded-[11px] border border-[#E5E7EB] px-4 py-3 text-[15px] text-[#191D24] outline-none focus:border-[#D94A56]"
+          />
+          <p className="mt-1.5 text-[13px] text-[#6A7282]">
+            Để trống để dùng lại tên tài khoản ({renameMember?.name || renameMember?.email || "—"}).
+          </p>
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setRenameMember(null)}
+            className="rounded-[10px] border border-[#E5E7EB] px-5 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-gray-50"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSaveRename}
+            disabled={submitting}
+            className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b] disabled:opacity-60"
+          >
+            {submitting ? "Đang lưu…" : "Lưu"}
+          </button>
+        </div>
+      </Modal>
+
+      {/* ── Edit class info ── */}
+      <Modal
+        open={editOpen}
+        onCancel={() => setEditOpen(false)}
+        footer={null}
+        closable={false}
+        width={480}
+        centered
+        styles={{ content: { borderRadius: 16, padding: 28 } }}
+      >
+        <h3 className="text-[20px] font-bold text-[#191D24]">Sửa thông tin lớp</h3>
+        <div className="mt-5 space-y-4">
+          <div>
+            <label className="mb-1.5 block text-[13px] font-bold text-[#191D24]">
+              Tên lớp <span className="text-[#D94A56]">*</span>
+            </label>
+            <input
+              value={editName}
+              maxLength={120}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="VD: IELTS Academic 7.5+"
+              className="w-full rounded-[11px] border border-[#E5E7EB] px-4 py-3 text-[15px] text-[#191D24] outline-none focus:border-[#D94A56]"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[13px] font-bold text-[#191D24]">Mô tả lớp</label>
+            <textarea
+              value={editDesc}
+              maxLength={200}
+              rows={3}
+              onChange={(e) => setEditDesc(e.target.value)}
+              placeholder="Mô tả ngắn về mục tiêu, lịch học…"
+              className="w-full resize-none rounded-[11px] border border-[#E5E7EB] px-4 py-3 text-[15px] text-[#191D24] outline-none focus:border-[#D94A56]"
+            />
+            <p className="mt-1.5 text-[13px] text-[#6A7282]">Tối đa 200 ký tự</p>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setEditOpen(false)}
+            className="rounded-[10px] border border-[#E5E7EB] px-5 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-gray-50"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={handleSaveEdit}
+            disabled={submitting}
+            className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b] disabled:opacity-60"
+          >
+            {submitting ? "Đang lưu…" : "Lưu"}
           </button>
         </div>
       </Modal>

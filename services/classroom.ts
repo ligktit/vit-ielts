@@ -189,14 +189,26 @@ export async function getClassroom(
 
     const { data: members, error: memberError } = await supabase
         .from("classroom_members")
-        .select("id, classroom_id, user_id, role, joined_at, users(name, email, avatar_url)")
+        .select(
+            "id, classroom_id, user_id, role, joined_at, display_name, users(name, email, avatar_url, is_pro, pro_expiration_date)"
+        )
         .eq("classroom_id", classroomId)
         .eq("status", "active")
         .order("joined_at", { ascending: true });
     if (memberError) throw memberError;
 
+    const now = Date.now();
     const flattened: ClassroomMemberWithUser[] = (members ?? []).map((m) => {
-        const u = (m.users ?? {}) as { name?: string | null; email?: string; avatar_url?: string | null };
+        const u = (m.users ?? {}) as {
+            name?: string | null;
+            email?: string;
+            avatar_url?: string | null;
+            is_pro?: boolean | null;
+            pro_expiration_date?: string | null;
+        };
+        const isPro = Boolean(
+            u.is_pro && u.pro_expiration_date && new Date(u.pro_expiration_date).getTime() > now
+        );
         return {
             id: m.id,
             classroom_id: m.classroom_id,
@@ -206,6 +218,8 @@ export async function getClassroom(
             name: u.name ?? null,
             email: u.email ?? "",
             avatar_url: u.avatar_url ?? null,
+            display_name: m.display_name ?? null,
+            is_pro: isPro,
         };
     });
 
@@ -342,6 +356,21 @@ export async function addMemberByEmail(
         p_email: email,
         p_role: role,
     });
+    if (error) throw error;
+}
+
+/** Teacher sets/clears a member's per-class display name (null = use account name). */
+export async function updateMemberDisplayName(
+    supabase: SupabaseClient,
+    classroomId: string,
+    userId: string,
+    displayName: string | null
+): Promise<void> {
+    const { error } = await supabase
+        .from("classroom_members")
+        .update({ display_name: displayName })
+        .eq("classroom_id", classroomId)
+        .eq("user_id", userId);
     if (error) throw error;
 }
 

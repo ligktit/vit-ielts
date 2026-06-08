@@ -28,6 +28,10 @@ export type ClassroomMemberWithUser = ClassroomMember & {
     name: string | null;
     email: string;
     avatar_url: string | null;
+    /** per-class display name override (teacher-editable); falls back to name */
+    display_name?: string | null;
+    /** account has an active Pro subscription */
+    is_pro?: boolean;
 };
 
 export type ClassroomAssignment = {

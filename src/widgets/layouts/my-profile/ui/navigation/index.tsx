@@ -154,7 +154,7 @@ export const Navigation = ({
                 {item.badge ? (
                   <span
                     className={twMerge(
-                      "ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide",
+                      "rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide",
                       isActive
                         ? "bg-white/25 text-white"
                         : "bg-[#FCE8EA] text-[#D94A56]"

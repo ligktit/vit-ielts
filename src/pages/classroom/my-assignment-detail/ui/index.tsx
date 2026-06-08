@@ -28,6 +28,9 @@ const statusLabel: Record<string, string> = {
   pending: "Chưa nộp",
 };
 
+// Toggle to show "Lời dặn của giáo viên" + "Hướng dẫn làm bài" (tạm ẩn).
+const SHOW_NOTE_AND_GUIDE = false;
+
 const typeLabel: Record<string, string> = {
   practice: "Luyện tập",
   exam: "Dự đoán",
@@ -104,11 +107,11 @@ export const PageMyAssignmentDetail = ({ assignment: a }: Props) => {
   return (
     <div className="space-y-5">
       <Link
-        href={ROUTES.CLASSROOM.MY_ASSIGNMENTS}
+        href={`${ROUTES.CLASSROOM.DETAIL(a.classroom_id)}?tab=assignments`}
         className="inline-flex items-center gap-1 text-sm text-[#6A7282] hover:text-[#D94A56]"
       >
         <span className="material-symbols-rounded text-[18px]">chevron_left</span>
-        Quay lại danh sách bài tập
+        Quay lại lớp học
       </Link>
 
       <div className="rounded-[13px] border border-gray-100 bg-white p-6 shadow-sm">
@@ -163,8 +166,8 @@ export const PageMyAssignmentDetail = ({ assignment: a }: Props) => {
           />
         </div>
 
-        {/* teacher note */}
-        {a.note ? (
+        {/* TẠM ẨN: "Lời dặn của giáo viên" + "Hướng dẫn làm bài" */}
+        {SHOW_NOTE_AND_GUIDE && a.note ? (
           <div className="mt-5 rounded-[12px] border border-[#F3C6CA] bg-[#FFF7F8] p-4">
             <div className="flex items-center gap-1.5 text-[13px] font-bold text-[#D94A56]">
               <span className="material-symbols-rounded text-[18px]">campaign</span>
@@ -174,20 +177,21 @@ export const PageMyAssignmentDetail = ({ assignment: a }: Props) => {
           </div>
         ) : null}
 
-        {/* instructions */}
-        <div className="mt-5">
-          <h3 className="text-[15px] font-bold text-[#191D24]">Hướng dẫn làm bài</h3>
-          <ul className="mt-2 space-y-2">
-            {INSTRUCTIONS.map((t, i) => (
-              <li key={i} className="flex items-start gap-2 text-[14px] text-[#6A7282]">
-                <span className="material-symbols-rounded mt-0.5 text-[18px] text-[#16A34A]">
-                  check_circle
-                </span>
-                <span>{t}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {SHOW_NOTE_AND_GUIDE ? (
+          <div className="mt-5">
+            <h3 className="text-[15px] font-bold text-[#191D24]">Hướng dẫn làm bài</h3>
+            <ul className="mt-2 space-y-2">
+              {INSTRUCTIONS.map((t, i) => (
+                <li key={i} className="flex items-start gap-2 text-[14px] text-[#6A7282]">
+                  <span className="material-symbols-rounded mt-0.5 text-[18px] text-[#16A34A]">
+                    check_circle
+                  </span>
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         {/* countdown + CTA */}
         {submitted ? (
