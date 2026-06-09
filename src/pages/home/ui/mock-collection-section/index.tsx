@@ -70,24 +70,12 @@ export const MockCollectionSection = ({ collections }: MockCollectionSectionProp
         </div>
 
         {/* Link xem thêm */}
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex justify-start">
           <Link
             href={ROUTES.EXAM.ARCHIVE}
-            className="inline-flex items-center gap-2 font-bold text-[15px] text-gray-900 hover:text-[#D94A56] transition-colors"
+            className="inline-flex items-center gap-2 bg-white hover:bg-[#f6f7f4] border-[1.5px] border-[rgba(25,29,36,0.1)] text-[#191d24] font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[13px] rounded-full transition-colors duration-200 whitespace-nowrap"
           >
-            Xem tất cả bộ đề
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            View all mock tests
           </Link>
         </div>
       </Container>

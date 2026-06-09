@@ -1,58 +1,7 @@
-import { Container } from "@/shared/ui";
-import { CategoryCard } from "@/shared/ui/ds";
+import { SkillCard } from "@/shared/ui/ds/molecules/skill-card/skill-card";
 import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
+import { ROUTES } from "@/shared/routes";
 import type { TestPlatformIntroConfig } from "./types";
-
-// ─── Default Data ─────────────────────────────────────────────────────────────
-const DEFAULTS: TestPlatformIntroConfig = {
-  badge: "PREMIUM",
-  title: "Khám Phá Kho Đề",
-  titleHighlight: "Dự Đoán",
-  cards: [
-    {
-      title: "IELTS Full Test",
-      icon: "/assets/figma/icons/book (1) 1.svg",
-      bg: "/assets/figma/icons/Background-1.png",
-      color: "from-rose-600 to-rose-500",
-      href: "#",
-    },
-    {
-      title: "Listening Practice",
-      icon: "/assets/figma/icons/listen 1.svg",
-      bg: "/assets/figma/icons/Background-2.png",
-      color: "from-emerald-600 to-emerald-500",
-      href: "#",
-    },
-    {
-      title: "Reading Practice",
-      icon: "/assets/figma/icons/reading-book 1.svg",
-      bg: "/assets/figma/icons/Background-3.png",
-      color: "from-orange-600 to-orange-400",
-      href: "#",
-    },
-    {
-      title: "Sample Writing",
-      icon: "/assets/figma/icons/copywriting (1) 1.svg",
-      bg: "/assets/figma/icons/Background-4.png",
-      color: "from-indigo-400 to-indigo-300",
-      href: "#",
-    },
-    {
-      title: "Sample Speaking",
-      icon: "/assets/figma/icons/speaking 1.svg",
-      bg: "/assets/figma/icons/Background-5.png",
-      color: "from-amber-500 to-yellow-400",
-      href: "#",
-    },
-    {
-      title: "IELTS Prediction",
-      icon: "/assets/figma/icons/search 1.svg",
-      bg: "/assets/figma/icons/Background-6.png",
-      color: "from-blue-600 to-blue-500",
-      href: "#",
-    },
-  ],
-};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -60,40 +9,27 @@ interface IeltsTestPlatformIntroProps {
   config?: TestPlatformIntroConfig;
 }
 
-export const IeltsTestPlatformIntro = ({ config }: IeltsTestPlatformIntroProps) => {
-  const c = { ...DEFAULTS, ...config };
-  const cards = c.cards?.length ? c.cards : DEFAULTS.cards;
-
+export const IeltsTestPlatformIntro = ({ config: _config }: IeltsTestPlatformIntroProps) => {
   return (
-    <div data-section="platform-intro" className="relative py-14 md:py-24 bg-[#FEF6F5] mb-12 px-4 sm:px-6">
-      <Container className="relative z-10">
-        <ScrollFadeIn className="text-center mb-14 flex flex-col items-center gap-4">
-          {/* Badge */}
-          <span className="inline-block px-[20px] py-[12px] rounded-full text-xs font-bold tracking-wider text-[#D94A56] bg-[#D94A56]/15 uppercase">
-            {c.badge}
-          </span>
+    <ScrollFadeIn
+      data-section="platform-intro"
+      className="w-full mb-[24px]"
+    >
+      {/* Figma 3278:620 — flex-col gap-34px */}
+      <div className="flex flex-col gap-[34px]">
+        {/* Section heading — Figma: Heading/1 38px Be Vietnam Pro Bold lh-1.1 tracking-[-0.95px] */}
+        <h2 className="font-display font-bold text-[38px] leading-[1.1] tracking-[-0.95px] text-[#191d24]">
+          Master every part of the test
+        </h2>
 
-          {/* Main Heading */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-800">
-            {c.title} <span className="text-[#D94A56]">{c.titleHighlight}</span>
-          </h2>
-        </ScrollFadeIn>
-
-        {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-10">
-          {cards.map((item, index) => (
-            <ScrollFadeIn key={index} delay={index * 80}>
-              <CategoryCard
-                title={item.title}
-                icon={item.icon}
-                bg={item.bg}
-                color={item.color}
-                href={item.href}
-              />
-            </ScrollFadeIn>
-          ))}
+        {/* Skill cards row — Figma: justify-between, 4 cards 260×252 */}
+        <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4">
+          <SkillCard skill="listening" href={ROUTES.PRACTICE.ARCHIVE_LISTENING} className="sm:w-[260px] sm:h-[252px]" />
+          <SkillCard skill="reading"   href={ROUTES.PRACTICE.ARCHIVE_READING}   className="sm:w-[260px] sm:h-[252px]" />
+          <SkillCard skill="writing"   href={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}  className="sm:w-[260px] sm:h-[252px]" />
+          <SkillCard skill="speaking"  href={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING} className="sm:w-[260px] sm:h-[252px]" />
         </div>
-      </Container>
-    </div>
+      </div>
+    </ScrollFadeIn>
   );
 };

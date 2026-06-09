@@ -13,8 +13,6 @@ import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 import ExamModeModal from "@/pages/ielts-exam-library/ui/exam-mode-modal";
 import { useAuth } from "@/appx/providers";
 import { useProContentModal } from "@/shared/ui/pro-content";
-import { createClient } from "~supabase/client";
-import { getQuizSummary } from "~services/exam-collection";
 import { toast } from "react-toastify";
 
 export type PracticeSectionProps = {
@@ -94,26 +92,13 @@ export const PracticeSection = ({
     <ScrollFadeIn data-section="practice-carousel" className="bg-white">
       <Container>
         {/* Header */}
-        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between sm:items-end mb-8 pl-1 pr-1">
-          <h2 className="text-[28px] md:text-[32px] font-bold text-[#2D3142]">{title}</h2>
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:items-center mb-8 pl-1 pr-1">
+          <h2 className="font-display font-bold text-[32px] sm:text-[38px] leading-[1.1] tracking-[-0.95px] text-[#191d24]">{title}</h2>
           <Link
             href={viewMoreLink}
-            className="text-gray-900 font-bold text-[15px] hover:text-[#D94A56] flex items-center gap-1 transition-colors"
+            className="inline-flex items-center gap-2 bg-white hover:bg-[#f6f7f4] border-[1.5px] border-[rgba(25,29,36,0.1)] text-[#191d24] font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[13px] rounded-full transition-colors duration-200 whitespace-nowrap shrink-0"
           >
-            Xem thêm
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-current"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            View all tests
           </Link>
         </div>
 
@@ -124,13 +109,12 @@ export const PracticeSection = ({
             type="button"
             onClick={handlePrev}
             aria-label="Previous"
-            className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+            className="hidden sm:flex absolute left-0 -translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#191d24] hover:bg-[#374151] shadow-lg transition-colors"
           >
             <img
-              src="/assets/figma/icons/Arrow1.svg"
+              src="/assets/icons/ArrowLeft.svg"
               alt=""
-              className="w-3 h-3 [filter:brightness(0)_invert(1)]"
-              style={{ transform: "rotate(180deg)" }}
+              className="w-4 h-4 [filter:brightness(0)_invert(1)]"
             />
           </button>
 
@@ -156,7 +140,7 @@ export const PracticeSection = ({
             >
               <SplideTrack>
                 {items.map((quiz) => {
-                  let partLabel = "Part 1";
+                  let partLabel: string | undefined = "Part 1";
                   if (quiz.type === 'exam') {
                     partLabel = "Trọn bộ";
                   } else if (quiz.type === 'academic') {
@@ -231,12 +215,12 @@ export const PracticeSection = ({
             type="button"
             onClick={handleNext}
             aria-label="Next"
-            className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#d94a56] hover:bg-[#ea8d95] shadow-lg transition-colors"
+            className="hidden sm:flex absolute right-0 translate-x-1/2 top-[35%] -translate-y-1/2 z-10 shrink-0 items-center justify-center w-9 h-9 rounded-full bg-[#191d24] hover:bg-[#374151] shadow-lg transition-colors"
           >
             <img
-              src="/assets/figma/icons/Arrow1.svg"
+              src="/assets/icons/ArrowRight.svg"
               alt=""
-              className="w-3 h-3 [filter:brightness(0)_invert(1)]"
+              className="w-4 h-4 [filter:brightness(0)_invert(1)]"
             />
           </button>
         </div>

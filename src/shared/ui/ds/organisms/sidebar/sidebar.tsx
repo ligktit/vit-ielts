@@ -1,3 +1,4 @@
+import { twMerge } from 'tailwind-merge';
 import { SidebarNavItem } from '../../molecules/sidebar-nav-item';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -9,11 +10,22 @@ export type SidebarUser = {
   avatarColor?: string;
 };
 
+export type SidebarNavEntry = {
+  id: string;
+  icon: string;
+  label: string;
+  href?: string;
+};
+
 export type SidebarStudentProps = {
   state?: 'expanded' | 'collapsed';
   activeItem?: string;
   user?: SidebarUser;
   onCollapse?: () => void;
+  /** Override the primary / community / account nav groups (each entry may carry an href). */
+  menu?: readonly SidebarNavEntry[];
+  community?: readonly SidebarNavEntry[];
+  account?: readonly SidebarNavEntry[];
   className?: string;
 };
 
@@ -22,6 +34,8 @@ export type SidebarTeacherProps = {
   activeItem?: string;
   user?: SidebarUser;
   onCollapse?: () => void;
+  menu?: readonly SidebarNavEntry[];
+  account?: readonly SidebarNavEntry[];
   className?: string;
 };
 
@@ -144,29 +158,33 @@ export const SidebarStudent = ({
   activeItem = 'home',
   user = { name: 'Nhật Minh', role: 'Target: Band 8.0', initials: 'NM' },
   onCollapse,
+  menu = STUDENT_MENU,
+  community = STUDENT_COMMUNITY,
+  account = ACCOUNT_ITEMS,
   className = '',
 }: SidebarStudentProps) => {
   const collapsed = state === 'collapsed';
 
   return (
     <div
-      className={[
+      className={twMerge(
         'flex flex-col gap-[12px] items-center bg-white',
         collapsed ? 'px-[14px] w-[76px]' : 'px-[16px] w-[250px]',
         'py-[22px] h-[900px] shrink-0',
         className,
-      ].join(' ')}
+      )}
     >
       <SidebarLogo collapsed={collapsed} onCollapse={onCollapse} />
       <SidebarDivider />
 
       <div className={`flex flex-col w-full px-[6px] shrink-0 ${collapsed ? 'items-center' : 'items-start'}`}>
         <div className={`flex flex-col gap-[6px] w-full ${collapsed ? 'items-center' : ''}`}>
-          {STUDENT_MENU.map(item => (
+          {menu.map(item => (
             <SidebarNavItem
               key={item.id}
               icon={item.icon}
               label={item.label}
+              href={item.href}
               active={activeItem === item.id}
               collapsed={collapsed}
             />
@@ -177,11 +195,12 @@ export const SidebarStudent = ({
       <SidebarDivider />
 
       <div className={`flex flex-col gap-[12px] w-full shrink-0 ${collapsed ? 'items-center' : 'items-start'}`}>
-        {STUDENT_COMMUNITY.map(item => (
+        {community.map(item => (
           <SidebarNavItem
             key={item.id}
             icon={item.icon}
             label={item.label}
+            href={item.href}
             active={activeItem === item.id}
             collapsed={collapsed}
           />
@@ -192,11 +211,12 @@ export const SidebarStudent = ({
 
       <div className={`flex flex-col w-full px-[6px] shrink-0 ${collapsed ? 'items-center' : 'items-start'}`}>
         <div className={`flex flex-col gap-[6px] w-full ${collapsed ? 'items-center' : ''}`}>
-          {ACCOUNT_ITEMS.map(item => (
+          {account.map(item => (
             <SidebarNavItem
               key={item.id}
               icon={item.icon}
               label={item.label}
+              href={item.href}
               active={activeItem === item.id}
               collapsed={collapsed}
             />
@@ -217,29 +237,32 @@ export const SidebarTeacher = ({
   activeItem = 'overview',
   user = { name: 'Pham Minh', role: 'Teacher', initials: 'PM' },
   onCollapse,
+  menu = TEACHER_MENU,
+  account = ACCOUNT_ITEMS,
   className = '',
 }: SidebarTeacherProps) => {
   const collapsed = state === 'collapsed';
 
   return (
     <div
-      className={[
+      className={twMerge(
         'flex flex-col gap-[12px] items-center bg-white',
         collapsed ? 'px-[14px] w-[76px]' : 'px-[16px] w-[250px]',
         'py-[22px] h-[900px] shrink-0',
         className,
-      ].join(' ')}
+      )}
     >
       <SidebarLogo collapsed={collapsed} onCollapse={onCollapse} />
       <SidebarDivider />
 
       <div className={`flex flex-col w-full px-[6px] shrink-0 ${collapsed ? 'items-center' : 'items-start'}`}>
         <div className={`flex flex-col gap-[6px] w-full ${collapsed ? 'items-center' : ''}`}>
-          {TEACHER_MENU.map(item => (
+          {menu.map(item => (
             <SidebarNavItem
               key={item.id}
               icon={item.icon}
               label={item.label}
+              href={item.href}
               active={activeItem === item.id}
               collapsed={collapsed}
             />
@@ -251,11 +274,12 @@ export const SidebarTeacher = ({
 
       <div className={`flex flex-col w-full px-[6px] shrink-0 ${collapsed ? 'items-center' : 'items-start'}`}>
         <div className={`flex flex-col gap-[6px] w-full ${collapsed ? 'items-center' : ''}`}>
-          {ACCOUNT_ITEMS.map(item => (
+          {account.map(item => (
             <SidebarNavItem
               key={item.id}
               icon={item.icon}
               label={item.label}
+              href={item.href}
               active={activeItem === item.id}
               collapsed={collapsed}
             />

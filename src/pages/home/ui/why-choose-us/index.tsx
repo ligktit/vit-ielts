@@ -1,58 +1,70 @@
-import Image from "next/image";
-import type { WhyChooseUsConfig } from "./types";
 import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
+import type { WhyChooseUsConfig } from "./types";
 
 // ─── Default Data ─────────────────────────────────────────────────────────────
-const DEFAULTS: WhyChooseUsConfig = {
-  badge: "Tại sao chọn chúng tôi?",
-  title: "Luyện thi IELTS Trên Giao Diện Thi Thật",
-  description:
-    "IPT cung cấp bộ đề thi thật tập trung vào các dạng câu hỏi xuất hiện thường xuyên, chủ đề lặp lại và cấu trúc đề được ghi nhận từ thí sinh thi gần đây, giúp người học luyện tập hiệu quả, tránh học lan man và tiết kiệm thời gian ôn tập.",
-  stats: [
-    { icon: "/assets/figma/icons/LovedbyStudents.svg", number: "5,000+", label: "HỌC VIÊN YÊU THÍCH", bgColor: "#D94A56" },
-    { icon: "/assets/figma/icons/Aim.svg", number: "1,000+", label: "HỌC VIÊN ĐẠT AIM", bgColor: "#219653" },
-    { icon: "/assets/figma/icons/Legit.svg", number: "20+", label: "ĐỀ THI THẬT", bgColor: "#5281F9" },
-    { icon: "/assets/figma/icons/Goal.svg", number: "100+", label: "HỌC VIÊN ĐẠT 8.0", bgColor: "#FC945A" },
-  ],
+
+type FeatureItem = {
+  iconName: string;
+  title: string;
+  description: string;
 };
 
-// ─── StatCard ─────────────────────────────────────────────────────────────────
+const DEFAULT_FEATURES: FeatureItem[] = [
+  {
+    iconName: "edit_note",
+    title: "Real exam format",
+    description: "Tests mirror the official IELTS structure, timing and difficulty exactly.",
+  },
+  {
+    iconName: "bar_chart",
+    title: "Instant scoring",
+    description: "Band scores and analytics the moment you finish a test.",
+  },
+  {
+    iconName: "record_voice_over",
+    title: "Expert feedback",
+    description: "Teachers grade your writing and speaking with actionable notes.",
+  },
+  {
+    iconName: "calendar_today",
+    title: "Study plans",
+    description: "A personalised roadmap that adapts to your target band and date.",
+  },
+  {
+    iconName: "smartphone",
+    title: "Practice anytime",
+    description: "Mobile-ready lessons so you can study in any spare 10 minutes.",
+  },
+  {
+    iconName: "groups",
+    title: "Community",
+    description: "Join speaking clubs and study groups to stay motivated together.",
+  },
+];
 
-const StatCard = ({
-  icon,
-  number,
-  label,
-  bgColor,
-  className = "",
-}: {
-  icon: string;
-  number: string;
-  label: string;
-  bgColor: string;
-  className?: string;
-}) => (
-  <div className={`group relative w-full sm:w-[350px] h-[120px] sm:h-[200px] rounded-[60px] sm:rounded-[100px] overflow-hidden shadow-lg bg-white flex items-center transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-gray-50/50 cursor-default ${className}`}>
+const DEFAULTS: WhyChooseUsConfig = {
+  badge: "WHY VIT IELTS",
+  title: "Everything you need in one place",
+  description:
+    "A complete prep ecosystem built around how students actually improve.",
+  stats: [],
+};
 
-    {/* Sweep Background */}
-    <div
-      className="absolute inset-0 w-full h-full origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 z-0"
-      style={{ backgroundColor: bgColor }}
-    />
+// ─── FeatureCard ──────────────────────────────────────────────────────────────
 
-    {/* Icon Container */}
-    <div className="absolute left-[-12px] sm:left-[-24px] top-1/2 -translate-y-1/2 w-[100px] h-[100px] sm:w-[178px] sm:h-[178px] shrink-0 z-10 transition-all duration-300 group-hover:brightness-0 group-hover:invert">
-      <Image src={icon} alt={label} fill className="object-contain" unoptimized />
+const FeatureCard = ({ iconName, title, description }: FeatureItem) => (
+  <div className="bg-[#374151] border border-[rgba(25,29,36,0.1)] rounded-[24px] p-[26px] flex flex-col items-start flex-1 min-w-0">
+    {/* Brand icon container */}
+    <div className="bg-[#b3e653] flex items-center justify-center rounded-[14px] w-12 h-12 shrink-0 mb-4">
+      <span className="material-symbols-rounded text-[#191d24] text-[28px]">{iconName}</span>
     </div>
 
-    {/* Text Container */}
-    <div className="flex flex-col items-center justify-center flex-1 pl-[80px] sm:pl-[135px] pr-6 sm:pr-8 relative z-10">
-      <div className="text-[26px] sm:text-[36px] font-extrabold text-[#111827] group-hover:text-white transition-colors duration-300 leading-none mb-2 sm:mb-3">
-        {number}
-      </div>
-      <div className="text-[12px] sm:text-[15px] font-semibold text-gray-700 group-hover:text-white/90 transition-colors duration-300 uppercase text-center leading-snug max-w-[140px]">
-        {label}
-      </div>
-    </div>
+    <p className="font-display font-bold text-[19px] leading-[1.3] text-white mb-2">
+      {title}
+    </p>
+    <p className="font-inter font-normal text-[14px] leading-[1.4] text-white/60">
+      {description}
+    </p>
   </div>
 );
 
@@ -62,92 +74,44 @@ interface WhyChooseUsProps {
   config?: WhyChooseUsConfig;
 }
 
-export const WhyChooseUs = ({ config }: WhyChooseUsProps) => {
-  const c = { ...DEFAULTS, ...config };
-  const stats = c.stats?.length ? c.stats : DEFAULTS.stats;
-
-  // Split stats: first 2 = left, last 2 = right
-  const leftStats = stats.slice(0, 2);
-  const rightStats = stats.slice(2, 4);
-
+export const WhyChooseUs = ({ config: _config }: WhyChooseUsProps) => {
+  // Figma redesign: section uses fixed feature cards — CMS stats config is not used.
   return (
-    <ScrollFadeIn data-section="why-choose-us" className="bg-white pt-16 pb-4 mb-0 min-[1025px]:py-20 px-4 sm:px-6">
-      <div className="max-w-[1360px] mx-auto">
+    <ScrollFadeIn
+      data-section="why-choose-us"
+      className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6"
+    >
+      <div className="max-w-[1312px] mx-auto bg-[#242938] rounded-[40px] px-8 sm:px-12 lg:px-16 py-12 lg:py-14">
 
-        {/* ── Mobile layout (≤1024px): text on top, 2×2 grid of cards below ── */}
-        <div className="flex flex-col gap-10 min-[1025px]:hidden">
-          {/* Text content first */}
-          <div className="flex flex-col items-center text-center">
-            <div className="inline-flex items-center justify-center px-6 py-2 bg-[#C3D4FF] text-[#5281F9] text-sm font-bold rounded-[60px] mb-8 uppercase tracking-wide">
-              {c.badge}
-            </div>
-            <h2 className="text-[28px] font-extrabold text-[#1E293B] leading-tight mb-6">
-              {c.title}
-            </h2>
-            <p className="text-[#64748B] text-base leading-relaxed max-w-xl mx-auto font-noto-sans font-medium">
-              {c.description}
-            </p>
+        {/* Header */}
+        <div className="mb-8">
+          <p className="font-inter font-bold text-[12px] leading-[1.2] tracking-[8px] uppercase text-[#b3e653] mb-4">
+            WHY VIT IELTS
+          </p>
+          <h2 className="font-display font-bold text-[32px] sm:text-[38px] leading-[1.1] tracking-[-0.95px] text-white max-w-[560px] mb-3">
+            Everything you need in one place
+          </h2>
+          <p className="font-inter font-normal text-[18px] leading-[1.5] text-white/60 max-w-[560px]">
+            A complete prep ecosystem built around how students actually improve.
+          </p>
+        </div>
+
+        {/* Feature cards: 2 rows × 3 cols */}
+        <div className="flex flex-col gap-[22px]">
+          {/* Row 1 */}
+          <div className="flex flex-col sm:flex-row gap-[22px]">
+            {DEFAULT_FEATURES.slice(0, 3).map((f) => (
+              <FeatureCard key={f.title} {...f} />
+            ))}
           </div>
-          {/* Cards grid below */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 place-items-center">
-            {stats.map((stat, i) => (
-              <StatCard
-                key={i}
-                icon={stat.icon}
-                number={stat.number}
-                label={stat.label}
-                bgColor={stat.bgColor}
-                className="w-full"
-              />
+          {/* Row 2 */}
+          <div className="flex flex-col sm:flex-row gap-[22px]">
+            {DEFAULT_FEATURES.slice(3, 6).map((f) => (
+              <FeatureCard key={f.title} {...f} />
             ))}
           </div>
         </div>
 
-        {/* ── Desktop layout (>1024px): left cards | center | right cards ── */}
-        <div className="hidden min-[1025px]:flex flex-row items-center justify-between gap-12 xl:gap-16">
-
-          {/* Left Column */}
-          <div className="flex flex-col gap-8 w-auto items-center">
-            {leftStats.map((stat, i) => (
-              <StatCard
-                key={i}
-                icon={stat.icon}
-                number={stat.number}
-                label={stat.label}
-                bgColor={stat.bgColor}
-                className={i === 1 ? "lg:translate-x-[39px]" : ""}
-              />
-            ))}
-          </div>
-
-          {/* Center Column */}
-          <div className="flex-1 flex flex-col items-center text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center justify-center px-6 py-2 bg-[#C3D4FF] text-[#5281F9] text-sm font-bold rounded-[60px] mb-8 uppercase tracking-wide">
-              {c.badge}
-            </div>
-            <h2 className="text-[32px] sm:text-[40px] font-extrabold text-[#1E293B] leading-tight mb-6">
-              {c.title}
-            </h2>
-            <p className="text-[#64748B] text-base md:text-lg leading-relaxed max-w-xl mx-auto font-noto-sans font-medium">
-              {c.description}
-            </p>
-          </div>
-
-          {/* Right Column */}
-          <div className="flex flex-col gap-8 w-auto items-center">
-            {rightStats.map((stat, i) => (
-              <StatCard
-                key={i}
-                icon={stat.icon}
-                number={stat.number}
-                label={stat.label}
-                bgColor={stat.bgColor}
-                className={i === 1 ? "lg:-translate-x-[39px]" : ""}
-              />
-            ))}
-          </div>
-
-        </div>
       </div>
     </ScrollFadeIn>
   );

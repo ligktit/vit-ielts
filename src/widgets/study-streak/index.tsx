@@ -1,6 +1,8 @@
-import { Card, Segmented, Spin } from "antd";
+// === Widget: Study Streak ===
+// Figma: 4 summary stat cards + white card with DS Tabs toggle (calendar/weekly) + skill breakdown + calendar/weekly view
+// DS Tabs replaces antd Segmented; antd Spin kept for loading behaviour
+import { Spin } from "antd";
 import { useState } from "react";
-import Image from "next/image";
 import { useStreakData } from "./hooks/useStreakData";
 import {
   StreakSummaryCards,
@@ -8,9 +10,15 @@ import {
   WeeklyStats,
   SkillBreakdown,
 } from "./ui";
-import styles from "./ui/streak-calendar.module.css";
+import { Tabs } from "@/shared/ui/ds/molecules/tabs";
+import type { TabItem } from "@/shared/ui/ds/molecules/tabs";
 
 type ViewMode = "calendar" | "weekly";
+
+const VIEW_TABS: TabItem[] = [
+  { id: "calendar", label: "Lịch tháng" },
+  { id: "weekly", label: "Theo tuần" },
+];
 
 export const StudyStreak = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
@@ -28,65 +36,48 @@ export const StudyStreak = () => {
   } = useStreakData();
 
   return (
-    <div className={styles.streakRoot}>
+    <div data-section="study-streak">
       {/* Summary stat cards */}
       <StreakSummaryCards summary={summary} loading={loading} />
 
-      <Card style={{ borderRadius: 16 }} styles={{ body: { overflowX: 'auto' } }}>
-        {/* View toggle */}
-        <div className={styles.viewToggle}>
-          <Segmented
-            value={viewMode}
-            onChange={(val) => setViewMode(val as ViewMode)}
-            options={[
-              { 
-                label: (
-                  <div className="flex items-center gap-2 px-1">
-                    <Image src="/assets/figma/icons/calendar-days 1.svg" alt="calendar" width={16} height={16} className="brightness-0 object-contain opacity-70" />
-                    <span>Lịch tháng</span>
-                  </div>
-                ), 
-                value: "calendar" 
-              },
-              { 
-                label: (
-                  <div className="flex items-center gap-2 px-1">
-                    <Image src="/assets/figma/icons/all.svg" alt="weekly" width={16} height={16} className="brightness-0 object-contain opacity-70" />
-                    <span>Theo tuần</span>
-                  </div>
-                ), 
-                value: "weekly" 
-              },
-            ]}
-            size="large"
-          />
-        </div>
-
-        {/* Skill breakdown bar */}
-        <div style={{ marginBottom: 20 }}>
-          <SkillBreakdown skillTotals={skillTotals} />
-        </div>
-
-        {/* Main content */}
-        <Spin spinning={loading}>
-          {viewMode === "calendar" ? (
-            <StreakCalendar
-              weeks={calendarWeeks}
-              currentMonth={currentMonth}
-              onPrevMonth={goToPrevMonth}
-              onNextMonth={goToNextMonth}
-              onToday={goToCurrentMonth}
-              loading={loading}
+      {/* Main card: toggle + skill breakdown + calendar/weekly view */}
+      <div className="bg-white rounded-[20px] border border-[rgba(25,29,36,0.08)] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] overflow-x-auto">
+        <div className="px-6 py-5">
+          {/* View toggle using DS Tabs */}
+          <div className="mb-5">
+            <Tabs
+              tabs={VIEW_TABS}
+              activeId={viewMode}
+              onChange={(id) => setViewMode(id as ViewMode)}
             />
-          ) : (
-            <WeeklyStats
-              weeks={calendarWeeks}
-              activities={activities}
-              currentMonth={currentMonth}
-            />
-          )}
-        </Spin>
-      </Card>
+          </div>
+
+          {/* Skill breakdown bar */}
+          <div className="mb-5">
+            <SkillBreakdown skillTotals={skillTotals} />
+          </div>
+
+          {/* Main content */}
+          <Spin spinning={loading}>
+            {viewMode === "calendar" ? (
+              <StreakCalendar
+                weeks={calendarWeeks}
+                currentMonth={currentMonth}
+                onPrevMonth={goToPrevMonth}
+                onNextMonth={goToNextMonth}
+                onToday={goToCurrentMonth}
+                loading={loading}
+              />
+            ) : (
+              <WeeklyStats
+                weeks={calendarWeeks}
+                activities={activities}
+                currentMonth={currentMonth}
+              />
+            )}
+          </Spin>
+        </div>
+      </div>
     </div>
   );
 };

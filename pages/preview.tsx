@@ -28,6 +28,7 @@ import { PricingCard } from '@/shared/ui/ds/molecules/pricing-card';
 import { Toast } from '@/shared/ui/ds/molecules/toast';
 import { Tabs } from '@/shared/ui/ds/molecules/tabs';
 import { Select } from '@/shared/ui/ds/molecules/select';
+import { FilterDropdown } from '@/shared/ui/ds/molecules/filter-dropdown';
 import { Stepper } from '@/shared/ui/ds/molecules/stepper';
 import { ProgressBar } from '@/shared/ui/ds/atoms/progress-bar';
 import { Pagination } from '@/shared/ui/ds/molecules/pagination';
@@ -141,6 +142,7 @@ export default function Preview() {
   const [activeTab, setActiveTab] = useState('overview');
   const [selectVal, setSelectVal] = useState('multiple_choice');
   const [paginationPage, setPaginationPage] = useState(2);
+  const [filterSel, setFilterSel] = useState<string[]>(['reading', 'writing']);
 
   const scrollTo = (id: string) => {
     setActiveSection(id);
@@ -1053,6 +1055,36 @@ export default function Preview() {
                       { value: 'speaking',  label: 'Speaking' },
                     ]}
                     value="reading"
+                    onChange={() => undefined}
+                  />
+                </div>
+              </div>
+
+              {/* FilterDropdown */}
+              <div>
+                <p className="text-[14px] font-bold text-[#b3e653] mb-5 font-inter">Filter dropdown <span className="text-[#6a7282]">— Figma 3521:116 / 3521:130</span></p>
+                <div className="bg-[#262626] rounded-[20px] px-7 py-8 flex gap-[10px] items-start">
+                  <FilterDropdown
+                    label="Category"
+                    options={[
+                      { value: 'reading', label: 'Reading' },
+                      { value: 'writing', label: 'Writing' },
+                      { value: 'speaking', label: 'Speaking' },
+                      { value: 'listening', label: 'Listening' },
+                      { value: 'vocabulary', label: 'Vocabulary' },
+                      { value: 'exam_tips', label: 'Exam tips' },
+                    ]}
+                    selected={filterSel}
+                    onChange={setFilterSel}
+                  />
+                  <FilterDropdown
+                    label="Read time"
+                    options={[
+                      { value: 'short', label: '< 5 min' },
+                      { value: 'medium', label: '5–10 min' },
+                      { value: 'long', label: '> 10 min' },
+                    ]}
+                    selected={[]}
                     onChange={() => undefined}
                   />
                 </div>

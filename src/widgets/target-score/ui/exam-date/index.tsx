@@ -1,3 +1,5 @@
+// === ExamDate — Exam schedule widget ===
+// Figma: white card, header (calendar icon + title) + 2 info slots (date + days left)
 import { useMemo, useState } from "react";
 import { SetExamDateModal } from "../set-exam-date-modal";
 import { useWidgetContext } from "../../context";
@@ -12,18 +14,11 @@ export const ExamDate = () => {
   const [isSetExamDateDialogOpen, setIsSetExamDateDialogOpen] = useState(false);
 
   const parseDate = (date: string | null) => {
-    const pad = (n: number) => ("0" + n).slice(-2);
-
     if (date) {
-      const dayjsInstance = dayjs(date);
-      const day = pad(dayjsInstance.date());
-      const month = pad(dayjsInstance.month() + 1);
-      const year = dayjsInstance.year();
-
-      return `${day}/${month}/${year}`;
+      const d = dayjs(date);
+      return `${String(d.date()).padStart(2, "0")}/${String(d.month() + 1).padStart(2, "0")}/${d.year()}`;
     }
-
-    return "_ / _ / _";
+    return "— / — / —";
   };
 
   const daysLeft = useMemo(() => {
@@ -34,7 +29,7 @@ export const ExamDate = () => {
   }, [examDate]);
 
   return (
-    <div className="md:min-h-[200px]">
+    <div className="h-full flex flex-col">
       <SetExamDateModal
         open={isSetExamDateDialogOpen}
         onCancel={() => setIsSetExamDateDialogOpen(false)}
@@ -43,45 +38,47 @@ export const ExamDate = () => {
           refetch();
         }}
       />
+
       {/* Header */}
-      <div className="py-3 px-4 flex items-center gap-2 border-b border-gray-200">
-        <span className="material-symbols-rounded text-xl text-gray-700">
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#e5e6e8]">
+        <span className="material-symbols-rounded text-[20px] text-[#191d24] shrink-0">
           calendar_month
         </span>
-        <h3 className="font-bold text-base text-gray-900">Exam schedule</h3>
+        <h3 className="font-inter font-bold text-[15px] text-[#191d24]">
+          Exam schedule
+        </h3>
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="flex flex-wrap gap-3">
-          {/* Exam Date Card */}
-          <div className="w-full md:w-[calc(50%-0.75rem)]">
-            <button
-              onClick={() => setIsSetExamDateDialogOpen(true)}
-              className="w-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col space-y-2 hover:border-gray-300 transition-colors cursor-pointer text-left"
-            >
-              <p className="text-xs font-medium text-gray-600">Exam date</p>
-              <div className="flex justify-between items-center">
-                <p className="text-3xl font-bold text-gray-900">
-                  {loading ? parseDate(null) : parseDate(examDate)}
-                </p>
-                <span className="material-symbols-rounded text-gray-600 text-xl">
-                  edit
-                </span>
-              </div>
-            </button>
-          </div>
-
-          {/* Days Remaining Card */}
-          <div className="w-full md:w-[calc(50%-0.75rem)]">
-            <div className="w-full bg-white rounded-lg border border-gray-200 p-4 flex flex-col space-y-2">
-              <p className="text-xs font-medium text-gray-600">
-                Days remaining
+      <div className="p-5 flex-1">
+        <div className="grid grid-cols-2 gap-3">
+          {/* Exam date slot */}
+          <button
+            type="button"
+            onClick={() => setIsSetExamDateDialogOpen(true)}
+            className="flex flex-col gap-2 p-4 rounded-[12px] bg-white border border-[#e5e6e8] hover:border-[#b3e653] transition-colors text-left cursor-pointer"
+          >
+            <p className="font-inter font-medium text-[11px] text-[#6a7282] leading-none">
+              Exam date
+            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="font-display font-bold text-[18px] text-[#191d24] leading-none">
+                {loading ? parseDate(null) : parseDate(examDate)}
               </p>
-              <p className="text-3xl font-bold text-gray-900">
-                {loading ? "_" : daysLeft || "_"}
-              </p>
+              <span className="material-symbols-rounded text-[#6a7282] text-[16px]">
+                edit
+              </span>
             </div>
+          </button>
+
+          {/* Days remaining slot */}
+          <div className="flex flex-col gap-2 p-4 rounded-[12px] bg-white border border-[#e5e6e8]">
+            <p className="font-inter font-medium text-[11px] text-[#6a7282] leading-none">
+              Days remaining
+            </p>
+            <p className="font-display font-bold text-[22px] text-[#191d24] leading-none mt-2">
+              {loading ? "—" : daysLeft || "—"}
+            </p>
           </div>
         </div>
       </div>

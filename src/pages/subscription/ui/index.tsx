@@ -1,25 +1,30 @@
 import { BaseLayout } from "@/widgets/layouts";
-import { Container } from "@/shared/ui";
 import { SubscriptionPlans } from "./subscription-plans";
-import { Testimonials } from "@/pages/home/ui/testimonials";
 import { FAQ } from "./faq";
-import { HeroBanner } from "@/shared/ui/ds";
-import { ROUTES } from "@/shared/routes";
-import dynamic from "next/dynamic";
 import type { TestimonialsConfig, FAQConfig } from "@/shared/types/admin-config";
 import { useAppContext } from "@/appx/providers";
 import { useMemo } from "react";
-
-
 import type { SubscriptionBannerConfig } from "@/shared/types/admin-config";
 
 interface PageSubscriptionProps {
+  // testimonialsConfig is kept in the prop contract so the SSR fetch in
+  // getServerSideProps remains behavior-identical; it is not rendered on this
+  // page because the Figma design (3336:2055) does not include a testimonials
+  // section.
   testimonialsConfig: TestimonialsConfig;
   faqConfig: FAQConfig;
   bannerConfig: SubscriptionBannerConfig;
 }
 
-export const PageSubscription = ({ testimonialsConfig, faqConfig, bannerConfig }: PageSubscriptionProps) => {
+export const PageSubscription = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  testimonialsConfig: _testimonialsConfig,
+  faqConfig,
+  // bannerConfig retained in the prop contract; Figma replaces the banner with
+  // the inline pricing header, so this is intentionally unused.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  bannerConfig: _bannerConfig,
+}: PageSubscriptionProps) => {
   const appContext = useAppContext();
 
   const buyProLink = useMemo(() => {
@@ -32,33 +37,20 @@ export const PageSubscription = ({ testimonialsConfig, faqConfig, bannerConfig }
   }, [appContext]);
 
   return (
-    <>
-      {/* === SECTION: Subscription Banner === */}
-      <HeroBanner
-        title={bannerConfig.title || "Subscription"}
-        breadcrumbs={[
-          { label: "Trang chủ", href: ROUTES.HOME },
-          { label: "Subscription" },
-        ]}
-      />
-
-      {/* === SECTION: Subscription Plans === */}
+    <div className="bg-[#f6f7f4] min-h-screen">
+      {/* === SECTION: Pricing header + billing toggle + plan cards ===
+          Figma 3336:2055 — Content block, max-w-[1126px], pt-56px pb-80px */}
       <div data-section="subscription-plans" className="px-4 sm:px-6">
-        <Container>
+        <div className="mx-auto max-w-[1126px]">
           <SubscriptionPlans buyProLink={buyProLink} />
-        </Container>
+        </div>
       </div>
 
-      {/* === SECTION: Testimonials === */}
-      <div data-section="subscription-testimonials" className="w-full bg-gray-50 py-16 mt-5">
-        <Testimonials config={testimonialsConfig} />
-      </div>
-
-      {/* === SECTION: FAQ === */}
+      {/* === SECTION: FAQ ===
+          Not present in Figma frame 3336:2055, retained because faqConfig is
+          fetched server-side and admin-managed CMS content lives here. */}
       <FAQ config={faqConfig} />
-
-
-    </>
+    </div>
   );
 };
 

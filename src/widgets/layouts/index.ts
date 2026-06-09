@@ -4,3 +4,4 @@ export * from './page-loader';
 export { MyProfileLayout } from './my-profile';
 export { ClassroomLayout } from './classroom';
 export * from './blank';
+export { AppShell } from './app-shell';

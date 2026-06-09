@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { Avatar, Button, Table, Tag, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { ClassroomLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import type { AssignmentWithStats, TrackingRow } from "~services/types/classroom";
 import { ROUTES } from "@/shared/routes";
 import { STATUS_META } from "../../status-display";
@@ -197,4 +197,4 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
   );
 };
 
-PageClassroomTracking.Layout = ClassroomLayout;
+PageClassroomTracking.Layout = AppShell;

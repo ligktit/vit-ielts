@@ -1,26 +1,22 @@
-import { Container } from "@/shared/ui";
-import { Button } from "@/shared/ui/ds";
 import Image from "next/image";
+import Link from "next/link";
 import type { HeroBannerConfig } from "./types";
+import { ROUTES } from "@/shared/routes";
 
 // ─── Default Data ─────────────────────────────────────────────────────────────
 const DEFAULTS: HeroBannerConfig = {
   title: {
-    line1: "IELTS Prediction Test",
-    line2: "Thi",
-    highlight: "Thử Như Thật",
+    line1: "Hit your Band 8.0",
+    line2: "with confidence.",
+    highlight: "",
   },
   subtitle:
-    "Thi thử như thật với giao diện 1:1 và kho đề sát thực tế. Bứt phá band điểm cùng hệ thống giải thích chi tiết.",
-  checklist: [
-    "Giao diện thi máy",
-    "Cập nhật xu hướng đề",
-    "Chấm chữa chi tiết, tối ưu thời gian",
-  ],
-  cta: { text: "Khám phá ngay", link: "/ielts-practice-library" },
+    "Personalised IELTS practice for Listening, Reading, Writing & Speaking — with real mock tests, instant scoring and feedback from expert teachers.",
+  checklist: [],
+  cta: { text: "Take a free mock test", link: ROUTES.EXAM.ARCHIVE },
   images: {
-    screen: "/assets/figma/icons/screen 1.png",
-    mascot: "/assets/figma/icons/like 1.png",
+    screen: "/assets/figma/hero-mascot.png",
+    mascot: "/assets/figma/hero-mascot.png",
   },
 };
 
@@ -31,113 +27,135 @@ export type HeroBannerProps = {
 };
 
 export const HeroBanner = ({ config }: HeroBannerProps) => {
-  const c = { ...DEFAULTS, ...config };
+  // Per design decision (2026-06-09): the new Figma landing copy + mascot are the
+  // canonical hero content — the legacy CMS "home/hero-banner" config held old-site
+  // text/images, so heading/subtitle/mascot are no longer driven by it. Admin may
+  // still override the primary CTA link.
+  const c: HeroBannerConfig = {
+    ...DEFAULTS,
+    cta: {
+      text: DEFAULTS.cta.text,
+      link: config?.cta?.link || DEFAULTS.cta.link,
+    },
+  };
 
   return (
-    <section
-      data-section="hero-banner"
-      className="relative w-full overflow-hidden bg-white min-h-[700px] flex items-center pt-[180px] pb-12 lg:pt-32 lg:pb-20 px-4 sm:px-6"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(217,74,86,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,74,86,0.07) 1px, transparent 1px)",
-        backgroundSize: "40px 40px",
-        backgroundPosition: "center top",
-      }}
-    >
-      <Container className="relative z-10 w-full">
-        {/* Layout 2 cột: Cột trái (Text) và Cột phải (Hình ảnh) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-20 w-full">
+    <section data-section="hero-banner" className="w-full mb-[24px]">
+      {/* White rounded card — Figma: bg-white rounded-[50px] shadow, px-64px py-56px */}
+      <div className="bg-white rounded-[50px] shadow-[0px_4px_20px_0px_rgba(0,0,0,0.1)] overflow-hidden">
+        <div className="flex flex-col lg:flex-row items-center gap-12 px-8 sm:px-12 lg:px-16 py-12 lg:py-14 relative min-h-[440px]">
 
-          {/* CỘT TRÁI: Cụm Text & CTA */}
-          <div className="flex flex-col items-start z-20 w-full gap-8">
-            {/* Title */}
-            <h1
-              className="text-[40px] leading-[1.2] sm:text-[52px] lg:text-[60px] font-bold tracking-tight text-[var(--color-default)] animate-fade-in-up"
-              style={{ animationDelay: "0ms" }}
-            >
-              <span className="block whitespace-nowrap font-medium">{c.title.line1}</span>
-              <span className="block font-medium">
-                {c.title.line2}{" "}
-                <span className="text-primary-500 font-bold">{c.title.highlight}</span>
+          {/* ── Left: text content ── */}
+          <div className="flex flex-col items-start flex-1 min-w-0 relative z-10">
+
+            {/* Social-proof pill — Figma: bg-white border shadow rounded-full px-14px py-8px gap-8px */}
+            <div className="inline-flex items-center gap-2 bg-white border border-[rgba(25,29,36,0.1)] shadow-[0px_2px_6px_0px_rgba(25,29,36,0.1)] rounded-full px-[14px] py-2 mb-[18px]">
+              {/* Green dot — Figma: Ellipse 8px filled #b3e653 */}
+              <div className="w-2 h-2 rounded-full bg-[#b3e653] shrink-0" />
+              <span className="font-inter font-bold text-[12px] text-[#191d24] tracking-[0.96px] uppercase whitespace-nowrap">
+                LOVED BY 28,000+ STUDENTS
               </span>
+            </div>
+
+            {/* H1 — Figma: Display/L 60px Be Vietnam Pro Bold lh-1.04 tracking-[-1.8px] w-560px */}
+            <h1 className="font-display font-bold text-[48px] sm:text-[56px] lg:text-[60px] leading-[1.04] tracking-[-1.8px] text-[#191d24] mb-4 max-w-[560px]">
+              <span className="block">{c.title.line1}</span>
+              <span className="block">{c.title.line2}</span>
             </h1>
 
-            {/* Subtitle */}
-            <p
-              className="text-[22px] leading-[1.8] max-w-[600px] font-normal animate-fade-in-up"
-              style={{ animationDelay: "120ms" }}
-            >
+            {/* Subtitle — Figma: Body/L 18px Inter Regular lh-1.5 w-470px #6a7282 */}
+            <p className="font-inter font-normal text-[18px] leading-[1.5] text-[#6a7282] max-w-[470px] mb-7">
               {c.subtitle}
             </p>
 
-            {/* Checklist */}
-            <div
-              className="flex flex-wrap gap-x-8 gap-y-4 w-full text-base sm:text-[22px] text-[var(--color-default)] font-semibold animate-fade-in-up"
-              style={{ animationDelay: "240ms" }}
-            >
-              {c.checklist.map((item, i) => (
-                <div key={i} className="flex items-center gap-3 whitespace-nowrap">
-                  <CheckCircleIcon />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <div
-              className="animate-fade-in-up"
-              style={{ animationDelay: "360ms" }}
-            >
-              <Button
-                variant="primary"
-                size="lg"
+            {/* CTA buttons — Figma: gap-14px */}
+            <div className="flex flex-wrap items-center gap-[14px] mb-[30px]">
+              {/* Primary: bg-[#b3e653] rounded-full px-26 py-15 */}
+              <Link
                 href={c.cta.link}
-                className="!rounded-full px-8 py-3 h-auto text-[18px] font-bold shadow-lg shadow-primary-500/20"
+                className="inline-flex items-center gap-2 bg-[#b3e653] hover:bg-[#9ad534] text-[#191d24] font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[15px] rounded-full transition-colors duration-200 whitespace-nowrap"
               >
                 {c.cta.text}
-              </Button>
+              </Link>
+              {/* Secondary: white border */}
+              <Link
+                href={ROUTES.PRACTICE.ARCHIVE_LISTENING}
+                className="inline-flex items-center gap-2 bg-white hover:bg-[#f6f7f4] border-[1.5px] border-[rgba(25,29,36,0.1)] text-[#191d24] font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[15px] rounded-full transition-colors duration-200 whitespace-nowrap"
+              >
+                Browse courses
+              </Link>
+            </div>
+
+            {/* Stats row — Figma: gap-34px, each col gap-2px */}
+            <div className="flex items-center gap-[34px] overflow-hidden">
+              <div className="flex flex-col gap-[2px] whitespace-nowrap">
+                <span className="font-display font-bold text-[24px] leading-[1.2] tracking-[-0.24px] text-[#191d24]">+1.5</span>
+                <span className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282]">avg. band uplift</span>
+              </div>
+              <div className="flex flex-col gap-[2px] whitespace-nowrap">
+                <span className="font-display font-bold text-[24px] leading-[1.2] tracking-[-0.24px] text-[#191d24]">920+</span>
+                <span className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282]">practice tests</span>
+              </div>
+              <div className="flex flex-col gap-[2px]">
+                {/* Star row — Figma: gap-5px, star icon ~25px */}
+                <div className="flex items-center gap-[5px]">
+                  <span className="font-display font-bold text-[24px] leading-[1.2] tracking-[-0.24px] text-[#191d24] whitespace-nowrap">4.9</span>
+                  <span className="text-[#b3e653] text-[22px] leading-none">★</span>
+                </div>
+                <span className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282] whitespace-nowrap">student rating</span>
+              </div>
             </div>
           </div>
 
-          {/* CỘT PHẢI: Mascots */}
-          <div
-            className="relative w-full h-[400px] sm:h-[500px] lg:h-[673px] flex items-center justify-center lg:justify-end animate-fade-in-up"
-            style={{ animationDelay: "120ms" }}
-          >
-
-            {/* Máy tính (Screen) */}
-            <div className="absolute top-0 right-[-8%] w-[90%] h-[70%] sm:w-[80%] sm:h-[80%] lg:w-full lg:min-h-[673px] lg:h-[673px] z-10 transition-transform duration-700 hover:scale-105">
+          {/* ── Right: HeroArt — Figma: 381×440px, 3 ellipses + mascot ── */}
+          <div className="relative shrink-0 w-full lg:w-[381px] h-[280px] sm:h-[360px] lg:h-[440px]">
+            {/* Large green ellipse — Figma: 357.887px, left-22.94px top-0 */}
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                width: 358,
+                height: 358,
+                top: 0,
+                left: 23,
+                background: "#b3e653",
+              }}
+            />
+            {/* Small green ellipse bottom-left — Figma: 122.684px, left-0.45px top-239.49px */}
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                width: 123,
+                height: 123,
+                top: 239,
+                left: 0,
+                background: "#b3e653",
+              }}
+            />
+            {/* Small green ellipse top-right — Figma: 122.684px, left-304.17px top-0 */}
+            <div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                width: 123,
+                height: 123,
+                top: 0,
+                left: 304,
+                background: "#b3e653",
+              }}
+            />
+            {/* Mascot image — Figma: absolute 360×422px at left-0.45 top-28.44 */}
+            <div className="absolute z-10 inset-0">
               <Image
-                src={c.images.screen}
-                alt="IELTS Interface Screen"
+                src={c.images.mascot}
+                alt="IELTS Mascot"
                 fill
                 className="object-contain object-center"
                 priority
               />
             </div>
-
-            {/* Mascot */}
-            <div className="absolute bottom-0 left-0 sm:left-[0] lg:-left-[10%] w-[200px] h-[260px] sm:w-[280px] sm:h-[350px] lg:w-[320px] lg:h-[400px] z-20 animate-float">
-              <Image
-                src={c.images.mascot}
-                alt="IELTS Mascot"
-                fill
-                className="object-contain drop-shadow-2xl"
-              />
-            </div>
-
           </div>
 
         </div>
-      </Container>
+      </div>
     </section>
   );
 };
-
-// ─── SVG ──────────────────────────────────────────────────────────────────────
-const CheckCircleIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-    <circle cx="12" cy="12" r="12" fill="#27AE60" />
-    <path d="M7.5 12.5L10.5 15.5L16.5 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);

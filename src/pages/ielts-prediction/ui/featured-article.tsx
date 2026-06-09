@@ -6,78 +6,80 @@ import { skillLabel } from "./skills";
 import type { Post } from "~services/types/database";
 
 /**
- * Large "Featured Article" hero card at the top of /ielts-prediction:
- * image on the left, skill·topic label + title + excerpt + tags on the right,
- * with a date and "Đọc tiếp" in the footer.
+ * Featured Article hero card — Figma node 3336:2162.
+ * Horizontal layout: gradient/image left (500px) + body right with
+ * FEATURED badge, skill eyebrow, title, excerpt, dark CTA button, meta.
  */
 export const FeaturedArticle = ({ post, href }: { post: Post; href: string }) => {
   const fallbackImage = useContentImageFallback();
   const imageSrc = resolveContentImage(post.featured_image || undefined, fallbackImage);
   const isLogoFallback = !post.featured_image && imageSrc.includes("logo.png");
   const label = skillLabel(post.skill);
-  const topic = (post.tags || [])[0] || (post.categories || []).find((c) => c !== "IELTS Prediction");
-  const eyebrow = [label, topic].filter(Boolean).join(" · ");
-  const tags = (post.tags || []).slice(0, 3);
+  const date = post.published_at ? dayjs(post.published_at).format("MMM D, YYYY") : "";
+  const wordCount = ((post.excerpt || "") + " " + post.title).split(/\s+/).length;
+  const readMin = Math.max(3, Math.ceil(wordCount / 30));
 
   return (
     <Link
       href={href}
-      className="group grid grid-cols-1 overflow-hidden rounded-3xl bg-white shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-shadow hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)] md:grid-cols-2"
+      className="group flex flex-col overflow-hidden rounded-[28px] bg-[#ffffff] border border-[rgba(25,29,36,0.1)] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_32px_0px_rgba(0,0,0,0.10)] transition-shadow md:flex-row"
     >
-      <div className="relative min-h-[260px] overflow-hidden">
-        {isLogoFallback && (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--color-secondary-200),_white_55%,_var(--color-primary-50))]" />
+      {/* Left — image / gradient area */}
+      <div
+        className="relative min-h-[220px] shrink-0 overflow-hidden md:w-[440px] md:min-h-0"
+        style={{
+          background: isLogoFallback
+            ? "linear-gradient(147deg, #5281f9 14%, #7ca1ff 86%)"
+            : undefined,
+        }}
+      >
+        {/* FEATURED badge */}
+        <div className="absolute left-6 top-6 z-10 flex items-start overflow-hidden rounded-full bg-[#ffffff] px-3 py-[6px]">
+          <span className="font-inter text-[11px] font-bold text-[#191d24]">FEATURED</span>
+        </div>
+
+        {!isLogoFallback ? (
+          <Image
+            src={imageSrc}
+            alt={post.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            priority
+            unoptimized
+          />
+        ) : (
+          /* Show gradient bg; logo not rendered in the gradient version */
+          <div className="absolute inset-0 bg-[linear-gradient(147deg,#5281f9_14%,#7ca1ff_86%)]" />
         )}
-        <Image
-          src={imageSrc}
-          alt={post.title}
-          fill
-          className={`${isLogoFallback ? "object-contain p-12 opacity-30 mix-blend-multiply" : "object-cover"} transition-transform duration-500 group-hover:scale-105`}
-          priority
-          unoptimized
-        />
       </div>
 
-      <div className="flex flex-col justify-center p-7 lg:p-9">
-        {eyebrow && (
-          <span className="mb-3 w-fit rounded-md bg-primary-50 px-2.5 py-1 text-[12px] font-semibold text-primary-500">
-            {eyebrow}
-          </span>
+      {/* Right — body */}
+      <div className="flex flex-1 flex-col gap-[14px] p-10 justify-center">
+        {label && (
+          <p className="font-inter text-[12px] font-bold text-[#9ad534] whitespace-nowrap uppercase tracking-[0.02em]">
+            {label}
+          </p>
         )}
-        <h2 className="mb-4 text-[22px] font-extrabold leading-tight text-[#1F2430] transition-colors group-hover:text-primary-500 lg:text-[26px]">
+
+        <h2 className="font-display text-[28px] font-bold leading-[1.08] tracking-[-0.56px] text-[#191d24]">
           {post.title}
         </h2>
+
         {post.excerpt && (
-          <p className="mb-5 line-clamp-3 text-[15px] leading-relaxed text-[#6A7282]">
+          <p className="font-inter text-[15px] font-normal text-[#6a7282] line-clamp-3">
             {post.excerpt}
           </p>
         )}
 
-        {tags.length > 0 && (
-          <div className="mb-5 flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-[#EEF0F4] px-3 py-1 text-[12px] tracking-[-0.3px] font-semibold text-[#4B5563]"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <div className="mt-auto flex items-center justify-between border-t border-[#F0F0F0] pt-4">
-          <span className="inline-flex items-center gap-1.5 text-[14px] text-[#9CA3AF]">
-            <span className="material-symbols-rounded text-[16px]">calendar_today</span>
-            {post.published_at ? dayjs(post.published_at).format("DD [Thg] MM, YYYY") : ""}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[15px] font-semibold text-primary-500">
-            Đọc tiếp
-            <span className="material-symbols-rounded text-[18px] transition-transform group-hover:translate-x-1">
-              arrow_forward
-            </span>
-          </span>
+        {/* CTA */}
+        <div className="inline-flex h-12 w-[150px] items-center justify-center rounded-full bg-[#191d24] px-4">
+          <span className="font-inter text-[14px] font-bold text-white">Read article</span>
         </div>
+
+        {/* Meta */}
+        <p className="font-inter text-[13px] font-medium text-[#6a7282]">
+          {readMin} min read{date ? ` · ${date}` : ""}
+        </p>
       </div>
     </Link>
   );

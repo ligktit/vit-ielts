@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { twMerge } from "tailwind-merge";
 import { Dropdown, Modal, message } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { createClient } from "~supabase/client";
 import { useAuth } from "@/appx/providers";
-import { ClassroomLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import { ClassroomQrScanner } from "../../qr-scanner";
 import { createClassroom, joinClassroomByCode } from "~services/classroom";
 import type {
@@ -15,6 +16,8 @@ import type {
 } from "~services/types/classroom";
 import { ROUTES } from "@/shared/routes";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type Props = {
   isTeacher: boolean;
   classrooms: ClassroomSummary[];
@@ -22,14 +25,22 @@ type Props = {
   studentStats: StudentDashboardStats | null;
 };
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 const TINTS = ["#D94A56", "#2563EB", "#7C3AED", "#0EA5E9", "#16A34A", "#EA580C"];
-const tintFor = (k: string) => TINTS[[...k].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length];
-const initials = (name: string) => name.trim().charAt(0).toUpperCase() || "L";
+const tintFor = (k: string) =>
+  TINTS[[...k].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length];
+const avatarInitials = (name: string) =>
+  name.trim().toUpperCase().split(/\s+/).slice(0, 2).map((w) => w[0]).join("") || "LC";
+
+// Pastel background from a hex tint: e.g. #D94A56 → "#D94A561A"
+const pastelBg = (tint: string) => `${tint}26`;
 
 const fieldBase =
-  "w-full rounded-[11px] border px-4 py-3 text-[15px] text-[#191D24] placeholder:text-[#9CA3AF] outline-none transition focus:border-[#D94A56]";
+  "w-full rounded-[11px] border px-4 py-3 text-[15px] text-[#191D24] placeholder:text-[#9CA3AF] outline-none transition focus:border-[#b3e653]";
 const labelCls = "mb-2 block text-[15px] font-bold text-[#191D24]";
-const ROW_GRID = "grid grid-cols-[1fr_120px_110px_180px_150px] items-center gap-2";
+
+// ─── Teacher-only stat card (kept from original) ─────────────────────────────
 
 const StatCard = ({
   icon,
@@ -42,9 +53,9 @@ const StatCard = ({
   value: number | string;
   tint: string;
 }) => (
-  <div className="flex items-center gap-[14px] rounded-[13px] border border-[#E5E7EB] bg-white px-5 py-[18px] shadow-[0_2px_6px_0_rgba(0,0,0,0.04)]">
+  <div className="flex items-center gap-[14px] rounded-[13px] border border-[#e7e9e4] bg-white px-5 py-[18px] shadow-[0_2px_4px_0_rgba(0,0,0,0.04)]">
     <span
-      className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[10px]"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px]"
       style={{ background: `${tint}1A` }}
     >
       <span className="material-symbols-rounded text-[22px] leading-none" style={{ color: tint }}>
@@ -52,18 +63,13 @@ const StatCard = ({
       </span>
     </span>
     <div className="flex flex-col gap-1">
-      <span className="text-[13px] font-medium text-[#6A7282]">{label}</span>
-      <span className="text-[28px] font-bold leading-none text-[#191D24]">{value}</span>
+      <span className="text-[13px] font-medium text-[#6a7282]">{label}</span>
+      <span className="text-[28px] font-bold leading-none text-[#191d24]">{value}</span>
     </div>
   </div>
 );
 
-const BannerStat = ({ label, value }: { label: string; value: number | string }) => (
-  <div className="min-w-[150px] rounded-[13px] bg-white/10 px-6 py-4 text-center">
-    <div className="text-[11px] uppercase tracking-wide text-white/80">{label}</div>
-    <div className="mt-1 text-[36px] font-bold leading-none">{value}</div>
-  </div>
-);
+// ─── Modal header (kept from original) ───────────────────────────────────────
 
 const ModalHeader = ({ title, onClose }: { title: string; onClose: () => void }) => (
   <div className="flex items-start justify-between">
@@ -78,35 +84,123 @@ const ModalHeader = ({ title, onClose }: { title: string; onClose: () => void })
   </div>
 );
 
+// ─── Figma-style class card ───────────────────────────────────────────────────
+// Matches Figma node 3733:936 "class" card — bg-white, rounded-[20px], p-[20px],
+// avatar initials, class name, description/subtitle, assignment count, status badge, Open →
+
+const ClassCard = ({ c }: { c: ClassroomSummary }) => {
+  const tint = tintFor(c.id);
+  const bg = pastelBg(tint);
+  const inits = avatarInitials(c.name);
+  const href = ROUTES.CLASSROOM.DETAIL(c.id);
+
+  const isActive = c.status === "active";
+
+  return (
+    <div className="bg-white border border-[#e7e9e4] rounded-[20px] p-[20px] flex flex-col gap-[14px] shadow-[0_2px_4px_0_rgba(0,0,0,0.04)] w-full sm:w-[350px] shrink-0">
+      {/* Header: avatar + name + subtitle */}
+      <div className="flex gap-[12px] items-center h-[44px]">
+        {c.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={c.image_url}
+            alt=""
+            className="h-[44px] w-[44px] rounded-[12px] object-cover shrink-0"
+          />
+        ) : (
+          <div
+            className="h-[44px] w-[44px] rounded-[12px] flex items-center justify-center shrink-0"
+            style={{ background: bg }}
+          >
+            <span
+              className="font-inter font-bold text-[15px] leading-none"
+              style={{ color: tint }}
+            >
+              {inits}
+            </span>
+          </div>
+        )}
+        <div className="flex flex-col gap-[2px] min-w-0">
+          <p className="font-inter font-bold text-[15px] text-[#191d24] leading-normal truncate">
+            {c.name}
+          </p>
+          <p className="font-inter font-normal text-[12px] text-[#6a7282] leading-normal truncate">
+            {c.description || `Mã: ${c.invite_code}`}
+          </p>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-[rgba(25,29,36,0.06)] w-full" />
+
+      {/* Stats row: student count + assignment count */}
+      <div className="flex items-center gap-[16px]">
+        <div className="flex items-center gap-[5px]">
+          <span className="material-symbols-rounded text-[15px] text-[#6a7282]">person</span>
+          <span className="font-inter font-medium text-[12px] text-[#6a7282]">
+            {c.student_count} học sinh
+          </span>
+        </div>
+        <div className="flex items-center gap-[5px]">
+          <span className="material-symbols-rounded text-[15px] text-[#6a7282]">assignment</span>
+          <span className="font-inter font-medium text-[12px] text-[#6a7282]">
+            {c.assignment_count} bài giao
+          </span>
+        </div>
+      </div>
+
+      {/* Footer: status badge + Open → */}
+      <div className="flex items-center justify-between">
+        {isActive ? (
+          <div className="flex gap-[6px] items-center justify-center px-[10px] py-[5px] rounded-[100px] bg-[#f2fadd]">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#219653] shrink-0" />
+            <span className="font-inter font-bold text-[12px] text-[#219653] whitespace-nowrap">
+              Đang hoạt động
+            </span>
+          </div>
+        ) : (
+          <div className="flex gap-[6px] items-center justify-center px-[10px] py-[5px] rounded-[100px] bg-[rgba(25,29,36,0.06)]">
+            <div className="w-[6px] h-[6px] rounded-full bg-[#6a7282] shrink-0" />
+            <span className="font-inter font-bold text-[12px] text-[#6a7282] whitespace-nowrap">
+              Đã đóng
+            </span>
+          </div>
+        )}
+        <Link
+          href={href}
+          className="font-inter font-bold text-[13px] text-[#5b8a00] hover:text-[#9ad534] whitespace-nowrap transition-colors"
+        >
+          Open →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+// ─── Teacher-only row (kept for teacher management view) ─────────────────────
+
+const ROW_GRID = "grid grid-cols-[1fr_120px_110px_180px_150px] items-center gap-2";
+
 const ClassRow = ({ c, showRoleBadge }: { c: ClassroomSummary; showRoleBadge: boolean }) => {
   const tint = tintFor(c.id);
-  const isStudent = c.viewer_role === "student";
-  // Both roles open the class detail page; students see a read-only view there.
   const primaryHref = ROUTES.CLASSROOM.DETAIL(c.id);
   return (
     <div className={`${ROW_GRID} border-b border-[#F3F4F6] px-2 py-4 last:border-0`}>
       <div className="flex min-w-0 items-center gap-3">
         {c.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={c.image_url}
-            alt=""
-            className="h-10 w-10 flex-shrink-0 rounded-full object-cover"
-          />
+          <img src={c.image_url} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
         ) : (
           <span
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-base font-bold"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-base font-bold"
             style={{ background: `${tint}1A`, color: tint }}
           >
-            {initials(c.name)}
+            {c.name.trim().charAt(0).toUpperCase()}
           </span>
         )}
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <Link
-              href={primaryHref}
-              className="truncate font-bold text-[#191D24] hover:text-[#D94A56]"
-            >
+            <Link href={primaryHref} className="truncate font-bold text-[#191D24] hover:text-[#b3e653]">
               {c.name}
             </Link>
             {showRoleBadge && c.viewer_role === "student" ? (
@@ -120,18 +214,16 @@ const ClassRow = ({ c, showRoleBadge }: { c: ClassroomSummary; showRoleBadge: bo
           </div>
         </div>
       </div>
-
       <span className="inline-flex items-center gap-1.5 text-[15px] font-semibold text-[#191D24]">
         <span className="material-symbols-rounded text-[18px] text-[#6A7282]">person</span>
         {c.student_count}
       </span>
-
       <span className="text-[15px] font-semibold text-[#191D24]">{c.assignment_count}</span>
-
       <span>
         {c.status === "active" ? (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E5F8EC] px-3 py-1 text-[13px] font-medium text-[#16A34A]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#16A34A]" /> Đang hoạt động
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f2fadd] px-3 py-1 text-[13px] font-medium text-[#219653]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#219653]" />
+            Đang hoạt động
           </span>
         ) : (
           <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-[13px] font-medium text-[#6A7282]">
@@ -139,46 +231,38 @@ const ClassRow = ({ c, showRoleBadge }: { c: ClassroomSummary; showRoleBadge: bo
           </span>
         )}
       </span>
-
       <div className="flex items-center justify-end gap-1">
-        {isStudent ? (
-          <Link
-            href={primaryHref}
-            className="inline-flex items-center gap-1 rounded-[8px] bg-[#D94A56] px-4 py-2 text-[14px] font-semibold text-white hover:bg-[#c8404b]"
-          >
-            Vào lớp →
-          </Link>
-        ) : (
-          <Link
-            href={ROUTES.CLASSROOM.DETAIL(c.id)}
-            className="rounded-[8px] bg-[#F3F4F6] px-4 py-2 text-[14px] font-semibold text-[#374151] hover:bg-[#E5E7EB]"
-          >
-            Quản lý
-          </Link>
-        )}
-        {c.viewer_role === "teacher" ? (
-          <Dropdown
-            trigger={["click"]}
-            menu={{
-              items: [
-                { key: "manage", label: <Link href={ROUTES.CLASSROOM.DETAIL(c.id)}>Quản lý lớp</Link> },
-                {
-                  key: "assign",
-                  label: <Link href={`${ROUTES.CLASSROOM.DETAIL(c.id)}?tab=assignments`}>Giao bài</Link>,
-                },
-                { key: "report", label: <Link href={ROUTES.CLASSROOM.TRACKING(c.id)}>Báo cáo</Link> },
-              ],
-            }}
-          >
-            <button className="flex h-9 w-9 items-center justify-center rounded-[8px] text-[#6A7282] hover:bg-gray-100">
-              <span className="material-symbols-rounded text-[20px]">more_vert</span>
-            </button>
-          </Dropdown>
-        ) : null}
+        <Link
+          href={primaryHref}
+          className="rounded-[8px] bg-[#f6f7f4] px-4 py-2 text-[14px] font-semibold text-[#374151] hover:bg-[#e8ebe2]"
+        >
+          Quản lý
+        </Link>
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: [
+              { key: "manage", label: <Link href={ROUTES.CLASSROOM.DETAIL(c.id)}>Quản lý lớp</Link> },
+              {
+                key: "assign",
+                label: (
+                  <Link href={`${ROUTES.CLASSROOM.DETAIL(c.id)}?tab=assignments`}>Giao bài</Link>
+                ),
+              },
+              { key: "report", label: <Link href={ROUTES.CLASSROOM.TRACKING(c.id)}>Báo cáo</Link> },
+            ],
+          }}
+        >
+          <button className="flex h-9 w-9 items-center justify-center rounded-[8px] text-[#6A7282] hover:bg-gray-100">
+            <span className="material-symbols-rounded text-[20px]">more_vert</span>
+          </button>
+        </Dropdown>
       </div>
     </div>
   );
 };
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }: Props) => {
   const router = useRouter();
@@ -199,11 +283,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
   const counts = useMemo(() => {
     const managed = classrooms.filter((c) => c.viewer_role === "teacher");
     const joined = classrooms.filter((c) => c.viewer_role === "student");
-    return {
-      managed: managed.length,
-      joined: joined.length,
-      total: classrooms.length,
-    };
+    return { managed: managed.length, joined: joined.length, total: classrooms.length };
   }, [classrooms]);
 
   useEffect(() => {
@@ -265,7 +345,6 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
       const code = trimmed.includes("/join/")
         ? trimmed.split("/join/")[1].split(/[?/]/)[0]
         : trimmed;
-      // Honor ?role=teacher in a pasted invite link (teacher invite link).
       const role: "teacher" | "student" = /[?&]role=teacher\b/i.test(trimmed)
         ? "teacher"
         : "student";
@@ -319,36 +398,30 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
     [joinWithCode]
   );
 
-  const name = currentUser?.name || "bạn";
+  // ── Split classrooms by role ─────────────────────────────────────────────
+  const studentClasses = classrooms.filter((c) => c.viewer_role === "student");
+  const teacherClasses = classrooms.filter((c) => c.viewer_role === "teacher");
+
+  // Subtitle line: how many classes the user is enrolled/managing
+  const subtitle = isTeacher
+    ? `You're managing ${counts.managed} class${counts.managed !== 1 ? "es" : ""}.`
+    : `You're enrolled in ${counts.joined} class${counts.joined !== 1 ? "es" : ""}.`;
 
   return (
-    <div className="space-y-7">
-      {/* Welcome banner */}
-      <div className="flex flex-col gap-4 rounded-[13px] bg-[#334155] px-8 py-[35px] text-white sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-xl">
-          <h2 className="text-xl font-extrabold sm:text-2xl">Chào mừng trở lại, {name}!</h2>
-          <p className="mt-1 text-sm text-white/70">
-            {isTeacher
-              ? "Quản lý các lớp bạn đang dạy, giao bài và theo dõi tiến độ học viên ngay tại đây."
-              : studentStats && studentStats.pending_count > 0
-                ? `Bạn có ${studentStats.pending_count} bài tập cần hoàn thành trong ${studentStats.joined_class_count} lớp đang tham gia.`
-                : "Theo dõi các lớp bạn tham gia và bài tập được giao."}
-          </p>
-        </div>
-        {isTeacher && stats ? (
-          <div className="flex gap-4">
-            <BannerStat label="Học sinh hoạt động" value={stats.active_students} />
-            <BannerStat label="Tiến độ trung bình" value={`${stats.avg_progress}%`} />
-          </div>
-        ) : !isTeacher && studentStats ? (
-          <div className="flex gap-4">
-            <BannerStat label="Bài tập cần làm" value={studentStats.pending_count} />
-            <BannerStat label="Đã hoàn thành" value={studentStats.submitted_count} />
-          </div>
-        ) : null}
+    <div className="space-y-[28px]">
+
+      {/* ── Top bar: heading + subtitle ── */}
+      {/* Figma 3733:630 "Top Bar" */}
+      <div data-section="classroom-top-bar">
+        <h1 className="font-display font-bold text-[26px] tracking-[-0.52px] text-[#191d24] leading-none">
+          My classes
+        </h1>
+        <p className="mt-[6px] font-inter font-normal text-[15px] text-[#6a7282]">
+          {subtitle}
+        </p>
       </div>
 
-      {/* Stat cards */}
+      {/* ── Teacher stats (unchanged, only shown for teachers) ── */}
       {isTeacher && stats ? (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard icon="menu_book" label="Số lớp quản lý" value={counts.managed} tint="#D94A56" />
@@ -370,84 +443,132 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         </div>
       ) : null}
 
-      {/* Action buttons */}
+      {/* ── Action buttons ── */}
       <div className="flex flex-wrap gap-3">
-        {/* Testing phase: any account can create a class (max 10, server-enforced). */}
         <button
           onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-2 rounded-[10px] bg-[#D94A56] px-6 py-3 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
+          className="inline-flex items-center gap-2 rounded-full bg-[#b3e653] px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#9ad534] transition-colors"
         >
-          <span className="material-symbols-rounded text-[20px]">add</span>
+          <span className="material-symbols-rounded text-[18px]">add</span>
           Tạo lớp mới
         </button>
         <button
           onClick={() => setJoinOpen(true)}
-          className="inline-flex items-center gap-2 rounded-[10px] border-[1.5px] border-[#D94A56] bg-white px-6 py-3 text-[15px] font-bold text-[#D94A56] hover:bg-[#FCE8EA]"
+          className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-[rgba(25,29,36,0.1)] bg-white px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#f6f7f4] transition-colors"
         >
-          <span className="material-symbols-rounded text-[20px]">link</span>
+          <span className="material-symbols-rounded text-[18px]">link</span>
           Tham gia bằng mã / link mời
         </button>
       </div>
 
-      {/* Class list */}
-      <div className="rounded-[13px] border border-gray-100 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <h3 className="text-lg font-bold text-[#2D3142]">Danh sách lớp học</h3>
-            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-[#6A7282]">
-              {classrooms.length} Lớp
-            </span>
-          </div>
-          {classrooms.length > 0 ? (
-            <span className="text-sm font-medium text-[#D94A56]">Xem tất cả →</span>
-          ) : null}
-        </div>
-
-        {classrooms.length === 0 ? (
-          <div className="flex flex-col items-center py-14 text-center">
-            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-              <span className="material-symbols-rounded text-[40px] leading-none text-gray-400">
-                school
-              </span>
-            </span>
-            <p className="mt-5 text-xl font-bold text-[#2D3142]">Chưa có lớp học nào</p>
-            <p className="mt-1 text-sm text-[#6A7282]">
-              tạo lớp mới hoặc tham gia bằng mã mời để bắt đầu
+      {/* ── Student class cards — Figma node 3733:932 "Classes" ── */}
+      {!isTeacher && (
+        <section data-section="student-classes">
+          <div className="flex items-center justify-between mb-[16px]">
+            <p className="font-display font-bold text-[20px] text-[#191d24] leading-normal whitespace-nowrap">
+              Your classes
             </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="rounded-[10px] bg-[#D94A56] px-6 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b]"
-              >
-                Tạo lớp ngay
-              </button>
+          </div>
+
+          {studentClasses.length === 0 ? (
+            <div className="bg-white border border-[#e7e9e4] rounded-[20px] p-[40px] flex flex-col items-center text-center gap-4">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#f6f7f4]">
+                <span className="material-symbols-rounded text-[32px] text-[#6a7282]">school</span>
+              </span>
+              <p className="font-display font-bold text-[18px] text-[#191d24]">
+                Chưa có lớp học nào
+              </p>
+              <p className="font-inter font-normal text-[14px] text-[#6a7282] max-w-[360px]">
+                Tham gia lớp bằng mã mời hoặc link từ giáo viên để bắt đầu.
+              </p>
               <button
                 onClick={() => setJoinOpen(true)}
-                className="rounded-[10px] border-[1.5px] border-[#D94A56] bg-white px-6 py-2.5 text-[15px] font-bold text-[#D94A56] hover:bg-[#FCE8EA]"
+                className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-[rgba(25,29,36,0.1)] bg-white px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#f6f7f4] transition-colors"
               >
+                <span className="material-symbols-rounded text-[18px]">link</span>
                 Tham gia lớp
               </button>
             </div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <div className="min-w-[760px]">
-              <div
-                className={`${ROW_GRID} border-b border-[#E5E7EB] px-2 pb-3 text-[11px] font-bold uppercase tracking-[0.06em] text-[#9CA3AF]`}
-              >
-                <span>Tên lớp</span>
-                <span>Học sinh</span>
-                <span>Bài giao</span>
-                <span>Trạng thái</span>
-                <span />
-              </div>
-              {classrooms.map((c) => (
-                <ClassRow key={c.id} c={c} showRoleBadge={isTeacher} />
+          ) : (
+            <div className="flex flex-wrap gap-[20px] items-start">
+              {studentClasses.map((c) => (
+                <ClassCard key={c.id} c={c} />
               ))}
             </div>
+          )}
+        </section>
+      )}
+
+      {/* ── Teacher class table — kept from original ── */}
+      {isTeacher && (
+        <section data-section="teacher-classes">
+          <div className="rounded-[20px] border border-[#e7e9e4] bg-white p-5 shadow-[0_2px_4px_0_rgba(0,0,0,0.04)]">
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <h3 className="font-display font-bold text-[18px] text-[#191d24]">
+                  Danh sách lớp học
+                </h3>
+                <span className="rounded-full bg-[#f6f7f4] px-2.5 py-0.5 text-[12px] font-medium text-[#6a7282]">
+                  {classrooms.length} lớp
+                </span>
+              </div>
+            </div>
+
+            {classrooms.length === 0 ? (
+              <div className="flex flex-col items-center py-14 text-center">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-[#f6f7f4]">
+                  <span className="material-symbols-rounded text-[40px] leading-none text-[#6a7282]">
+                    school
+                  </span>
+                </span>
+                <p className="mt-5 font-display font-bold text-[18px] text-[#191d24]">
+                  Chưa có lớp học nào
+                </p>
+                <p className="mt-1 text-[14px] text-[#6A7282]">
+                  Tạo lớp mới để bắt đầu quản lý học sinh.
+                </p>
+                <button
+                  onClick={() => setCreateOpen(true)}
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#b3e653] px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#9ad534] transition-colors"
+                >
+                  Tạo lớp ngay
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="min-w-[760px]">
+                  <div
+                    className={`${ROW_GRID} border-b border-[#e7e9e4] px-2 pb-3 text-[11px] font-bold uppercase tracking-[0.06em] text-[#9CA3AF]`}
+                  >
+                    <span>Tên lớp</span>
+                    <span>Học sinh</span>
+                    <span>Bài giao</span>
+                    <span>Trạng thái</span>
+                    <span />
+                  </div>
+                  {classrooms.map((c) => (
+                    <ClassRow key={c.id} c={c} showRoleBadge={isTeacher} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </section>
+      )}
+
+      {/* ── Teacher also sees their student classes as cards ── */}
+      {isTeacher && studentClasses.length > 0 && (
+        <section data-section="teacher-student-classes">
+          <p className="font-display font-bold text-[20px] text-[#191d24] leading-normal mb-[16px]">
+            Lớp bạn đang học
+          </p>
+          <div className="flex flex-wrap gap-[20px] items-start">
+            {studentClasses.map((c) => (
+              <ClassCard key={c.id} c={c} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── Create class modal ── */}
       <Modal
@@ -474,7 +595,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                 if (createErr) setCreateErr(false);
               }}
               placeholder="VD: IELTS Academic 7.5+ – Lớp tối thứ 3, 5"
-              className={`${fieldBase} ${createErr ? "border-[#D94A56]" : "border-[#E5E7EB]"}`}
+              className={twMerge(fieldBase, createErr ? "border-[#D94A56]" : "border-[#E5E7EB]")}
             />
             {createErr ? (
               <p className="mt-1 text-[13px] text-[#D94A56]">Vui lòng nhập tên lớp.</p>
@@ -488,7 +609,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
               rows={4}
               onChange={(e) => setCreateDesc(e.target.value)}
               placeholder="Mô tả ngắn về mục tiêu, lịch học, đối tượng…"
-              className={`${fieldBase} resize-none border-[#E5E7EB]`}
+              className={twMerge(fieldBase, "resize-none border-[#E5E7EB]")}
             />
             <p className="mt-2 text-[13px] text-[#6A7282]">Tối đa 200 ký tự</p>
           </div>
@@ -496,14 +617,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         <div className="mt-8 flex justify-end gap-3">
           <button
             onClick={closeCreate}
-            className="rounded-[10px] border border-[#E5E7EB] bg-white px-6 py-2.5 text-[15px] font-bold text-[#374151] hover:bg-gray-50"
+            className="rounded-full border border-[#e7e9e4] bg-white px-6 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-[#f6f7f4]"
           >
             Huỷ
           </button>
           <button
             onClick={handleCreate}
             disabled={submitting}
-            className="rounded-[10px] bg-[#D94A56] px-7 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b] disabled:opacity-60"
+            className="rounded-full bg-[#b3e653] px-7 py-2.5 text-[14px] font-bold text-[#191d24] hover:bg-[#9ad534] disabled:opacity-60 transition-colors"
           >
             {submitting ? "Đang tạo…" : "Tạo lớp"}
           </button>
@@ -534,7 +655,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
               if (joinErr) setJoinErr(false);
             }}
             placeholder="VD: ABC123 hoặc https://…"
-            className={`${fieldBase} ${joinErr ? "border-[#D94A56]" : "border-[#E5E7EB]"}`}
+            className={twMerge(fieldBase, joinErr ? "border-[#D94A56]" : "border-[#E5E7EB]")}
           />
           {joinErr ? (
             <p className="mt-1 text-[13px] text-[#D94A56]">Vui lòng nhập mã mời.</p>
@@ -542,14 +663,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         </div>
 
         <div className="my-5 flex items-center gap-4">
-          <span className="h-px flex-1 bg-[#E5E7EB]" />
+          <span className="h-px flex-1 bg-[#e7e9e4]" />
           <span className="text-[14px] text-[#6A7282]">hoặc</span>
-          <span className="h-px flex-1 bg-[#E5E7EB]" />
+          <span className="h-px flex-1 bg-[#e7e9e4]" />
         </div>
 
         <button
           onClick={() => setScanOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-[11px] bg-[#FCE8EA] py-3.5 text-[15px] font-bold text-[#D94A56] hover:bg-[#FBD9DE]"
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-[#f6f7f4] py-3.5 text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#e8ebe2] transition-colors"
         >
           <span className="material-symbols-rounded text-[20px]">qr_code_2</span>
           Quét QR code mời
@@ -558,14 +679,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         <div className="mt-8 flex justify-end gap-3">
           <button
             onClick={closeJoin}
-            className="rounded-[10px] border border-[#E5E7EB] bg-white px-6 py-2.5 text-[15px] font-bold text-[#374151] hover:bg-gray-50"
+            className="rounded-full border border-[#e7e9e4] bg-white px-6 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-[#f6f7f4]"
           >
             Huỷ
           </button>
           <button
             onClick={handleJoin}
             disabled={submitting}
-            className="rounded-[10px] bg-[#D94A56] px-7 py-2.5 text-[15px] font-bold text-white shadow-[0_4px_12px_0_rgba(217,74,87,0.25)] hover:bg-[#c8404b] disabled:opacity-60"
+            className="rounded-full bg-[#b3e653] px-7 py-2.5 text-[14px] font-bold text-[#191d24] hover:bg-[#9ad534] disabled:opacity-60 transition-colors"
           >
             {submitting ? "Đang tham gia…" : "Tham gia"}
           </button>
@@ -577,4 +698,4 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
   );
 };
 
-PageClassroomList.Layout = ClassroomLayout;
+PageClassroomList.Layout = AppShell;

@@ -1,13 +1,47 @@
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { AuthLayout } from "@/widgets/layouts";
-import { useRouter } from "next/router";
+import { BlankLayout } from "@/widgets/layouts";
 import { useAuth } from "@/appx/providers";
 import Link from "next/link";
 import { ROUTES } from "@/shared/routes";
 import { GoogleIcon } from "@/shared/ui/icons";
-import { HeroBanner } from "@/shared/ui/ds/organisms/hero-banner";
+import { Button } from "@/shared/ui/ds/atoms/button";
+import { Input } from "@/shared/ui/ds/atoms/input";
 import type { LoginPageConfig } from "@/shared/types/admin-config";
+
+/* ── Figma asset: Decoration blobs (temporary remote URLs, expires ~7 days) ── */
+const imgDecorationTop =
+  "https://www.figma.com/api/mcp/asset/9ac236a3-c745-4ad6-98dd-b1faa9a5568c";
+const imgDecorationBottom =
+  "https://www.figma.com/api/mcp/asset/0dd2a09a-0301-4ed1-9274-438deab9261b";
+const imgLogoFull =
+  "https://www.figma.com/api/mcp/asset/6336773f-1724-4a43-ac69-89484ad33638";
+const imgVitIeltsText =
+  "https://www.figma.com/api/mcp/asset/b538ff80-9616-4927-aa4b-5e6362af2896";
+const imgTrophy =
+  "https://www.figma.com/api/mcp/asset/2175c9aa-8033-4dc5-8005-ab4f3c1df65c";
+
+/* ── Icon helpers (Material Symbols Rounded via className) ── */
+const EyeIcon = () => (
+  <span className="material-symbols-rounded text-[#6a7282] text-[18px] leading-none select-none">
+    visibility
+  </span>
+);
+const EyeOffIcon = () => (
+  <span className="material-symbols-rounded text-[#6a7282] text-[18px] leading-none select-none">
+    visibility_off
+  </span>
+);
+const EnvelopeIcon = () => (
+  <span className="material-symbols-rounded text-[#6a7282] text-[18px] leading-none select-none">
+    mail
+  </span>
+);
+const LockIcon = () => (
+  <span className="material-symbols-rounded text-[#6a7282] text-[18px] leading-none select-none">
+    lock
+  </span>
+);
 
 type FormData = {
   email: string;
@@ -18,8 +52,7 @@ interface PageLoginProps {
   loginConfig?: LoginPageConfig;
 }
 
-export function PageLogin({ loginConfig }: PageLoginProps) {
-  const router = useRouter();
+export function PageLogin({ loginConfig: _loginConfig }: PageLoginProps) {
   const { signIn, signInWithGoogle } = useAuth();
   const {
     control,
@@ -52,30 +85,111 @@ export function PageLogin({ loginConfig }: PageLoginProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen items-center bg-white">
-      {/* Hero Banner Section */}
-      <HeroBanner
-        title="Đăng nhập & Đăng ký"
-        breadcrumbs={[
-          { label: "Trang chủ", href: ROUTES.HOME },
-          { label: "Đăng nhập & Đăng ký", href: ROUTES.LOGIN() },
-          { label: "Đăng nhập" },
-        ]}
-      />
+    /* === SECTION: Page Root === */
+    <div
+      className="flex flex-col min-h-screen bg-[#f6f7f4]"
+      data-section="auth-login-root"
+    >
+      {/* === SECTION: Body (Brand Panel + Form Area) === */}
+      <div
+        className="flex flex-1 min-h-screen"
+        data-section="auth-login-body"
+      >
+        {/* === SECTION: Brand Panel === */}
+        <div
+          className="hidden md:flex flex-1 flex-col justify-between px-[60px] lg:px-[120px] py-[100px] bg-[#b3e653] relative overflow-hidden"
+          data-section="brand-panel"
+        >
+          {/* Decoration blobs */}
+          <img
+            src={imgDecorationTop}
+            alt=""
+            aria-hidden="true"
+            className="absolute right-[-40px] top-[-104px] w-[360px] h-[360px] pointer-events-none"
+          />
+          <img
+            src={imgDecorationBottom}
+            alt=""
+            aria-hidden="true"
+            className="absolute left-[-100px] bottom-[-20px] w-[251px] h-[251px] pointer-events-none"
+          />
 
-      {/* Login Box */}
-      <div className="w-full flex justify-center py-[130px] relative z-30 px-4 max-w-7xl">
-        <div className="w-[562px] bg-white rounded-[32px] shadow-[0px_2px_10px_rgba(0,0,0,0.5)] flex flex-col items-center py-8 px-6 sm:px-[64px]">
-          <h2 className="font-noto-sans font-bold text-[32px] leading-[39px] text-center text-[#D94A56] mb-[30px]">
-            Đăng Nhập
-          </h2>
+          {/* Logo */}
+          <div className="relative flex items-center gap-3 h-[50px] z-10">
+            <img
+              src={imgLogoFull}
+              alt="VitIELTS Logo"
+              className="h-[50px] w-auto"
+            />
+            <img
+              src={imgVitIeltsText}
+              alt="VitIELTS"
+              className="h-[32px] w-auto"
+            />
+          </div>
 
-          <form className="w-full flex flex-col gap-[30px]" onSubmit={handleSubmit(onSubmit)}>
-            
-            <div className="w-full flex flex-col gap-[10px]">
-              {/* Email */}
-              <div className="w-full flex flex-col items-start gap-[10px]">
-                <label htmlFor="email" className="font-noto-sans font-bold text-[16px] leading-[22px] text-[#191D24]">
+          {/* Headline + tagline */}
+          <div className="relative z-10 flex flex-col gap-[88px]">
+            <h1 className="font-display font-bold text-[46px] leading-[1.08] tracking-[-0.92px] text-[#191d24] w-[470px]">
+              Welcome back.<br />
+              Keep your streak going.
+            </h1>
+            <p className="font-inter font-normal text-[17px] leading-normal text-[#33421a] w-[430px]">
+              Pick up right where you left off — your tests, scores and study
+              plan are all saved.
+            </p>
+          </div>
+
+          {/* Card · Band 7.5 */}
+          <div
+            className="relative z-10 flex items-center gap-4 bg-white rounded-[20px] shadow-[0px_8px_24px_0px_rgba(0,0,0,0.1)] px-5 h-[92px] w-[330px]"
+            data-section="band-card"
+          >
+            <img
+              src={imgTrophy}
+              alt=""
+              aria-hidden="true"
+              className="w-[34px] h-[34px] shrink-0"
+            />
+            <div className="flex flex-col gap-[2px]">
+              <p className="font-inter font-bold text-[15px] text-[#191d24] whitespace-nowrap">
+                Band 7.5 — last mock
+              </p>
+              <p className="font-inter font-normal text-[13px] text-[#6a7282] whitespace-nowrap">
+                +1.5 since you started
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* === SECTION: Form Area === */}
+        <div
+          className="flex flex-1 items-center justify-center px-4 py-12 bg-[#f6f7f4]"
+          data-section="form-area"
+        >
+          {/* Card · Auth Form */}
+          <div
+            className="bg-white rounded-[28px] shadow-[0px_16px_40px_0px_rgba(0,0,0,0.08)] p-[40px] w-full max-w-[460px] flex flex-col gap-4"
+            data-section="auth-card"
+          >
+            {/* Title + subtitle */}
+            <h2 className="font-display font-bold text-[32px] leading-[1.08] tracking-[-0.64px] text-[#9ad534]">
+              Log in
+            </h2>
+            <p className="font-inter font-normal text-[15px] text-[#6a7282]">
+              Welcome back — let&apos;s get practising.
+            </p>
+
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              {/* === Email === */}
+              <div className="flex flex-col gap-[6px]">
+                <label
+                  htmlFor="login-email"
+                  className="font-inter font-semibold text-[13px] text-[#191d24]"
+                >
                   Email
                 </label>
                 <Controller
@@ -83,120 +197,191 @@ export function PageLogin({ loginConfig }: PageLoginProps) {
                   name="email"
                   rules={{ required: true }}
                   render={({ field }) => (
-                    <input
+                    <Input
                       {...field}
-                      id="email"
+                      id="login-email"
                       type="email"
+                      size="lg"
                       autoComplete="email"
-                      inputMode="email"
-                      placeholder="Nhập email của bạn"
-                      className="w-full box-border border border-[#BDBDBD] rounded-[12px] h-[40px] px-[18px] font-noto-sans font-normal text-[14px] text-[#374151] outline-none focus:border-[#D94A56] transition-colors"
+                      placeholder="you@email.com"
+                      leftIcon={<EnvelopeIcon />}
+                      error={!!errors.email}
+                      fullWidth
                     />
                   )}
                 />
                 {errors.email && (
-                  <span className="text-red-500 text-sm">{errors.email.message || "Vui lòng nhập email"}</span>
+                  <span className="font-inter text-[12px] text-[#e54552]">
+                    {errors.email.message || "Vui lòng nhập email"}
+                  </span>
                 )}
               </div>
 
-              {/* Password */}
-              <div className="w-full flex flex-col items-start gap-[10px]">
-                <label htmlFor="password" className="font-noto-sans font-bold text-[16px] leading-[22px] text-[#191D24]">
-                  Mật khẩu
+              {/* === Password === */}
+              <div className="flex flex-col gap-[6px]">
+                <label
+                  htmlFor="login-password"
+                  className="font-inter font-semibold text-[13px] text-[#191d24]"
+                >
+                  Password
                 </label>
-                <div className="w-full relative">
-                  <Controller
-                    control={control}
-                    name="password"
-                    rules={{ required: true }}
-                    render={({ field }) => (
-                      <input
-                        {...field}
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Nhập mật khẩu của bạn"
-                        className="w-full box-border border border-[#BDBDBD] rounded-[12px] h-[40px] pl-[18px] pr-[40px] font-noto-sans font-normal text-[14px] text-[#374151] outline-none focus:border-[#D94A56] transition-colors"
-                      />
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-[8px] top-[10px] w-[20px] h-[20px] flex items-center justify-center text-[#71717A] hover:text-[#374151] transition-colors bg-transparent border-none cursor-pointer p-0"
-                  >
-                    {/* Eye SVG */}
-                    {showPassword ? (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5C5.63636 5 2 12 2 12C2 12 5.63636 19 12 19C18.3636 19 22 12 22 12C22 12 18.3636 5 12 5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    ) : (
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.94 17.94C16.2306 18.6362 14.1436 19 12 19C5.63636 19 2 12 2 12C2 12 3.65158 8.87898 6.06 6.06001M9.9 4.23001C10.5846 4.07842 11.285 4 12 4C18.3636 4 22 11 22 11C22 11 20.3484 14.121 17.9406 16.9406M14.1213 14.1213C13.5582 14.6844 12.8315 15 12 15C10.3431 15 9 13.6569 9 12C9 11.1685 9.31561 10.4418 9.87868 9.87868M3 3L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                <Controller
+                  control={control}
+                  name="password"
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      size="lg"
+                      placeholder="••••••••"
+                      leftIcon={<LockIcon />}
+                      rightIcon={
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          className="flex items-center justify-center p-0 bg-transparent border-none cursor-pointer leading-none"
+                        >
+                          {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                        </button>
+                      }
+                      error={!!errors.password}
+                      fullWidth
+                    />
+                  )}
+                />
                 {errors.password && (
-                  <span className="text-red-500 text-sm">Vui lòng nhập mật khẩu</span>
+                  <span className="font-inter text-[12px] text-[#e54552]">
+                    Vui lòng nhập mật khẩu
+                  </span>
                 )}
               </div>
+
+              {/* === Forgot password === */}
+              <div>
+                <Link
+                  href={ROUTES.FORGOT_PASSWORD}
+                  className="font-inter font-semibold text-[13px] text-[#9ad534] hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              {/* === Submit === */}
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                fullWidth
+                loading={isSubmitting || isLoading}
+                disabled={isSubmitting || isLoading}
+              >
+                Log in
+              </Button>
+            </form>
+
+            {/* === Divider "or" === */}
+            <div className="flex items-center gap-3 w-full">
+              <div className="flex-1 h-px bg-[rgba(25,29,36,0.1)]" />
+              <span className="font-inter font-medium text-[12px] text-[#6a7282]">
+                or
+              </span>
+              <div className="flex-1 h-px bg-[rgba(25,29,36,0.1)]" />
             </div>
 
-            {/* Forgot Password */}
-            <div className="w-full text-center">
-              <Link href={ROUTES.FORGOT_PASSWORD} className="font-noto-sans font-medium text-[14px] leading-[17px] text-[#5281F9] hover:underline">
-                Quên mật khẩu?
+            {/* === Google button === */}
+            <Button
+              type="button"
+              variant="outlined"
+              size="md"
+              fullWidth
+              disabled={isLoading || isSubmitting}
+              onClick={handleGoogleLogin}
+              leftIcon={<GoogleIcon />}
+            >
+              Continue with Google
+            </Button>
+
+            {/* === Register link === */}
+            <div className="flex gap-[5px] items-center text-[14px]">
+              <span className="font-inter font-normal text-[#6a7282]">
+                New here?
+              </span>
+              <Link
+                href={ROUTES.REGISTER}
+                className="font-inter font-bold text-[#9ad534] hover:underline"
+              >
+                Create an account
               </Link>
             </div>
-
-            {/* Login Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting || isLoading}
-              className="w-full h-[55px] flex justify-center items-center py-3 px-3 gap-[15px] bg-[#D94A56] rounded-[10px] shadow-[0px_4px_20px_-8px_rgba(0,0,0,0.11),0px_0px_10px_rgba(0,0,0,0.1)] hover:bg-[#E3636E] transition-colors disabled:opacity-70 disabled:cursor-not-allowed border-none cursor-pointer"
-            >
-              <span className="font-noto-sans font-bold text-[20px] leading-[24px] text-white">
-                Đăng nhập
-              </span>
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="w-full flex flex-row items-center my-[30px]">
-            <div className="flex-1 border-b border-[#374151]"></div>
-            <span className="font-noto-sans font-medium text-[16px] leading-[19px] text-[#374151] px-[10px]">
-              Hoặc đăng nhập bằng
-            </span>
-            <div className="flex-1 border-b border-[#374151]"></div>
-          </div>
-
-          {/* Google Button */}
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={isLoading || isSubmitting}
-            className="w-full h-[55px] flex justify-center items-center py-3 px-3 gap-[15px] bg-white rounded-[10px] shadow-[0px_4px_20px_-8px_rgba(0,0,0,0.11),0px_0px_10px_rgba(0,0,0,0.1)] border border-transparent hover:border-gray-200 transition-colors disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer mb-[36px]"
-          >
-            <GoogleIcon />
-            <span className="font-noto-sans font-bold text-[16px] leading-[22px] text-[#18181B]">
-              Google
-            </span>
-          </button>
-
-          {/* Register Link */}
-          <div className="w-full text-center">
-            <span className="font-noto-sans font-medium text-[16px] leading-[19px] text-[#374151]">
-              Bạn chưa có tài khoản?{" "}
-            </span>
-            <Link href={ROUTES.REGISTER} className="font-noto-sans font-medium text-[16px] leading-[19px] text-[#D94A56] hover:underline">
-              Đăng ký ngay
-            </Link>
           </div>
         </div>
       </div>
+
+      {/* === SECTION: Footer === */}
+      <footer
+        className="bg-[#191d24] flex items-start justify-between px-[90px] py-[48px] shrink-0 w-full"
+        data-section="auth-footer"
+      >
+        <div className="flex flex-col gap-[14px]">
+          <div className="flex items-center font-display font-bold text-[19px] leading-[1.3]">
+            <span className="text-white">VIT</span>
+            <span className="text-[#9ad534]">IELTS</span>
+          </div>
+          <p className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282] w-[280px]">
+            Smarter IELTS preparation for ambitious learners. Practice, track,
+            improve — all in one place.
+          </p>
+        </div>
+        <div className="flex flex-col gap-[10px]">
+          <p className="font-inter font-bold text-[12px] tracking-[0.96px] text-white">
+            LEARN
+          </p>
+          <div className="h-1" />
+          {["Listening", "Reading", "Writing", "Speaking"].map((item) => (
+            <p
+              key={item}
+              className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282]"
+            >
+              {item}
+            </p>
+          ))}
+        </div>
+        <div className="flex flex-col gap-[10px]">
+          <p className="font-inter font-bold text-[12px] tracking-[0.96px] text-white">
+            RESOURCES
+          </p>
+          <div className="h-1" />
+          {["Mock tests", "Vocabulary", "Blog", "Band guide"].map((item) => (
+            <p
+              key={item}
+              className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282]"
+            >
+              {item}
+            </p>
+          ))}
+        </div>
+        <div className="flex flex-col gap-[10px]">
+          <p className="font-inter font-bold text-[12px] tracking-[0.96px] text-white">
+            COMPANY
+          </p>
+          <div className="h-1" />
+          {["About", "Teachers", "Pricing", "Contact"].map((item) => (
+            <p
+              key={item}
+              className="font-inter font-normal text-[14px] leading-[1.4] text-[#6a7282]"
+            >
+              {item}
+            </p>
+          ))}
+        </div>
+      </footer>
     </div>
   );
 }
 
-PageLogin.Layout = AuthLayout;
+PageLogin.Layout = BlankLayout;

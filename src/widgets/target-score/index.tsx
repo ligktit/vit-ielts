@@ -1,11 +1,10 @@
+// === Widget: Target Score + Exam Schedule ===
+// Figma: 2-col equal cards (TargetScore + ExamDate), gap 24px, desktop side-by-side; mobile stacked
+// Each is a white card with rounded-[20px], border, shadow
+// WidgetContextProvider wraps here so this widget works standalone (home page)
+// AND when the dashboard wraps an outer provider (DashboardInner reads from the outer one).
 import { WidgetContextProvider } from "./context";
 import { DetailScore, ExamDate } from "./ui";
-
-// === Figma: My IELTS score target + Exam schedule ===
-// Geometric: Desktop = 2-col equal (each ~50%), gap 24px; Mobile = stacked
-// Each section is a white card with header + content
-// DetailScore card: minimal-height ~200px
-// ExamDate card: minimal-height ~200px
 
 export const TargetScore = () => {
   return (
@@ -15,18 +14,12 @@ export const TargetScore = () => {
         data-section="target-score"
       >
         {/* My IELTS score target card */}
-        <div
-          className="bg-white rounded-xl overflow-hidden"
-          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-        >
+        <div className="bg-white rounded-[20px] border border-[rgba(25,29,36,0.08)] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] overflow-hidden">
           <DetailScore />
         </div>
 
         {/* Exam schedule card */}
-        <div
-          className="bg-white rounded-xl overflow-hidden"
-          style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
-        >
+        <div className="bg-white rounded-[20px] border border-[rgba(25,29,36,0.08)] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] overflow-hidden">
           <ExamDate />
         </div>
       </div>

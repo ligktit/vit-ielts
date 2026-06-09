@@ -1,69 +1,32 @@
-import {
-  IELTSListeningExamIcon,
-  IELTSReadingExamIcon,
-} from "@/shared/ui/icons";
+// === Widget: Practice History ===
+// Figma: white card, rounded-[20px], DS Tabs nav (Reading / Listening), antd Table content
+// Tabs use DS Tabs molecule — green underline active state, Inter font
 import { useState } from "react";
 import { QuizListing } from "./ui";
-import { twMerge } from "tailwind-merge";
+import { Tabs } from "@/shared/ui/ds/molecules/tabs";
+import type { TabItem } from "@/shared/ui/ds/molecules/tabs";
 
-// === Figma: Practice History section ===
-// Geometric: full-width white card, radius 12px
-// Tabs: "Reading Practices" (active: red underline + red text), "Listening Practices"
-// Table: columns Quiz, Taken on, Time Taken, Questions, Correct, Incorrect, Missed, Result, (View btn)
-
-const TABS = [
-  {
-    key: "reading" as const,
-    label: "Reading Practices",
-    icon: IELTSReadingExamIcon,
-  },
-  {
-    key: "listening" as const,
-    label: "Listening Practices",
-    icon: IELTSListeningExamIcon,
-  },
+const TABS: TabItem[] = [
+  { id: "reading", label: "Reading Practices" },
+  { id: "listening", label: "Listening Practices" },
 ];
 
 export const PracticeHistory = () => {
-  const [activeKey, setActiveKey] = useState<"reading" | "listening">(
-    "reading"
-  );
+  const [activeKey, setActiveKey] = useState<"reading" | "listening">("reading");
 
   return (
     <div
-      className="bg-white rounded-xl overflow-x-auto"
-      style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
+      className="bg-white rounded-[20px] border border-[rgba(25,29,36,0.08)] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] overflow-hidden"
       data-section="practice-history"
     >
       {/* === Tab Header === */}
-      <div className="border-b border-gray-100 px-5">
-        <nav className="flex gap-0" role="tablist" aria-label="Practice history tabs">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeKey === tab.key;
-            return (
-              <button
-                key={tab.key}
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => setActiveKey(tab.key)}
-                className={twMerge(
-                  "flex items-center gap-2 px-1 py-4 mr-6 text-sm font-medium transition-colors duration-150 border-b-2 -mb-px",
-                  isActive
-                    ? "text-primary-500 border-primary-500"
-                    : "text-gray-500 border-transparent hover:text-gray-700"
-                )}
-              >
-                <Icon
-                  width={16}
-                  height={16}
-                  className="inline-flex flex-shrink-0"
-                />
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
+      <div className="border-b border-[#e5e6e8] px-5">
+        <Tabs
+          tabs={TABS}
+          activeId={activeKey}
+          onChange={(id) => setActiveKey(id as "reading" | "listening")}
+          className="bg-transparent rounded-none pt-0 px-0 gap-0"
+        />
       </div>
 
       {/* === Table Content === */}

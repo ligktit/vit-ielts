@@ -21,6 +21,11 @@ export const ROUTES = {
 
   SUBSCRIPTION: "/subscription",
 
+  MY_PROGRESS: "/my-progress",
+  STUDY_PLAN: "/study-plan",
+  VOCABULARY: "/vocabulary",
+  COMMUNITY: "/community",
+
   CLASSROOM: {
     // Teacher
     LIST: "/classroom",

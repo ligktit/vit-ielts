@@ -4,4 +4,5 @@ export type {
   SidebarTeacherProps,
   SidebarTopActionsProps,
   SidebarUser,
+  SidebarNavEntry,
 } from './sidebar';

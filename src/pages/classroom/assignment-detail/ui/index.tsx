@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Avatar } from "antd";
 import dayjs from "dayjs";
-import { ClassroomLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import type { AssignmentDetail } from "~services/types/classroom";
 import { ROUTES } from "@/shared/routes";
 
@@ -220,4 +220,4 @@ export const PageAssignmentDetail = ({ detail }: Props) => {
   );
 };
 
-PageAssignmentDetail.Layout = ClassroomLayout;
+PageAssignmentDetail.Layout = AppShell;

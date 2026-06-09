@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { DatePicker, Dropdown, Modal, Tag, TimePicker, message } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { createClient } from "~supabase/client";
-import { ClassroomLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import { getQuizzes } from "~services/quiz";
 import {
   addMemberByEmail,
@@ -2062,4 +2062,4 @@ export const PageClassroomDetail = ({
   );
 };
 
-PageClassroomDetail.Layout = ClassroomLayout;
+PageClassroomDetail.Layout = AppShell;

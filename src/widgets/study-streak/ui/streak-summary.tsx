@@ -1,6 +1,7 @@
-import Image from "next/image";
+// === StreakSummaryCards — Study streak stat cards ===
+// Figma: same card pattern as DashboardStats — white bg, border, rounded-[24px], shadow
+// Icon slot (44px, tinted bg, rounded-[12px]) + label; right: value (Be Vietnam Pro Bold 24px) + optional trend
 import type { StreakSummary } from "../api";
-import styles from "./streak-calendar.module.css";
 
 type Props = {
   summary: StreakSummary;
@@ -8,45 +9,74 @@ type Props = {
 };
 
 const STATS = [
-  { key: "currentStreak" as const, iconSrc: "/assets/figma/icons/Aim.svg", label: "Streak hiện tại", bgColor: "#FC945A" },
-  { key: "longestStreak" as const, iconSrc: "/assets/figma/icons/Goal.svg", label: "Streak dài nhất", bgColor: "#2F80ED" },
-  { key: "totalDays" as const, iconSrc: "/assets/figma/icons/calendar-days 1.svg", label: "Tổng ngày", bgColor: "#27AE60" },
-  { key: "monthDays" as const, iconSrc: "/assets/figma/icons/all.svg", label: "Tháng này", bgColor: "#8B5CF6" },
+  {
+    key: "currentStreak" as const,
+    iconClass: "material-symbols-rounded",
+    iconContent: "local_fire_department",
+    iconTint: "rgba(252,148,89,0.16)",
+    iconColor: "#fc945a",
+    label: "Streak hiện tại",
+    unit: "ngày",
+  },
+  {
+    key: "longestStreak" as const,
+    iconClass: "material-symbols-rounded",
+    iconContent: "emoji_events",
+    iconTint: "rgba(82,129,249,0.16)",
+    iconColor: "#5281f9",
+    label: "Streak dài nhất",
+    unit: "ngày",
+  },
+  {
+    key: "totalDays" as const,
+    iconClass: "material-symbols-rounded",
+    iconContent: "calendar_today",
+    iconTint: "rgba(179,230,83,0.16)",
+    iconColor: "#9ad534",
+    label: "Tổng ngày học",
+    unit: "ngày",
+  },
+  {
+    key: "monthDays" as const,
+    iconClass: "material-symbols-rounded",
+    iconContent: "calendar_month",
+    iconTint: "rgba(140,115,242,0.16)",
+    iconColor: "#7c6ef9",
+    label: "Tháng này",
+    unit: "ngày",
+  },
 ];
 
 export const StreakSummaryCards = ({ summary, loading }: Props) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[19px] mb-6">
       {STATS.map((stat) => (
         <div
           key={stat.key}
-          className="flex items-stretch rounded-[100px] overflow-hidden max-w-full"
-          style={{
-             backgroundColor: stat.bgColor,
-             border: `5px solid ${stat.bgColor}`,
-          }}
+          className="bg-white border border-[rgba(25,29,36,0.1)] rounded-[24px] shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)] p-[22px] flex items-end justify-between min-w-0 overflow-hidden"
         >
-          {/* Icon block */}
-          <div
-            className="flex-shrink-0 flex items-center justify-center p-[20px] aspect-square w-[76px] h-[76px]"
-          >
-            <Image 
-              src={stat.iconSrc} 
-              alt={stat.label} 
-              width={36} 
-              height={36} 
-              className="w-full h-full object-contain brightness-0 invert" 
-            />
-          </div>
-          {/* Text block */}
-          <div 
-            className="flex flex-col justify-center px-4 py-2 min-w-0 flex-1 bg-white rounded-r-[31px]"
-          >
-            <p className="text-[#2D3142] font-semibold text-[13px] xl:text-[14px] whitespace-nowrap overflow-hidden text-ellipsis line-clamp-1">
+          {/* Left: icon + label */}
+          <div className="flex flex-col gap-[10px] items-start shrink-0">
+            <div
+              className="flex items-center justify-center rounded-[12px] size-[44px] shrink-0"
+              style={{ backgroundColor: stat.iconTint }}
+            >
+              <span
+                className={stat.iconClass}
+                style={{ color: stat.iconColor, fontSize: 22 }}
+              >
+                {stat.iconContent}
+              </span>
+            </div>
+            <p className="font-inter font-medium text-[13px] text-[#6a7282] leading-normal">
               {stat.label}
             </p>
-            <p className="text-2xl mt-0.5" style={{ color: stat.bgColor }}>
-              {loading ? "—" : summary[stat.key]}
+          </div>
+
+          {/* Right: value */}
+          <div className="flex flex-col gap-[4px] items-end shrink-0 text-right">
+            <p className="font-display font-bold text-[24px] tracking-[-0.48px] text-[#191d24] leading-normal">
+              {loading ? "—" : `${summary[stat.key]} ${stat.unit}`}
             </p>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Avatar } from "antd";
 import dayjs from "dayjs";
-import { ClassroomLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import type { StudentHistory } from "~services/classroom";
 import { ROUTES } from "@/shared/routes";
 import {
@@ -233,4 +233,4 @@ const Stat = ({
   </div>
 );
 
-PageStudentHistory.Layout = ClassroomLayout;
+PageStudentHistory.Layout = AppShell;

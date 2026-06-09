@@ -7,23 +7,23 @@ import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 
 const DEFAULT_REVIEWS: ReviewItem[] = [
   // Column 1
-  { name: "Nguyễn Thị Lan", score: "IELTS 7.0", avatar: "/assets/figma/icons/Background-1.png", review: "Giao diện thi rất giống thi thật, giúp mình làm quen trước ngày thi. Mình đã đạt band 7.0 sau 2 tháng luyện tập liên tục.", rating: 5 },
-  { name: "Trần Văn Minh", score: "IELTS 6.5", avatar: "/assets/figma/icons/Background-2.png", review: "Đề thi sát với cấu trúc thật. Mình thích cách chấm điểm tự động, tiết kiệm rất nhiều thời gian ôn luyện.", rating: 5 },
-  { name: "Hoàng Minh Tuấn", score: "IELTS 7.5", avatar: "/assets/figma/icons/Background-3.png", review: "Trang web này giúp mình tập làm quen với format thi thật. Sau khi luyện đủ 30 bài, mình tự tin hơn hẳn khi thi chính thức.", rating: 5 },
-  { name: "Bùi Thị Thu", score: "IELTS 6.0", avatar: "/assets/figma/icons/Background-4.png", review: "Phần Listening rất chuẩn, đúng format. Mình từng mua khóa học bên ngoài nhưng giờ luyện ở đây là đủ rồi.", rating: 5 },
-  { name: "Lý Thanh Sơn", score: "IELTS 8.0", avatar: "/assets/figma/icons/Background-5.png", review: "Rất hài lòng với chất lượng đề. Hệ thống chấm điểm tức thì giúp mình biết ngay điểm yếu để cải thiện.", rating: 5 },
+  { name: "Nguyễn Thị Lan", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Giao diện thi rất giống thi thật, giúp mình làm quen trước ngày thi. Mình đã đạt band 7.0 sau 2 tháng luyện tập liên tục.", rating: 5 },
+  { name: "Trần Văn Minh", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Đề thi sát với cấu trúc thật. Mình thích cách chấm điểm tự động, tiết kiệm rất nhiều thời gian ôn luyện.", rating: 5 },
+  { name: "Hoàng Minh Tuấn", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Trang web này giúp mình tập làm quen với format thi thật. Sau khi luyện đủ 30 bài, mình tự tin hơn hẳn khi thi chính thức.", rating: 5 },
+  { name: "Bùi Thị Thu", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "Phần Listening rất chuẩn, đúng format. Mình từng mua khóa học bên ngoài nhưng giờ luyện ở đây là đủ rồi.", rating: 5 },
+  { name: "Lý Thanh Sơn", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "Rất hài lòng với chất lượng đề. Hệ thống chấm điểm tức thì giúp mình biết ngay điểm yếu để cải thiện.", rating: 5 },
   // Column 2
-  { name: "Phạm Thị Hoa", score: "IELTS 7.5", avatar: "/assets/figma/icons/Background-2.png", review: "Platform tốt nhất mình từng dùng để luyện IELTS. Reading và Listening đều rất chất lượng, đề đa dạng.", rating: 5 },
-  { name: "Lê Quốc Bảo", score: "IELTS 6.0", avatar: "/assets/figma/icons/Background-3.png", review: "Mình luyện tập mỗi ngày với bộ đề ở đây. Sau 3 tháng đã tăng từ 5.5 lên 6.0, rất hài lòng với kết quả.", rating: 5 },
-  { name: "Ngô Thị Mai", score: "IELTS 7.0", avatar: "/assets/figma/icons/Background-4.png", review: "Giao diện rất thân thiện và chuyên nghiệp. Đề thi bám sát thực tế và cập nhật thường xuyên.", rating: 5 },
-  { name: "Đinh Văn Khoa", score: "IELTS 6.5", avatar: "/assets/figma/icons/Background-5.png", review: "Trải nghiệm thi thử rất mượt mà, không khác gì thi thật. Mình đã tăng 1.0 band chỉ sau 2 tháng luyện đề đây.", rating: 5 },
-  { name: "Vương Thị Liên", score: "IELTS 7.0", avatar: "/assets/figma/icons/Background-6.png", review: "Bộ đề phong phú, giải thích chi tiết. Mình đặc biệt thích tính năng xem lại lỗi sai sau mỗi bài thi.", rating: 5 },
+  { name: "Phạm Thị Hoa", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Platform tốt nhất mình từng dùng để luyện IELTS. Reading và Listening đều rất chất lượng, đề đa dạng.", rating: 5 },
+  { name: "Lê Quốc Bảo", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "Mình luyện tập mỗi ngày với bộ đề ở đây. Sau 3 tháng đã tăng từ 5.5 lên 6.0, rất hài lòng với kết quả.", rating: 5 },
+  { name: "Ngô Thị Mai", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Giao diện rất thân thiện và chuyên nghiệp. Đề thi bám sát thực tế và cập nhật thường xuyên.", rating: 5 },
+  { name: "Đinh Văn Khoa", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Trải nghiệm thi thử rất mượt mà, không khác gì thi thật. Mình đã tăng 1.0 band chỉ sau 2 tháng luyện đề đây.", rating: 5 },
+  { name: "Vương Thị Liên", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Bộ đề phong phú, giải thích chi tiết. Mình đặc biệt thích tính năng xem lại lỗi sai sau mỗi bài thi.", rating: 5 },
   // Column 3
-  { name: "Đặng Thu Hương", score: "IELTS 8.0", avatar: "/assets/figma/icons/Background-4.png", review: "Hệ thống giao diện máy tính rất mượt, đúng với format thi thật. Đặc biệt phần Listening rất chuẩn.", rating: 5 },
-  { name: "Vũ Thế Dũng", score: "IELTS 6.5", avatar: "/assets/figma/icons/Background-5.png", review: "Luyện đề trên này giúp mình quen với áp lực thời gian. Kết quả thi thật tốt hơn mình mong đợi.", rating: 5 },
-  { name: "Trịnh Thị Ngọc", score: "IELTS 7.0", avatar: "/assets/figma/icons/Background-6.png", review: "Mình đã thử nhiều nền tảng luyện IELTS khác nhau. Đây là nơi có đề sát thực nhất và interface đẹp nhất.", rating: 5 },
-  { name: "Cao Minh Nhật", score: "IELTS 6.5", avatar: "/assets/figma/icons/Background-1.png", review: "Chất lượng đề thi cao, cập nhật liên tục. Mình học Read và Listen ở đây là chủ yếu và thấy hiệu quả rõ rệt.", rating: 5 },
-  { name: "Phan Thị Hải", score: "IELTS 7.5", avatar: "/assets/figma/icons/Background-2.png", review: "Sau khi dùng nền tảng này 3 tháng, mình đạt 7.5 thật sự bất ngờ. Phần thi thật không khác gì luyện ở đây.", rating: 5 },
+  { name: "Đặng Thu Hương", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "Hệ thống giao diện máy tính rất mượt, đúng với format thi thật. Đặc biệt phần Listening rất chuẩn.", rating: 5 },
+  { name: "Vũ Thế Dũng", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Luyện đề trên này giúp mình quen với áp lực thời gian. Kết quả thi thật tốt hơn mình mong đợi.", rating: 5 },
+  { name: "Trịnh Thị Ngọc", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Mình đã thử nhiều nền tảng luyện IELTS khác nhau. Đây là nơi có đề sát thực nhất và interface đẹp nhất.", rating: 5 },
+  { name: "Cao Minh Nhật", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Chất lượng đề thi cao, cập nhật liên tục. Mình học Read và Listen ở đây là chủ yếu và thấy hiệu quả rõ rệt.", rating: 5 },
+  { name: "Phan Thị Hải", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Sau khi dùng nền tảng này 3 tháng, mình đạt 7.5 thật sự bất ngờ. Phần thi thật không khác gì luyện ở đây.", rating: 5 },
 ];
 
 const DEFAULTS: TestimonialsConfig = {
@@ -39,7 +39,7 @@ const DEFAULTS: TestimonialsConfig = {
 const StarRating = ({ count = 5 }: { count?: number }) => (
   <div className="flex gap-0.5">
     {Array.from({ length: count }).map((_, i) => (
-      <span key={i} className="material-symbols-rounded text-yellow-400 filled text-base">
+      <span key={i} className="material-symbols-rounded text-[#b3e653] filled text-base">
         star
       </span>
     ))}
@@ -49,15 +49,15 @@ const StarRating = ({ count = 5 }: { count?: number }) => (
 // ─── ReviewCard ───────────────────────────────────────────────────────────────
 
 const ReviewCard = ({ name, score, avatar, review, rating }: ReviewItem) => (
-  <div className="relative bg-white rounded-2xl shadow-md p-5 flex flex-col gap-3 overflow-hidden shrink-0">
+  <div className="relative bg-white rounded-[20px] shadow-[0px_6px_18px_0px_rgba(25,29,36,0.08)] p-5 flex flex-col gap-3 overflow-hidden shrink-0 border border-[#e5e6e8]">
     {/* Decorative quote mark */}
-    <div className="absolute top-3 right-4 text-5xl font-serif text-primary-500 opacity-10 leading-none select-none pointer-events-none">
+    <div className="absolute top-3 right-4 text-5xl font-serif text-[#191d24] opacity-5 leading-none select-none pointer-events-none">
       "
     </div>
 
     {/* Avatar + name + score */}
     <div className="flex items-center gap-3 relative z-10">
-      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-[#FAF7EB]">
+      <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-[#f6f7f4]">
         <Image
           src={avatar}
           alt={name}
@@ -68,13 +68,13 @@ const ReviewCard = ({ name, score, avatar, review, rating }: ReviewItem) => (
         />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-bold text-[#2D3142] text-sm leading-tight truncate">{name}</p>
-        <p className="text-xs text-primary-500 font-semibold mt-0.5">{score}</p>
+        <p className="font-display font-bold text-[#191d24] text-sm leading-tight truncate">{name}</p>
+        <p className="font-inter font-bold text-xs text-[#b3e653] mt-0.5">{score}</p>
       </div>
     </div>
 
     {/* Review text */}
-    <p className="text-sm text-gray-600 leading-relaxed line-clamp-4 relative z-10">{review}</p>
+    <p className="font-inter text-sm text-[#6a7282] leading-relaxed line-clamp-4 relative z-10">{review}</p>
 
     {/* Star rating */}
     <div className="relative z-10 mt-auto">
@@ -126,36 +126,22 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
   const col3 = reviews.slice(perCol * 2);
 
   return (
-    <ScrollFadeIn data-section="testimonials" className="w-full px-4 sm:px-6 lg:px-8">
-      <div className="relative overflow-hidden bg-primary-500 rounded-[30px] w-full min-h-[560px] lg:min-h-[700px] max-w-[1360px] mx-auto flex flex-col">
-        {/* === Decorative SVG === */}
-        <div
-          className="absolute pointer-events-none select-none left-[-43px] top-[347px] w-[517px] h-[517px] z-0"
-          aria-hidden="true"
-        >
-          <Image
-            src="/assets/figma/icons/feedback2.svg"
-            alt=""
-            width={517}
-            height={517}
-            className="opacity-20"
-            unoptimized
-          />
-        </div>
+    <ScrollFadeIn data-section="testimonials" className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6">
+      <div className="relative overflow-hidden bg-[#242938] rounded-[40px] w-full max-w-[1312px] mx-auto flex flex-col">
 
         {/* === Mobile layout (< lg) === */}
         <div className="lg:hidden relative z-10 flex flex-col gap-6 py-10 px-6 sm:px-8">
           {/* Text + CTA */}
           <div className="flex flex-col gap-4">
-            <h2 className="font-noto-sans font-bold text-[32px] text-white leading-tight">
+            <h2 className="font-display font-bold text-[32px] text-white leading-[1.1] tracking-[-0.95px]">
               {c.title}
             </h2>
-            <p className="font-noto-sans font-semibold text-sm text-white/90 leading-relaxed">
+            <p className="font-inter font-normal text-sm text-white/70 leading-relaxed">
               {c.description}
             </p>
             <div className="mt-2 mb-[20px]">
               <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
-                {c.cta?.text ?? "Đăng ký ngay"}
+                {c.cta?.text ?? "Xem thêm"}
               </Button>
             </div>
           </div>
@@ -171,15 +157,15 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
         <div className="hidden lg:grid relative z-10 flex-1 w-full lg:grid-cols-[320px_1fr] xl:grid-cols-[360px_1fr] gap-8 lg:gap-12 items-center py-10 lg:py-14 px-6 sm:px-8 lg:px-14 xl:px-12">
           {/* Left: Content block */}
           <div className="flex flex-col gap-4 lg:self-start lg:mt-[52px]">
-            <h2 className="font-noto-sans font-bold text-[36px] text-white leading-tight max-w-[250px]">
+            <h2 className="font-display font-bold text-[36px] text-white leading-[1.1] tracking-[-0.95px] max-w-[250px]">
               {c.title}
             </h2>
-            <p className="font-noto-sans font-semibold text-base text-white/90 leading-relaxed">
+            <p className="font-inter font-normal text-base text-white/70 leading-relaxed">
               {c.description}
             </p>
             <div className="mt-4">
               <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
-                {c.cta?.text ?? "Đăng ký ngay"}
+                {c.cta?.text ?? "Xem thêm"}
               </Button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { getPosts } from "~services/post";
 import type { Post } from "~services/types/database";
 import type { PracticeLibraryBannerConfig } from "@/pages/ielts-prediction/ui/types";
 import { PageIELTSPrediction } from "@/pages/ielts-prediction/ui";
+import { AppShell } from "@/widgets/layouts";
 
 /**
  * General knowledge-sharing blog. Same layout / sidebar / skill filter as
@@ -79,3 +80,5 @@ export function PageBlog(props: {
 }) {
   return <PageIELTSPrediction {...props} breadcrumbLabel="Blog" />;
 }
+
+PageBlog.Layout = AppShell;

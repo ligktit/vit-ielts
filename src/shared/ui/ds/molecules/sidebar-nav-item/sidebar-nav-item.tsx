@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export type SidebarNavItemProps = {
   icon: string;
   label: string;
@@ -15,7 +17,7 @@ export const SidebarNavItem = ({
   href = '#',
   onClick,
 }: SidebarNavItemProps) => (
-  <a
+  <Link
     href={href}
     onClick={onClick}
     className={[
@@ -38,5 +40,5 @@ export const SidebarNavItem = ({
         {label}
       </span>
     )}
-  </a>
+  </Link>
 );
