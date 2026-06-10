@@ -9,6 +9,7 @@ import { Footer } from "@/shared/ui/ds/organisms/footer";
 import { Button } from "@/shared/ui/ds/atoms/button";
 import { useAuth } from "@/appx/providers";
 import { ROUTES } from "@/shared/routes";
+import { FOOTER_COLUMNS } from "../footer-columns";
 
 /**
  * AppShell — logged-in app layout (Figma "Student Dashboard" shell).
@@ -38,21 +39,9 @@ const STUDENT_COMMUNITY: SidebarNavEntry[] = [
   { id: "blog", icon: "book", label: "Blog", href: ROUTES.BLOG.ARCHIVE },
 ];
 
-const FOOTER_COLUMNS = [
-  { title: "Learn", links: [
-    { label: "Listening", href: ROUTES.PRACTICE.ARCHIVE_LISTENING },
-    { label: "Reading", href: ROUTES.PRACTICE.ARCHIVE_READING },
-    { label: "Mock tests", href: ROUTES.EXAM.ARCHIVE },
-    { label: "Prediction", href: ROUTES.PREDICTION.ARCHIVE },
-  ] },
-  { title: "Resources", links: [
-    { label: "Blog", href: ROUTES.BLOG.ARCHIVE },
-    { label: "Subscription", href: ROUTES.SUBSCRIPTION },
-  ] },
-  { title: "Company", links: [
-    { label: "My Dashboard", href: ROUTES.ACCOUNT.DASHBOARD },
-    { label: "My Classes", href: ROUTES.CLASSROOM.LIST },
-  ] },
+const STUDENT_ACCOUNT: SidebarNavEntry[] = [
+  { id: "settings", icon: "settings", label: "Settings", href: ROUTES.ACCOUNT.SETTINGS },
+  { id: "help", icon: "help", label: "Help & Support", href: ROUTES.HELP },
 ];
 
 const activeFromPath = (pathname: string): string => {
@@ -64,6 +53,8 @@ const activeFromPath = (pathname: string): string => {
   if (pathname.startsWith(ROUTES.VOCABULARY)) return "vocabulary";
   if (pathname.startsWith(ROUTES.COMMUNITY)) return "community";
   if (pathname.startsWith("/blog")) return "blog";
+  if (pathname.startsWith(ROUTES.ACCOUNT.SETTINGS)) return "settings";
+  if (pathname.startsWith(ROUTES.HELP)) return "help";
   if (
     pathname.startsWith("/ielts-exam-library") ||
     pathname.startsWith("/take-the-test") ||
@@ -98,6 +89,8 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         user={{ name, role: "Student", initials }}
         menu={STUDENT_MENU}
         community={STUDENT_COMMUNITY}
+        account={STUDENT_ACCOUNT}
+        profileHref={ROUTES.ACCOUNT.MY_PROFILE}
         onCollapse={() => setCollapsed((c) => !c)}
         className="hidden lg:flex sticky top-0 h-dvh self-start"
       />
@@ -105,7 +98,10 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center justify-end gap-4 px-6 lg:px-10 pt-6 pb-2 shrink-0">
           {isSignedIn ? (
-            <SidebarTopActions userInitials={initials} />
+            <SidebarTopActions
+              userInitials={initials}
+              profileHref={ROUTES.ACCOUNT.MY_PROFILE}
+            />
           ) : (
             <div className="flex items-center gap-3">
               <Button variant="outlined" size="sm" href={ROUTES.LOGIN()}>
@@ -118,7 +114,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           )}
         </header>
 
-        <main className="flex-1 min-w-0 px-6 lg:px-10 pb-12">{children}</main>
+        <main className="flex-1 min-w-0 px-6 lg:px-10 pb-12">
+          <div className="max-w-container-xl mx-auto">{children}</div>
+        </main>
 
         <Footer columns={FOOTER_COLUMNS} showCopyright />
       </div>

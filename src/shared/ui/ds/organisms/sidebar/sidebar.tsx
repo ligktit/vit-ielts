@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { twMerge } from 'tailwind-merge';
 import { SidebarNavItem } from '../../molecules/sidebar-nav-item';
 
@@ -26,6 +27,8 @@ export type SidebarStudentProps = {
   menu?: readonly SidebarNavEntry[];
   community?: readonly SidebarNavEntry[];
   account?: readonly SidebarNavEntry[];
+  /** When set, the bottom profile card links to this route. */
+  profileHref?: string;
   className?: string;
 };
 
@@ -36,6 +39,8 @@ export type SidebarTeacherProps = {
   onCollapse?: () => void;
   menu?: readonly SidebarNavEntry[];
   account?: readonly SidebarNavEntry[];
+  /** When set, the bottom profile card links to this route. */
+  profileHref?: string;
   className?: string;
 };
 
@@ -44,6 +49,8 @@ export type SidebarTopActionsProps = {
   avatarColor?: string;
   onSearch?: (q: string) => void;
   onNotifications?: () => void;
+  /** When set, the avatar links to this route. */
+  profileHref?: string;
   className?: string;
 };
 
@@ -53,31 +60,58 @@ const SidebarDivider = () => (
   <hr className="w-full border-0 border-t border-[var(--color-border-hairline)] shrink-0 m-0" />
 );
 
-const ProfileCard = ({ user, collapsed }: { user: SidebarUser; collapsed: boolean }) => (
-  <div
-    className={[
-      'flex items-center gap-[10px] bg-white border border-[rgba(25,29,36,0.1)] rounded-[14px] p-[10px] w-full shrink-0',
-      collapsed ? 'justify-center' : '',
-    ].join(' ')}
-  >
-    <div
-      className="flex items-center justify-center rounded-[19px] w-[38px] h-[38px] shrink-0 text-white text-[14px] font-bold font-inter"
-      style={{ background: user.avatarColor ?? 'var(--color-accent-blue)' }}
-    >
-      {user.initials}
-    </div>
-    {!collapsed && (
-      <div className="flex flex-col gap-[2px] min-w-0 overflow-hidden">
-        <span className="text-[14px] font-bold font-inter text-[var(--color-ink-900)] truncate leading-normal">
-          {user.name}
-        </span>
-        <span className="text-[12px] font-inter text-[var(--color-ink-muted)] truncate leading-normal">
-          {user.role}
-        </span>
+const ProfileCard = ({
+  user,
+  collapsed,
+  href,
+}: {
+  user: SidebarUser;
+  collapsed: boolean;
+  href?: string;
+}) => {
+  const baseClassName = [
+    'flex items-center gap-[10px] bg-white border border-[rgba(25,29,36,0.1)] rounded-[14px] p-[10px] w-full shrink-0',
+    collapsed ? 'justify-center' : '',
+  ].join(' ');
+
+  const content = (
+    <>
+      <div
+        className="flex items-center justify-center rounded-[19px] w-[38px] h-[38px] shrink-0 text-white text-[14px] font-bold font-inter"
+        style={{ background: user.avatarColor ?? 'var(--color-accent-blue)' }}
+      >
+        {user.initials}
       </div>
-    )}
-  </div>
-);
+      {!collapsed && (
+        <div className="flex flex-col gap-[2px] min-w-0 overflow-hidden">
+          <span className="text-[14px] font-bold font-inter text-[var(--color-ink-900)] truncate leading-normal">
+            {user.name}
+          </span>
+          <span className="text-[12px] font-inter text-[var(--color-ink-muted)] truncate leading-normal">
+            {user.role}
+          </span>
+        </div>
+      )}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        aria-label="My Profile"
+        className={twMerge(
+          baseClassName,
+          'no-underline cursor-pointer transition-colors hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-tint)]',
+        )}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={baseClassName}>{content}</div>;
+};
 
 const SidebarLogo = ({
   collapsed,
@@ -105,9 +139,11 @@ const SidebarLogo = ({
       </button>
     ) : (
       <>
-        <span className="text-[18px] font-bold font-display text-[var(--color-ink-900)] shrink-0 whitespace-nowrap">
-          Vit<span style={{ color: 'var(--color-brand)' }}>IELTS</span>
-        </span>
+        <img
+          src="/assets/logos/logo-on-bright.svg"
+          alt="VitIELTS"
+          className="h-[28px] w-auto object-contain shrink-0"
+        />
         <button
           type="button"
           onClick={onCollapse}
@@ -161,6 +197,7 @@ export const SidebarStudent = ({
   menu = STUDENT_MENU,
   community = STUDENT_COMMUNITY,
   account = ACCOUNT_ITEMS,
+  profileHref,
   className = '',
 }: SidebarStudentProps) => {
   const collapsed = state === 'collapsed';
@@ -225,7 +262,7 @@ export const SidebarStudent = ({
       </div>
 
       <div className="flex-1 min-h-0 w-full" />
-      <ProfileCard user={user} collapsed={collapsed} />
+      <ProfileCard user={user} collapsed={collapsed} href={profileHref} />
     </div>
   );
 };
@@ -239,6 +276,7 @@ export const SidebarTeacher = ({
   onCollapse,
   menu = TEACHER_MENU,
   account = ACCOUNT_ITEMS,
+  profileHref,
   className = '',
 }: SidebarTeacherProps) => {
   const collapsed = state === 'collapsed';
@@ -288,7 +326,7 @@ export const SidebarTeacher = ({
       </div>
 
       <div className="flex-1 min-h-0 w-full" />
-      <ProfileCard user={user} collapsed={collapsed} />
+      <ProfileCard user={user} collapsed={collapsed} href={profileHref} />
     </div>
   );
 };
@@ -300,6 +338,7 @@ export const SidebarTopActions = ({
   avatarColor,
   onSearch,
   onNotifications,
+  profileHref,
   className = '',
 }: SidebarTopActionsProps) => (
   <div className={`flex gap-[14px] items-center ${className}`}>
@@ -317,12 +356,23 @@ export const SidebarTopActions = ({
     </label>
 
     {/* User avatar */}
-    <div
-      className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 text-white text-[14px] font-bold font-inter"
-      style={{ background: avatarColor ?? 'var(--color-accent-blue)' }}
-    >
-      {userInitials}
-    </div>
+    {profileHref ? (
+      <Link
+        href={profileHref}
+        aria-label="My Profile"
+        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 text-white text-[14px] font-bold font-inter no-underline cursor-pointer transition-shadow hover:ring-2 hover:ring-[var(--color-brand)] hover:ring-offset-2"
+        style={{ background: avatarColor ?? 'var(--color-accent-blue)' }}
+      >
+        {userInitials}
+      </Link>
+    ) : (
+      <div
+        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 text-white text-[14px] font-bold font-inter"
+        style={{ background: avatarColor ?? 'var(--color-accent-blue)' }}
+      >
+        {userInitials}
+      </div>
+    )}
 
     {/* Notifications */}
     <button

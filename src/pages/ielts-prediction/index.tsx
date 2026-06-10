@@ -45,7 +45,7 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Prediction Tests",
         description: {
           line1:
-            "IELTS Prediction Tests Online miễn phí tại IELTS PREDICTION với đề",
+            "IELTS Prediction Tests Online miễn phí tại VitIELTS với đề",
           line2:
             "thi, audio, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
           line3: "trải nghiệm làm bài thi thử như trên máy.",
@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Prediction Tests",
         description: {
           line1:
-            "IELTS Prediction Tests Online miễn phí tại IELTS PREDICTION với đề",
+            "IELTS Prediction Tests Online miễn phí tại VitIELTS với đề",
           line2:
             "thi, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
           line3: "trải nghiệm làm bài thi thử như trên máy.",

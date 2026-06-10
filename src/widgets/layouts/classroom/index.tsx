@@ -1,7 +1,9 @@
 import React from "react";
 import { useRouter } from "next/router";
 import { Container } from "@/shared/ui";
-import { Footer, Header } from "../base/ui";
+import { Header } from "../base/ui";
+import { Footer } from "@/shared/ui/ds/organisms/footer";
+import { FOOTER_COLUMNS } from "../footer-columns";
 import { Navigation } from "../my-profile/ui";
 import { HeroBanner } from "@/shared/ui/ds";
 import { ROUTES } from "@/shared/routes";
@@ -45,7 +47,7 @@ export const ClassroomLayout = ({ children }: { children: React.ReactNode }) => 
         data-section="classroom-content"
         className="bg-[#f8f9fb] lg:mb-13 overflow-x-hidden px-4 sm:px-6"
       >
-        <Container>
+        <Container className="max-w-container-xl">
           <div className="py-8 lg:py-10">
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:items-start">
               <aside className="w-full lg:w-[280px] flex-shrink-0 space-y-5">
@@ -57,7 +59,7 @@ export const ClassroomLayout = ({ children }: { children: React.ReactNode }) => 
         </Container>
       </section>
 
-      <Footer />
+      <Footer columns={FOOTER_COLUMNS} showCopyright />
     </>
   );
 };

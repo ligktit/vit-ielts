@@ -2,14 +2,15 @@
 // Figma node 3346:166 "Stat Cards" — 4 cards: Current band, Tests taken, Study streak, Hours practised
 // Card anatomy: white bg, 1px border rgba(25,29,36,0.1), rounded-[24px], shadow-[0px_6px_18px_0px_rgba(0,0,0,0.05)]
 // Left: tinted icon-slot (44px, rounded-[12px]) + label below; Right: value (Be Vietnam Pro Bold 24px #191d24) + trend (Inter SemiBold 12px #9ad534)
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/appx/providers";
 import { createClient } from "~supabase/client";
 
 type StatCardConfig = {
-  iconSrc: string;
+  icon: string; // Material Symbols icon name OR "/assets/..." path for SVG files
+  iconSvg?: boolean; // true → render as <Image>, false/undefined → render as Material Symbol
   iconTint: string; // rgba background for icon slot
+  iconColor: string; // icon color (unused when iconSvg=true)
   label: string;
   value: string;
   trend?: string;
@@ -96,29 +97,34 @@ export const DashboardStats = ({ currentBand, studyStreakDays }: Props = {}) => 
 
   const stats: StatCardConfig[] = [
     {
-      iconSrc: "/assets/figma/icons/Goal.svg",
+      icon: "emoji_events",
       iconTint: "rgba(179,230,83,0.16)",
+      iconColor: "#7aae1a",
       label: "Current band",
       value: bandDisplay,
       trend: undefined,
     },
     {
-      iconSrc: "/assets/figma/icons/Note.svg",
+      icon: "/assets/icons/Exam.svg",
+      iconSvg: true,
       iconTint: "rgba(82,129,249,0.16)",
+      iconColor: "#5281f9",
       label: "Tests taken",
       value: testsDisplay,
       trend: weekTests > 0 ? `${weekTests} this week` : undefined,
     },
     {
-      iconSrc: "/assets/figma/icons/count.svg",
+      icon: "calendar_month",
       iconTint: "rgba(252,148,89,0.16)",
+      iconColor: "#fc945a",
       label: "Study streak",
       value: streakDisplay,
       trend: undefined,
     },
     {
-      iconSrc: "/assets/figma/icons/Aim.svg",
+      icon: "access_time",
       iconTint: "rgba(140,115,242,0.16)",
+      iconColor: "#8c73f2",
       label: "Hours practised",
       value: totalHours,
       trend: undefined,
@@ -139,16 +145,31 @@ export const DashboardStats = ({ currentBand, studyStreakDays }: Props = {}) => 
           <div className="flex flex-col gap-[10px] items-start shrink-0">
             {/* Icon slot */}
             <div
-              className="flex items-center justify-center rounded-[12px] size-[44px] shrink-0 overflow-hidden"
+              className="flex items-center justify-center rounded-[12px] size-[44px] shrink-0"
               style={{ backgroundColor: stat.iconTint }}
             >
-              <Image
-                src={stat.iconSrc}
-                alt={stat.label}
-                width={24}
-                height={24}
-                className="object-contain"
-              />
+              {stat.iconSvg ? (
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    minWidth: 22,
+                    minHeight: 22,
+                    backgroundColor: "var(--color-accent-blue)",
+                    maskImage: `url(${stat.icon})`,
+                    maskSize: "contain",
+                    maskRepeat: "no-repeat",
+                    maskPosition: "center",
+                  }}
+                />
+              ) : (
+                <span
+                  className="material-symbols-rounded leading-none"
+                  style={{ color: stat.iconColor, fontSize: 22, minWidth: 22, minHeight: 22 }}
+                >
+                  {stat.icon}
+                </span>
+              )}
             </div>
             {/* Label */}
             <p className="font-inter font-medium text-[13px] text-[#6a7282] leading-normal">

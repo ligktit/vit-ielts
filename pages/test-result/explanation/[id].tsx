@@ -24,7 +24,7 @@ function toIPracticeSingle(quiz: QuizWithPassages): IPracticeSingle {
     } as IPracticeSingle["seo"],
     link: `/ielts-practice-library/${quiz.slug}`,
     slug: quiz.slug,
-    author: { node: { name: "IELTS Prediction" } },
+    author: { node: { name: "VitIELTS" } },
     date: quiz.published_at ?? quiz.created_at,
     featuredImage: quiz.featured_image
       ? { node: { sourceUrl: quiz.featured_image, altText: quiz.title } }

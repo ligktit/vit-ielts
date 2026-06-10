@@ -32,12 +32,12 @@ const withTermsOfUseConfig = async (
     termsOfUseConfig = {
       banner: {
         title: "Terms of Service",
-        subtitle: "IELTS Prediction Terms of Service Here",
+        subtitle: "VitIELTS Terms of Service Here",
         backgroundImage: "/img-admin/bg-image-11.jpg",
       },
       heroImage: "/img-admin/bg-image-11.jpg",
       content: {
-        introTitle: "Welcome to IELTS Prediction Terms of Service",
+        introTitle: "Welcome to VitIELTS Terms of Service",
         introParagraphs: [
           "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
         ],

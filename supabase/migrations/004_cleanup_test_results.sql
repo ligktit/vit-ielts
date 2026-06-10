@@ -11,6 +11,10 @@
 --    → Database → Extensions → search "pg_cron" → Enable
 -- ============================================================================
 
+-- Enable pg_cron (no-op on cloud where it's already enabled via Dashboard;
+-- required for local `supabase db reset` to apply this migration)
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
 -- Index for fast date-range queries on test_results
 CREATE INDEX IF NOT EXISTS idx_test_results_submitted_at
   ON test_results(submitted_at);

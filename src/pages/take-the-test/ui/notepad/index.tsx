@@ -72,10 +72,10 @@ function Notepad() {
   const partNumber = part.current + 1;
 
   return (
-    <div className="notepad-sidebar flex flex-col w-full h-full bg-white md:border-l md:border-gray-200">
+    <div className="notepad-sidebar flex flex-col w-full h-full bg-surface-card md:border-l md:border-border-hairline">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 flex-shrink-0">
-        <span className="text-[15px] font-bold text-[#222] tracking-wide">NOTE</span>
+      <div className="flex items-center justify-between px-4 py-4 border-b border-border-hairline flex-shrink-0">
+        <span className="text-[15px] font-bold text-ink-900 tracking-wide">NOTE</span>
         <div className="flex items-center gap-2">
           {/* Global eye toggle - toggle all highlights */}
           <button
@@ -106,10 +106,10 @@ function Notepad() {
                 setHiddenHighlights(new Set(notes.map(n => n.nodeId)));
               }
             }}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-brand-surface transition-colors cursor-pointer"
             title="Toggle all highlights"
           >
-            <span className="material-symbols-rounded text-[20px] text-[#222]" style={{ fontVariationSettings: "'wght' 700" }}>
+            <span className="material-symbols-rounded text-[20px] text-ink-900" style={{ fontVariationSettings: "'wght' 700" }}>
               {notes.length > 0 && notes.every(n => hiddenHighlights.has(n.nodeId)) ? "visibility_off" : "visibility"}
             </span>
           </button>
@@ -117,9 +117,9 @@ function Notepad() {
           <button
             type="button"
             onClick={() => setIsNotesViewOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-brand-surface transition-colors cursor-pointer"
           >
-            <span className="material-symbols-rounded text-[20px] text-[#222]" style={{ fontVariationSettings: "'wght' 700" }}>close</span>
+            <span className="material-symbols-rounded text-[20px] text-ink-900" style={{ fontVariationSettings: "'wght' 700" }}>close</span>
           </button>
         </div>
       </div>
@@ -127,7 +127,7 @@ function Notepad() {
       {/* Notes list */}
       <div className="flex-1 overflow-y-auto">
         {notes.length === 0 && (
-          <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+          <div className="flex items-center justify-center h-full text-ink-muted text-sm">
             Select text and click Note to add notes
           </div>
         )}
@@ -135,13 +135,13 @@ function Notepad() {
           const isLastNote = index === notes.length - 1;
           const isActive = focusedNoteId ? focusedNoteId === note.nodeId : isLastNote;
           return (
-          <div key={note.nodeId} className={`border-b border-gray-100 p-4 transition-colors ${isActive ? 'bg-[#dbeafe]' : 'bg-white'}`}>
+          <div key={note.nodeId} className={`border-b border-border-hairline p-4 transition-colors ${isActive ? 'bg-brand-surface' : 'bg-surface-card'}`}>
             {/* Part label + highlighted text */}
             <div className="flex items-center gap-1 mb-2 min-w-0">
-              <span className="text-[16px] font-bold text-[#222] whitespace-nowrap">
+              <span className="text-body-m font-bold text-ink-900 whitespace-nowrap">
                 Part {partNumber}
               </span>
-              <span className="text-[16px] text-[#555] truncate">
+              <span className="text-body-m text-ink-muted truncate">
                 {note.text}
               </span>
             </div>
@@ -161,7 +161,7 @@ function Notepad() {
                 handleSave(note.nodeId);
               }}
               placeholder="Record ideas"
-              className="w-full border border-gray-300 bg-white rounded px-3 py-2 text-[16px] text-[#333] resize-none focus:outline-none focus:border-[#90c0f0] transition-colors h-[60px]"
+              className="w-full border border-border-hairline bg-surface-card rounded px-3 py-2 text-body-m text-ink-body resize-none focus:outline-none focus:border-accent-blue transition-colors h-[60px]"
             />
 
             {/* Delete button */}
@@ -169,7 +169,7 @@ function Notepad() {
               <button
                 type="button"
                 onClick={() => handleDelete(note.nodeId)}
-                className="text-[16px] font-semibold text-[#2979c4] hover:text-[#1a5da0] cursor-pointer tracking-wide"
+                className="text-body-m font-semibold text-accent-blue hover:text-ink-700 cursor-pointer tracking-wide"
               >
                 DELETE
               </button>

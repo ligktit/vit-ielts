@@ -32,14 +32,14 @@ const withPrivacyPolicyConfig = async (
     privacyPolicyConfig = {
       banner: {
         title: "Privacy Policy",
-        subtitle: "IELTS Prediction Privacy Policy Here",
+        subtitle: "VitIELTS Privacy Policy Here",
         backgroundImage: "/img-admin/bg-image-11.jpg",
       },
       heroImage: "/img-admin/bg-image-11.jpg",
       content: {
-        introTitle: "Welcome to IELTS Prediction Privacy Policy",
+        introTitle: "Welcome to VitIELTS Privacy Policy",
         introParagraphs: [
-          "At IELTS Prediction, we are committed to protecting your privacy.",
+          "At VitIELTS, we are committed to protecting your privacy.",
         ],
         sections: [
           {

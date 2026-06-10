@@ -155,8 +155,8 @@ export const Footer = () => {
               <Link href={ROUTES.HOME} className="block w-full">
                 <div className="relative w-[120px] h-[60px] md:w-[150px] md:h-[70px]">
                   <Image
-                    src="/assets/figma/logos/logo-white.png"
-                    alt={generalSettingsTitle || "IPT Logo"}
+                    src="/assets/logos/logo-on-dark.svg"
+                    alt={generalSettingsTitle || "VitIELTS"}
                     fill
                     className="object-contain object-left"
                     sizes="150px"
@@ -166,9 +166,9 @@ export const Footer = () => {
 
               {/* Tagline */}
               <p className="text-white text-[14px] leading-[21px] font-normal font-noto-sans mb-0">
-                IELTS PREDICTION Test (IPT) specializes in providing highly
-                accuratte test simulations and forecast sets that closely
-                reflect the real IELTS exam.
+                VitIELTS specializes in providing highly accurate test
+                simulations and forecast sets that closely reflect the real
+                IELTS exam.
               </p>
 
               {/* Social Media Icons */}

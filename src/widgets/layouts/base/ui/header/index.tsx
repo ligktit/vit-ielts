@@ -264,13 +264,13 @@ export const Header = () => {
 
   return (
     <>
-      {/* === SECTION: Announcement Bar (red scrolling ticker) === */}
-      <AnnouncementBar />
+      {/* === SECTION: Announcement Bar (red scrolling ticker) — hidden === */}
+      {/* <AnnouncementBar /> */}
 
       {/* === SECTION: Header Navigation === */}
       <DSHeader
-        logoSrc={"/assets/figma/logos/logo-color.png"}
-        logoAlt={generalSettingsTitle || "IELTS Prediction"}
+        logoSrc={"/assets/logos/logo-on-bright.svg"}
+        logoAlt={generalSettingsTitle || "VitIELTS"}
         navItems={dsNavItems}
         userMenuItems={[
           {

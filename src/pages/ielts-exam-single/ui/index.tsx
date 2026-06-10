@@ -1,16 +1,15 @@
 import { useAuth } from "@/appx/providers";
 import { ROUTES } from "@/shared/routes";
-import { Container } from "@/shared/ui";
-import { Avatar, Breadcrumb, Button, Divider } from "@/shared/ui/ds";
-import { TestCardWithScore } from "@/entities/practice-test";
 import { useProContentModal } from "@/shared/ui/pro-content";
 import { SEOHeader } from "@/widgets";
+import { AppShell } from "@/widgets/layouts";
 import { decode } from "html-entities";
 import Image from "next/image";
 import Link from "next/link";
 import { IPracticeSingle } from "@/pages/ielts-practice-single/api";
 import { PracticeHistoryWidget } from "@/pages/ielts-practice-single/ui/practice-history";
 import { normalizeSectionBadge } from "@/shared/lib/quiz-part";
+import { TestCardWithScore } from "@/entities/practice-test";
 import ExamModeModal from "@/pages/ielts-exam-library/ui/exam-mode-modal";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -55,14 +54,48 @@ export function PageIELTSExamSingle({ post, isPreview: isPreviewProp }: { post: 
     setIsModalOpen(true);
   };
 
-  const breadcrumbs = post.seo?.breadcrumbs || [];
-  const dsBreadcrumbItems = breadcrumbs.map((b) => ({
-    label: decode(b.text),
-    href: b.url,
-  }));
-
   const skill = post.quizFields.skill[0];
-  const capitalizedSkill = skill === "listening" ? "Listening" : "Reading";
+  const examType = post.quizFields.type[0];
+  const capitalizedSkill = skill === "listening" ? "LISTENING" : "READING";
+  const capitalizedType = examType === "academic" ? "ACADEMIC" : examType === "general" ? "GENERAL" : examType.toUpperCase();
+
+  // Compute backed stats
+  const passageCount = post.quizFields.passages?.length ?? 0;
+  const questionCount = post.quizFields.passages?.reduce(
+    (acc, p) => acc + (p.questions?.length ?? 0),
+    0
+  ) ?? 0;
+  const timeMinutes = post.quizFields.time;
+
+  // Static prose copy (acceptable UI copy — no backing field)
+  const isReading = skill === "reading";
+  const whatToExpectText = isReading
+    ? "This test mirrors the official IELTS Academic Reading paper exactly — same structure, timing and difficulty curve. You'll read passages of increasing difficulty and answer questions across a range of task types, from True/False/Not Given to matching headings and sentence completion."
+    : "This test mirrors the official IELTS Listening paper exactly — same structure, timing and difficulty curve. You'll listen to four recordings and answer 40 questions across a range of task types.";
+
+  const beforeYouBeginText =
+    "Find a quiet space where you won't be interrupted for the full duration, and treat it like the real exam — the closer your conditions, the more useful your band score will be. You can flag questions and come back to them, and review all your answers before you submit.";
+
+  // Test format checklist — derived from passages if available, else static
+  const formatItems: string[] = isReading
+    ? [
+        ...(post.quizFields.passages ?? []).map(
+          (p, i) => `Passage ${i + 1}${p.title ? ` — ${p.title}` : ""}`
+        ),
+        timeMinutes ? `${timeMinutes} minutes total · no extra transfer time` : "60 minutes total · no extra transfer time",
+        "Auto-marked the moment you submit",
+      ]
+    : [
+        "Part 1 — conversation between two speakers",
+        "Part 2 — monologue on everyday topic",
+        "Part 3 — conversation between multiple speakers",
+        "Part 4 — academic lecture or monologue",
+        timeMinutes ? `${timeMinutes} minutes total · no extra transfer time` : "30 minutes + 10 minutes transfer",
+        "Auto-marked the moment you submit",
+      ];
+
+  const relatedLabel = isReading ? "Other reading tests" : "Other listening tests";
+  const relatedQuizzes = post.relatedPracticeQuizzes ?? [];
 
   return (
     <>
@@ -73,305 +106,193 @@ export function PageIELTSExamSingle({ post, isPreview: isPreviewProp }: { post: 
         image={post.featuredImage?.node.sourceUrl}
       />
 
-      <div className="min-h-screen pb-20 bg-white relative px-4 sm:px-6">
-        {/* Background Grid - Only in Hero Area */}
+      {/* ── Back link ── */}
+      <div className="mb-6">
+        <Link
+          href={ROUTES.EXAM.ARCHIVE}
+          className="inline-flex items-center gap-1.5 text-body-s font-semibold text-brand-hover hover:underline"
+        >
+          <span className="material-symbols-rounded text-[16px] leading-none">arrow_back</span>
+          Back to mock tests
+        </Link>
+      </div>
+
+      {/* ── Skill · Type chip ── */}
+      <div className="mb-4">
+        <span className="inline-flex items-center px-3 py-1 rounded-full bg-brand-tint text-brand-hover text-eyebrow font-display tracking-[0.08em]">
+          {capitalizedSkill} · {capitalizedType}
+        </span>
+      </div>
+
+      {/* ── H1 + subtitle ── */}
+      <h1 className="text-heading-1 font-display font-bold text-ink-900 leading-tight mb-3">
+        {decode(post.title)}
+      </h1>
+      {post.excerpt && (
         <div
-          className="absolute inset-x-0 top-0 h-[380px] md:h-[420px] pointer-events-none z-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(217,74,86,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(217,74,86,0.07) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-            backgroundPosition: "center top",
-          }}
+          className="text-body-m text-ink-muted mb-6 max-w-2xl"
+          dangerouslySetInnerHTML={{ __html: post.excerpt }}
         />
+      )}
 
-        {/* The Red Stripe (Behind the card) */}
-        <div className="absolute top-[380px] md:top-[420px] left-0 w-full h-[10px] bg-[#D94A56] z-0" />
-
-        <Container className="relative z-10 pt-[160px] md:pt-[220px] mb-13">
-          {/* Header Box */}
-          <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] px-[20px] md:px-[61px] py-[30px] md:py-[50px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] text-left">
-            <div className="mb-[23px]">
-              <Breadcrumb items={dsBreadcrumbItems} />
+      {/* ── Stat bar ── */}
+      <div className="bg-surface-card rounded-2xl border border-border-hairline shadow-primary px-6 py-5 flex flex-wrap items-center gap-6 mb-8">
+        {/* Stats */}
+        <div className="flex items-center gap-8 flex-1 flex-wrap">
+          {passageCount > 0 && (
+            <div className="flex flex-col">
+              <span className="text-title-m font-display font-bold text-ink-900">{passageCount}</span>
+              <span className="text-body-s text-ink-muted">Passages</span>
             </div>
-
-            <h1 className="text-3xl md:text-[40px] font-extrabold text-[#2D3142] font-noto-sans leading-tight mb-[23px]">
-              {post.title}
-            </h1>
-
-            {post.excerpt && (
-              <div
-                className="text-[#6A7282] text-sm md:text-base font-noto-sans max-w-full pb-[23px] border-b border-[rgba(0,0,0,0.06)] line-clamp-2"
-                dangerouslySetInnerHTML={{ __html: post.excerpt }}
-              />
-            )}
-
-            {/* Author info */}
-            <div className="flex items-center justify-between pt-[23px]">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    src={post.author.node.userData.avatar?.node.sourceUrl}
-                    name={post.author.node.name || "Admin"}
-                    size="sm"
-                  />
-                  <span className="text-sm font-medium text-[#2D3142]">
-                    {post.author.node.name || "Administrator"}
-                  </span>
-                </div>
-                <div className="text-sm font-medium text-[#6A7282]">
-                  {post.date
-                    ? new Date(post.date).toLocaleDateString("vi-VN")
-                    : "14/12/2025"}
-                </div>
-              </div>
-              <button
-                className="p-1 hover:bg-gray-100 rounded transition-colors text-[#2D3142]"
-                title="Share"
-              >
-                <span className="material-symbols-rounded text-[24px] align-middle">
-                  ios_share
-                </span>
-              </button>
+          )}
+          {questionCount > 0 && (
+            <div className="flex flex-col">
+              <span className="text-title-m font-display font-bold text-ink-900">{questionCount}</span>
+              <span className="text-body-s text-ink-muted">Questions</span>
             </div>
+          )}
+          {timeMinutes > 0 && (
+            <div className="flex flex-col">
+              <span className="text-title-m font-display font-bold text-ink-900">{timeMinutes} min</span>
+              <span className="text-body-s text-ink-muted">Time limit</span>
+            </div>
+          )}
+          {/* Band range: no backing field — hidden per rules */}
+        </div>
+
+        {/* Start test button */}
+        <button
+          onClick={handleStartExam}
+          className="shrink-0 inline-flex items-center gap-2 bg-brand hover:bg-brand-hover active:bg-brand-hover text-ink-900 font-display font-semibold text-body-m px-6 py-3 rounded-full transition-colors"
+        >
+          Start test
+        </button>
+      </div>
+
+      {/* ── Media / preview area ── */}
+      <div className="relative rounded-2xl overflow-hidden mb-8 aspect-[21/9] bg-gradient-to-br from-accent-blue to-brand flex items-center justify-center">
+        {post.featuredImage?.node.sourceUrl ? (
+          <Image
+            src={post.featuredImage.node.sourceUrl}
+            alt={post.featuredImage.node.altText || post.title}
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        ) : null}
+        {/* Play overlay */}
+        <button
+          onClick={handleStartExam}
+          aria-label="Start test"
+          className="relative z-10 w-20 h-20 rounded-full bg-surface-card/90 hover:bg-surface-card flex items-center justify-center shadow-primary transition-colors"
+        >
+          <span className="material-symbols-rounded text-[36px] text-ink-900 ml-1">play_arrow</span>
+        </button>
+      </div>
+
+      {/* ── Body prose ── */}
+      <div className="space-y-8 mb-10">
+        {/* What to expect */}
+        <div>
+          <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-3">What to expect</h2>
+          <p className="text-body-m text-ink-body leading-relaxed">{whatToExpectText}</p>
+        </div>
+
+        {/* Test format checklist */}
+        <div>
+          <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-4">Test format</h2>
+          <ul className="space-y-3">
+            {formatItems.map((item, i) => (
+              <li key={i} className="flex items-start gap-3 text-body-m text-ink-body">
+                <span className="material-symbols-rounded text-[20px] text-brand-hover mt-0.5 shrink-0">check</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Before you begin */}
+        <div>
+          <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-3">Before you begin</h2>
+          <p className="text-body-m text-ink-body leading-relaxed">{beforeYouBeginText}</p>
+        </div>
+      </div>
+
+      {/* ── Test history ── */}
+      <div className="bg-surface-card rounded-2xl border border-border-hairline shadow-primary p-6 mb-8">
+        <div className="flex items-center gap-2 mb-5">
+          <span className="material-symbols-rounded text-[20px] text-ink-700">history</span>
+          <h3 className="text-title-m font-display font-bold text-ink-900">Your attempt history</h3>
+        </div>
+        <PracticeHistoryWidget post={post} />
+      </div>
+
+      {/* ── PDF download ── */}
+      {post.quizFields.pdf?.node?.mediaItemUrl && (
+        <div className="bg-surface-card rounded-2xl border-2 border-brand p-6 mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="material-symbols-rounded text-brand-hover text-[28px]">picture_as_pdf</span>
+            <h3 className="text-title-m font-display font-bold text-ink-900">Download PDF</h3>
           </div>
-        </Container>
-
-        <Container className="max-w-[1360px] relative z-10">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Column: Fixed details */}
-            <div className="w-full lg:w-[220px] shrink-0 relative z-10">
-              <div className="sticky top-35 space-y-6">
-                <div>
-                  <h3 className="font-bold text-lg text-[#2D3142] mb-3">
-                    IELTS {capitalizedSkill} Exam
-                  </h3>
-                  <p className="text-sm text-[#6A7282] leading-relaxed">
-                    Full IELTS {capitalizedSkill} test with all parts included.
-                    Simulate the real exam experience with time limits and
-                    scoring.
-                  </p>
-                </div>
-                
-                <div className="space-y-4 pt-4">
-                  <button 
-                    className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors"
-                    onClick={() => navigator.clipboard.writeText(window.location.href)}
-                  >
-                    <span className="material-symbols-rounded text-lg">content_copy</span>
-                    Copy link
-                  </button>
-                  <button 
-                    className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors"
-                    onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
-                  >
-                    <span className="material-symbols-rounded text-lg">share</span>
-                    Share
-                  </button>
-                  
-                  <div className="pt-2">
-                    <Button
-                      variant="primary"
-                      onClick={handleStartExam}
-                      className="w-full !rounded-full py-2.5 h-auto text-sm font-semibold shadow-sm"
-                      leftIcon={
-                        <span className="material-symbols-rounded text-[20px]">
-                          play_circle
-                        </span>
-                      }
-                    >
-                      Làm bài thi
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <p className="text-body-s text-ink-body mb-4">
+            Download a printable copy of {post.title}.
+          </p>
+          <a
+            href={post.quizFields.pdf.node.mediaItemUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex justify-between items-center bg-brand-tint hover:bg-brand-surface rounded-xl p-4 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="bg-brand-hover text-ink-900 text-[10px] font-bold px-2 py-1 rounded font-display">PDF</span>
+              <span className="text-body-s font-semibold text-ink-900">{post.title}</span>
             </div>
+            <span className="material-symbols-rounded text-ink-muted group-hover:text-brand-hover transition-colors">download</span>
+          </a>
+        </div>
+      )}
 
-            {/* Middle Column: Main Content */}
-            <div className="w-full lg:flex-1 space-y-6 relative z-10">
-              {/* Featured Image */}
-              <div className="aspect-[21/10] relative rounded-[24px] overflow-hidden border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
-                {post.featuredImage?.node.sourceUrl && (
-                  <Image
-                    src={post.featuredImage.node.sourceUrl}
-                    alt={post.featuredImage.node.altText || post.title}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                )}
-              </div>
+      {/* ── Green CTA card ── */}
+      <div className="bg-brand rounded-2xl p-8 mb-12 flex flex-col gap-4">
+        <div>
+          <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-1">Ready to test yourself?</h2>
+          <p className="text-body-m text-ink-700">
+            {timeMinutes > 0
+              ? `Give yourself ${timeMinutes} uninterrupted minutes. You've got this.`
+              : "Give yourself the full time. You've got this."}
+          </p>
+        </div>
+        <button
+          onClick={handleStartExam}
+          className="self-start inline-flex items-center gap-2 bg-ink-900 hover:bg-ink-700 text-surface-card font-display font-semibold text-body-m px-6 py-3 rounded-full transition-colors"
+        >
+          Start test now
+        </button>
+      </div>
 
-              {/* Overview Box */}
-              {post.excerpt && (
-                <div id="overview-box" className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
-                  <div className="flex items-center gap-2 mb-6">
-                    <span className="material-symbols-rounded text-[#2D3142]">
-                      info
-                    </span>
-                    <h3 className="font-bold text-lg text-[#2D3142]">
-                      Tổng quan
-                    </h3>
-                  </div>
-                  <div
-                    className="prose max-w-none text-[#4B5563]"
-                    dangerouslySetInnerHTML={{ __html: post.excerpt }}
-                  />
-                </div>
-              )}
-
-              {/* History Box */}
-              <div className="bg-white rounded-[24px] border border-[rgba(0,0,0,0.06)] p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <span className="material-symbols-rounded text-[#2D3142]">
-                    history
-                  </span>
-                  <h3 className="font-bold text-lg text-[#2D3142]">
-                    Lịch sử làm bài
-                  </h3>
-                </div>
-                <PracticeHistoryWidget post={post} />
-              </div>
-
-              {/* Download PDF Box */}
-              {post.quizFields.pdf?.node?.mediaItemUrl && (
-                <div className="bg-white rounded-[12px] border-2 border-primary-500 p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="material-symbols-rounded text-primary-500 font-bold text-[28px]">
-                      picture_as_pdf
-                    </span>
-                    <h3 className="font-bold text-xl text-[#2D3142]">
-                      Download PDF
-                    </h3>
-                  </div>
-                  <p className="text-[#2D3142] text-sm mb-5 font-medium">
-                    You can download a nice copy of the questions and answers for {post.title} here.
-                  </p>
-                  <a
-                    href={post.quizFields.pdf.node.mediaItemUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center bg-[#E5E5E5]/40 hover:bg-[#E5E5E5]/80 transition-colors rounded-lg p-4 cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-1 rounded">PDF</span>
-                      <span className="font-semibold text-[#2D3142] text-sm">{post.title}</span>
-                    </div>
-                    <span className="material-symbols-rounded flex items-center justify-center bg-white shadow-sm p-1 rounded text-[#6A7282] group-hover:text-primary-500 transition-colors">
-                      download
-                    </span>
-                  </a>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap justify-center gap-4 pt-4">
-                <Button
-                  variant="primary"
-                  onClick={handleStartExam}
-                  className="min-w-[160px] !rounded-full px-8 py-3 h-auto text-base font-semibold"
-                  leftIcon={
-                    <span className="material-symbols-rounded text-[20px]">
-                      play_circle
-                    </span>
-                  }
-                >
-                  Làm bài thi
-                </Button>
-              </div>
-            </div>
-
-            {/* Right Column: Related items */}
-            <div className="w-full lg:w-[280px] shrink-0 space-y-8 relative z-10">
-              {post.relatedPracticeQuizzes &&
-                post.relatedPracticeQuizzes.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-lg text-[#2D3142]">
-                      Bài test nổi bật
-                    </h3>
-                    <TestCardWithScore
-                      quizId={(post.relatedPracticeQuizzes[0] as any).id ?? post.relatedPracticeQuizzes[0].slug}
-                      title={post.relatedPracticeQuizzes[0].title}
-                      image={
-                        post.relatedPracticeQuizzes[0].featuredImage || undefined
-                      }
-                      skill={skill}
-                      part={normalizeSectionBadge(skill, 1).label}
-                      attempts={1195}
-                      isPro={post.quizFields.proUserOnly}
-                      href={ROUTES.EXAM.SINGLE(
-                        post.relatedPracticeQuizzes[0].slug
-                      )}
-                    />
-                  </div>
-                )}
-
-                {post.relatedPracticeQuizzes &&
-                post.relatedPracticeQuizzes.length > 1 && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-lg text-[#2D3142]">
-                        Có thể bạn quan tâm
-                      </h3>
-
-                    </div>
-
-                    <div className="space-y-4">
-                      {post.relatedPracticeQuizzes.slice(1, 4).map((rel, idx) => (
-                        <Link
-                          key={idx}
-                          href={ROUTES.EXAM.SINGLE(rel.slug)}
-                          className="flex gap-3 group items-center"
-                        >
-                          <div className="w-[100px] h-[65px] relative rounded-lg overflow-hidden shrink-0 border border-[rgba(0,0,0,0.06)] bg-[#FAF7EB]">
-                            {rel.featuredImage && (
-                              <Image
-                                src={rel.featuredImage as string}
-                                alt={rel.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform"
-                                unoptimized
-                              />
-                            )}
-                          </div>
-                          <h4 className="text-sm font-semibold text-[#2D3142] group-hover:text-primary-500 line-clamp-3 transition-colors">
-                            {rel.title}
-                          </h4>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
-            </div>
-          </div>
-        </Container>
-
-        {/* Bottom Related Section */}
-        <Container className="max-w-[1360px] mt-20 relative z-10">
-          <div className="mb-6">
-            <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
-              Bài thi tương tự
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {post.relatedPracticeQuizzes?.slice(0, 4).map((quiz, i) => (
+      {/* ── Related tests grid ── */}
+      {relatedQuizzes.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-6">{relatedLabel}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {relatedQuizzes.slice(0, 3).map((quiz, i) => (
               <TestCardWithScore
-                key={i}
+                key={quiz.id ?? i}
                 quizId={(quiz as any).id ?? quiz.slug}
                 title={quiz.title}
                 image={quiz.featuredImage || undefined}
                 skill={skill}
                 part={normalizeSectionBadge(skill, i + 1).label}
-                attempts={1195}
+                attempts={post.quizFields.testsTaken}
                 isPro={post.quizFields.proUserOnly}
                 href={ROUTES.EXAM.SINGLE(quiz.slug)}
               />
             ))}
           </div>
-        </Container>
-      </div>
+        </div>
+      )}
 
-      {/* ExamModeModal — mở khi click "Làm bài thi" hoặc autoStart */}
+      {/* ExamModeModal — opened on "Start test" / autoStart */}
       <ExamModeModal
         navigateLink={ROUTES.TAKE_THE_TEST(post.slug) + (router.query.preview === "true" ? "?preview=true" : "")}
         quiz={post as any}
@@ -381,3 +302,5 @@ export function PageIELTSExamSingle({ post, isPreview: isPreviewProp }: { post: 
     </>
   );
 }
+
+PageIELTSExamSingle.Layout = AppShell;

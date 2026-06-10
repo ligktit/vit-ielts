@@ -31,7 +31,7 @@ function toIPracticeSingle(quiz: QuizWithPassages): IPracticeSingle {
     link: `/ielts-practice-library/${quiz.slug}`,
     slug: quiz.slug,
     author: {
-      node: { name: "IELTS Prediction" },
+      node: { name: "VitIELTS" },
     },
     date: quiz.published_at ?? quiz.created_at,
     featuredImage: quiz.featured_image

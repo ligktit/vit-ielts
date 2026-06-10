@@ -137,48 +137,50 @@ export const ExamItem = ({
         <div className="flex flex-1 flex-col justify-between p-4 sm:p-5">
           <div className="space-y-2 mb-4">
             <h3
-              className="text-[17px] font-bold text-[#202020] leading-snug truncate group-hover:text-primary-500 transition-colors"
+              className="text-[17px] font-bold text-ink-900 leading-snug truncate group-hover:text-brand transition-colors"
               title={item.title}
             >
               {item.title}
             </h3>
-            <p className="font-noto-sans text-[14px] text-[#6A7282]">
-              {quizFields.testsTaken ?? 0} attempts
+            <p className="font-noto-sans text-[14px] text-ink-muted">
+              {(quizFields.testsTaken ?? 0).toLocaleString()} attempts
+              {quizFields.time != null && quizFields.time > 0 && (
+                <> · {quizFields.time} min</>
+              )}
             </p>
           </div>
 
           <div className="mt-auto flex items-center justify-between gap-3">
-            {/* CTA button */}
-            <div className="relative flex h-[49px] flex-1 max-w-[170px] items-center gap-[10px] px-4 rounded-[40px] border border-[rgba(128,128,128,0.55)] bg-white overflow-hidden transition-[border-color] duration-300 hover:border-[var(--color-primary-450)] group/btn">
-              <div className="absolute inset-0 translate-x-[-100%] group-hover/btn:translate-x-0 transition-transform duration-300 ease-out bg-[var(--color-primary-450)] rounded-[25px]" />
-              <div className="relative z-10 flex-shrink-0 text-[var(--color-primary-500)] group-hover/btn:text-white transition-colors duration-300">
+            {/* CTA button — dark filled pill per Figma */}
+            <div className="flex h-[49px] flex-1 max-w-[170px] items-center gap-[10px] px-4 rounded-[40px] bg-ink-700 hover:bg-ink-900 transition-colors duration-200 cursor-pointer">
+              {/* Icon container: white circle with icon inside */}
+              <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-white">
                 {isProtected ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path d="M18 8H6C4.89543 8 4 8.89543 4 10V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10C20 8.89543 19.1046 8 18 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M7 8V6C7 4.67392 7.52678 3.40215 8.46447 2.46447C9.40215 1.52678 10.6739 1 12 1C13.3261 1 14.5979 1.52678 15.5355 2.46447C16.4732 3.40215 17 4.67392 17 6V8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M18 8H6C4.89543 8 4 8.89543 4 10V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V10C20 8.89543 19.1046 8 18 8Z" stroke="#242938" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M7 8V6C7 4.67392 7.52678 3.40215 8.46447 2.46447C9.40215 1.52678 10.6739 1 12 1C13.3261 1 14.5979 1.52678 15.5355 2.46447C16.4732 3.40215 17 4.67392 17 6V8" stroke="#242938" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-                    <path d="M10 8L16 12L10 16V8Z" fill="currentColor" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path d="M8 5L19 12L8 19V5Z" fill="#242938" />
                   </svg>
                 )}
               </div>
-              <span className="relative z-10 font-noto-sans text-[15px] font-bold text-[#242938] group-hover/btn:text-white transition-colors duration-300 truncate">
+              <span className="font-noto-sans text-[15px] font-bold text-white truncate">
                 {isDone ? "Làm lại" : "Làm bài"}
               </span>
             </div>
 
-            {/* Circular Score — click mở History Modal */}
+            {/* Circular Score — click mở History Modal; green ring + green number per Figma */}
             {isDone && latestResultId && !isProtected && formattedScore !== undefined && (
               <button
                 type="button"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsHistoryOpen(true); }}
-                className="flex h-[60px] w-[60px] flex-col items-center justify-center p-[10px] rounded-full border border-[rgba(128,128,128,0.55)] bg-white flex-shrink-0 cursor-pointer hover:border-primary-500 hover:text-primary-500 transition-colors"
+                className="flex h-[60px] w-[60px] flex-col items-center justify-center rounded-full border-2 border-brand bg-white flex-shrink-0 cursor-pointer hover:bg-brand/10 transition-colors"
                 title="Xem lịch sử làm bài"
               >
                 <span
-                  className={`text-primary-500 font-noto-sans font-bold leading-none ${
+                  className={`text-brand font-noto-sans font-bold leading-none ${
                     !isBandScore && totalQuestions != null
                       ? "text-[13px]"
                       : "text-[18px]"

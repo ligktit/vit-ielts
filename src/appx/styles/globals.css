@@ -103,6 +103,13 @@
   --breakpoint-xl: 1200px;
   --breakpoint-xxl: 1536px;
 
+  /* ── Container max-widths — Figma layout ── */
+  --max-width-container-sm:  640px;
+  --max-width-container-md:  768px;
+  --max-width-container-lg:  1024px;
+  --max-width-container-xl:  1200px;
+  --max-width-container-2xl: 1360px;
+
   --color-quaternary: oklch(72.151% 0.14993 40.693);
   --color-quaternary-50: oklch(100% 0 none);
   --color-quaternary-100: oklch(97.136% 0.01365 46.234);

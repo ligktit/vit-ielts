@@ -36,11 +36,11 @@ export const SEOHeader = ({
   const metaDescription = description
     ? stripHtml(description).slice(0, 160)
     : title
-      ? `${title} - IELTS Prediction`
+      ? `${title} - VitIELTS`
       : undefined;
 
-  const ogTitle = title || "IELTS Prediction";
-  const siteName = "IELTS Prediction";
+  const ogTitle = title || "VitIELTS";
+  const siteName = "VitIELTS";
 
   return (
     <Head>

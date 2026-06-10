@@ -447,7 +447,7 @@ function Footer() {
 
   return (
     <>
-      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white">
+      <footer className="fixed bottom-0 left-0 right-0 z-50 bg-surface-card">
         {post.quizFields.skill[0] === "listening" && post.quizFields.audio && (() => {
           // Audio segmentation (audio_start / audio_end) only applies to
           // single-passage practice quizzes — those reuse the full test
@@ -507,7 +507,7 @@ function Footer() {
                           "h-[3px] w-full",
                           isComplete ? "bg-green-700" : "bg-gray-200"
                         )} />
-                        <span className="font-semibold text-[14px] md:text-[16px] text-[#000] whitespace-nowrap pl-2 pr-3 md:pl-[20px] md:pr-[30px] pt-2 flex items-center gap-1.5">
+                        <span className="font-semibold text-[14px] md:text-[16px] text-ink-900 whitespace-nowrap pl-2 pr-3 md:pl-[20px] md:pr-[30px] pt-2 flex items-center gap-1.5">
                           {isComplete && (
                             <span className="text-green-700 material-symbols-rounded text-[16px] md:text-[18px] leading-none bold">check</span>
                           )}
@@ -539,9 +539,9 @@ function Footer() {
                                     handleScrollToQuestion(group[0]);
                                   }}
                                   className={twMerge(
-                                    "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[14px] md:text-[16px] border-2 border-transparent rounded cursor-pointer whitespace-nowrap",
+                                    "text-ink-900 p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[14px] md:text-[16px] border-2 border-transparent rounded cursor-pointer whitespace-nowrap",
                                     group.includes(activeQuestionIndex) &&
-                                    "font-semibold border-2 border-[#418FC6]"
+                                    "font-semibold border-2 border-accent-blue"
                                   )}
                                 >
                                   {group[0] + 1}-{group[group.length - 1] + 1}
@@ -555,9 +555,9 @@ function Footer() {
                                       handleScrollToQuestion(questionIndex);
                                     }}
                                     className={twMerge(
-                                      "text-[#000] p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[14px] md:text-[16px] border-2 border-transparent rounded cursor-pointer",
+                                      "text-ink-900 p-1 pb-[2px] flex items-center leading-[16px]! justify-center text-[14px] md:text-[16px] border-2 border-transparent rounded cursor-pointer",
                                       activeQuestionIndex === questionIndex &&
-                                      "font-semibold border-2 border-[#418FC6]"
+                                      "font-semibold border-2 border-accent-blue"
                                     )}
                                   >
                                     {questionIndex + 1}
@@ -586,13 +586,13 @@ function Footer() {
                         ))}
                       </div>
                       <div className="flex items-center gap-2 md:gap-3 w-full justify-center pt-2">
-                        <span className="pl-2 md:pl-[20px] text-[14px] md:text-[16px] text-gray-700 whitespace-nowrap flex items-center gap-1.5">
+                        <span className="pl-2 md:pl-[20px] text-[14px] md:text-[16px] text-ink-body whitespace-nowrap flex items-center gap-1.5">
                           {isComplete && (
                             <span className="text-green-700 material-symbols-rounded text-[16px] md:text-[18px] leading-none bold">check</span>
                           )}
                           {info.customTitle || (isReadingTest ? "Passage" : "Part") + " " + ((info.displayPartIndex !== undefined ? info.displayPartIndex : info.partIndex) + 1)}
                         </span>
-                        <span className="text-[13px] md:text-[16px] text-gray-500 whitespace-nowrap">
+                        <span className="text-[13px] md:text-[16px] text-ink-muted whitespace-nowrap">
                           {info.answeredCount} of {info.totalQuestions}
                         </span>
                       </div>
@@ -624,7 +624,7 @@ function Footer() {
                 type="button"
                 onClick={handleNextQuestion}
                 disabled={activeQuestionIndex >= totalQuestions - 1}
-                className="bg-[#000]! flex items-center justify-center w-[55px] h-[55px] rounded bg-gray-800 disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
+                className="bg-ink-900! flex items-center justify-center w-[55px] h-[55px] rounded bg-gray-800 disabled:cursor-not-allowed transition-colors rounded-[0] disabled:bg-[#dddddd]!"
               >
                 <Image
                   width={23}
@@ -642,8 +642,8 @@ function Footer() {
               className={twMerge(
                 "w-[80px] h-[53px] mb-[-12px] rounded-[0]! transition-colors",
                 totalQuestions > 0 && answeredMap.size === totalQuestions
-                  ? "bg-[#262626] text-[#fff] hover:bg-[#404040]"
-                  : "bg-[#efefef] text-[#535353] hover:text-[#fff] hover:bg-[#262626]"
+                  ? "bg-brand text-ink-900 hover:bg-brand-hover"
+                  : "bg-border-hairline text-ink-muted hover:text-surface-card hover:bg-ink-900"
               )}
               onClick={() => setConfirmSubmitModal(true)}
               loading={isSubmitting || isSubmitted}
@@ -671,7 +671,7 @@ function Footer() {
       </Modal>
 
       {!isReadingTest && !isReady && (
-        <div className="fixed inset-0 bg-black/70 z-[1001] flex flex-col items-center justify-center text-white p-8 text-center">
+        <div className="fixed inset-0 bg-ink-900/70 z-[1001] flex flex-col items-center justify-center text-white p-8 text-center">
           <Image
             width={108}
             height={89}
@@ -681,19 +681,19 @@ function Footer() {
             className="mb-[30px]"
             priority
           />
-          <p className="text-[16px] mb-4">
+          <p className="text-body-m mb-4">
             You will be listening to an audio clip during this test. You will
             not be permitted to pause or rewind the audio while answering the
             questions.
           </p>
-          <p className="mb-6 text-[16px]">
+          <p className="mb-6 text-body-m">
             To continue, click Play.
           </p>
           <button
             onClick={() => setIsReady(true)}
-            className="flex items-center justify-center gap-2 w-[96px] h-[47px] bg-[#000] text-[#fff] rounded-[3px]! hover:bg-[#404040] transition-colors"
+            className="flex items-center justify-center gap-2 w-[96px] h-[47px] bg-ink-900 text-surface-card rounded-[3px]! hover:bg-ink-700 transition-colors"
           >
-            <div className="w-[26px] h-[26px] bg-[#fff] rounded-[50px] flex items-center justify-center cursor-pointer">
+            <div className="w-[26px] h-[26px] bg-surface-card rounded-[50px] flex items-center justify-center cursor-pointer">
               <Image
                 width={10}
                 height={12}

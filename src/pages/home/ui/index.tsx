@@ -52,7 +52,7 @@ export const PageHome = ({
       {/* === SECTION: Target Score & Practice History (Only for signed in users) === */}
       {isSignedIn && (
         <div className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6">
-          <div className="max-w-[1312px] mx-auto bg-white rounded-[40px] px-8 sm:px-12 py-10 space-y-10">
+          <div className=" mx-auto bg-white rounded-[40px] px-8 sm:px-12 py-10 space-y-10">
             <TargetScore />
             <section className="space-y-6">
               <h3 className="font-display font-bold text-[32px] leading-[1.1] tracking-[-0.95px] text-[#191d24]">
@@ -66,7 +66,7 @@ export const PageHome = ({
 
       {/* === SECTION: Practice Tests — "Practice like it's exam day" === */}
       <div data-section="practice-tests" className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6">
-        <div className="max-w-[1312px] mx-auto bg-white rounded-[40px] px-8 sm:px-12 py-10 flex flex-col gap-10">
+        <div className=" mx-auto bg-white rounded-[40px] px-8 sm:px-12 py-10 flex flex-col gap-10">
 
           {/* Section heading + View all */}
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:items-center">
@@ -115,14 +115,14 @@ export const PageHome = ({
         </div>
       </div>
 
-      {/* === SECTION: Testimonials (Marquee) — not in Figma frame, kept & restyled === */}
-      <Testimonials config={testimonialsConfig} />
+      {/* === SECTION: Testimonials (Marquee) — hidden === */}
+      {/* <Testimonials config={testimonialsConfig} /> */}
 
       {/* === SECTION: Why Choose Us (dark feature grid) === */}
       <WhyChooseUs config={whyChooseUsConfig} />
 
-      {/* === SECTION: CTA Banner (green) === */}
-      <CtaBanner />
+      {/* === SECTION: CTA Banner (green) — hidden === */}
+      {/* <CtaBanner /> */}
     </div>
   );
 };
@@ -133,7 +133,7 @@ PageHome.Layout = AppShell;
 
 const CtaBanner = () => (
   <div className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6 pb-10">
-    <div className="max-w-[1312px] mx-auto bg-[#b3e653] rounded-[40px] px-8 sm:px-12 py-14 flex flex-col items-center text-center relative overflow-hidden">
+    <div className=" mx-auto bg-[#b3e653] rounded-[40px] px-8 sm:px-12 py-14 flex flex-col items-center text-center relative overflow-hidden">
       {/* Dot pattern overlay */}
       <div
         className="absolute inset-0 rounded-[40px] opacity-30 pointer-events-none"

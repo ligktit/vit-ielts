@@ -1,6 +1,8 @@
 import React from "react";
 import { Container } from "@/shared/ui";
-import { Footer, Header } from "../base/ui";
+import { Header } from "../base/ui";
+import { Footer } from "@/shared/ui/ds/organisms/footer";
+import { FOOTER_COLUMNS } from "../footer-columns";
 import { Navigation } from "./ui";
 import { ROUTES } from "@/shared/routes";
 import { useRouter } from "next/router";
@@ -89,7 +91,7 @@ export const MyProfileLayout = ({
 
       {/* === SECTION: Main Content === */}
       <section data-section="dashboard-content" className="bg-[#f8f9fb] lg:mb-13 overflow-x-hidden px-4 sm:px-6">
-        <Container>
+        <Container className="max-w-container-xl">
           <div className="py-8 lg:py-10">
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 lg:items-start">
               {/* === Left Sidebar === */}
@@ -106,7 +108,7 @@ export const MyProfileLayout = ({
         </Container>
       </section>
 
-      <Footer />
+      <Footer columns={FOOTER_COLUMNS} showCopyright />
     </>
   );
 };

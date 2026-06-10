@@ -127,7 +127,7 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
 
   return (
     <ScrollFadeIn data-section="testimonials" className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6">
-      <div className="relative overflow-hidden bg-[#242938] rounded-[40px] w-full max-w-[1312px] mx-auto flex flex-col">
+      <div className="relative overflow-hidden bg-[#242938] rounded-[40px] w-full  mx-auto flex flex-col">
 
         {/* === Mobile layout (< lg) === */}
         <div className="lg:hidden relative z-10 flex flex-col gap-6 py-10 px-6 sm:px-8">

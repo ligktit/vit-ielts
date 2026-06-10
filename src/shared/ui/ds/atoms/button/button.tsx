@@ -62,8 +62,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
      Figma: Primary / Hover   — #9AD534, no shadow */
   primary: [
     'bg-[#b3e653] text-[#191d24]',
-    'shadow-[0px_12px_13px_rgba(25,29,36,0.42)]',
-    'hover:bg-[#9ad534] hover:shadow-none',
+    'hover:bg-[#9ad534]',
   ].join(' '),
 
   /* Figma: Dark / Default — #191D24, white text

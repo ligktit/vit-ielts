@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { FormProvider, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { Container } from "@/shared/ui";
-import { QuizLibraryNav, SEOHeader } from "@/widgets";
+import { SEOHeader } from "@/widgets";
+import { AppShell } from "@/widgets/layouts";
 import { ExamLibraryHeroBanner } from "./hero-banner";
 import { Filter } from "./filter";
 import { ExamCollection } from "./exam-collection";
@@ -22,12 +22,6 @@ export type FilterFormValues = {
 };
 
 const PAGE_SIZE = 5;
-
-const SORT_OPTIONS: Array<{ label: string; value: FilterFormValues["sort"] }> = [
-  { label: "Newest", value: "newest" },
-  { label: "Popular", value: "popular" },
-  { label: "High Ranking", value: "high-ranking" },
-];
 
 const buildPages = (current: number, total: number) => {
   if (total <= 1) return [1];
@@ -78,6 +72,13 @@ export const PageIELTSExamLibrary = ({
 
   const [navigating, setNavigating] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Local search draft in the toolbar search box
+  const [searchDraft, setSearchDraft] = useState(values.search ?? "");
+
+  useEffect(() => {
+    setSearchDraft(values.search ?? "");
+  }, [values.search]);
 
   // Skeleton state during SSR navigation triggered by filter changes
   useEffect(() => {
@@ -212,179 +213,178 @@ export const PageIELTSExamLibrary = ({
     return ids;
   }, [pagedCols]);
 
+  const applyToolbarSearch = () => {
+    setValue("search", searchDraft.trim(), { shouldDirty: true });
+    setValue("page", 1, { shouldDirty: true });
+  };
+
+  const total = initialData.pageInfo?.total;
+
   return (
     <FormProvider {...methods}>
       <SEOHeader fullHead={""} title={"IELTS Exam Library"} />
 
-      <div className="min-h-screen bg-white pb-20">
-        <ExamLibraryHeroBanner config={heroConfig} />
+      <div className="py-6 sm:py-8">
+        {/* ══ PAGE HEADER (Figma 3410:221) ══
+            Title + subtitle on the left. Search / avatar / bell on the
+            right are rendered by the app-shell header widget; here we
+            only render the title area per our scope. */}
+        <ExamLibraryHeroBanner config={heroConfig} total={total} />
+      </div>
 
-        <section className="mt-12 px-4 sm:px-6">
-        <Container>
-          {/* === SECTION: Mock Tests === */}
-          <section id="iel-main" data-section="iel-main">
-            <div className="mb-10 flex flex-col gap-6">
-              <h2 className="font-noto-sans text-3xl font-extrabold text-[#2D3142]">
-                IELTS Mock Tests
-              </h2>
+      {/* ══ TOOLBAR (Figma 3410:224) ══
+          Left: filter chips   Right: search box + mobile filter btn */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-hairline pb-4 mb-6">
+        {/* Left: chip filters */}
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
+          <Filter collections={availableCollections} />
+        </div>
 
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <QuizLibraryNav />
+        {/* Right: search box + mobile filter button */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Toolbar search — Figma node 3410:236 */}
+          <div className="relative flex items-center h-9 w-44 sm:w-52 rounded-full border border-border-hairline bg-surface-card overflow-hidden focus-within:border-brand transition">
+            <span className="material-symbols-rounded pl-3 text-[16px] text-ink-muted pointer-events-none">
+              search
+            </span>
+            <input
+              value={searchDraft}
+              onChange={(e) => setSearchDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  applyToolbarSearch();
+                }
+              }}
+              onBlur={applyToolbarSearch}
+              placeholder="Search tests…"
+              className="flex-1 h-full bg-transparent px-2.5 text-body-s text-ink-700 outline-none placeholder:text-ink-muted"
+            />
+          </div>
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setDrawerOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full border border-[rgba(0,0,0,0.1)] bg-white px-4 py-3 text-sm font-bold text-[#242938] transition hover:bg-gray-50 lg:hidden"
-                  >
-                    <span className="material-symbols-rounded text-base">tune</span>
-                    Filter
-                  </button>
-                  <div className="relative min-w-[11rem]">
-                    <select
-                      value={values.sort}
-                      onChange={(e) => {
-                        setValue("sort", e.target.value as FilterFormValues["sort"], {
-                          shouldDirty: true,
-                        });
-                        setValue("page", 1, { shouldDirty: true });
-                      }}
-                      className="w-full appearance-none rounded-full border border-[rgba(0,0,0,0.1)] bg-white px-5 py-3 pr-11 text-sm font-semibold text-[#242938] outline-none transition hover:bg-gray-50"
-                    >
-                      {SORT_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="material-symbols-rounded pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#242938]/60">
-                      keyboard_arrow_down
-                    </span>
-                  </div>
-                </div>
+          {/* Mobile filter button — visible only below lg */}
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border-hairline bg-surface-card px-3.5 py-1.5 text-body-s font-semibold text-ink-700 transition hover:bg-primary-100 lg:hidden cursor-pointer"
+          >
+            <span className="material-symbols-rounded text-[16px]">tune</span>
+            Filter
+          </button>
+        </div>
+      </div>
+
+      {/* ══ COLLECTIONS LIST — full-width (no sidebar) ══ */}
+      <section id="iel-main" data-section="iel-main">
+        <BatchResultsProvider quizIds={allQuizIds}>
+          <div className="space-y-12 min-w-0">
+            {navigating ? (
+              <div className="space-y-12">
+                {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                  <ExamCollection key={i} loading={true} />
+                ))}
               </div>
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-[60px] xl:gap-[80px]">
-              {/* Sidebar */}
-              <aside className="hidden lg:block">
-                <div className="sticky top-[100px]">
-                  <Filter collections={availableCollections} />
-                </div>
-              </aside>
-
-              {/* List */}
-              <BatchResultsProvider quizIds={allQuizIds}>
-              <div className="space-y-12 min-w-0">
-                {navigating ? (
-                  <div className="space-y-12">
-                    {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                      <ExamCollection key={i} loading={true} />
-                    ))}
-                  </div>
-                ) : pagedCols.length ? (
-                  <div className="space-y-12">
-                    {pagedCols.map((col) => (
-                      <ExamCollection key={col.id} data={col} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-[30px] border border-dashed border-[rgba(0,0,0,0.1)] bg-[#FAF7EB]/50 px-6 py-16 text-center">
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#242938]/40">
-                      No results
-                    </p>
-                    <h3 className="mt-3 font-noto-sans text-2xl font-extrabold text-[#242938]">
-                      No mock tests matched the current filters.
-                    </h3>
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#242938]/60">
-                      Clear a few filters or search with a broader keyword to explore more tests.
-                    </p>
-                  </div>
-                )}
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex flex-wrap items-center justify-center gap-[8px] pt-4">
-                    <button
-                      type="button"
-                      disabled={currentPage <= 1}
-                      onClick={() => goToPage(Math.max(1, currentPage - 1))}
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
-                    >
-                      <span className="material-symbols-rounded text-xl">chevron_left</span>
-                    </button>
-
-                    {visiblePages.map((page, index, array) => {
-                      const isGap = index > 0 && page - array[index - 1] > 1;
-                      return (
-                        <div key={page} className="flex items-center gap-[8px]">
-                          {isGap && (
-                            <div className="flex h-[32px] w-[32px] items-end justify-center pb-1 text-black/30 font-bold tracking-widest leading-none">
-                              ...
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => goToPage(page)}
-                            className={`flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-base font-semibold transition cursor-pointer ${
-                              page === currentPage
-                                ? "bg-primary-500 text-white"
-                                : "text-[#2D3142] hover:bg-gray-100"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        </div>
-                      );
-                    })}
-
-                    <button
-                      type="button"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
-                      className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[6px] text-[#2D3142] transition cursor-pointer disabled:cursor-not-allowed disabled:text-black/30 hover:bg-gray-50"
-                    >
-                      <span className="material-symbols-rounded text-xl">chevron_right</span>
-                    </button>
-                  </div>
-                )}
+            ) : pagedCols.length ? (
+              <div className="space-y-12">
+                {pagedCols.map((col) => (
+                  <ExamCollection key={col.id} data={col} />
+                ))}
               </div>
-              </BatchResultsProvider>
-            </div>
-          </section>
-        </Container>
-        </section>
+            ) : (
+              <div className="rounded-[30px] border border-dashed border-border-hairline bg-primary-50 px-6 py-16 text-center">
+                <p className="text-caption-bold font-bold uppercase tracking-[0.24em] text-ink-900/40">
+                  No results
+                </p>
+                <h3 className="mt-3 font-display text-heading-2 font-bold text-ink-900">
+                  No mock tests matched the current filters.
+                </h3>
+                <p className="mx-auto mt-3 max-w-xl text-body-s leading-7 text-ink-muted">
+                  Clear a few filters or search with a broader keyword to explore more tests.
+                </p>
+              </div>
+            )}
 
-        {/* Mobile Filter Drawer */}
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 bg-black/50 lg:hidden">
-            <div className="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto bg-white p-5 shadow-2xl">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#2D3142]/40">
-                    Filters
-                  </p>
-                  <h3 className="mt-1 font-noto-sans text-2xl font-extrabold text-[#2D3142]">
-                    Refine results
-                  </h3>
-                </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-center gap-[8px] pt-4">
                 <button
                   type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[rgba(0,0,0,0.1)] text-[#2D3142]"
+                  disabled={currentPage <= 1}
+                  onClick={() => goToPage(Math.max(1, currentPage - 1))}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-ink-700 transition cursor-pointer disabled:cursor-not-allowed disabled:text-ink-900/30 hover:bg-primary-100"
                 >
-                  <span className="material-symbols-rounded">close</span>
+                  <span className="material-symbols-rounded text-xl">chevron_left</span>
+                </button>
+
+                {visiblePages.map((page, index, array) => {
+                  const isGap = index > 0 && page - array[index - 1] > 1;
+                  return (
+                    <div key={page} className="flex items-center gap-[8px]">
+                      {isGap && (
+                        <div className="flex h-8 w-8 items-end justify-center pb-1 text-ink-900/30 font-bold tracking-widest leading-none">
+                          ...
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => goToPage(page)}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-body-s font-semibold transition cursor-pointer ${
+                          page === currentPage
+                            ? "bg-brand text-ink-900"
+                            : "text-ink-700 hover:bg-primary-100"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] text-ink-700 transition cursor-pointer disabled:cursor-not-allowed disabled:text-ink-900/30 hover:bg-primary-100"
+                >
+                  <span className="material-symbols-rounded text-xl">chevron_right</span>
                 </button>
               </div>
-              <Filter
-                mobile
-                collections={availableCollections}
-                onClose={() => setDrawerOpen(false)}
-              />
-            </div>
+            )}
           </div>
-        )}
-      </div>
+        </BatchResultsProvider>
+      </section>
+
+      {/* Mobile Filter Drawer */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 bg-ink-900/50 lg:hidden">
+          <div className="absolute inset-y-0 right-0 w-full max-w-sm overflow-y-auto bg-surface-card p-5 shadow-2xl">
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-caption-bold font-bold uppercase tracking-[0.24em] text-ink-900/40">
+                  Filters
+                </p>
+                <h3 className="mt-1 font-display text-heading-2 font-bold text-ink-900">
+                  Refine results
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(false)}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border-hairline text-ink-700 cursor-pointer hover:bg-primary-100 transition"
+              >
+                <span className="material-symbols-rounded">close</span>
+              </button>
+            </div>
+            <Filter
+              mobile
+              collections={availableCollections}
+              onClose={() => setDrawerOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </FormProvider>
   );
 };
+
+PageIELTSExamLibrary.Layout = AppShell;

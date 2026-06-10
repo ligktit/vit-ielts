@@ -17,7 +17,10 @@ export const ROUTES = {
     MY_PROFILE: "/account/my-profile",
     ORDER_HISTORY: "/account/order-history",
     AFFILIATE: "/account/affiliate",
+    SETTINGS: "/account/settings",
   },
+
+  HELP: "/help",
 
   SUBSCRIPTION: "/subscription",
 

@@ -107,7 +107,9 @@ Copy link uses `navigator.clipboard.writeText` with a textarea fallback and `set
 /tests/**
 ```
 
-**Protected pages (do not restyle):** `pages/take-the-test/**`, `pages/admin/**`, `pages/preview.tsx`.
+**Protected pages (do not restyle):** `pages/admin/**`, `pages/preview.tsx`.
+
+> **Note (unlocked 2026-06-10):** `pages/take-the-test/**` is no longer protected — it is open for a UI redesign to align with the current design system. UI-only rules still apply: preserve the test-taking logic, data flow, timers, autosave/submit, and prop signatures; restyle presentation only.
 
 **Design-system rules.**
 - **No magic values.** Every color, font size, weight, spacing, radius, shadow, breakpoint must reference a design token. Canonical token source = the `@theme` block in `src/appx/styles/globals.css` (drives Tailwind utilities), re-extracted from Figma. `src/shared/ui/ds/design-tokens.css` is being retired — see `DESIGN_SYSTEM_REBUILD.md`. Raw hex / arbitrary px/rem / one-off colors are forbidden.

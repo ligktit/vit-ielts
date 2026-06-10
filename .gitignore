@@ -56,3 +56,7 @@ scripts/figma-data/design-system-page.json
 
 # figma mcp local cache
 .figma-cache/
+
+# supabase local dev (data dump filtered for local import — regenerate with scripts/filter-local-data.mjs)
+supabase/seed-local-data.sql
+.env.local.cloud-backup

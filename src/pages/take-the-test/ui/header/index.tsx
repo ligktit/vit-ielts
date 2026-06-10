@@ -27,7 +27,7 @@ const OptionItem = ({
   <button
     onClick={onClick}
     className={`w-full flex items-center justify-between text-left p-4 rounded-lg mb-3 ${
-      isPrimary ? "bg-red-600 text-white" : "bg-gray-100 hover:bg-gray-200"
+      isPrimary ? "bg-danger text-white" : "bg-gray-100 hover:bg-gray-200"
     }`}
   >
     <div className="flex items-center">
@@ -172,13 +172,13 @@ function Header({ post }: { post: IPracticeSingle }) {
     <>
       {/* Full-screen loading overlay for retake */}
       {isRetaking && (
-        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface-card/90 backdrop-blur-sm">
           <span className="material-symbols-rounded text-[48px] text-[#d94a56] animate-spin">refresh</span>
-          <p className="mt-4 text-base font-semibold text-gray-700">Đang chuẩn bị bài thi mới...</p>
+          <p className="mt-4 text-base font-semibold text-ink-body">Đang chuẩn bị bài thi mới...</p>
         </div>
       )}
 
-      <header className="py-2 bg-white shadow z-20 px-[16px]">
+      <header className="py-2 bg-surface-card shadow-primary z-20 px-[16px]">
         <Container className="max-w-none">
           <div className="flex items-center">
             <div className="md:w-1/2">
@@ -201,10 +201,10 @@ function Header({ post }: { post: IPracticeSingle }) {
                 </div>
 
                 <div className="title-wrap ml-[15px]">
-                  <h2 className="font-bold text-base">{post.title}</h2>
+                  <h2 className="font-display font-bold text-base text-ink-900">{post.title}</h2>
 
                   <div className="flex items-center">
-                    <span className={`font-medium text-sm ${timer && timer.asSeconds() < 0 ? 'text-gray-400' : 'text-dark'}`}>
+                    <span className={`font-medium text-sm ${timer && timer.asSeconds() < 0 ? 'text-ink-muted' : 'text-ink-900'}`}>
                       {Number(post.quizFields.time) < 0
                         ? "No time limit"
                         : timer
@@ -222,7 +222,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                   <>
                     <Link
                       href={getBackUrl()}
-                      className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors"
+                      className="flex flex-col md:flex-row items-center gap-1 text-ink-900 hover:text-[#d94a56] font-medium transition-colors"
                     >
                       <span className="material-symbols-rounded bold block! text-[20px] md:text-[24px]!">arrow_back</span>
                       <span className="hidden lg:inline text-sm whitespace-nowrap">Quay lại</span>
@@ -236,7 +236,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                         const url = ROUTES.TAKE_THE_TEST(post.slug);
                         window.location.href = `${url}?retake=true`;
                       }}
-                      className="flex flex-col md:flex-row items-center gap-1 text-[#222] hover:text-[#d94a56] font-medium transition-colors disabled:opacity-50"
+                      className="flex flex-col md:flex-row items-center gap-1 text-ink-900 hover:text-[#d94a56] font-medium transition-colors disabled:opacity-50"
                     >
                       <span className={`material-symbols-rounded bold block! text-[20px] md:text-[24px]! ${isRetaking ? "animate-spin" : ""}`}>refresh</span>
                       <span className="hidden lg:inline text-sm whitespace-nowrap">{isRetaking ? "Đang tải..." : "Làm lại"}</span>
@@ -244,7 +244,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                   </>
                 )}
 
-                <div className="w-[1px] h-[24px] bg-gray-300 hidden md:block mx-2"></div>
+                <div className="w-[1px] h-[24px] bg-border-hairline hidden md:block mx-2"></div>
 
                 <Image
                   width={28}
@@ -273,7 +273,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                     className="p-[0] border-[0] shadow-[0]"
                     onClick={handleNotesView}
                   >
-                    <span className="material-symbols-rounded bold block! text-[24px]! text-[#222]">
+                    <span className="material-symbols-rounded bold block! text-[24px]! text-ink-900">
                       assignment
                     </span>
                   </Button>
@@ -325,7 +325,7 @@ function Header({ post }: { post: IPracticeSingle }) {
             <div className="relative flex justify-center items-center h-full ml-[-16px] mt-[-5px]">
               <button
                 onClick={() => setOptionsView("main")}
-                className="absolute left-0 flex gap-[10px] items-center text-gray-600 hover:text-black cursor-pointer"
+                className="absolute left-0 flex gap-[10px] items-center text-ink-muted hover:text-ink-900 cursor-pointer"
               >
                 <Image
                   width={17}
@@ -336,7 +336,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                   className="mt-[-3px] option-icon"
                   priority
                 />
-                <span className="font-[500] text-[27px] text-[#000]  popup-title">
+                <span className="font-[500] text-[27px] text-ink-900  popup-title">
                   Options
                 </span>
               </button>
@@ -409,12 +409,12 @@ function Header({ post }: { post: IPracticeSingle }) {
 
           {/* ▼▼▼ BẮT ĐẦU THAY ĐỔI TẠI ĐÂY ▼▼▼ */}
           {optionsView === "textSize" && (
-            <div className="border border-[#c5c5c5] rounded-[4px] overflow-hidden mt-[30px]">
+            <div className="border border-border-hairline rounded-[4px] overflow-hidden mt-[30px]">
               {textSizes.map((size) => (
                 <button
                   key={size.key}
                   onClick={() => setSelectedTextSize(size.key)}
-                  className="w-full flex items-center text-left px-[36px] py-[27px] border-b border-gray-300 last:border-b-0 hover:bg-gray-100 transition-colors"
+                  className="w-full flex items-center text-left px-[36px] py-[27px] border-b border-border-hairline last:border-b-0 hover:bg-gray-100 transition-colors"
                 >
                   <span
                     className={`material-symbols-rounded check-size xbold mr-[25px] transition-opacity ${

@@ -25,7 +25,7 @@ const DEFAULT_BANNER: PracticeLibraryBannerConfig = {
     title: "Blog",
     description: {
       line1: "Chia sẻ kiến thức, mẹo và chiến lược học IELTS",
-      line2: "được cập nhật thường xuyên bởi IELTS Prediction.",
+      line2: "được cập nhật thường xuyên bởi VitIELTS.",
       line3: "",
     },
     backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
@@ -35,7 +35,7 @@ const DEFAULT_BANNER: PracticeLibraryBannerConfig = {
     title: "Blog",
     description: {
       line1: "Chia sẻ kiến thức, mẹo và chiến lược học IELTS",
-      line2: "được cập nhật thường xuyên bởi IELTS Prediction.",
+      line2: "được cập nhật thường xuyên bởi VitIELTS.",
       line3: "",
     },
     backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",

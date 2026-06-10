@@ -10,15 +10,13 @@ import { Button } from "@/shared/ui/ds/atoms/button";
 import { Input } from "@/shared/ui/ds/atoms/input";
 import type { RegisterPageConfig } from "@/shared/types/admin-config";
 
-/* ── Figma asset: Decoration blobs (temporary remote URLs, expires ~7 days) ── */
-const imgDecorationTop =
-  "https://www.figma.com/api/mcp/asset/88de9b06-33d8-49c7-97f6-bbff2ac4f3df";
-const imgDecorationBottom =
-  "https://www.figma.com/api/mcp/asset/900d930c-56b4-49ba-8b46-326dad91858d";
-const imgLogoText =
-  "https://www.figma.com/api/mcp/asset/bc794042-a1f7-478d-80de-8fd94d7a7c7a";
-const imgTrophy =
-  "https://www.figma.com/api/mcp/asset/afda6ff4-1677-4a59-a9b0-cc04a781504d";
+const imgLogoText = "/assets/logos/logo-on-dark.svg";
+
+const TrophyIcon = () => (
+  <svg width="34" height="34" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 28H20M16 23V28M7.25 16H6C4.93913 16 3.92172 15.5786 3.17157 14.8284C2.42143 14.0783 2 13.0609 2 12V10C2 9.73478 2.10536 9.48043 2.29289 9.29289C2.48043 9.10536 2.73478 9 3 9H7M24.75 16H26C27.0609 16 28.0783 15.5786 28.8284 14.8284C29.5786 14.0783 30 13.0609 30 12V10C30 9.73478 29.8946 9.48043 29.7071 9.29289C29.5196 9.10536 29.2652 9 29 9H25M7 6H25V13.8875C25 18.85 21.0313 22.9625 16.0688 23C14.8811 23.0091 13.7034 22.783 12.6035 22.3348C11.5036 21.8865 10.5033 21.225 9.6603 20.3884C8.81728 19.5518 8.14819 18.5565 7.6916 17.4601C7.23502 16.3637 6.99997 15.1877 7 14V6Z" stroke="#b3e653" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 
 /* ── Icon helpers (Material Symbols Rounded via className) ── */
 const EyeIcon = () => (
@@ -122,77 +120,68 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
     >
       {/* === SECTION: Body (Brand Panel + Form Area) === */}
       <div
-        className="flex flex-1 min-h-screen"
+        className="relative flex flex-1 min-h-screen"
         data-section="auth-register-body"
       >
+        {/* Dark bleed — fills left half of viewport edge-to-edge */}
+        <div className="absolute inset-y-0 left-0 right-1/2 bg-[#191d24]" aria-hidden="true" />
+
+        {/* Decoration blobs — clipped within exact left-half boundary */}
+        <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden pointer-events-none z-[1]" aria-hidden="true">
+          <div className="absolute right-[-40px] top-[-104px] w-[320px] h-[320px] rounded-full bg-white/10" />
+          <div className="absolute left-[-157px] bottom-[-60px] w-[401px] h-[401px] rounded-full bg-white/10" />
+        </div>
+
         {/* === SECTION: Brand Panel (dark) === */}
         <div
-          className="hidden md:flex flex-1 flex-col justify-between px-[60px] lg:px-[120px] py-[100px] bg-[#191d24] relative overflow-hidden"
+          className="hidden md:flex flex-1 flex-col bg-[#191d24] relative"
           data-section="brand-panel"
         >
-          {/* Decoration blobs */}
-          <img
-            src={imgDecorationTop}
-            alt=""
-            aria-hidden="true"
-            className="absolute right-[-40px] top-[-104px] w-[320px] h-[320px] pointer-events-none"
-          />
-          <img
-            src={imgDecorationBottom}
-            alt=""
-            aria-hidden="true"
-            className="absolute left-[-157px] bottom-[-60px] w-[401px] h-[401px] pointer-events-none"
-          />
 
-          {/* Logo */}
-          <div className="relative z-10 h-[50px]">
+          {/* Content constrained to container-md, right-aligned toward form */}
+          <div className="relative z-10 flex flex-col justify-between h-full py-[10vh] px-[60px] w-full max-w-[var(--max-width-container-md)] ml-auto">
+            {/* Logo */}
             <img
               src={imgLogoText}
               alt="VitIELTS"
-              className="h-[50px] w-auto"
+              className="h-auto w-full max-w-[480px]"
             />
-          </div>
 
-          {/* Headline + feature bullets */}
-          <div className="relative z-10 flex flex-col gap-[26px]">
-            <h1 className="font-display font-bold text-[46px] leading-[1.08] tracking-[-0.92px] text-white w-[470px]">
-              Start your<br />
-              Band 8.0 journey.
-            </h1>
+            {/* Headline + feature bullets */}
+            <div className="flex flex-col gap-[26px]">
+              <h1 className="font-display font-bold text-[46px] leading-[1.08] tracking-[-0.92px] text-white">
+                Start your<br />
+                Band 8.0 journey.
+              </h1>
 
-            {FEATURES.map((feat) => (
-              <div key={feat} className="flex items-center gap-3">
-                {/* Check icon pill */}
-                <span className="flex items-center justify-center shrink-0 w-[26px] h-[26px] rounded-[13px] bg-[#b3e653]">
-                  <span className="material-symbols-rounded text-[#191d24] text-[14px] leading-none font-bold select-none">
-                    check
+              {FEATURES.map((feat) => (
+                <div key={feat} className="flex items-center gap-3">
+                  <span className="flex items-center justify-center shrink-0 w-[26px] h-[26px] rounded-[13px] bg-[#b3e653]">
+                    <span className="material-symbols-rounded text-[#191d24] text-[14px] leading-none font-bold select-none">
+                      check
+                    </span>
                   </span>
-                </span>
-                <p className="font-inter font-medium text-[16px] text-[#dbe0e8]">
-                  {feat}
+                  <p className="font-inter font-medium text-[16px] text-[#dbe0e8]">
+                    {feat}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Card · Band 7.5 */}
+            <div
+              className="flex items-center gap-4 bg-white rounded-[20px] shadow-[0px_8px_24px_0px_rgba(0,0,0,0.1)] px-5 h-[92px] w-[330px]"
+              data-section="band-card"
+            >
+              <TrophyIcon />
+              <div className="flex flex-col gap-[2px]">
+                <p className="font-inter font-bold text-[15px] text-[#191d24] whitespace-nowrap">
+                  Band 7.5 — last mock
+                </p>
+                <p className="font-inter font-normal text-[13px] text-[#6a7282] whitespace-nowrap">
+                  +1.5 since you started
                 </p>
               </div>
-            ))}
-          </div>
-
-          {/* Card · Band 7.5 */}
-          <div
-            className="relative z-10 flex items-center gap-4 bg-white rounded-[20px] shadow-[0px_8px_24px_0px_rgba(0,0,0,0.1)] px-5 h-[92px] w-[330px]"
-            data-section="band-card"
-          >
-            <img
-              src={imgTrophy}
-              alt=""
-              aria-hidden="true"
-              className="w-[34px] h-[34px] shrink-0"
-            />
-            <div className="flex flex-col gap-[2px]">
-              <p className="font-inter font-bold text-[15px] text-[#191d24] whitespace-nowrap">
-                Band 7.5 — last mock
-              </p>
-              <p className="font-inter font-normal text-[13px] text-[#6a7282] whitespace-nowrap">
-                +1.5 since you started
-              </p>
             </div>
           </div>
         </div>

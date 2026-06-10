@@ -81,7 +81,7 @@ export const WhyChooseUs = ({ config: _config }: WhyChooseUsProps) => {
       data-section="why-choose-us"
       className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6"
     >
-      <div className="max-w-[1312px] mx-auto bg-[#242938] rounded-[40px] px-8 sm:px-12 lg:px-16 py-12 lg:py-14">
+      <div className=" mx-auto bg-[#242938] rounded-[40px] px-8 sm:px-12 lg:px-16 py-12 lg:py-14">
 
         {/* Header */}
         <div className="mb-8">

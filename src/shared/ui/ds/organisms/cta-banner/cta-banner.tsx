@@ -85,7 +85,7 @@ export const CTABanner = ({
               <div className="min-[1025px]:hidden flex justify-end items-end pr-6 min-[600px]:pr-8">
                 <Image
                   src={mascotSrc}
-                  alt="IELTS Prediction Mascot"
+                  alt="VitIELTS Mascot"
                   className="object-contain drop-shadow-[4px_0px_4px_rgba(0,0,0,0.25)]"
                   width={220}
                   height={220}
@@ -96,7 +96,7 @@ export const CTABanner = ({
               <div className="hidden min-[1025px]:block absolute right-[5cqi] bottom-[-25%] w-[32cqi] h-[32cqi] z-[3] pointer-events-none">
                 <Image
                   src={mascotSrc}
-                  alt="IELTS Prediction Mascot"
+                  alt="VitIELTS Mascot"
                   className="absolute bottom-0 left-1/2 w-[30cqi] min-h-[350px] h-auto object-cover drop-shadow-[4px_0px_4px_rgba(0,0,0,0.25)] pointer-events-auto origin-bottom transition-transform duration-500 ease-out hover:scale-[1.1] hover:rotate-4 hover:drop-shadow-[6px_4px_8px_rgba(0,0,0,0.2)] -translate-x-1/2"
                   width={450}
                   height={380}

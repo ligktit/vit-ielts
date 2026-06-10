@@ -1,17 +1,26 @@
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { MyProfileLayout } from "@/widgets/layouts";
+import { AppShell } from "@/widgets/layouts";
 import {
   calculatePrice,
   formatPrice,
   SkillType,
 } from "@/pages/subscription/ui/subscription-plans/pricing";
 import { ROUTES } from "@/shared/routes";
-import { CheckCircle, Trash2 } from "lucide-react";
 import { useAuth } from "@/appx/providers/auth-provider";
+import { createClient } from "~supabase/client";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import type { CoursePackagesConfig } from "@/shared/types/admin-config";
+
+/** Coupon shape returned by /api/coupons/validate */
+type AppliedCoupon = {
+  id: string;
+  code: string;
+  type: "percent" | "fixed" | null;
+  value: number;
+  discountAmount: number;
+};
 
 const CheckoutPage = () => {
   const router = useRouter();
@@ -20,14 +29,11 @@ const CheckoutPage = () => {
   const [isCreatingOrder, setIsCreatingOrder] = useState(false);
   const [config, setConfig] = useState<CoursePackagesConfig | null>(null);
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<{
-    id: string;
-    code: string;
-    discountAmount: number;
-  } | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  // 1. Fetch config on mount
+  // 1. Fetch config on mount + resolve email from Supabase session (presentation only)
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -41,6 +47,14 @@ const CheckoutPage = () => {
       }
     };
     fetchConfig();
+
+    // Resolve email from Supabase session (presentation-only — not sent to order API)
+    const supabase = createClient();
+    void supabase.auth.getSession().then(
+      (result: Awaited<ReturnType<typeof supabase.auth.getSession>>) => {
+        setUserEmail(result.data.session?.user.email ?? null);
+      }
+    );
   }, []);
 
   // 2. Tính toán selection an toàn với Optional Chaining
@@ -195,91 +209,130 @@ const CheckoutPage = () => {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500 border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-gray-500 font-medium">Loading checkout details...</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand border-t-transparent mx-auto" />
+          <p className="mt-4 text-ink-muted text-body-s font-medium">
+            Loading checkout details...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" data-section="checkout-main">
-      {/* Target: Success Alert */}
-      <div className="flex items-center gap-2 rounded-xl bg-[#EDF7ED] px-5 py-3 text-[#1E4620]">
-        <CheckCircle className="h-5 w-5 text-[#4CAF50]" />
-        <p className="text-sm font-medium">
-          {productName} • {selection.duration} month
-          {selection.duration > 1 ? "s" : ""} added to your cart.
+    <div className="space-y-8 py-6" data-section="checkout-main">
+      {/* Page heading */}
+      <div>
+        <h1 className="font-display text-heading-1 text-ink-900 leading-tight">
+          Checkout
+        </h1>
+        <p className="text-body-s text-ink-muted mt-1">
+          You&apos;re one step away from Pro.
         </p>
       </div>
 
-      <h2 className="text-[24px] font-bold text-[#2D3142] tracking-tight">Cart</h2>
-
+      {/* Two-column layout */}
       <div className="flex flex-col lg:flex-row gap-6 items-start">
-        {/* === Left: Cart Items Table === */}
-        <div className="flex-1 rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full">
-          {/* Table Header */}
-          <div className="grid grid-cols-4 bg-[#F8F9FA] px-6 py-4 text-sm font-bold text-[#2D3142] border-b border-gray-100">
-            <div className="col-span-3">Subscription Plan</div>
-            <div className="text-right">Total</div>
-          </div>
 
-          {/* Table Body */}
-          <div className="grid grid-cols-4 px-6 py-5 items-center bg-white group">
-            <div className="col-span-3 flex items-center gap-4">
-              <button
-                type="button"
-                className="text-primary-500 hover:text-primary-300 transition-colors flex-shrink-0"
-                aria-label="Remove item"
-                onClick={() => router.push(ROUTES.SUBSCRIPTION)}
+        {/* ── LEFT CARD: Billing details + Payment method ── */}
+        <div className="flex-1 min-w-0 rounded-2xl border border-border-hairline bg-surface-card shadow-primary p-8 space-y-8">
+
+          {/* Billing details */}
+          <section>
+            <h2 className="font-display text-heading-2 text-ink-900 mb-6">
+              Billing details
+            </h2>
+
+            <div className="space-y-5">
+              {/* Full name — read-only from currentUser */}
+              <div>
+                <label className="block text-body-s font-semibold text-ink-900 mb-1.5">
+                  Full name
+                </label>
+                <div className="w-full rounded-lg border border-border-hairline bg-surface-card px-4 py-3 text-body-m text-ink-900">
+                  {currentUser?.name || "—"}
+                </div>
+              </div>
+
+              {/* Email — read-only from currentUser */}
+              <div>
+                <label className="block text-body-s font-semibold text-ink-900 mb-1.5">
+                  Email address
+                </label>
+                <div className="w-full rounded-lg border border-border-hairline bg-surface-card px-4 py-3 text-body-m text-ink-900">
+                  {userEmail || "—"}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Divider */}
+          <hr className="border-border-hairline" />
+
+          {/* Payment method */}
+          <section>
+            <h2 className="font-display text-heading-2 text-ink-900 mb-4">
+              Payment method
+            </h2>
+            <div className="rounded-xl border border-border-hairline bg-surface-card p-5 flex items-start gap-4">
+              <span
+                className="material-symbols-rounded text-ink-muted mt-0.5 shrink-0"
+                aria-hidden="true"
               >
-                <Trash2 className="h-5 w-5" />
-              </button>
-
-              <div className="h-16 w-16 rounded-xl border border-gray-100 bg-[#FAF7EB] flex items-center justify-center text-xs font-bold text-[#2D3142] flex-shrink-0" style={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.04)"}}>
-                {selection.pkgType === "combo" ? "COMBO" : "SINGLE"}
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-base font-bold text-[#2D3142]">
-                  {selection.pkgType === "combo" ? "Standard Plan" : "Single Pack"}
+                account_balance
+              </span>
+              <div>
+                <p className="text-body-m font-semibold text-ink-900">
+                  Bank transfer / Online payment
                 </p>
-                <p className="text-sm text-gray-500 mt-0.5 truncate">
-                  {productName} • {selection.duration} month
-                  {selection.duration > 1 ? "s" : ""}
+                <p className="text-body-s text-ink-muted mt-1">
+                  Payment instructions will be sent to your email after you confirm the order.
                 </p>
               </div>
             </div>
-
-            <div className="text-right text-base font-bold text-[#2D3142]">
-              {formatPrice(selection.price)}
-            </div>
-          </div>
+          </section>
         </div>
 
-        {/* === Right: Order Summary === */}
-        <div className="w-full lg:w-[360px] flex-shrink-0 rounded-2xl border border-gray-100 bg-[#F8F9FA] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.04)] text-[#2D3142]">
-          <h3 className="text-lg font-bold mb-5">Your order</h3>
+        {/* ── RIGHT CARD: Order summary ── */}
+        <div className="w-full lg:w-[380px] shrink-0 rounded-2xl border border-border-hairline bg-surface-card shadow-primary p-8 space-y-6">
 
-          {/* Coupon Code section */}
-          <div className="space-y-2 mb-6">
-            <label className="text-sm font-bold block">Mã giảm giá</label>
+          <h2 className="font-display text-heading-2 text-ink-900">
+            Order summary
+          </h2>
+
+          {/* Plan description */}
+          <div className="rounded-xl border border-border-hairline bg-surface-card px-4 py-3">
+            <p className="text-body-m font-semibold text-ink-900">{productName}</p>
+            <p className="text-body-s text-ink-muted mt-0.5">
+              {selection.duration} month{selection.duration > 1 ? "s" : ""}
+            </p>
+          </div>
+
+          {/* Coupon code */}
+          <div className="space-y-2">
+            <label className="block text-body-s font-semibold text-ink-900">
+              Mã giảm giá
+            </label>
             {appliedCoupon ? (
-              <div className="flex items-center justify-between p-3 bg-white border border-green-200 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg border border-border-hairline bg-surface-card px-4 py-3">
                 <div>
-                  <p className="text-sm font-bold text-[#27AE60]">
+                  <p className="text-body-s font-bold text-accent-teal">
                     {appliedCoupon.code}
                   </p>
-                  <p className="text-xs text-green-600 font-medium">
-                    Giảm {appliedCoupon.type === "percent" ? `${appliedCoupon.value}%` : formatPrice(appliedCoupon.value)} ({formatPrice(discountDisplayAmount)})
+                  <p className="text-caption-bold text-accent-teal">
+                    Giảm{" "}
+                    {appliedCoupon.type === "percent"
+                      ? `${appliedCoupon.value}%`
+                      : formatPrice(appliedCoupon.value)}{" "}
+                    ({formatPrice(discountDisplayAmount)})
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => {
                     setAppliedCoupon(null);
                     setCouponCode("");
                   }}
-                  className="text-primary-500 hover:text-primary-300 text-sm font-bold"
+                  className="text-body-s font-bold text-danger hover:opacity-80 transition-opacity"
                 >
                   Xóa
                 </button>
@@ -291,17 +344,16 @@ const CheckoutPage = () => {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Nhập mã giảm giá"
-                  className="flex-1 w-full min-w-0 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none"
+                  className="flex-1 min-w-0 rounded-lg border border-border-hairline bg-surface-card px-4 py-2.5 text-body-s text-ink-900 placeholder:text-ink-muted focus:border-ink-700 focus:outline-none transition-colors"
                   onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      handleApplyCoupon();
-                    }
+                    if (e.key === "Enter") handleApplyCoupon();
                   }}
                 />
                 <button
+                  type="button"
                   onClick={handleApplyCoupon}
                   disabled={isValidatingCoupon}
-                  className="px-5 py-2.5 rounded-lg bg-[#2D3142] hover:bg-black text-white text-sm font-bold transition-colors disabled:opacity-50 flex-shrink-0"
+                  className="shrink-0 px-4 py-2.5 rounded-lg bg-ink-900 hover:bg-ink-700 text-surface-card text-body-s font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Áp dụng
                 </button>
@@ -309,41 +361,74 @@ const CheckoutPage = () => {
             )}
           </div>
 
-          {/* Financials */}
-          <div className="space-y-4 text-sm mb-6">
+          {/* Line items */}
+          <div className="space-y-3 text-body-s">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Sub-total</span>
-              <span className="font-medium text-[#2D3142]">{formatPrice(selection.price)}</span>
+              <span className="text-ink-muted">Sub-total</span>
+              <span className="font-medium text-ink-900">
+                {formatPrice(selection.price)}
+              </span>
             </div>
+
             {appliedCoupon && (
-              <div className="flex items-center justify-between text-[#27AE60]">
+              <div className="flex items-center justify-between text-accent-teal">
                 <span>Giảm giá ({appliedCoupon.code})</span>
-                <span className="font-bold">-{formatPrice(discountDisplayAmount)}</span>
+                <span className="font-bold">
+                  -{formatPrice(discountDisplayAmount)}
+                </span>
               </div>
             )}
+
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Tax</span>
-              <span className="font-medium text-[#2D3142]">0</span>
-            </div>
-            
-            <div className="border-t border-gray-200 pt-4 flex items-center justify-between">
-              <span className="text-base font-bold">Total</span>
-              <span className="text-lg font-bold">{formatPrice(finalPrice)}</span>
+              <span className="text-ink-muted">Tax</span>
+              <span className="font-medium text-ink-900">
+                {formatPrice(0)}
+              </span>
             </div>
           </div>
 
+          {/* Total */}
+          <div className="border-t border-border-hairline pt-5 flex items-baseline justify-between">
+            <span className="font-display text-title-m text-ink-900">Total</span>
+            <span className="font-display text-heading-2 text-ink-900">
+              {formatPrice(finalPrice)}
+            </span>
+          </div>
+
+          {/* Pay button — dark, full-width (Figma "Pay {amount}" CTA) */}
           <button
+            type="button"
             onClick={handleCheckout}
             disabled={isCreatingOrder}
-            className="w-full py-3.5 rounded-lg bg-tertiary-500 hover:bg-[#E08A40] text-white font-bold text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-ink-900 hover:bg-ink-700 text-surface-card font-display font-bold text-body-m py-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isCreatingOrder ? "Đang xử lý..." : "Checkout"}
+            <span className="material-symbols-rounded text-[20px]" aria-hidden="true">
+              shopping_bag
+            </span>
+            {isCreatingOrder ? "Đang xử lý..." : `Pay ${formatPrice(finalPrice)}`}
           </button>
 
-          <div className="text-center">
+          {/* Benefits list */}
+          <ul className="space-y-2.5">
+            {[
+              "Cancel anytime",
+              "30-day money-back guarantee",
+              "Instant access to all tests",
+            ].map((benefit) => (
+              <li key={benefit} className="flex items-center gap-2.5 text-body-s text-ink-muted">
+                <span className="material-symbols-rounded text-[18px] text-ink-muted" aria-hidden="true">
+                  check_circle
+                </span>
+                {benefit}
+              </li>
+            ))}
+          </ul>
+
+          {/* Back to plans link */}
+          <div className="text-center pt-1">
             <Link
               href={ROUTES.SUBSCRIPTION}
-              className="text-sm font-medium text-blue-500 hover:text-blue-600 transition-colors"
+              className="text-body-s font-medium text-ink-muted hover:text-ink-900 transition-colors underline underline-offset-2"
             >
               View Subscription Plans
             </Link>
@@ -354,7 +439,7 @@ const CheckoutPage = () => {
   );
 };
 
-CheckoutPage.Layout = MyProfileLayout;
+CheckoutPage.Layout = AppShell;
 
 // Disable static generation để tránh lỗi prerender
 // Trang này cần client-side data (router query, auth, config)

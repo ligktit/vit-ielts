@@ -679,12 +679,12 @@ export function PageTakeTheTest() {
               <Header post={post} />
 
               <main id="iel-take-test-main" className="shrink grow overflow-hidden flex flex-col pb-[60px]">
-                <div className="border border-[#d5d5d5] rounded-[4px] flex-shrink-0 m-[16px] bg-[#f1f2ec]">
+                <div className="border border-border-hairline rounded-lg flex-shrink-0 m-[16px] bg-brand-surface">
                   <div className="p-[16px]">
-                    <div className="font-bold text-gray-800 text-base md:text-lg leading-tight">
+                    <div className="font-display font-bold text-ink-900 text-base md:text-lg leading-tight">
                       {passageInfo.customTitle || `${passageInfo.partLabel} ${passageInfo.partNumber}`}
                     </div>
-                    <div className="text-[#000] text-base">
+                    <div className="font-body text-ink-body text-base">
                       Read the text and answer questions {passageInfo.questionRange}
                     </div>
                   </div>
@@ -702,7 +702,7 @@ export function PageTakeTheTest() {
                       <Splitter>
                         {post.quizFields.skill[0] === "reading" && (
                           <Splitter.Panel min="20%" max="80%">
-                            <div className="prose-sm max-w-none p-[16px] pt-[30px] pb-[120px] bg-white h-full overflow-y-auto text-[#000]">
+                            <div className="prose-sm max-w-none p-[16px] pt-[30px] pb-[120px] bg-surface-card h-full overflow-y-auto text-ink-body">
                               {headingQuestion ? (
                                 <PassageRenderer
                                   passageContent={currentPassage.passage_content}
@@ -732,7 +732,7 @@ export function PageTakeTheTest() {
                             className={twMerge(
                               "h-full overflow-y-auto",
                               post.quizFields.skill[0] === "listening" &&
-                              "mx-auto bg-white listening-board"
+                              "mx-auto bg-surface-card listening-board"
                             )}
                           >
                             <TextSelectionWrapper>

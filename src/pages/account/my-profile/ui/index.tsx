@@ -1,7 +1,7 @@
 import { useAppContext } from "@/appx/providers";
 import Head from "next/head";
-import { MyProfileLayout } from "@/widgets/layouts";
-import { Button, Card, DatePicker, Input, Select, Skeleton } from "antd";
+import { AppShell } from "@/widgets/layouts";
+import { Button as AntButton, DatePicker, Input, Select, Skeleton } from "antd";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -9,6 +9,7 @@ import { AvatarUpload, UserAccountTypeBadge } from "@/shared/ui";
 import { toast } from "react-toastify";
 import { createClient } from "~supabase/client";
 import { useAuth } from "@/appx/providers";
+import { ROUTES } from "@/shared/routes";
 
 type UserDataForm = {
   id: string;
@@ -24,12 +25,14 @@ type UserDataForm = {
 
 export const PageMyProfile = () => {
   const [preview, setPreview] = useState<string | undefined>();
+  const [isEditing, setIsEditing] = useState(false);
   const {
     setValue,
     control,
     formState: { errors, isSubmitting, isDirty, dirtyFields },
     handleSubmit,
     getValues,
+    reset,
   } = useForm<UserDataForm>();
   const {
     masterData: {
@@ -70,12 +73,12 @@ export const PageMyProfile = () => {
               phoneNumber: profile.phone_number || "",
               avatar: profile.avatar_url
                 ? {
-                  node: {
-                    mediaDetails: {
-                      sizes: [{ sourceUrl: profile.avatar_url, width: "96" }],
+                    node: {
+                      mediaDetails: {
+                        sizes: [{ sourceUrl: profile.avatar_url, width: "96" }],
+                      },
                     },
-                  },
-                }
+                  }
                 : undefined,
             },
           },
@@ -118,7 +121,8 @@ export const PageMyProfile = () => {
       // Email is display-only (cannot be edited here) — never written.
       if (dirtyFields.gender) updateData.gender = formData.gender;
       if (dirtyFields.phoneNumber) updateData.phone_number = formData.phoneNumber;
-      if (dirtyFields.date_of_birth) updateData.date_of_birth = formData.date_of_birth?.format("YYYY-MM-DD");
+      if (dirtyFields.date_of_birth)
+        updateData.date_of_birth = formData.date_of_birth?.format("YYYY-MM-DD");
 
       // Update profile fields only when something actually changed (an empty
       // update would be a wasted write — and breaks "password only" saves).
@@ -130,44 +134,81 @@ export const PageMyProfile = () => {
         if (error) throw error;
       }
 
-      // Change the auth password if a new one was entered. This was missing —
-      // the form collected the password but never called Supabase Auth, so the
-      // save reported success while the password never changed.
+      // Change the auth password if a new one was entered.
       if (dirtyFields.password && formData.password) {
         const { error: pwError } = await supabase.auth.updateUser({
           password: formData.password,
         });
         if (pwError) throw pwError;
-        // Clear the fields so they're not re-submitted / left on screen.
         setValue("password", "");
         setValue("confirm_password", "");
       }
 
       await fetchProfile();
       toast.success("Profile updated successfully");
+      setIsEditing(false);
     } catch (error: any) {
       toast.error(error?.message || "Failed to update profile");
     }
   };
 
+  const handleCancel = () => {
+    if (data?.viewer) {
+      reset({
+        id: data.viewer.id,
+        name: data.viewer.name,
+        email: data.viewer.email,
+        gender: data.viewer.userData.gender?.[0] || "male",
+        date_of_birth: data.viewer.userData.dateOfBirth
+          ? dayjs(data.viewer.userData.dateOfBirth)
+          : undefined,
+        phoneNumber: data.viewer.userData.phoneNumber,
+        password: "",
+        confirm_password: "",
+        avatar: null,
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const viewer = data?.viewer;
+  const isPro = viewer?.userData?.isPro;
+
   return (
-    <Card style={{ borderRadius: 16 }}>
+    <>
       <Head>
         <title>{`My Profile | ${generalSettingsTitle}`}</title>
       </Head>
-         {data?.viewer && !dataLoading ? (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex items-center space-x-4 border-b pb-4 border-gray-100 mb-4">
-            <div className="h-24">
+
+      {/* Page heading */}
+      <div className="mb-6">
+        <h1 className="text-heading-2 font-display font-bold text-ink-900 mb-1">
+          My Profile
+        </h1>
+        <p className="text-body-s text-ink-muted">
+          Manage your account, plan and study preferences.
+        </p>
+      </div>
+
+      {dataLoading || !viewer ? (
+        <div className="bg-surface-card rounded-2xl p-6 shadow-primary">
+          <Skeleton active />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-5">
+          {/* ── Profile card ── */}
+          <div className="bg-surface-card rounded-2xl p-6 shadow-primary flex items-center gap-5">
+            {/* Avatar */}
+            <div className="shrink-0">
               <Controller
                 control={control}
                 name="avatar"
                 render={({ field: { onChange } }) => (
                   <div className="relative group">
-                    <div className="border-2 shadow border-solid border-white rounded-full overflow-hidden group-hover:border-primary duration-300">
+                    <div className="border-2 border-solid border-border-hairline rounded-full overflow-hidden group-hover:border-brand duration-300 shadow-primary">
                       <AvatarUpload
                         classNames={{
-                          container: "w-[100px] h-[100px] border-none",
+                          container: "w-[72px] h-[72px] border-none",
                           image: "object-cover",
                           wrapper: "p-0",
                         }}
@@ -175,8 +216,8 @@ export const PageMyProfile = () => {
                         previewUrl={preview}
                       />
                     </div>
-                    <div className="bottom-0 right-0 absolute rounded-full pointer-events-none group-hover:text-white border-white border-2 shadow bg-white p-1 group-hover:border-primary group-hover:bg-primary duration-300">
-                      <span className="material-symbols-rounded block! text-lg! leading-none!">
+                    <div className="bottom-0 right-0 absolute rounded-full pointer-events-none group-hover:text-ink-900 border-border-hairline border-2 bg-surface-card p-0.5 group-hover:border-brand group-hover:bg-brand duration-300">
+                      <span className="material-symbols-rounded block! text-base! leading-none!">
                         add_a_photo
                       </span>
                     </div>
@@ -184,230 +225,319 @@ export const PageMyProfile = () => {
                 )}
               />
             </div>
-            <div>
-              <h3 className="text-lg space-x-2">
-                <span className="font-semibold">{data.viewer.name}</span>
-                <UserAccountTypeBadge isPro={data.viewer.userData.isPro} />
-              </h3>
-              <p className="text-gray-500">{data.viewer.email}</p>
-              {data.viewer.userData.proExpirationDate && (
-                <p className="text-sm mt-1">
-                  {data.viewer.userData.isPro ? (
-                    <span className="text-gray-500">
-                      Hết hạn Pro:{" "}
-                      <span className="font-medium text-[#2D3142]">
-                        {dayjs(data.viewer.userData.proExpirationDate).format("DD/MM/YYYY")}
+
+            {/* Name + email + badge */}
+            <div className="flex-1 min-w-0">
+              <p className="text-title-m font-display font-bold text-ink-900 truncate">
+                {viewer.name}
+              </p>
+              <p className="text-body-s text-ink-muted truncate mt-0.5">
+                {viewer.email}
+              </p>
+              {isPro && (
+                <span className="inline-block mt-2">
+                  <UserAccountTypeBadge isPro={isPro} />
+                </span>
+              )}
+            </div>
+
+            {/* Edit profile button — right side */}
+            <div className="shrink-0 ml-auto">
+              {!isEditing && (
+                <AntButton
+                  size="large"
+                  onClick={() => setIsEditing(true)}
+                  className="rounded-xl! font-medium!"
+                >
+                  Edit profile
+                </AntButton>
+              )}
+            </div>
+          </div>
+
+          {/* ── Two-column lower section ── */}
+          <div className="flex flex-col lg:flex-row gap-5 items-start">
+            {/* Left — Account details */}
+            <div className="flex-1 min-w-0 bg-surface-card rounded-2xl p-6 shadow-primary">
+              <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-6">
+                Account details
+              </h2>
+
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="flex flex-col gap-5">
+                  {/* Full name */}
+                  <div>
+                    <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                      Full name
+                      <span className="text-danger ml-0.5">*</span>
+                    </label>
+                    <Controller
+                      control={control}
+                      name="name"
+                      rules={{
+                        required: { value: true, message: "Name is required" },
+                      }}
+                      render={({ field }) => (
+                        <Input
+                          size="large"
+                          {...field}
+                          disabled={!isEditing}
+                          placeholder="Enter your full name"
+                          status={errors.name ? "error" : ""}
+                          className="rounded-xl!"
+                        />
+                      )}
+                    />
+                    {errors.name && (
+                      <span className="text-danger text-body-s block mt-1">
+                        {errors.name.message}
                       </span>
-                    </span>
-                  ) : (
-                    <span className="text-[#D94A56]">
-                      Pro đã hết hạn ngày{" "}
-                      <span className="font-medium">
-                        {dayjs(data.viewer.userData.proExpirationDate).format("DD/MM/YYYY")}
+                    )}
+                  </div>
+
+                  {/* Email address */}
+                  <div>
+                    <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                      Email address
+                    </label>
+                    <Controller
+                      control={control}
+                      name="email"
+                      render={({ field }) => (
+                        <Input
+                          size="large"
+                          {...field}
+                          disabled
+                          placeholder="Email"
+                          className="rounded-xl!"
+                        />
+                      )}
+                    />
+                  </div>
+
+                  {/* Phone + Gender row */}
+                  <div className="flex flex-col sm:flex-row gap-5">
+                    <div className="flex-1">
+                      <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                        Phone number
+                      </label>
+                      <Controller
+                        control={control}
+                        name="phoneNumber"
+                        rules={{
+                          pattern: {
+                            value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
+                            message: "Invalid phone number",
+                          },
+                        }}
+                        render={({ field }) => (
+                          <Input
+                            size="large"
+                            {...field}
+                            disabled={!isEditing}
+                            placeholder="Enter phone number"
+                            status={errors.phoneNumber ? "error" : ""}
+                            className="rounded-xl!"
+                          />
+                        )}
+                      />
+                      {errors.phoneNumber && (
+                        <span className="text-danger text-body-s block mt-1">
+                          {errors.phoneNumber.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                        Gender
+                        <span className="text-danger ml-0.5">*</span>
+                      </label>
+                      <Controller
+                        control={control}
+                        name="gender"
+                        defaultValue="male"
+                        rules={{
+                          required: { value: true, message: "Gender is required" },
+                        }}
+                        render={({ field }) => (
+                          <Select
+                            size="large"
+                            className="w-full"
+                            disabled={!isEditing}
+                            options={[
+                              { value: "male", label: "Male" },
+                              { value: "female", label: "Female" },
+                            ]}
+                            {...field}
+                          />
+                        )}
+                      />
+                      {errors.gender && (
+                        <span className="text-danger text-body-s block mt-1">
+                          {errors.gender.message}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Date of birth */}
+                  <div>
+                    <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                      Date of birth
+                      <span className="text-danger ml-0.5">*</span>
+                    </label>
+                    <Controller
+                      control={control}
+                      name="date_of_birth"
+                      rules={{
+                        required: {
+                          value: true,
+                          message: "Date of birth is required",
+                        },
+                      }}
+                      render={({ field }) => (
+                        <DatePicker
+                          size="large"
+                          format="DD/MM/YYYY"
+                          className="w-full rounded-xl!"
+                          maxDate={dayjs()}
+                          disabled={!isEditing}
+                          {...field}
+                        />
+                      )}
+                    />
+                    {errors.date_of_birth && (
+                      <span className="text-danger text-body-s block mt-1">
+                        {errors.date_of_birth.message}
                       </span>
-                    </span>
+                    )}
+                  </div>
+
+                  {/* Password row — only shown when editing */}
+                  {isEditing && (
+                    <div className="flex flex-col sm:flex-row gap-5">
+                      <div className="flex-1">
+                        <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                          New password
+                        </label>
+                        <Controller
+                          control={control}
+                          name="password"
+                          render={({ field }) => (
+                            <Input.Password
+                              size="large"
+                              {...field}
+                              className="rounded-xl!"
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-label-bold font-bold text-ink-900 mb-1.5">
+                          Confirm new password
+                        </label>
+                        <Controller
+                          control={control}
+                          name="confirm_password"
+                          rules={{
+                            validate: (value) => {
+                              if (value !== getValues("password")) {
+                                return "Passwords do not match";
+                              }
+                              return true;
+                            },
+                          }}
+                          render={({ field }) => (
+                            <Input.Password
+                              size="large"
+                              {...field}
+                              className="rounded-xl!"
+                            />
+                          )}
+                        />
+                        {errors.confirm_password && (
+                          <span className="text-danger text-body-s block mt-1">
+                            {errors.confirm_password.message}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
+
+                  {/* Action buttons — only shown when editing */}
+                  {isEditing && (
+                    <div className="flex items-center gap-3 pt-2 border-t border-border-hairline">
+                      <AntButton
+                        type="primary"
+                        size="large"
+                        htmlType="submit"
+                        loading={isSubmitting}
+                        disabled={!isDirty}
+                        className="rounded-xl! bg-brand! border-brand! text-ink-900! font-semibold! hover:bg-brand-hover! hover:border-brand-hover!"
+                      >
+                        Save changes
+                      </AntButton>
+                      <AntButton
+                        size="large"
+                        onClick={handleCancel}
+                        className="rounded-xl!"
+                      >
+                        Cancel
+                      </AntButton>
+                    </div>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Right column */}
+            <div className="w-full lg:w-[340px] shrink-0 flex flex-col gap-5">
+              {/* Your plan card */}
+              <div className="bg-surface-card rounded-2xl p-6 shadow-primary">
+                <p className="text-eyebrow font-bold text-brand-hover tracking-widest uppercase mb-2">
+                  Your plan
                 </p>
-              )}
+                <h3 className="text-title-m font-display font-bold text-ink-900 mb-4">
+                  {isPro ? "Pro Member" : "Free Plan"}
+                </h3>
+                {viewer.userData.proExpirationDate && (
+                  <p className="text-body-s mb-4">
+                    {isPro ? (
+                      <span className="text-ink-muted">
+                        Active until{" "}
+                        <span className="font-medium text-ink-900">
+                          {dayjs(viewer.userData.proExpirationDate).format(
+                            "DD MMM YYYY"
+                          )}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-danger">
+                        Expired on{" "}
+                        <span className="font-medium">
+                          {dayjs(viewer.userData.proExpirationDate).format(
+                            "DD MMM YYYY"
+                          )}
+                        </span>
+                      </span>
+                    )}
+                  </p>
+                )}
+                <AntButton
+                  href={ROUTES.SUBSCRIPTION}
+                  size="large"
+                  className="w-full rounded-xl! font-medium!"
+                >
+                  Manage subscription
+                </AntButton>
+              </div>
             </div>
           </div>
-          <div className="flex -m-2 flex-wrap">
-            <div className="p-2 w-full">
-              <label htmlFor="email" className="block font-medium mb-2">
-                <span>Name</span>
-                <span className="text-red-500">*</span>
-              </label>
-              <Controller
-                control={control}
-                name="name"
-                rules={{
-                  required: { value: true, message: "Name is required" },
-                }}
-                render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    placeholder="Please enter your name"
-                    status={errors.name ? "error" : ""}
-                  />
-                )}
-              />
-              {errors.name && (
-                <span className="text-red-500 block mt-1">
-                  {errors.name.message}
-                </span>
-              )}
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label htmlFor="email" className="block font-medium mb-2">
-                <span>Email</span>
-              </label>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    disabled
-                    placeholder="Email"
-                  />
-                )}
-              />
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label htmlFor="phoneNumber" className="block font-medium mb-2">
-                <span>Phone number</span>
-              </label>
-              <Controller
-                control={control}
-                name="phoneNumber"
-                rules={{
-                  pattern: {
-                    value: /(84|0[3|5|7|8|9])+([0-9]{8})\b/g,
-                    message: "Invalid phone number",
-                  },
-                }}
-                render={({ field }) => (
-                  <Input
-                    size="large"
-                    {...field}
-                    placeholder="Please enter phone number"
-                    status={errors.phoneNumber ? "error" : ""}
-                  />
-                )}
-              />
-              {errors.phoneNumber && (
-                <span className="text-red-500 block mt-1">
-                  {errors.phoneNumber.message}
-                </span>
-              )}
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label htmlFor="date_of_birth" className="block font-medium mb-2">
-                <span>Date of Birth</span>
-                <span className="text-red-500">*</span>
-              </label>
-              <Controller
-                control={control}
-                name="date_of_birth"
-                rules={{
-                  required: {
-                    value: true,
-                    message: "Date of birth is required",
-                  },
-                }}
-                render={({ field }) => (
-                  <DatePicker
-                    size="large"
-                    format={"DD/MM/YYYY"}
-                    className="w-full"
-                    maxDate={dayjs()}
-                    {...field}
-                  />
-                )}
-              />
-              {errors.date_of_birth && (
-                <span className="text-red-500 block mt-1">
-                  {errors.date_of_birth.message}
-                </span>
-              )}
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label htmlFor="gender" className="block font-medium mb-2">
-                <span>Gender</span>
-                <span className="text-red-500">*</span>
-              </label>
-              <Controller
-                control={control}
-                name="gender"
-                defaultValue="male"
-                rules={{
-                  required: { value: true, message: "Gender is required" },
-                }}
-                render={({ field }) => (
-                  <Select
-                    size="large"
-                    className="w-full"
-                    options={[
-                      {
-                        value: "male",
-                        label: "Male",
-                      },
-                      {
-                        value: "female",
-                        label: "Female",
-                      },
-                    ]}
-                    {...field}
-                  />
-                )}
-              />
-              {errors.gender && (
-                <span className="text-red-500 block mt-1">
-                  {errors.gender.message}
-                </span>
-              )}
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label htmlFor="password" className="block font-medium mb-2">
-                <span>New Password</span>
-              </label>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field }) => (
-                  <Input.Password size="large" {...field} />
-                )}
-              />
-            </div>
-            <div className="p-2 w-full md:w-1/2">
-              <label
-                htmlFor="confirm_password"
-                className="block font-medium mb-2"
-              >
-                <span>Confirm New Password</span>
-              </label>
-              <Controller
-                control={control}
-                name="confirm_password"
-                rules={{
-                  validate: (value) => {
-                    if (value !== getValues("password")) {
-                      return "Passwords do not match";
-                    }
-                    return true;
-                  },
-                }}
-                render={({ field }) => (
-                  <Input.Password size="large" {...field} />
-                )}
-              />
-              {errors.confirm_password && (
-                <span className="text-red-500 block mt-1">
-                  {errors.confirm_password.message}
-                </span>
-              )}
-            </div>
-            <div className="p-2 w-full text-end">
-              <Button
-                type="primary"
-                size="large"
-                htmlType="submit"
-                loading={isSubmitting}
-                disabled={!isDirty}
-                className="w-full md:w-auto"
-              >
-                Save
-              </Button>
-            </div>
-          </div>
-        </form>
-      ) : (
-        <Skeleton active />
+        </div>
       )}
-    </Card>
+    </>
   );
 };
 
-PageMyProfile.Layout = MyProfileLayout;
+PageMyProfile.Layout = AppShell;

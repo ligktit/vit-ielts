@@ -47,7 +47,7 @@ function toIPracticeSingle(
     author: {
       node: {
         userData: {},
-        name: "IELTS Prediction",
+        name: "VitIELTS",
       },
     },
     date: quiz.published_at ?? quiz.created_at,

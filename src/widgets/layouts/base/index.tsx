@@ -1,6 +1,8 @@
 import { useAppContext, useAuth } from "@/appx/providers";
-import { FloatingButton, Footer, SaleNotification } from "./ui";
+import { FloatingButton, SaleNotification } from "./ui";
 import { Header } from "./ui/header";
+import { Footer } from "@/shared/ui/ds/organisms/footer";
+import { FOOTER_COLUMNS } from "../footer-columns";
 import { ClipboardEvent, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useDeviceID } from "@/shared/hooks";
 import { toast } from "react-toastify";
@@ -98,7 +100,7 @@ export const BaseLayout = ({ children }: { children: React.ReactNode }) => {
         {children}
       </main>
       {/* === SECTION: Footer === */}
-      <Footer />
+      <Footer columns={FOOTER_COLUMNS} showCopyright />
       <SaleNotification />
       <FloatingButton />
     </>
