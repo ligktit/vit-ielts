@@ -1,45 +1,23 @@
+import { useState, useCallback } from "react";
 import { AppShell } from "@/widgets/layouts";
+import { createClient } from "~supabase/client";
+import { joinClub, leaveClub } from "~services/community";
+import type { Club } from "~services/community";
 
 // ---------------------------------------------------------------------------
-// Static data — no backend services exist yet for Community
+// Props
 // ---------------------------------------------------------------------------
 
-interface Club {
-  name: string;
-  tagline: string;
-  members: string;
-  level: string;
-  iconBg: string;
-  iconColor: string;
+interface PageCommunityProps {
+  clubs: Club[];
+  userId: string;
 }
 
-const CLUBS: Club[] = [
-  {
-    name: "Daily Speaking Club",
-    tagline: "Open practice every evening",
-    members: "2.4k members",
-    level: "All levels",
-    iconBg: "bg-[rgba(179,230,83,0.16)]",
-    iconColor: "text-[#6db33f]",
-  },
-  {
-    name: "Band 7+ Circle",
-    tagline: "Advanced fluency & ideas",
-    members: "860 members",
-    level: "Advanced",
-    iconBg: "bg-[rgba(82,129,249,0.16)]",
-    iconColor: "text-[#5281f9]",
-  },
-  {
-    name: "Pronunciation Lab",
-    tagline: "Sounds, stress & intonation",
-    members: "1.1k members",
-    level: "Intermediate",
-    iconBg: "bg-[rgba(124,110,249,0.16)]",
-    iconColor: "text-[#7c6ef9]",
-  },
-];
+// ---------------------------------------------------------------------------
+// Static visual data for sections that are not yet backed by the database
+// ---------------------------------------------------------------------------
 
+// VISUAL-ONLY: Recent discussions — no posts/comments backend yet
 interface Discussion {
   initials: string;
   avatarBg: string;
@@ -84,17 +62,38 @@ const DISCUSSIONS: Discussion[] = [
   },
 ];
 
+// Stable color palette for club icon chips (cycled by index)
+const CHIP_STYLES: Array<{ iconBg: string; iconColor: string }> = [
+  { iconBg: "bg-[rgba(179,230,83,0.16)]", iconColor: "text-[#6db33f]" },
+  { iconBg: "bg-[rgba(82,129,249,0.16)]", iconColor: "text-[#5281f9]" },
+  { iconBg: "bg-[rgba(124,110,249,0.16)]", iconColor: "text-[#7c6ef9]" },
+  { iconBg: "bg-[rgba(249,107,139,0.16)]", iconColor: "text-[#f96b8b]" },
+];
+
+function formatMemberCount(count: number): string {
+  if (count >= 1000) return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}k members`;
+  return `${count} member${count === 1 ? "" : "s"}`;
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
-const ClubCard = ({ club }: { club: Club }) => (
+interface ClubCardProps {
+  club: Club;
+  chipStyle: { iconBg: string; iconColor: string };
+  onJoin: (clubId: string) => void;
+  onLeave: (clubId: string) => void;
+  loading: boolean;
+}
+
+const ClubCard = ({ club, chipStyle, onJoin, onLeave, loading }: ClubCardProps) => (
   <div className="bg-white border border-[rgba(25,29,36,0.1)] rounded-[24px] p-[24px] flex flex-col gap-[14px] flex-1 min-w-0">
     {/* Icon chip */}
     <div
-      className={`${club.iconBg} rounded-[14px] size-[48px] flex items-center justify-center shrink-0`}
+      className={`${chipStyle.iconBg} rounded-[14px] size-[48px] flex items-center justify-center shrink-0`}
     >
-      <span className={`material-symbols-rounded text-[24px] ${club.iconColor}`}>
+      <span className={`material-symbols-rounded text-[24px] ${chipStyle.iconColor}`}>
         mic
       </span>
     </div>
@@ -105,24 +104,38 @@ const ClubCard = ({ club }: { club: Club }) => (
         {club.name}
       </p>
       <p className="font-inter font-normal text-[13px] text-[#6a7282] leading-normal">
-        {club.tagline}
+        {club.tagline ?? ""}
       </p>
     </div>
 
     {/* Meta row */}
     <div className="flex items-center gap-[10px]">
       <span className="font-inter font-semibold text-[13px] text-[#6a7282]">
-        {club.members}
+        {formatMemberCount(club.member_count)}
       </span>
       <span className="bg-[#f6f7f4] font-inter font-bold text-[12px] text-[#191d24] px-[12px] py-[6px] rounded-full">
         {club.level}
       </span>
     </div>
 
-    {/* Join button */}
-    <button className="bg-[#191d24] text-white font-inter font-bold text-[13px] rounded-full py-[10px] w-full hover:bg-[#2d3142] transition-colors">
-      Join club
-    </button>
+    {/* Join / Leave button */}
+    {club.joined ? (
+      <button
+        onClick={() => onLeave(club.id)}
+        disabled={loading}
+        className="bg-[#f6f7f4] text-[#191d24] font-inter font-bold text-[13px] rounded-full py-[10px] w-full hover:bg-[#e8e9e4] transition-colors disabled:opacity-50"
+      >
+        Leave club
+      </button>
+    ) : (
+      <button
+        onClick={() => onJoin(club.id)}
+        disabled={loading}
+        className="bg-[#191d24] text-white font-inter font-bold text-[13px] rounded-full py-[10px] w-full hover:bg-[#2d3142] transition-colors disabled:opacity-50"
+      >
+        Join club
+      </button>
+    )}
   </div>
 );
 
@@ -168,7 +181,74 @@ const DiscussionRow = ({
 // Page component
 // ---------------------------------------------------------------------------
 
-export const PageCommunity = () => {
+export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProps) => {
+  // Optimistic local state — mirrors the server-rendered list
+  const [clubs, setClubs] = useState<Club[]>(initialClubs);
+  // Tracks which club IDs have an in-flight mutation
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+
+  const setLoading = useCallback((clubId: string, on: boolean) => {
+    setPendingIds((prev) => {
+      const next = new Set(prev);
+      on ? next.add(clubId) : next.delete(clubId);
+      return next;
+    });
+  }, []);
+
+  const handleJoin = useCallback(
+    async (clubId: string) => {
+      // Optimistic update
+      setClubs((prev) =>
+        prev.map((c) =>
+          c.id === clubId ? { ...c, joined: true, member_count: c.member_count + 1 } : c
+        )
+      );
+      setLoading(clubId, true);
+      try {
+        const supabase = createClient();
+        await joinClub(supabase, { clubId, userId });
+      } catch {
+        // Revert on failure
+        setClubs((prev) =>
+          prev.map((c) =>
+            c.id === clubId ? { ...c, joined: false, member_count: c.member_count - 1 } : c
+          )
+        );
+      } finally {
+        setLoading(clubId, false);
+      }
+    },
+    [userId, setLoading]
+  );
+
+  const handleLeave = useCallback(
+    async (clubId: string) => {
+      // Optimistic update
+      setClubs((prev) =>
+        prev.map((c) =>
+          c.id === clubId
+            ? { ...c, joined: false, member_count: Math.max(0, c.member_count - 1) }
+            : c
+        )
+      );
+      setLoading(clubId, true);
+      try {
+        const supabase = createClient();
+        await leaveClub(supabase, { clubId, userId });
+      } catch {
+        // Revert on failure
+        setClubs((prev) =>
+          prev.map((c) =>
+            c.id === clubId ? { ...c, joined: true, member_count: c.member_count + 1 } : c
+          )
+        );
+      } finally {
+        setLoading(clubId, false);
+      }
+    },
+    [userId, setLoading]
+  );
+
   return (
     <div className="flex flex-col gap-[28px]">
       {/* Page heading */}
@@ -181,7 +261,7 @@ export const PageCommunity = () => {
         </p>
       </div>
 
-      {/* Live Session banner */}
+      {/* VISUAL-ONLY: Live session banner — no live-session backend yet */}
       <div className="bg-[#191d24] rounded-[24px] px-[32px] py-[28px] flex items-center justify-between gap-[24px]">
         <div className="flex flex-col gap-[10px] flex-1 min-w-0">
           {/* LIVE pill */}
@@ -209,14 +289,21 @@ export const PageCommunity = () => {
         Speaking clubs
       </h2>
 
-      {/* Clubs grid */}
+      {/* Clubs grid — real data */}
       <div className="flex gap-[20px] items-stretch">
-        {CLUBS.map((club) => (
-          <ClubCard key={club.name} club={club} />
+        {clubs.map((club, i) => (
+          <ClubCard
+            key={club.id}
+            club={club}
+            chipStyle={CHIP_STYLES[i % CHIP_STYLES.length]}
+            onJoin={handleJoin}
+            onLeave={handleLeave}
+            loading={pendingIds.has(club.id)}
+          />
         ))}
       </div>
 
-      {/* Recent discussions */}
+      {/* VISUAL-ONLY: Recent discussions — posts/comments not in scope yet */}
       <div className="bg-white border border-[rgba(25,29,36,0.1)] rounded-[24px] overflow-hidden">
         {/* Header row */}
         <div className="flex items-center justify-between px-[24px] pt-[24px] pb-[8px]">
