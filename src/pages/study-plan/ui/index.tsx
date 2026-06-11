@@ -1,106 +1,88 @@
 // === PAGE: Study Plan ===
 // Figma node 3495:178 "16 · Study Plan"
 // Layout: plan summary banner, 7-day week grid, today's task list
+//
+// NOTE: Task creation / plan generation is a separate future feature.
+//       This page only renders and toggles existing tasks from the DB.
+import { useState, useCallback } from "react";
 import { AppShell } from "@/widgets/layouts";
+import { createClient } from "~supabase/client";
+import { toggleStudyTask } from "../../../../services/study-plan";
+import type { StudyTask, StudyWeek } from "../../../../services/study-plan";
 
-// --- Types ---
+// ── skill tag colours ────────────────────────────────────────────────────────
 
-interface DayEntry {
+const SKILL_COLORS: Record<string, { bg: string; text: string }> = {
+  Writing:    { bg: "rgba(252,148,89,0.16)",  text: "#b1683e" },
+  Listening:  { bg: "rgba(89,196,252,0.16)",  text: "#2a7fa6" },
+  Reading:    { bg: "rgba(179,230,83,0.16)",  text: "#7da13a" },
+  Speaking:   { bg: "rgba(249,110,180,0.16)", text: "#ae4d87" },
+  Vocabulary: { bg: "rgba(124,110,249,0.16)", text: "#574dae" },
+  Grammar:    { bg: "rgba(252,220,89,0.16)",  text: "#a67c27" },
+};
+
+const DEFAULT_TAG_COLOR = { bg: "rgba(106,114,130,0.16)", text: "#6a7282" };
+
+function skillTag(skill: string | null): { bg: string; text: string } {
+  if (!skill) return DEFAULT_TAG_COLOR;
+  return SKILL_COLORS[skill] ?? DEFAULT_TAG_COLOR;
+}
+
+// ── week-grid helpers ────────────────────────────────────────────────────────
+
+const DAY_ABBRS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+interface WeekDay {
   abbr: string;
-  date: number;
-  tasks: string[];
-  isToday?: boolean;
+  isoDate: string; // YYYY-MM-DD
+  dateNum: number;
+  isToday: boolean;
 }
 
-interface TaskEntry {
-  title: string;
-  subtitle: string;
-  tag: string;
-  tagColor: string;   // bg colour (rgba string)
-  tagText: string;    // text colour
-  done: boolean;
+function buildWeekDays(weekStartISO: string): WeekDay[] {
+  const start = new Date(weekStartISO);
+  const today = new Date().toISOString().slice(0, 10);
+  return DAY_ABBRS.map((abbr, i) => {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    return { abbr, isoDate: iso, dateNum: d.getDate(), isToday: iso === today };
+  });
 }
 
-// --- Static data (no backend yet) ---
+// ── sub-components ───────────────────────────────────────────────────────────
 
-const WEEK_DAYS: DayEntry[] = [
-  { abbr: "MON", date: 9,  tasks: ["Reading"] },
-  { abbr: "TUE", date: 10, tasks: ["Listening"] },
-  { abbr: "WED", date: 11, tasks: ["Writing", "Vocab"], isToday: true },
-  { abbr: "THU", date: 12, tasks: ["Speaking"] },
-  { abbr: "FRI", date: 13, tasks: ["Mock test"] },
-  { abbr: "SAT", date: 14, tasks: ["Review"] },
-  { abbr: "SUN", date: 15, tasks: [] },
-];
-
-const TODAY_TASKS: TaskEntry[] = [
-  {
-    title: "Writing Task 2 — opinion essay",
-    subtitle: "Writing · 25 min",
-    tag: "Writing",
-    tagColor: "rgba(252,148,89,0.16)",
-    tagText: "#b1683e",
-    done: true,
-  },
-  {
-    title: "Vocabulary set — academic verbs",
-    subtitle: "Vocabulary · 15 min",
-    tag: "Vocabulary",
-    tagColor: "rgba(124,110,249,0.16)",
-    tagText: "#574dae",
-    done: true,
-  },
-  {
-    title: "Reading practice — Passage 3",
-    subtitle: "Reading · 20 min",
-    tag: "Reading",
-    tagColor: "rgba(179,230,83,0.16)",
-    tagText: "#7da13a",
-    done: false,
-  },
-];
-
-// --- Sub-components ---
-
-function DayCard({ day }: { day: DayEntry }) {
-  if (day.isToday) {
-    return (
-      <div className="bg-[#b3e653] flex-1 min-w-0 flex flex-col gap-[10px] items-start px-[14px] py-[16px] rounded-[18px] self-stretch overflow-hidden">
-        <p className="font-inter font-bold text-[#191d24] text-[11px] leading-normal whitespace-nowrap">
-          {day.abbr}
-        </p>
-        <p className="font-display font-bold text-[#191d24] text-[20px] leading-normal whitespace-nowrap">
-          {day.date}
-        </p>
-        {day.tasks.map((task) => (
-          <div
-            key={task}
-            className="bg-white flex items-center overflow-hidden px-[8px] py-[5px] rounded-[8px] w-full"
-          >
-            <p className="font-inter font-semibold text-[#191d24] text-[11px] leading-normal whitespace-nowrap">
-              {task}
-            </p>
-          </div>
-        ))}
-      </div>
-    );
-  }
+function DayCard({
+  day,
+  tasks,
+}: {
+  day: WeekDay;
+  tasks: StudyTask[];
+}) {
+  const isToday = day.isToday;
+  const outer = isToday
+    ? "bg-[#b3e653]"
+    : "bg-white border border-[rgba(25,29,36,0.1)]";
+  const abbr = isToday ? "text-[#191d24]" : "text-[#6a7282]";
+  const pill = isToday ? "bg-white" : "bg-[#f6f7f4]";
 
   return (
-    <div className="bg-white border border-[rgba(25,29,36,0.1)] flex-1 min-w-0 flex flex-col gap-[10px] items-start px-[14px] py-[16px] rounded-[18px] self-stretch overflow-hidden">
-      <p className="font-inter font-bold text-[#6a7282] text-[11px] leading-normal whitespace-nowrap">
+    <div
+      className={`${outer} flex-1 min-w-0 flex flex-col gap-[10px] items-start px-[14px] py-[16px] rounded-[18px] self-stretch overflow-hidden`}
+    >
+      <p className={`font-inter font-bold ${abbr} text-[11px] leading-normal whitespace-nowrap`}>
         {day.abbr}
       </p>
       <p className="font-display font-bold text-[#191d24] text-[20px] leading-normal whitespace-nowrap">
-        {day.date}
+        {day.dateNum}
       </p>
-      {day.tasks.map((task) => (
+      {tasks.map((t) => (
         <div
-          key={task}
-          className="bg-[#f6f7f4] flex items-center overflow-hidden px-[8px] py-[5px] rounded-[8px] w-full"
+          key={t.id}
+          className={`${pill} flex items-center overflow-hidden px-[8px] py-[5px] rounded-[8px] w-full`}
         >
-          <p className="font-inter font-semibold text-[#191d24] text-[11px] leading-normal whitespace-nowrap">
-            {task}
+          <p className="font-inter font-semibold text-[#191d24] text-[11px] leading-normal whitespace-nowrap truncate">
+            {t.skill ?? t.title}
           </p>
         </div>
       ))}
@@ -108,7 +90,18 @@ function DayCard({ day }: { day: DayEntry }) {
   );
 }
 
-function TaskRow({ task, isLast }: { task: TaskEntry; isLast: boolean }) {
+function TaskRow({
+  task,
+  isLast,
+  onToggle,
+}: {
+  task: StudyTask;
+  isLast: boolean;
+  onToggle: (id: string, done: boolean) => void;
+}) {
+  const { bg, text } = skillTag(task.skill);
+  const tag = task.skill ?? "Task";
+
   return (
     <div
       className={`flex gap-[14px] items-center py-[14px] w-full overflow-hidden ${
@@ -116,49 +109,142 @@ function TaskRow({ task, isLast }: { task: TaskEntry; isLast: boolean }) {
       }`}
     >
       {/* Checkbox */}
-      {task.done ? (
-        <div className="bg-[#b3e653] flex items-center justify-center rounded-[7px] shrink-0 size-[24px]">
-          <span className="font-inter font-bold text-[#191d24] text-[13px] leading-none">✓</span>
-        </div>
-      ) : (
-        <div className="bg-white border-[1.5px] border-[rgba(25,29,36,0.1)] rounded-[7px] shrink-0 size-[24px]" />
-      )}
+      <button
+        type="button"
+        aria-label={task.done ? "Mark as not done" : "Mark as done"}
+        onClick={() => onToggle(task.id, !task.done)}
+        className="shrink-0 focus:outline-none"
+      >
+        {task.done ? (
+          <div className="bg-[#b3e653] flex items-center justify-center rounded-[7px] size-[24px]">
+            <span className="font-inter font-bold text-[#191d24] text-[13px] leading-none">✓</span>
+          </div>
+        ) : (
+          <div className="bg-white border-[1.5px] border-[rgba(25,29,36,0.1)] rounded-[7px] size-[24px]" />
+        )}
+      </button>
 
       {/* Text */}
       <div className="flex flex-1 min-w-0 flex-col gap-[2px] items-start overflow-hidden">
         <p
-          className={`font-inter font-semibold text-[15px] leading-normal whitespace-nowrap ${
+          className={`font-inter font-semibold text-[15px] leading-normal truncate ${
             task.done ? "line-through text-[#6a7282]" : "text-[#191d24]"
           }`}
         >
           {task.title}
         </p>
-        <p className="font-inter font-normal text-[#6a7282] text-[13px] leading-normal whitespace-nowrap">
-          {task.subtitle}
-        </p>
+        {task.skill && (
+          <p className="font-inter font-normal text-[#6a7282] text-[13px] leading-normal whitespace-nowrap">
+            {task.skill}
+          </p>
+        )}
       </div>
 
       {/* Tag */}
       <div
         className="flex items-center justify-center overflow-hidden px-[12px] py-[6px] rounded-full shrink-0"
-        style={{ backgroundColor: task.tagColor }}
+        style={{ backgroundColor: bg }}
       >
         <p
           className="font-inter font-bold text-[12px] leading-normal whitespace-nowrap"
-          style={{ color: task.tagText }}
+          style={{ color: text }}
         >
-          {task.tag}
+          {tag}
         </p>
       </div>
     </div>
   );
 }
 
-// --- Main page ---
+// ── empty states ─────────────────────────────────────────────────────────────
 
-export const PageStudyPlan = () => {
-  const doneTasks = TODAY_TASKS.filter((t) => t.done).length;
-  const totalTasks = TODAY_TASKS.length;
+function EmptyWeek() {
+  return (
+    <div className="flex flex-col gap-[8px] items-center justify-center py-[32px] w-full">
+      <p className="font-inter font-semibold text-[#6a7282] text-[15px] leading-normal">
+        No tasks scheduled this week.
+      </p>
+      <p className="font-inter font-normal text-[#6a7282] text-[13px] leading-normal">
+        Task generation is coming soon — check back later.
+      </p>
+    </div>
+  );
+}
+
+function EmptyToday() {
+  return (
+    <p className="font-inter font-normal text-[#6a7282] text-[14px] leading-normal py-[20px]">
+      No tasks for today. Enjoy the rest day!
+    </p>
+  );
+}
+
+// ── props ────────────────────────────────────────────────────────────────────
+
+export interface PageStudyPlanProps {
+  studyWeek: StudyWeek;
+  weekStartISO: string;
+}
+
+// ── main page ────────────────────────────────────────────────────────────────
+
+export const PageStudyPlan = ({
+  studyWeek: initialStudyWeek,
+  weekStartISO,
+}: PageStudyPlanProps) => {
+  // Client-side optimistic state — initialise from SSR props.
+  const [studyWeek, setStudyWeek] = useState<StudyWeek>(initialStudyWeek ?? {});
+
+  const weekDays = buildWeekDays(weekStartISO ?? new Date().toISOString().slice(0, 10));
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayTasks = studyWeek[todayISO] ?? [];
+
+  // Weekly progress stats (across the whole week).
+  const allWeekTasks = weekDays.flatMap((d) => studyWeek[d.isoDate] ?? []);
+  const doneCount = allWeekTasks.filter((t) => t.done).length;
+  const totalCount = allWeekTasks.length;
+  const progressFraction = totalCount > 0 ? doneCount / totalCount : 0;
+
+  const doneTodayCount = todayTasks.filter((t) => t.done).length;
+
+  // Day-name for the "Today" header (e.g. "Wednesday").
+  const todayDayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+
+  // ── toggle handler ──────────────────────────────────────────────────────────
+  const handleToggle = useCallback(
+    async (taskId: string, newDone: boolean) => {
+      // Optimistic update.
+      setStudyWeek((prev) => {
+        const next: StudyWeek = {};
+        for (const [day, tasks] of Object.entries(prev)) {
+          next[day] = tasks.map((t) =>
+            t.id === taskId ? { ...t, done: newDone } : t,
+          );
+        }
+        return next;
+      });
+
+      // Persist to Supabase (browser client — RLS enforces ownership).
+      const supabase = createClient();
+      const updated = await toggleStudyTask(supabase, taskId, newDone);
+
+      // Rollback if the server call failed.
+      if (!updated) {
+        setStudyWeek((prev) => {
+          const next: StudyWeek = {};
+          for (const [day, tasks] of Object.entries(prev)) {
+            next[day] = tasks.map((t) =>
+              t.id === taskId ? { ...t, done: !newDone } : t,
+            );
+          }
+          return next;
+        });
+      }
+    },
+    [],
+  );
+
+  const hasAnyTasks = allWeekTasks.length > 0;
 
   return (
     <div className="min-h-screen bg-[#f6f7f4]">
@@ -177,18 +263,33 @@ export const PageStudyPlan = () => {
         <div className="bg-[#191d24] flex items-center justify-between overflow-hidden px-[32px] py-[28px] rounded-[24px] w-full">
           <div className="flex flex-1 min-w-0 flex-col gap-[10px] items-start overflow-hidden">
             <p className="font-inter font-bold text-[#b3e653] text-[12px] leading-normal tracking-[0.06em] whitespace-nowrap">
-              TARGET · BAND 8.0 BY 15 AUG 2026
+              TARGET · BAND 8.0
             </p>
-            <p className="font-display font-bold text-white text-[22px] leading-normal whitespace-nowrap">
-              4 of 5 tasks done this week
-            </p>
+            {hasAnyTasks ? (
+              <p className="font-display font-bold text-white text-[22px] leading-normal whitespace-nowrap">
+                {doneCount} of {totalCount} tasks done this week
+              </p>
+            ) : (
+              <p className="font-display font-bold text-white text-[22px] leading-normal whitespace-nowrap">
+                No tasks scheduled yet
+              </p>
+            )}
             {/* Progress bar */}
             <div className="bg-[rgba(255,255,255,0.16)] flex h-[10px] items-center overflow-hidden rounded-[6px] w-[400px] max-w-full">
-              <div className="bg-[#b3e653] h-full" style={{ flex: "4 0 0" }} />
-              <div className="h-full" style={{ flex: "1 0 0" }} />
+              {hasAnyTasks && progressFraction > 0 && (
+                <div
+                  className="bg-[#b3e653] h-full rounded-[6px]"
+                  style={{ width: `${progressFraction * 100}%` }}
+                />
+              )}
             </div>
           </div>
-          <button className="bg-[#b3e653] flex items-center justify-center overflow-hidden px-[22px] py-[13px] rounded-full shrink-0 hover:bg-[#9ad534] transition-colors">
+          <button
+            type="button"
+            className="bg-[#b3e653] flex items-center justify-center overflow-hidden px-[22px] py-[13px] rounded-full shrink-0 hover:bg-[#9ad534] transition-colors cursor-not-allowed opacity-60"
+            title="Task generation coming soon"
+            disabled
+          >
             <span className="font-inter font-bold text-[#191d24] text-[14px] leading-normal whitespace-nowrap">
               Adjust plan
             </span>
@@ -200,11 +301,19 @@ export const PageStudyPlan = () => {
           <h2 className="font-display font-bold text-[#191d24] text-[18px] leading-normal whitespace-nowrap">
             This week
           </h2>
-          <div className="flex gap-[14px] items-start w-full">
-            {WEEK_DAYS.map((day) => (
-              <DayCard key={day.abbr} day={day} />
-            ))}
-          </div>
+          {hasAnyTasks ? (
+            <div className="flex gap-[14px] items-start w-full">
+              {weekDays.map((day) => (
+                <DayCard
+                  key={day.isoDate}
+                  day={day}
+                  tasks={studyWeek[day.isoDate] ?? []}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyWeek />
+          )}
         </div>
 
         {/* Today's Tasks card */}
@@ -212,17 +321,28 @@ export const PageStudyPlan = () => {
           {/* Header */}
           <div className="flex items-center justify-between pb-[8px] w-full">
             <h2 className="font-display font-bold text-[#191d24] text-[18px] leading-normal whitespace-nowrap">
-              Today · Wednesday
+              Today · {todayDayName}
             </h2>
-            <span className="font-inter font-semibold text-[#9ad534] text-[14px] leading-normal whitespace-nowrap">
-              {doneTasks} of {totalTasks} done
-            </span>
+            {todayTasks.length > 0 && (
+              <span className="font-inter font-semibold text-[#9ad534] text-[14px] leading-normal whitespace-nowrap">
+                {doneTodayCount} of {todayTasks.length} done
+              </span>
+            )}
           </div>
 
           {/* Task list */}
-          {TODAY_TASKS.map((task, i) => (
-            <TaskRow key={task.title} task={task} isLast={i === TODAY_TASKS.length - 1} />
-          ))}
+          {todayTasks.length > 0 ? (
+            todayTasks.map((task, i) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                isLast={i === todayTasks.length - 1}
+                onToggle={handleToggle}
+              />
+            ))
+          ) : (
+            <EmptyToday />
+          )}
         </div>
       </div>
     </div>
