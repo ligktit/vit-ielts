@@ -105,7 +105,7 @@ function SortablePassagePanel({
                                             Passage {pIdx + 1}
                                         </span>
                                         <span className="passage-name">
-                                            {passage.title || "(Chưa đặt tên)"}
+                                            {passage.title || "(Untitled)"}
                                         </span>
                                     </div>
                                     <div className="passage-header-badges">
@@ -117,7 +117,7 @@ function SortablePassagePanel({
                                                 fontSize: 11,
                                             }}
                                         />
-                                        <span className="passage-header-badge-label">câu hỏi</span>
+                                        <span className="passage-header-badge-label">questions</span>
                                         {questionTypes.length > 0 && (
                                             <div className="passage-type-dots">
                                                 {questionTypes.map(t => (
@@ -138,11 +138,11 @@ function SortablePassagePanel({
                             <Space onClick={(e) => e.stopPropagation()} size={4}>
                                 {totalPassages > 1 && (
                                     <Popconfirm
-                                        title="Xóa passage này?"
-                                        description={`Passage "${passage.title || pIdx + 1}" và ${qCount} câu hỏi sẽ bị xóa.`}
+                                        title="Delete this passage?"
+                                        description={`Passage "${passage.title || pIdx + 1}" and ${qCount} question(s) will be deleted.`}
                                         onConfirm={onRemove}
-                                        okText="Xóa"
-                                        cancelText="Hủy"
+                                        okText="Delete"
+                                        cancelText="Cancel"
                                         okButtonProps={{ danger: true }}
                                     >
                                         <Button
@@ -311,7 +311,7 @@ export default function PassageList({
                         <Tag style={{ marginLeft: 8 }}>{passages.length}</Tag>
                     </span>
                     <span className="passage-list-subtitle">
-                        · {totalQuestions} câu hỏi
+                        · {totalQuestions} questions
                     </span>
                 </div>
                 <Button
@@ -319,7 +319,7 @@ export default function PassageList({
                     icon={<PlusOutlined />}
                     onClick={onAdd}
                 >
-                    Thêm Passage
+                    Add Passage
                 </Button>
             </div>
 
@@ -327,10 +327,10 @@ export default function PassageList({
             {passages.length === 0 ? (
                 <Empty
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    description="Chưa có passage nào"
+                    description="No passages yet"
                 >
                     <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                        Thêm Passage đầu tiên
+                        Add First Passage
                     </Button>
                 </Empty>
             ) : (

@@ -87,8 +87,8 @@ export default function AdminLoginPage() {
         .admin-login-page input:-webkit-autofill:focus,
         .admin-login-page input:-webkit-autofill:active {
           transition: background-color 99999s ease-in-out 0s !important;
-          -webkit-text-fill-color: #1e293b !important;
-          caret-color: #1e293b !important;
+          -webkit-text-fill-color: #191D24 !important;
+          caret-color: #191D24 !important;
         }
       ` }} />
 
@@ -106,9 +106,9 @@ export default function AdminLoginPage() {
             <div className="admin-login-branding-content">
               <div className="admin-login-logo">
                 <img
-                  src="/logo.png"
-                  alt="IELTS Prediction"
-                  style={{ height: 40, width: "auto", objectFit: "contain" }}
+                  src="/assets/logos/logo-on-bright.svg"
+                  alt="VIT IELTS"
+                  style={{ height: 36, width: "auto", objectFit: "contain" }}
                 />
               </div>
               <h1 className="admin-login-branding-title">
@@ -140,7 +140,7 @@ export default function AdminLoginPage() {
             <div className="admin-login-card">
               <div className="admin-login-card-header">
                 <div className="admin-login-shield-icon">
-                  <LockOutlined style={{ fontSize: 24, color: "#d94a56" }} />
+                  <LockOutlined style={{ fontSize: 24, color: "#7DB024" }} />
                 </div>
                 <h2 className="admin-login-card-title">Đăng nhập Admin</h2>
                 <p className="admin-login-card-subtitle">
@@ -229,20 +229,21 @@ export default function AdminLoginPage() {
                   className="admin-login-submit-btn"
                   style={{
                     background: isLoginHovered
-                      ? "linear-gradient(135deg, #c43a46 0%, #a83240 100%)"
-                      : "linear-gradient(135deg, #d94a56 0%, #c43a46 100%)",
+                      ? "linear-gradient(135deg, #7DB024 0%, #6a9920 100%)"
+                      : "linear-gradient(135deg, #9AD534 0%, #7DB024 100%)",
                     border: "none",
                     height: 48,
                     borderRadius: 12,
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontSize: 15,
                     letterSpacing: "0.3px",
+                    color: "#191D24",
                     transform: isLoginHovered
                       ? "translateY(-1px)"
                       : "translateY(0)",
                     boxShadow: isLoginHovered
-                      ? "0 8px 24px rgba(217, 74, 86, 0.35)"
-                      : "0 4px 12px rgba(217, 74, 86, 0.2)",
+                      ? "0 8px 24px rgba(154, 213, 52, 0.4)"
+                      : "0 4px 12px rgba(154, 213, 52, 0.25)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                   onMouseEnter={() => setIsLoginHovered(true)}
@@ -296,7 +297,7 @@ export default function AdminLoginPage() {
             height: 600px;
             background: radial-gradient(
               circle,
-              rgba(217, 74, 86, 0.3) 0%,
+              rgba(154, 213, 52, 0.22) 0%,
               transparent 70%
             );
             top: -200px;
@@ -309,7 +310,7 @@ export default function AdminLoginPage() {
             height: 500px;
             background: radial-gradient(
               circle,
-              rgba(99, 102, 241, 0.25) 0%,
+              rgba(22, 155, 134, 0.18) 0%,
               transparent 70%
             );
             bottom: -150px;
@@ -322,7 +323,7 @@ export default function AdminLoginPage() {
             height: 400px;
             background: radial-gradient(
               circle,
-              rgba(59, 130, 246, 0.2) 0%,
+              rgba(251, 221, 96, 0.15) 0%,
               transparent 70%
             );
             top: 50%;
@@ -370,8 +371,8 @@ export default function AdminLoginPage() {
             padding: 48px;
             background: linear-gradient(
               135deg,
-              rgba(217, 74, 86, 0.05) 0%,
-              rgba(99, 102, 241, 0.03) 100%
+              rgba(154, 213, 52, 0.07) 0%,
+              rgba(22, 155, 134, 0.04) 100%
             );
             border-right: 1px solid rgba(0, 0, 0, 0.05);
           }
@@ -391,12 +392,12 @@ export default function AdminLoginPage() {
             width: 48px;
             height: 48px;
             border-radius: 14px;
-            background: linear-gradient(135deg, #d94a56 0%, #c43a46 100%);
+            background: linear-gradient(135deg, #9AD534 0%, #7DB024 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            box-shadow: 0 4px 12px rgba(217, 74, 86, 0.3);
+            color: #191D24;
+            box-shadow: 0 4px 12px rgba(154, 213, 52, 0.3);
           }
 
           .admin-login-logo-text {
@@ -442,9 +443,9 @@ export default function AdminLoginPage() {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #d94a56, #f87171);
+            background: linear-gradient(135deg, #9AD534, #B3E653);
             flex-shrink: 0;
-            box-shadow: 0 0 8px rgba(217, 74, 86, 0.4);
+            box-shadow: 0 0 8px rgba(154, 213, 52, 0.5);
           }
 
           /* ── Right login form ── */
@@ -470,8 +471,8 @@ export default function AdminLoginPage() {
             width: 56px;
             height: 56px;
             border-radius: 16px;
-            background: rgba(217, 74, 86, 0.1);
-            border: 1px solid rgba(217, 74, 86, 0.2);
+            background: rgba(154, 213, 52, 0.12);
+            border: 1px solid rgba(154, 213, 52, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -578,9 +579,9 @@ export default function AdminLoginPage() {
           .admin-login-page .admin-login-input.ant-input:focus,
           .admin-login-page .admin-login-input .ant-input:hover,
           .admin-login-page .admin-login-input.ant-input:hover {
-            border-color: rgba(217, 74, 86, 0.3) !important;
+            border-color: rgba(154, 213, 52, 0.5) !important;
             background: #fff !important;
-            box-shadow: 0 0 0 2px rgba(217, 74, 86, 0.05) !important;
+            box-shadow: 0 0 0 2px rgba(154, 213, 52, 0.08) !important;
           }
 
           .admin-login-page .admin-login-input .ant-input::placeholder {
@@ -606,9 +607,9 @@ export default function AdminLoginPage() {
 
           .admin-login-page .admin-login-input.ant-input-password:focus-within,
           .admin-login-page .admin-login-input.ant-input-password:hover {
-            border-color: rgba(217, 74, 86, 0.3) !important;
+            border-color: rgba(154, 213, 52, 0.5) !important;
             background: #fff !important;
-            box-shadow: 0 0 0 2px rgba(217, 74, 86, 0.05) !important;
+            box-shadow: 0 0 0 2px rgba(154, 213, 52, 0.08) !important;
           }
 
           .admin-login-page .admin-login-input.ant-input-password .ant-input,
@@ -643,7 +644,7 @@ export default function AdminLoginPage() {
           /* Button focus outline fix */
           .admin-login-page .admin-login-submit-btn:focus {
             outline: none !important;
-            box-shadow: 0 0 0 3px rgba(217, 74, 86, 0.25) !important;
+            box-shadow: 0 0 0 3px rgba(154, 213, 52, 0.3) !important;
           }
         `}</style>
       </div>

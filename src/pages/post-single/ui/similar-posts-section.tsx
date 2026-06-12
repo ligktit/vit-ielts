@@ -21,13 +21,13 @@ export function SimilarPostsSection({ posts }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-extrabold text-[#2D3142] font-noto-sans">
-            Bài viết tương tự
+            Similar posts
           </h2>
           <Link
             href="/blog"
             className="text-sm font-semibold text-primary-500 hover:text-primary-300 transition-colors flex items-center gap-1"
           >
-            Tất cả bài viết
+            All posts
             <span className="material-symbols-rounded text-base leading-none">
               arrow_forward
             </span>

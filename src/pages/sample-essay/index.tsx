@@ -54,7 +54,7 @@ function transformSampleEssayToLegacy(essay: SampleEssayDB): SingleSampleEssay {
       title: seo.meta_title ?? essay.title,
       metaDesc: seo.meta_description ?? essay.excerpt ?? "",
       breadcrumbs: [
-        { text: "Trang chủ", url: "/" },
+        { text: "Home", url: "/" },
         { text: essay.skill === "writing" ? "Writing Sample" : essay.skill === "speaking" ? "Speaking Sample" : "Sample Essay", url: essay.skill === "writing" ? "/ielts-writing-sample" : essay.skill === "speaking" ? "/ielts-speaking-sample" : "/" },
         { text: essay.title, url: `/${essay.slug}` },
       ],
@@ -112,16 +112,16 @@ export const getServerSidePropsArchive = async (
     writing: {
       title: "DOL IELTS Writing Task 1 Academic Sample",
       description: {
-        line1: "Tổng hợp bài mẫu IELTS Exam Writing Task 1 và hướng dẫn cách làm bài,",
-        line2: "từ vựng chi tiết theo chủ đề.",
+        line1: "IELTS Writing Task 1 sample essays with step-by-step guidance,",
+        line2: "detailed topic vocabulary included.",
       },
       backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
     },
     speaking: {
       title: "DOL IELTS Speaking Sample",
       description: {
-        line1: "Tổng hợp bài mẫu IELTS Exam Speaking Task 1 và hướng dẫn cách làm bài,",
-        line2: "từ vựng chi tiết theo chủ đề.",
+        line1: "IELTS Speaking sample answers with step-by-step guidance,",
+        line2: "detailed topic vocabulary included.",
       },
       backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
     },

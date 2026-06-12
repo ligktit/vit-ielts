@@ -55,8 +55,8 @@ export const ROUTES = {
   },
 
   PRACTICE: {
-    ARCHIVE_LISTENING: "/ielts-practice-library/listening",
-    ARCHIVE_READING: "/ielts-practice-library/reading",
+    ARCHIVE_LISTENING: "/ielts-exam-library?skill=listening",
+    ARCHIVE_READING: "/ielts-exam-library?skill=reading",
     SINGLE: (slug: string) => `/ielts-practice-library/${slug}`,
   },
 

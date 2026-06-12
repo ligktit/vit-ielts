@@ -196,7 +196,7 @@ export const PracticeTestItem = ({ item }: { item: IPracticeTest }) => {
               <span className="material-symbols-rounded text-primary!">
                 play_circle
               </span>
-              <span className="font-semibold">Làm bài</span>
+              <span className="font-semibold">Start test</span>
             </Button>
           </>
         ) : (
@@ -214,7 +214,7 @@ export const PracticeTestItem = ({ item }: { item: IPracticeTest }) => {
               <span className="material-symbols-rounded text-primary!">
                 play_circle
               </span>
-              <span className="font-semibold">Làm bài</span>
+              <span className="font-semibold">Start test</span>
             </LinkButton>
           </Link>
         )}

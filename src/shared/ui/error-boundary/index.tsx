@@ -78,7 +78,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
                 >
                     <div style={{ fontSize: 56, marginBottom: 12 }}>⚠️</div>
                     <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
-                        Đã xảy ra lỗi
+                        Something went wrong
                     </h1>
                     <p
                         style={{
@@ -88,9 +88,9 @@ export class AppErrorBoundary extends React.Component<Props, State> {
                             lineHeight: 1.55,
                         }}
                     >
-                        Trang gặp lỗi không mong muốn. Bài làm của bạn (nếu đang làm
-                        bài) đã được tự động lưu nháp 60 giây/lần. Hãy thử tải lại trang
-                        — nếu vẫn lỗi, vui lòng liên hệ hỗ trợ.
+                        An unexpected error occurred. Your progress (if you were taking a
+                        test) is auto-saved every 60 seconds. Try reloading the page —
+                        if the issue persists, please contact support.
                     </p>
                     {this.state.message && (
                         <pre
@@ -131,7 +131,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
                                 fontWeight: 600,
                             }}
                         >
-                            Tải lại trang
+                            Reload page
                         </button>
                         <button
                             type="button"
@@ -146,7 +146,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
                                 fontWeight: 600,
                             }}
                         >
-                            Về trang chủ
+                            Back to home
                         </button>
                     </div>
                 </div>

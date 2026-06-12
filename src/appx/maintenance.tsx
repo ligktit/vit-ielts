@@ -4,8 +4,8 @@ export const MaintenancePage = () => {
   return (
     <>
       <Head>
-        <title>Website đang bảo trì</title>
-        <meta name="description" content="Website đang trong quá trình bảo trì" />
+        <title>Under Maintenance</title>
+        <meta name="description" content="This website is currently under maintenance" />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
@@ -36,19 +36,19 @@ export const MaintenancePage = () => {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Đang Bảo Trì
+            Under Maintenance
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-            Website hiện đang trong quá trình bảo trì để cải thiện chất lượng dịch vụ.
+            The website is currently undergoing maintenance to improve our service quality.
           </p>
-          
+
           <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
             <p className="text-lg text-gray-700 mb-4">
-              Chúng tôi sẽ sớm quay trở lại với những cải tiến mới.
+              We&apos;ll be back soon with new improvements.
             </p>
             <p className="text-base text-gray-500">
-              Xin cảm ơn sự kiên nhẫn của bạn!
+              Thank you for your patience!
             </p>
           </div>
           
@@ -72,7 +72,7 @@ export const MaintenancePage = () => {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            <span className="text-sm">Đang cập nhật...</span>
+            <span className="text-sm">Updating...</span>
           </div>
         </div>
       </div>

@@ -130,12 +130,12 @@ export const Footer = () => {
         <section data-section="footer-cta-banner" className="pt-16 pb-16 bg-white">
           <ScrollFadeIn className="mx-auto sm:px-6">
             <CTABanner
-              title={ctaBannerConfig?.title || "Sẵn sàng cho kì thi IELTS máy?"}
+              title={ctaBannerConfig?.title || "Ready to ace the IELTS?"}
               subtitle={
                 ctaBannerConfig?.description ||
-                "Ôn luyện trên các bài thi sát thực đề, xem giải thích chi tiết trước khi bước vào phòng thi!"
+                "Practice with realistic exam simulations and review detailed explanations before test day!"
               }
-              ctaText={ctaBannerConfig?.button?.text || "Bắt đầu luyện thi"}
+              ctaText={ctaBannerConfig?.button?.text || "Start practising"}
               ctaHref={
                 ctaBannerConfig?.button?.link || buyProLink || ROUTES.LOGIN()
               }

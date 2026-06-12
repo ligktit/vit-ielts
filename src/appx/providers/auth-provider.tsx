@@ -54,7 +54,7 @@ export const useAuth = () => {
       if (isAdminRole(profile?.roles)) {
         // Sign out immediately and block access
         await supabase.auth.signOut();
-        throw new Error("Tài khoản quản trị viên phải đăng nhập tại trang /admin/login.");
+        throw new Error("Admin accounts must sign in at /admin/login.");
       }
     }
 

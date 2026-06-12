@@ -24,8 +24,8 @@ const DEFAULT_BANNER: PracticeLibraryBannerConfig = {
   listening: {
     title: "Blog",
     description: {
-      line1: "Chia sẻ kiến thức, mẹo và chiến lược học IELTS",
-      line2: "được cập nhật thường xuyên bởi VitIELTS.",
+      line1: "Tips, strategies and knowledge for IELTS success",
+      line2: "updated regularly by VitIELTS.",
       line3: "",
     },
     backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
@@ -34,8 +34,8 @@ const DEFAULT_BANNER: PracticeLibraryBannerConfig = {
   reading: {
     title: "Blog",
     description: {
-      line1: "Chia sẻ kiến thức, mẹo và chiến lược học IELTS",
-      line2: "được cập nhật thường xuyên bởi VitIELTS.",
+      line1: "Tips, strategies and knowledge for IELTS success",
+      line2: "updated regularly by VitIELTS.",
       line3: "",
     },
     backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",

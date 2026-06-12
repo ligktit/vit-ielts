@@ -41,7 +41,7 @@ function PassageEditorInner({
                 {isListening && (
                     <>
                         <Col span={3}>
-                            <Form.Item label="Audio Start" tooltip="MM:SS hoặc số giây (vd 0:40 = 40 giây)">
+                            <Form.Item label="Audio Start" tooltip="MM:SS or seconds (e.g. 0:40 = 40s)">
                                 <MMSSInput
                                     value={passage.audio_start}
                                     onChange={(v) => onUpdatePassage("audio_start", v ?? null)}
@@ -50,7 +50,7 @@ function PassageEditorInner({
                             </Form.Item>
                         </Col>
                         <Col span={3}>
-                            <Form.Item label="Audio End" tooltip="MM:SS hoặc số giây (vd 4:15 = 4 phút 15 giây)">
+                            <Form.Item label="Audio End" tooltip="MM:SS or seconds (e.g. 4:15 = 4m 15s)">
                                 <MMSSInput
                                     value={passage.audio_end}
                                     onChange={(v) => onUpdatePassage("audio_end", v ?? null)}
@@ -63,7 +63,7 @@ function PassageEditorInner({
                 <Col span={isListening ? 5 : 8}>
                     <Form.Item label="Start question no">
                         <InputNumber 
-                            placeholder="Mặc định: 1" 
+                            placeholder="Default: 1" 
                             value={passage.start_question_number} 
                             onChange={(v) => onUpdatePassage("start_question_number", v)} 
                             className="w-full" 
@@ -72,7 +72,7 @@ function PassageEditorInner({
                 </Col>
             </Row>
             <Form.Item label="Content">
-                <RichTextEditor value={passage.content ?? ""} onChange={(html) => onUpdatePassage("content", html)} placeholder="Nhập nội dung passage..." />
+                <RichTextEditor value={passage.content ?? ""} onChange={(html) => onUpdatePassage("content", html)} placeholder="Enter passage content..." />
             </Form.Item>
 
             <Divider>Questions ({(Array.isArray(passage.questions) ? passage.questions : []).length})</Divider>

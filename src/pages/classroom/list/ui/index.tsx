@@ -5,7 +5,6 @@ import { twMerge } from "tailwind-merge";
 import { Dropdown, Modal, message } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { createClient } from "~supabase/client";
-import { useAuth } from "@/appx/providers";
 import { AppShell } from "@/widgets/layouts";
 import { ClassroomQrScanner } from "../../qr-scanner";
 import { createClassroom, joinClassroomByCode } from "~services/classroom";
@@ -48,7 +47,7 @@ const ModalHeader = ({ title, onClose }: { title: string; onClose: () => void })
     <button
       onClick={onClose}
       className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] transition hover:bg-[#E5E7EB]"
-      aria-label="Đóng"
+      aria-label="Close"
     >
       <CloseOutlined />
     </button>
@@ -95,7 +94,7 @@ const ClassCard = ({ c }: { c: ClassroomSummary }) => {
             {c.name}
           </p>
           <p className="font-inter font-normal text-[12px] text-[#6a7282] leading-normal truncate">
-            {c.description || `Mã: ${c.invite_code}`}
+            {c.description || `Code: ${c.invite_code}`}
           </p>
         </div>
       </div>
@@ -108,13 +107,13 @@ const ClassCard = ({ c }: { c: ClassroomSummary }) => {
         <div className="flex items-center gap-[5px]">
           <span className="material-symbols-rounded text-[15px] text-[#6a7282]">person</span>
           <span className="font-inter font-medium text-[12px] text-[#6a7282]">
-            {c.student_count} học sinh
+            {c.student_count} students
           </span>
         </div>
         <div className="flex items-center gap-[5px]">
           <span className="material-symbols-rounded text-[15px] text-[#6a7282]">assignment</span>
           <span className="font-inter font-medium text-[12px] text-[#6a7282]">
-            {c.assignment_count} bài giao
+            {c.assignment_count} assignments
           </span>
         </div>
       </div>
@@ -125,14 +124,14 @@ const ClassCard = ({ c }: { c: ClassroomSummary }) => {
           <div className="flex gap-[6px] items-center justify-center px-[10px] py-[5px] rounded-[100px] bg-[#f2fadd]">
             <div className="w-[6px] h-[6px] rounded-full bg-[#219653] shrink-0" />
             <span className="font-inter font-bold text-[12px] text-[#219653] whitespace-nowrap">
-              Đang hoạt động
+              Active
             </span>
           </div>
         ) : (
           <div className="flex gap-[6px] items-center justify-center px-[10px] py-[5px] rounded-[100px] bg-[rgba(25,29,36,0.06)]">
             <div className="w-[6px] h-[6px] rounded-full bg-[#6a7282] shrink-0" />
             <span className="font-inter font-bold text-[12px] text-[#6a7282] whitespace-nowrap">
-              Đã đóng
+              Closed
             </span>
           </div>
         )}
@@ -195,7 +194,7 @@ const TeacherClassCard = ({ c }: { c: ClassroomSummary }) => {
               {c.name}
             </p>
             <p className="font-inter font-normal text-[13px] leading-normal text-ink-muted truncate">
-              {c.description || `Mã: ${c.invite_code}`}
+              {c.description || `Code: ${c.invite_code}`}
             </p>
           </div>
         </div>
@@ -207,24 +206,24 @@ const TeacherClassCard = ({ c }: { c: ClassroomSummary }) => {
             items: [
               {
                 key: "manage",
-                label: <Link href={ROUTES.CLASSROOM.DETAIL(c.id)}>Quản lý lớp</Link>,
+                label: <Link href={ROUTES.CLASSROOM.DETAIL(c.id)}>Manage class</Link>,
               },
               {
                 key: "assign",
                 label: (
-                  <Link href={`${ROUTES.CLASSROOM.DETAIL(c.id)}?tab=assignments`}>Giao bài</Link>
+                  <Link href={`${ROUTES.CLASSROOM.DETAIL(c.id)}?tab=assignments`}>Assign tests</Link>
                 ),
               },
               {
                 key: "report",
-                label: <Link href={ROUTES.CLASSROOM.TRACKING(c.id)}>Báo cáo</Link>,
+                label: <Link href={ROUTES.CLASSROOM.TRACKING(c.id)}>Report</Link>,
               },
             ],
           }}
         >
           <button
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] text-ink-muted hover:bg-[#f6f7f4] transition-colors"
-            aria-label="Thêm hành động"
+            aria-label="More actions"
           >
             <span className="material-symbols-rounded text-[20px]">more_vert</span>
           </button>
@@ -286,9 +285,8 @@ const TeacherClassCard = ({ c }: { c: ClassroomSummary }) => {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }: Props) => {
+export const PageClassroomList = ({ isTeacher, classrooms, studentStats }: Props) => {
   const router = useRouter();
-  const { currentUser } = useAuth();
   const supabase = useMemo(() => createClient(), []);
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -310,10 +308,10 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
 
   useEffect(() => {
     if (router.query.join_error) {
-      message.error("Mã mời không hợp lệ hoặc lớp đã đóng.");
+      message.error("Invalid invite code or the class is closed.");
       router.replace(ROUTES.CLASSROOM.LIST, undefined, { shallow: true });
     } else if (router.query.join_pending) {
-      message.success("Đã gửi yêu cầu vào lớp. Vui lòng chờ giáo viên duyệt.");
+      message.success("Join request sent. Please wait for the teacher to approve.");
       router.replace(ROUTES.CLASSROOM.LIST, undefined, { shallow: true });
     }
   }, [router.query.join_error, router.query.join_pending, router]);
@@ -342,20 +340,20 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Bạn cần đăng nhập.");
+      if (!user) throw new Error("You must be signed in.");
       const classroom = await createClassroom(supabase, {
         name: createName.trim(),
         description: createDesc.trim() || null,
         ownerId: user.id,
       });
-      message.success("Đã tạo lớp thành công!");
+      message.success("Class created successfully!");
       router.push(ROUTES.CLASSROOM.DETAIL(classroom.id));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       message.error(
         msg.includes("CLASS_LIMIT_REACHED")
-          ? "Bạn đã đạt giới hạn 10 lớp học."
-          : "Không tạo được lớp."
+          ? "You have reached the 10-class limit."
+          : "Could not create class."
       );
       setSubmitting(false);
     }
@@ -379,7 +377,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         const result = await joinClassroomByCode(supabase, code, role);
         if (result.status === "pending") {
           message.success(
-            `Đã gửi yêu cầu vào lớp ${result.name}. Vui lòng chờ giáo viên duyệt.`
+            `Join request sent for ${result.name}. Please wait for the teacher to approve.`
           );
           setSubmitting(false);
           setJoinOpen(false);
@@ -387,14 +385,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
           setScanOpen(false);
           return;
         }
-        message.success(`Đã tham gia lớp ${result.name}!`);
+        message.success(`You have joined ${result.name}!`);
         router.push(ROUTES.CLASSROOM.DETAIL(result.id));
       } catch (e) {
         const msg = e instanceof Error ? e.message : "";
         message.error(
           msg.includes("CLASS_NOT_FOUND")
-            ? "Mã mời không hợp lệ hoặc lớp đã đóng."
-            : "Không tham gia được lớp."
+            ? "Invalid invite code or the class is closed."
+            : "Could not join class."
         );
         setSubmitting(false);
       }
@@ -513,7 +511,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
           {studentClasses.length > 0 && (
             <section data-section="teacher-student-classes">
               <p className="font-display font-bold text-[20px] text-ink-900 leading-normal mb-[16px]">
-                Lớp bạn đang học
+                Classes you&apos;re enrolled in
               </p>
               <div className="flex flex-wrap gap-[20px] items-start">
                 {studentClasses.map((c) => (
@@ -536,7 +534,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                   <span className="material-symbols-rounded text-[22px] leading-none" style={{ color: "#2563EB" }}>school</span>
                 </span>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[13px] font-medium text-[#6a7282]">Số lớp tham gia</span>
+                  <span className="text-[13px] font-medium text-[#6a7282]">Classes joined</span>
                   <span className="text-[28px] font-bold leading-none text-[#191d24]">{studentStats.joined_class_count}</span>
                 </div>
               </div>
@@ -545,7 +543,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                   <span className="material-symbols-rounded text-[22px] leading-none" style={{ color: "#D94A56" }}>assignment</span>
                 </span>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[13px] font-medium text-[#6a7282]">Bài tập cần làm</span>
+                  <span className="text-[13px] font-medium text-[#6a7282]">Pending tasks</span>
                   <span className="text-[28px] font-bold leading-none text-[#191d24]">{studentStats.pending_count}</span>
                 </div>
               </div>
@@ -554,7 +552,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                   <span className="material-symbols-rounded text-[22px] leading-none" style={{ color: "#16A34A" }}>task_alt</span>
                 </span>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[13px] font-medium text-[#6a7282]">Đã hoàn thành</span>
+                  <span className="text-[13px] font-medium text-[#6a7282]">Completed</span>
                   <span className="text-[28px] font-bold leading-none text-[#191d24]">{studentStats.submitted_count}</span>
                 </div>
               </div>
@@ -563,7 +561,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                   <span className="material-symbols-rounded text-[22px] leading-none" style={{ color: "#EA580C" }}>grade</span>
                 </span>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[13px] font-medium text-[#6a7282]">Điểm trung bình</span>
+                  <span className="text-[13px] font-medium text-[#6a7282]">Average score</span>
                   <span className="text-[28px] font-bold leading-none text-[#191d24]">{studentStats.avg_band != null ? studentStats.avg_band : "—"}</span>
                 </div>
               </div>
@@ -573,18 +571,11 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
           {/* Student action buttons */}
           <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => setCreateOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-[#b3e653] px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#9ad534] transition-colors"
-            >
-              <span className="material-symbols-rounded text-[18px]">add</span>
-              Tạo lớp mới
-            </button>
-            <button
               onClick={() => setJoinOpen(true)}
               className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-[rgba(25,29,36,0.1)] bg-white px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#f6f7f4] transition-colors"
             >
               <span className="material-symbols-rounded text-[18px]">link</span>
-              Tham gia bằng mã / link mời
+              Join with code / invite link
             </button>
           </div>
 
@@ -602,17 +593,17 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                   <span className="material-symbols-rounded text-[32px] text-[#6a7282]">school</span>
                 </span>
                 <p className="font-display font-bold text-[18px] text-[#191d24]">
-                  Chưa có lớp học nào
+                  No classes yet
                 </p>
                 <p className="font-inter font-normal text-[14px] text-[#6a7282] max-w-[360px]">
-                  Tham gia lớp bằng mã mời hoặc link từ giáo viên để bắt đầu.
+                  Join a class using an invite code or link from your teacher.
                 </p>
                 <button
                   onClick={() => setJoinOpen(true)}
                   className="inline-flex items-center gap-2 rounded-full border-[1.5px] border-[rgba(25,29,36,0.1)] bg-white px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#f6f7f4] transition-colors"
                 >
                   <span className="material-symbols-rounded text-[18px]">link</span>
-                  Tham gia lớp
+                  Join class
                 </button>
               </div>
             ) : (
@@ -637,11 +628,11 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         styles={{ content: { borderRadius: 16, padding: 32 } }}
         destroyOnClose
       >
-        <ModalHeader title="Tạo lớp học mới" onClose={closeCreate} />
+        <ModalHeader title="Create new class" onClose={closeCreate} />
         <div className="mt-6 space-y-5">
           <div>
             <label className={labelCls}>
-              Tên lớp học <span className="text-[#D94A56]">*</span>
+              Class name <span className="text-[#D94A56]">*</span>
             </label>
             <input
               value={createName}
@@ -650,24 +641,24 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
                 setCreateName(e.target.value);
                 if (createErr) setCreateErr(false);
               }}
-              placeholder="VD: IELTS Academic 7.5+ – Lớp tối thứ 3, 5"
+              placeholder="E.g. IELTS Academic 7.5+ – Tue/Thu evening"
               className={twMerge(fieldBase, createErr ? "border-[#D94A56]" : "border-[#E5E7EB]")}
             />
             {createErr ? (
-              <p className="mt-1 text-[13px] text-[#D94A56]">Vui lòng nhập tên lớp.</p>
+              <p className="mt-1 text-[13px] text-[#D94A56]">Please enter a class name.</p>
             ) : null}
           </div>
           <div>
-            <label className={labelCls}>Mô tả lớp</label>
+            <label className={labelCls}>Class description</label>
             <textarea
               value={createDesc}
               maxLength={200}
               rows={4}
               onChange={(e) => setCreateDesc(e.target.value)}
-              placeholder="Mô tả ngắn về mục tiêu, lịch học, đối tượng…"
+              placeholder="Short description: goal, schedule, target audience…"
               className={twMerge(fieldBase, "resize-none border-[#E5E7EB]")}
             />
-            <p className="mt-2 text-[13px] text-[#6A7282]">Tối đa 200 ký tự</p>
+            <p className="mt-2 text-[13px] text-[#6A7282]">Max 200 characters</p>
           </div>
         </div>
         <div className="mt-8 flex justify-end gap-3">
@@ -675,14 +666,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
             onClick={closeCreate}
             className="rounded-full border border-[#e7e9e4] bg-white px-6 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-[#f6f7f4]"
           >
-            Huỷ
+            Cancel
           </button>
           <button
             onClick={handleCreate}
             disabled={submitting}
             className="rounded-full bg-[#b3e653] px-7 py-2.5 text-[14px] font-bold text-[#191d24] hover:bg-[#9ad534] disabled:opacity-60 transition-colors"
           >
-            {submitting ? "Đang tạo…" : "Tạo lớp"}
+            {submitting ? "Creating…" : "Create"}
           </button>
         </div>
       </Modal>
@@ -698,29 +689,29 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
         styles={{ content: { borderRadius: 16, padding: 32 } }}
         destroyOnClose
       >
-        <ModalHeader title="Tham gia lớp" onClose={closeJoin} />
+        <ModalHeader title="Join class" onClose={closeJoin} />
         <p className="mt-3 text-[15px] text-[#6A7282]">
-          Nhập mã mời hoặc dán link mời bạn nhận được từ giáo viên.
+          Enter an invite code or paste the invite link you received from your teacher.
         </p>
         <div className="mt-5">
-          <label className={labelCls}>Mã mời hoặc link</label>
+          <label className={labelCls}>Invite code or link</label>
           <input
             value={joinCode}
             onChange={(e) => {
               setJoinCode(e.target.value);
               if (joinErr) setJoinErr(false);
             }}
-            placeholder="VD: ABC123 hoặc https://…"
+            placeholder="E.g. ABC123 or https://…"
             className={twMerge(fieldBase, joinErr ? "border-[#D94A56]" : "border-[#E5E7EB]")}
           />
           {joinErr ? (
-            <p className="mt-1 text-[13px] text-[#D94A56]">Vui lòng nhập mã mời.</p>
+            <p className="mt-1 text-[13px] text-[#D94A56]">Please enter an invite code.</p>
           ) : null}
         </div>
 
         <div className="my-5 flex items-center gap-4">
           <span className="h-px flex-1 bg-[#e7e9e4]" />
-          <span className="text-[14px] text-[#6A7282]">hoặc</span>
+          <span className="text-[14px] text-[#6A7282]">or</span>
           <span className="h-px flex-1 bg-[#e7e9e4]" />
         </div>
 
@@ -729,7 +720,7 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
           className="flex w-full items-center justify-center gap-2 rounded-full bg-[#f6f7f4] py-3.5 text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#e8ebe2] transition-colors"
         >
           <span className="material-symbols-rounded text-[20px]">qr_code_2</span>
-          Quét QR code mời
+          Scan invite QR code
         </button>
 
         <div className="mt-8 flex justify-end gap-3">
@@ -737,14 +728,14 @@ export const PageClassroomList = ({ isTeacher, classrooms, stats, studentStats }
             onClick={closeJoin}
             className="rounded-full border border-[#e7e9e4] bg-white px-6 py-2.5 text-[14px] font-bold text-[#374151] hover:bg-[#f6f7f4]"
           >
-            Huỷ
+            Cancel
           </button>
           <button
             onClick={handleJoin}
             disabled={submitting}
             className="rounded-full bg-[#b3e653] px-7 py-2.5 text-[14px] font-bold text-[#191d24] hover:bg-[#9ad534] disabled:opacity-60 transition-colors"
           >
-            {submitting ? "Đang tham gia…" : "Tham gia"}
+            {submitting ? "Joining…" : "Join"}
           </button>
         </div>
       </Modal>

@@ -35,7 +35,7 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
         className="inline-flex items-center gap-1 text-sm text-[#6A7282] hover:text-[#D94A56]"
       >
         <span className="material-symbols-rounded text-[18px]">chevron_left</span>
-        Quay lại báo cáo lớp
+        Back to class report
       </Link>
 
       {/* Student header */}
@@ -51,35 +51,35 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
             </Avatar>
             <div>
               <h2 className="text-2xl font-extrabold text-[#191D24]">
-                {student?.name || student?.email || "Học sinh"}
+                {student?.name || student?.email || "Student"}
               </h2>
               <p className="mt-0.5 text-sm text-[#6A7282]">
-                Học viên · Lớp {history.classroom_name} · {student?.email}
+                Student · Class {history.classroom_name} · {student?.email}
               </p>
               <div className="mt-6 flex flex-wrap gap-8">
-                <Stat icon="assignment" tint="#2563EB" value={String(attempts.length)} label="Bài đã làm" />
+                <Stat icon="assignment" tint="#2563EB" value={String(attempts.length)} label="Tests done" />
                 <Stat
                   icon="grade"
                   tint="#D94A56"
                   value={history.avg_band != null ? String(history.avg_band) : "—"}
-                  label="Band trung bình"
+                  label="Average band"
                 />
                 <Stat
                   icon="schedule"
                   tint="#16A34A"
-                  value={history.avg_duration_min != null ? `${history.avg_duration_min} Phút` : "—"}
-                  label="Thời gian trung bình"
+                  value={history.avg_duration_min != null ? `${history.avg_duration_min} min` : "—"}
+                  label="Avg. time"
                 />
               </div>
             </div>
           </div>
           <div className="text-right">
             <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#16A34A]">
-              <span className="h-2 w-2 rounded-full bg-[#16A34A]" /> Đang hoạt động
+              <span className="h-2 w-2 rounded-full bg-[#16A34A]" /> Active
             </div>
             {history.joined_at ? (
               <div className="mt-1 text-[13px] text-[#6A7282]">
-                Tham gia từ {dayjs(history.joined_at).format("DD/MM/YYYY")}
+                Joined {dayjs(history.joined_at).format("DD/MM/YYYY")}
               </div>
             ) : null}
           </div>
@@ -89,11 +89,11 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
       {/* Attempts table */}
       <div className="rounded-[13px] border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-lg font-bold text-[#191D24]">Tất cả bài đã làm</h3>
+          <h3 className="text-lg font-bold text-[#191D24]">All attempts</h3>
           <div className="flex gap-2">
             {(
               [
-                ["all", "Tất cả"],
+                ["all", "All"],
                 ["reading", "Reading"],
                 ["listening", "Listening"],
                 ["writing", "Writing"],
@@ -113,23 +113,23 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
         </div>
 
         {attempts.length === 0 ? (
-          <p className="py-10 text-center text-[#6A7282]">Học sinh chưa nộp bài nào trong lớp.</p>
+          <p className="py-10 text-center text-[#6A7282]">This student has not submitted any assignments in this class.</p>
         ) : (
           <div className="overflow-x-auto">
             <div className="min-w-[780px]">
               <div className={`${ROW_GRID} border-b border-[#E5E7EB] px-2 pb-3 text-[11px] font-bold uppercase tracking-[0.06em] text-[#9CA3AF]`}>
-                <span>Tên bài</span>
-                <span>Kỹ năng</span>
-                <span>Band / Điểm</span>
-                <span>Thời gian</span>
-                <span>Ngày nộp</span>
+                <span>Test name</span>
+                <span>Skill</span>
+                <span>Band / Score</span>
+                <span>Duration</span>
+                <span>Submitted</span>
                 <span />
               </div>
               {filtered.map((a) => (
                 <div key={a.test_result_id} className={`${ROW_GRID} border-b border-[#F3F4F6] px-2 py-4 last:border-0`}>
                   <div className="min-w-0 pr-3">
                     <div className="text-[15px] font-bold leading-snug text-[#191D24]">
-                      {a.quiz_title || "Đề không khả dụng"}
+                      {a.quiz_title || "Test unavailable"}
                     </div>
                     {a.quiz_source ? (
                       <div className="text-[13px] text-[#6A7282]">{a.quiz_source}</div>
@@ -160,7 +160,7 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
                       if (label == null) {
                         return (
                           <span className="rounded-md bg-gray-100 px-2 py-0.5 text-[13px] font-medium text-[#6A7282]">
-                            Chờ chấm
+                            Pending review
                           </span>
                         );
                       }
@@ -176,7 +176,7 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
                     })()}
                   </div>
                   <div className="text-[14px] text-[#191D24]">
-                    {a.duration_min != null ? `${a.duration_min} phút` : "—"}
+                    {a.duration_min != null ? `${a.duration_min} min` : "—"}
                   </div>
                   <div className="text-[14px] text-[#6A7282]">
                     {a.submitted_at ? dayjs(a.submitted_at).format("DD/MM/YYYY HH:mm") : "—"}
@@ -186,14 +186,14 @@ export const PageStudentHistory = ({ classroomId, history }: Props) => {
                       href={ROUTES.TEST_RESULT(a.test_result_id)}
                       className="whitespace-nowrap rounded-[8px] border border-[#E5E7EB] px-3 py-1.5 text-[13px] font-semibold text-[#374151] hover:bg-gray-50"
                     >
-                      Xem lại
+                      Review
                     </Link>
                   </div>
                 </div>
               ))}
               {filtered.length === 0 ? (
                 <p className="py-8 text-center text-[14px] text-[#6A7282]">
-                  Không có bài làm phù hợp.
+                  No matching attempts found.
                 </p>
               ) : null}
             </div>

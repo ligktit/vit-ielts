@@ -150,18 +150,18 @@ export default function MatrixEditor({ data, onChange }: MatrixEditorProps) {
                             }
                             options={categoryOptions}
                             style={{ width: 200 }}
-                            notFoundContent="Thêm Categories trước"
+                            notFoundContent="Add Categories first"
                         />
                         <Popover
                             open={openExpIdx === idx}
                             onOpenChange={(v) => setOpenExpIdx(v ? idx : null)}
                             trigger="click"
-                            title="Giải thích cho câu này"
+                            title="Explanation for this item"
                             content={
                                 <Input.TextArea
                                     rows={3}
                                     style={{ width: 280 }}
-                                    placeholder="Nhập giải thích…"
+                                    placeholder="Enter explanation…"
                                     value={item.explanation ?? ""}
                                     onChange={(e) =>
                                         updateItem(idx, { explanation: e.target.value })

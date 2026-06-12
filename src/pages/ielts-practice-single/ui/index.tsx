@@ -190,7 +190,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                     }}
                   >
                     <span className="material-symbols-rounded text-lg">{copied ? 'check_circle' : 'content_copy'}</span>
-                    {copied ? 'Đã copy!' : 'Copy link'}
+                    {copied ? 'Copied!' : 'Copy link'}
                   </button>
                   <button
                     className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors cursor-pointer"
@@ -212,7 +212,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                         </span>
                       }
                     >
-                      Làm bài
+                      Start test
                     </Button>
                   </div>
                 </div>
@@ -242,7 +242,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                       info
                     </span>
                     <h3 className="font-bold text-lg text-[#2D3142]">
-                      Tổng quan
+                      Overview
                     </h3>
                   </div>
                   <div
@@ -259,7 +259,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                     history
                   </span>
                   <h3 className="font-bold text-lg text-[#2D3142]">
-                    Lịch sử làm bài
+                    History
                   </h3>
                 </div>
                 <PracticeHistoryWidget post={post} />
@@ -309,7 +309,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                     </span>
                   }
                 >
-                  Làm bài
+                  Start test
                 </Button>
               </div>
             </div>
@@ -322,7 +322,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                     <>
                       <div className="space-y-4">
                         <h3 className="font-bold text-lg text-[#2D3142]">
-                          Bài test nổi bật
+                          Featured tests
                         </h3>
                         <TestCardWithScore
                           quizId={post.relatedPracticeQuizzes[0].id}
@@ -339,7 +339,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
                       {post.relatedPracticeQuizzes.length > 1 && (
                         <div className="space-y-4">
                           <h3 className="font-bold text-lg text-[#2D3142]">
-                            Có thể bạn quan tâm
+                            You might like
                           </h3>
 
                           <div className="space-y-4">
@@ -380,7 +380,7 @@ export function PageIELTSPracticeSingle({ post, isPreview: isPreviewProp }: { po
           <Container className="max-w-[1360px] mt-20 relative z-10">
             <div className="mb-8">
               <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
-                Bài thi tương tự
+                Similar tests
               </h2>
             </div>
             <div className="relative">

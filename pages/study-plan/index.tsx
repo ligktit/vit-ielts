@@ -22,7 +22,8 @@ function getMondayISO(date: Date): string {
 
 async function withStudyPlan(
   context: GetServerSidePropsContext,
-): Promise<{ props: { studyWeek: StudyWeek; weekStartISO: string } }> {
+): Promise<{ props: { studyWeek: StudyWeek; weekStartISO: string; userId: string } }> {
+  const fallback = { studyWeek: {}, weekStartISO: getMondayISO(new Date()), userId: "" };
   try {
     const supabase = createServerSupabase(context);
     const {
@@ -32,15 +33,15 @@ async function withStudyPlan(
     if (!user) {
       // withAuth (composed below) handles the redirect; return empty defaults so
       // the merge still produces a valid props shape.
-      return { props: { studyWeek: {}, weekStartISO: getMondayISO(new Date()) } };
+      return { props: fallback };
     }
 
     const weekStartISO = getMondayISO(new Date());
     const studyWeek = await getStudyWeek(supabase, user.id, weekStartISO);
 
-    return { props: { studyWeek, weekStartISO } };
+    return { props: { studyWeek, weekStartISO, userId: user.id } };
   } catch {
-    return { props: { studyWeek: {}, weekStartISO: getMondayISO(new Date()) } };
+    return { props: fallback };
   }
 }
 

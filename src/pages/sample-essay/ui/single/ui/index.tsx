@@ -205,7 +205,7 @@ export const PageSingle = ({
                     <span className="material-symbols-rounded text-lg">
                       {copied ? "check_circle" : "content_copy"}
                     </span>
-                    {copied ? "Đã copy!" : "Copy link"}
+                    {copied ? "Copied!" : "Copy link"}
                   </button>
                   <button
                     className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors cursor-pointer"
@@ -287,7 +287,7 @@ export const PageSingle = ({
           <Container className="max-w-[1360px] mt-16 relative z-10">
             <div className="mb-8">
               <h2 className="text-xl md:text-2xl font-bold text-[#2D3142]">
-                Bài viết liên quan
+                Related essays
               </h2>
             </div>
             <div className="relative">
@@ -344,7 +344,7 @@ export const PageSingle = ({
                           // a lock on related Pro essays.
                           isLocked={essayIsPro && !viewerIsPro}
                           href={ROUTES.SAMPLE_ESSAY.SINGLE(essay.slug)}
-                          actionText="Xem thêm"
+                          actionText="View more"
                         />
                       </SplideSlide>
                     );

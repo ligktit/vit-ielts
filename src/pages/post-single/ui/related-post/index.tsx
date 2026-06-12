@@ -20,7 +20,7 @@ function RelatedPost({ relatedPosts }: { relatedPosts: SidebarPost[] }) {
   return (
     <>
       <div className="space-y-4">
-        <h3 className="font-bold text-lg text-[#2D3142]">Bài viết nổi bật</h3>
+        <h3 className="font-bold text-lg text-[#2D3142]">Featured posts</h3>
         <PostCard
           title={featured.title}
           image={featured.featured_image ?? undefined}
@@ -33,7 +33,7 @@ function RelatedPost({ relatedPosts }: { relatedPosts: SidebarPost[] }) {
       {relatedPosts.length > 1 && (
         <div className="space-y-4 mt-8">
           <h3 className="font-bold text-lg text-[#2D3142]">
-            Có thể bạn quan tâm
+            You might like
           </h3>
 
           <div className="space-y-4">

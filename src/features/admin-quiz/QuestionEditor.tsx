@@ -78,7 +78,7 @@ function QuestionEditorInner({ question: q, onUpdate }: QuestionEditorProps) {
                     <RichTextEditor
                         value={q.instructions ?? ""}
                         onChange={(html) => onUpdate("instructions", html)}
-                        placeholder="Nhập hướng dẫn..."
+                        placeholder="Enter instructions..."
                         height={160}
                     />
                 </Form.Item>
@@ -88,7 +88,7 @@ function QuestionEditorInner({ question: q, onUpdate }: QuestionEditorProps) {
                 <RichTextEditor
                     value={q.question_text ?? ""}
                     onChange={(html) => onUpdate("question_text", html)}
-                    placeholder="Nhập nội dung câu hỏi..."
+                    placeholder="Enter question content..."
                 />
             </Form.Item>
 

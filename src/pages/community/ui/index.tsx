@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { AppShell } from "@/widgets/layouts";
 import { createClient } from "~supabase/client";
-import { joinClub, leaveClub } from "~services/community";
-import type { Club } from "~services/community";
+import { joinClub, leaveClub, createPost } from "~services/community";
+import type { Club, CommunityPost } from "~services/community";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -10,57 +10,13 @@ import type { Club } from "~services/community";
 
 interface PageCommunityProps {
   clubs: Club[];
+  recentPosts: CommunityPost[];
   userId: string;
 }
 
 // ---------------------------------------------------------------------------
-// Static visual data for sections that are not yet backed by the database
+// Constants
 // ---------------------------------------------------------------------------
-
-// VISUAL-ONLY: Recent discussions — no posts/comments backend yet
-interface Discussion {
-  initials: string;
-  avatarBg: string;
-  title: string;
-  category: string;
-  author: string;
-  replies: number;
-}
-
-const DISCUSSIONS: Discussion[] = [
-  {
-    initials: "MA",
-    avatarBg: "bg-[#5281f9]",
-    title: "How do you paraphrase the question fast?",
-    category: "Writing",
-    author: "Minh A.",
-    replies: 12,
-  },
-  {
-    initials: "TL",
-    avatarBg: "bg-[#7c6ef9]",
-    title: "Best resources for Part 3 ideas?",
-    category: "Speaking",
-    author: "Thu L.",
-    replies: 8,
-  },
-  {
-    initials: "KP",
-    avatarBg: "bg-[#b3e653]",
-    title: "Got 8.0 — here's my 30-day routine",
-    category: "Success stories",
-    author: "Khoa P.",
-    replies: 41,
-  },
-  {
-    initials: "HN",
-    avatarBg: "bg-[#f96b8b]",
-    title: "Listening Section 4 always trips me up",
-    category: "Listening",
-    author: "Ha N.",
-    replies: 19,
-  },
-];
 
 // Stable color palette for club icon chips (cycled by index)
 const CHIP_STYLES: Array<{ iconBg: string; iconColor: string }> = [
@@ -70,9 +26,37 @@ const CHIP_STYLES: Array<{ iconBg: string; iconColor: string }> = [
   { iconBg: "bg-[rgba(249,107,139,0.16)]", iconColor: "text-[#f96b8b]" },
 ];
 
+// Cycled avatar background colours for post author chips
+const AVATAR_COLORS = [
+  "bg-[#5281f9]",
+  "bg-[#7c6ef9]",
+  "bg-[#b3e653]",
+  "bg-[#f96b8b]",
+  "bg-[#f9a84c]",
+  "bg-[#4cc9f0]",
+];
+
+function avatarColor(seed: string): string {
+  // Simple deterministic pick based on first char code of the post id
+  const idx = seed.charCodeAt(0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[idx];
+}
+
 function formatMemberCount(count: number): string {
   if (count >= 1000) return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}k members`;
   return `${count} member${count === 1 ? "" : "s"}`;
+}
+
+function formatRelativeDate(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 // ---------------------------------------------------------------------------
@@ -139,41 +123,141 @@ const ClubCard = ({ club, chipStyle, onJoin, onLeave, loading }: ClubCardProps) 
   </div>
 );
 
-const DiscussionRow = ({
-  discussion,
-  isLast,
-}: {
-  discussion: Discussion;
+interface PostRowProps {
+  post: CommunityPost;
   isLast: boolean;
-}) => (
+}
+
+const PostRow = ({ post, isLast }: PostRowProps) => (
   <div
-    className={`flex gap-[14px] items-center py-[14px] h-[72px] ${
+    className={`flex gap-[14px] items-center py-[14px] min-h-[72px] ${
       !isLast ? "border-b border-[rgba(25,29,36,0.1)]" : ""
     }`}
   >
     {/* Avatar */}
     <div
-      className={`${discussion.avatarBg} rounded-full size-[40px] flex items-center justify-center shrink-0`}
+      className={`${avatarColor(post.id)} rounded-full size-[40px] flex items-center justify-center shrink-0`}
     >
       <span className="font-inter font-bold text-[14px] text-white">
-        {discussion.initials}
+        {post.author_initials}
       </span>
     </div>
 
     {/* Text */}
     <div className="flex flex-col gap-[2px] flex-1 min-w-0">
       <p className="font-inter font-semibold text-[15px] text-[#191d24] leading-normal truncate">
-        {discussion.title}
+        {post.title}
       </p>
       <p className="font-inter font-normal text-[13px] text-[#6a7282] leading-normal">
-        {discussion.category} · {discussion.author}
+        {post.club_name ? `${post.club_name} · ` : ""}{post.author_name}
       </p>
     </div>
 
-    {/* Reply count */}
+    {/* Relative time */}
     <span className="font-inter font-semibold text-[13px] text-[#6a7282] shrink-0">
-      {discussion.replies} replies
+      {formatRelativeDate(post.created_at)}
     </span>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
+// Compose box
+// ---------------------------------------------------------------------------
+
+interface ComposeBoxProps {
+  onSubmit: (title: string, body: string) => Promise<void>;
+  submitting: boolean;
+}
+
+const ComposeBox = ({ onSubmit, submitting }: ComposeBoxProps) => {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const titleRef = useRef<HTMLInputElement>(null);
+
+  const handleOpen = () => {
+    setOpen(true);
+    setTimeout(() => titleRef.current?.focus(), 50);
+  };
+
+  const handleSubmit = async () => {
+    const t = title.trim();
+    const b = body.trim();
+    if (!t || !b) return;
+    await onSubmit(t, b);
+    setTitle("");
+    setBody("");
+    setOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      handleSubmit();
+    }
+    if (e.key === "Escape") {
+      setOpen(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={handleOpen}
+        className="font-inter font-semibold text-[14px] text-[#9ad534] hover:text-[#b3e653] transition-colors"
+      >
+        New post
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-[10px] w-full" onKeyDown={handleKeyDown}>
+      <input
+        ref={titleRef}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Post title"
+        maxLength={200}
+        className="w-full border border-[rgba(25,29,36,0.15)] rounded-[12px] px-[14px] py-[10px] font-inter font-semibold text-[14px] text-[#191d24] placeholder:text-[#9aa0ac] focus:outline-none focus:border-[#b3e653]"
+      />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder="What's on your mind?"
+        rows={3}
+        maxLength={2000}
+        className="w-full border border-[rgba(25,29,36,0.15)] rounded-[12px] px-[14px] py-[10px] font-inter font-normal text-[14px] text-[#191d24] placeholder:text-[#9aa0ac] resize-none focus:outline-none focus:border-[#b3e653]"
+      />
+      <div className="flex items-center gap-[10px] justify-end">
+        <button
+          onClick={() => setOpen(false)}
+          disabled={submitting}
+          className="font-inter font-semibold text-[13px] text-[#6a7282] hover:text-[#191d24] transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting || !title.trim() || !body.trim()}
+          className="bg-[#191d24] text-white font-inter font-bold text-[13px] rounded-full px-[20px] py-[8px] hover:bg-[#2d3142] transition-colors disabled:opacity-50"
+        >
+          {submitting ? "Posting…" : "Post"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Empty state
+// ---------------------------------------------------------------------------
+
+const EmptyDiscussions = () => (
+  <div className="flex flex-col items-center gap-[8px] py-[32px]">
+    <span className="material-symbols-rounded text-[40px] text-[#9aa0ac]">forum</span>
+    <p className="font-inter font-normal text-[14px] text-[#6a7282]">
+      No posts yet — be the first to start a discussion!
+    </p>
   </div>
 );
 
@@ -181,10 +265,13 @@ const DiscussionRow = ({
 // Page component
 // ---------------------------------------------------------------------------
 
-export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProps) => {
-  // Optimistic local state — mirrors the server-rendered list
+export const PageCommunity = ({
+  clubs: initialClubs,
+  recentPosts: initialPosts,
+  userId,
+}: PageCommunityProps) => {
+  // --- Clubs state (optimistic join/leave) ---
   const [clubs, setClubs] = useState<Club[]>(initialClubs);
-  // Tracks which club IDs have an in-flight mutation
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   const setLoading = useCallback((clubId: string, on: boolean) => {
@@ -197,7 +284,6 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
 
   const handleJoin = useCallback(
     async (clubId: string) => {
-      // Optimistic update
       setClubs((prev) =>
         prev.map((c) =>
           c.id === clubId ? { ...c, joined: true, member_count: c.member_count + 1 } : c
@@ -208,7 +294,6 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
         const supabase = createClient();
         await joinClub(supabase, { clubId, userId });
       } catch {
-        // Revert on failure
         setClubs((prev) =>
           prev.map((c) =>
             c.id === clubId ? { ...c, joined: false, member_count: c.member_count - 1 } : c
@@ -223,7 +308,6 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
 
   const handleLeave = useCallback(
     async (clubId: string) => {
-      // Optimistic update
       setClubs((prev) =>
         prev.map((c) =>
           c.id === clubId
@@ -236,7 +320,6 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
         const supabase = createClient();
         await leaveClub(supabase, { clubId, userId });
       } catch {
-        // Revert on failure
         setClubs((prev) =>
           prev.map((c) =>
             c.id === clubId ? { ...c, joined: true, member_count: c.member_count + 1 } : c
@@ -247,6 +330,28 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
       }
     },
     [userId, setLoading]
+  );
+
+  // --- Posts state (optimistic prepend) ---
+  const [posts, setPosts] = useState<CommunityPost[]>(initialPosts);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreatePost = useCallback(
+    async (title: string, body: string) => {
+      setSubmitting(true);
+      try {
+        const supabase = createClient();
+        const newPost = await createPost(supabase, { userId, title, body });
+        // Prepend optimistically — server already persisted it
+        setPosts((prev) => [newPost, ...prev]);
+      } catch {
+        // Silent failure — compose box stays closed; post simply won't appear
+        // until a page refresh. Consider a toast here in a future iteration.
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [userId]
   );
 
   return (
@@ -303,27 +408,25 @@ export const PageCommunity = ({ clubs: initialClubs, userId }: PageCommunityProp
         ))}
       </div>
 
-      {/* VISUAL-ONLY: Recent discussions — posts/comments not in scope yet */}
+      {/* Recent discussions — real data from community_posts */}
       <div className="bg-white border border-[rgba(25,29,36,0.1)] rounded-[24px] overflow-hidden">
         {/* Header row */}
         <div className="flex items-center justify-between px-[24px] pt-[24px] pb-[8px]">
           <h2 className="font-display font-bold text-[18px] text-[#191d24] leading-normal">
             Recent discussions
           </h2>
-          <button className="font-inter font-semibold text-[14px] text-[#9ad534] hover:text-[#b3e653] transition-colors">
-            New post
-          </button>
+          <ComposeBox onSubmit={handleCreatePost} submitting={submitting} />
         </div>
 
-        {/* Discussion rows */}
+        {/* Post rows */}
         <div className="px-[24px] pb-[10px]">
-          {DISCUSSIONS.map((discussion, i) => (
-            <DiscussionRow
-              key={discussion.initials + i}
-              discussion={discussion}
-              isLast={i === DISCUSSIONS.length - 1}
-            />
-          ))}
+          {posts.length === 0 ? (
+            <EmptyDiscussions />
+          ) : (
+            posts.map((post, i) => (
+              <PostRow key={post.id} post={post} isLast={i === posts.length - 1} />
+            ))
+          )}
         </div>
       </div>
     </div>

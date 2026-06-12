@@ -1,7 +1,7 @@
 import { GetServerSideProps } from "next";
 import { createServerSupabase } from "~supabase/server";
 import { getMasterData } from "~supabase/getMasterData";
-import { getVocabularyOverview } from "~services/vocabulary";
+import { getVocabularyOverview, getVocabularyProgress } from "~services/vocabulary";
 import { ROUTES } from "@/shared/routes";
 
 export { PageVocabulary } from "./ui";
@@ -21,15 +21,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const [master, vocabularyOverview] = await Promise.all([
+  const [master, vocabularyOverview, vocabProgress] = await Promise.all([
     getMasterData(context),
     getVocabularyOverview(supabase, user.id),
+    getVocabularyProgress(supabase, user.id),
   ]);
 
   return {
     props: {
       ...master.props,
       vocabularyOverview,
+      vocabProgress,
     },
   };
 };

@@ -225,7 +225,7 @@ export const PageArchive = ({
               <DSHeroBanner
                 title={bannerData.title}
                 breadcrumbs={[
-                  { label: "Trang chủ", href: "/" },
+                  { label: "Home", href: "/" },
                   { label: skill === "writing" ? "Writing Samples" : "Speaking Samples" },
                 ]}
               />
@@ -357,10 +357,10 @@ export const PageArchive = ({
                       No results
                     </p>
                     <h3 className="mt-3 font-noto-sans text-2xl font-extrabold text-[#242938]">
-                      Không tìm thấy bài mẫu nào.
+                      No sample essays found.
                     </h3>
                     <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-[#242938]/60">
-                      Thử bỏ bớt filter hoặc tìm kiếm từ khóa khác xem sao bạn nhé.
+                      Try removing some filters or searching with a different keyword.
                     </p>
                   </div>
                 )}

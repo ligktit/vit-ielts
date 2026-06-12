@@ -12,9 +12,9 @@ export const SaleNotification = () => {
   const openNotification = useCallback(() => {
     const randomMonth = _.sample(months);
     api.info({
-      message: "Thông báo",
+      message: "Notification",
       placement: "bottomLeft",
-      description: `Một khách hàng đã đăng kí VIP ${randomMonth} tháng`,
+      description: `A customer just subscribed to VIP ${randomMonth}-month plan`,
     });
   }, [api]);
 

@@ -15,8 +15,8 @@ const STATS = [
     iconContent: "local_fire_department",
     iconTint: "rgba(252,148,89,0.16)",
     iconColor: "#fc945a",
-    label: "Streak hiện tại",
-    unit: "ngày",
+    label: "Current streak",
+    unit: "days",
   },
   {
     key: "longestStreak" as const,
@@ -24,8 +24,8 @@ const STATS = [
     iconContent: "emoji_events",
     iconTint: "rgba(82,129,249,0.16)",
     iconColor: "#5281f9",
-    label: "Streak dài nhất",
-    unit: "ngày",
+    label: "Longest streak",
+    unit: "days",
   },
   {
     key: "totalDays" as const,
@@ -33,8 +33,8 @@ const STATS = [
     iconContent: "calendar_today",
     iconTint: "rgba(179,230,83,0.16)",
     iconColor: "#9ad534",
-    label: "Tổng ngày học",
-    unit: "ngày",
+    label: "Total days",
+    unit: "days",
   },
   {
     key: "monthDays" as const,
@@ -42,8 +42,8 @@ const STATS = [
     iconContent: "calendar_month",
     iconTint: "rgba(140,115,242,0.16)",
     iconColor: "#7c6ef9",
-    label: "Tháng này",
-    unit: "ngày",
+    label: "This month",
+    unit: "days",
   },
 ];
 

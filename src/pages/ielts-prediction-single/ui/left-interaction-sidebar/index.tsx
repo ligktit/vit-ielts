@@ -68,7 +68,7 @@ function LeftInteractionSidebar({ post }: { post: IPracticeSingle }) {
         >
           <LinkButton target="_blank" type="primary" size="large">
             <span className="material-symbols-rounded">play_circle</span>
-            <span>Làm bài</span>
+            <span>Start test</span>
           </LinkButton>
         </Link>
       ) : post.quizFields.proUserOnly && currentUser.userData.isPro ? (
@@ -80,13 +80,13 @@ function LeftInteractionSidebar({ post }: { post: IPracticeSingle }) {
         >
           <LinkButton target="_blank" type="primary" size="large">
             <span className="material-symbols-rounded">play_circle</span>
-            <span>Làm bài</span>
+            <span>Start test</span>
           </LinkButton>
         </Link>
       ) : post.quizFields.proUserOnly ? (
         <Button type="primary" size="large" onClick={openProContentModal}>
           <span className="material-symbols-rounded">play_circle</span>
-          <span>Làm bài</span>
+          <span>Start test</span>
         </Button>
       ) : (
         <Link
@@ -97,7 +97,7 @@ function LeftInteractionSidebar({ post }: { post: IPracticeSingle }) {
         >
           <LinkButton target="_blank" type="primary" size="large">
             <span className="material-symbols-rounded">play_circle</span>
-            <span>Làm bài</span>
+            <span>Start test</span>
           </LinkButton>
         </Link>
       )}

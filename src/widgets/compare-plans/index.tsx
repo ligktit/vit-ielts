@@ -4,17 +4,17 @@ import { twMerge } from "tailwind-merge";
 
 const features = [
   {
-    title: "Làm đề Listening, Reading",
+    title: "Listening & Reading practice",
     free: true,
     pro: true,
   },
   {
-    title: "Đáp án & giải thích Listening, Reading",
+    title: "Answers & explanations",
     free: true,
     pro: true,
   },
   {
-    title: "Luyện tập với bộ đề Premium",
+    title: "Practice with Premium test sets",
     free: false,
     pro: true,
   },
@@ -36,15 +36,15 @@ export function ComparePlans() {
           </div>
         </div>
         <div className="text-center border-b border-gray-300 pb-3">
-          <h3 className="font-bold text-lg">Phòng Luyện đề IELTS</h3>
+          <h3 className="font-bold text-lg">IELTS Practice Room</h3>
           <p className="text-sm text-gray-500">
-            Luyện IELTS toàn diện 4 kỹ năng
+            Complete 4-skill IELTS practice
           </p>
         </div>
         <table className="table-auto w-full">
           <tbody>
             <tr className="uppercase font-bold">
-              <td className="p-2">Quyền lợi</td>
+              <td className="p-2">Benefits</td>
               <td className="p-2 text-center">Free</td>
               <td className="p-2 text-center">
                 <span className="text-tertiary-500">Pro</span>

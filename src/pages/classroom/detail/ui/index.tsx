@@ -117,7 +117,7 @@ const MemberRow = ({
   onRename: (m: ClassroomMemberWithUser) => void;
 }) => {
   const [bg, fg] = tintFor(m.user_id);
-  const name = m.display_name || m.name || m.email || "Thành viên";
+  const name = m.display_name || m.name || m.email || "Member";
   const canRemove = canManage && !isClassOwner && !isCurrentUser;
   const showMenu = canManage && !isCurrentUser;
   return (
@@ -142,7 +142,7 @@ const MemberRow = ({
           ) : (
             <span className="truncate">{name}</span>
           )}
-          {isCurrentUser ? <span className="font-normal text-[#6A7282] text-[13px]">(Bạn)</span> : null}
+          {isCurrentUser ? <span className="font-normal text-[#6A7282] text-[13px]">(You)</span> : null}
           <span
             className={`inline-flex h-[18px] items-center rounded-full px-2 text-[10px] font-bold uppercase tracking-widest ${
               m.is_pro
@@ -164,11 +164,11 @@ const MemberRow = ({
           trigger={["click"]}
           menu={{
             items: [
-              { key: "rename", label: "Sửa tên" },
+              { key: "rename", label: "Edit name" },
               ...(canRemove
                 ? [
                     { type: "divider" as const },
-                    { key: "remove", label: "Xóa khỏi lớp", danger: true },
+                    { key: "remove", label: "Remove from class", danger: true },
                   ]
                 : []),
             ],
@@ -219,15 +219,15 @@ const AssignmentRow = ({
   if (a.due_at) {
     const d = dayjs(a.due_at);
     if (d.isBefore(dayjs())) {
-      dueLabel = "Quá hạn";
+      dueLabel = "Overdue";
       dueColor = "#E54552";
     } else {
       const days = d.diff(dayjs(), "day");
       if (days <= 1) {
-        dueLabel = "Sắp đến hạn";
+        dueLabel = "Due soon";
         dueColor = "#F59E0B";
       } else {
-        dueLabel = `Còn ${days} ngày`;
+        dueLabel = `${days} days left`;
         dueColor = "#16A34A";
       }
     }
@@ -236,7 +236,7 @@ const AssignmentRow = ({
     <div className={`${ASSIGN_GRID} border-b border-[#F3F4F6] px-5 py-4 last:border-0`}>
       <div className="min-w-0 pr-3">
         <div className="text-[14px] font-semibold leading-snug text-[#191D24]">
-          {a.quiz_title || "Đề không khả dụng"}
+          {a.quiz_title || "Test unavailable"}
         </div>
         {a.quiz_source || a.note ? (
           <div className="text-[12px] text-[#6A7282]">{a.quiz_source || a.note}</div>
@@ -261,12 +261,12 @@ const AssignmentRow = ({
           <div className="h-full rounded-full bg-[#B3E653]" style={{ width: `${ratio}%` }} />
         </div>
         <div className="mt-1 text-[12px] text-[#6A7282]">
-          {a.submitted_count}/{a.target_count} hoàn thành
+          {a.submitted_count}/{a.target_count} completed
         </div>
       </div>
       <div>
         <div className="text-[13px] text-[#191D24]">
-          {a.due_at ? dayjs(a.due_at).format("DD/MM HH:mm") : "Không có hạn"}
+          {a.due_at ? dayjs(a.due_at).format("DD/MM HH:mm") : "No deadline"}
         </div>
         {a.due_at ? (
           <div className="text-[12px] font-semibold" style={{ color: dueColor }}>
@@ -279,16 +279,16 @@ const AssignmentRow = ({
           href={ROUTES.CLASSROOM.ASSIGNMENT_DETAIL(classroomId, a.id)}
           className="whitespace-nowrap rounded-[8px] border border-[#E5E6E8] px-3 py-1.5 text-[12px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
         >
-          Chi tiết
+          Details
         </Link>
         <Dropdown
           trigger={["click"]}
           menu={{
             items: [
-              { key: "due", label: "Đổi hạn nộp" },
-              { key: "report", label: <Link href={ROUTES.CLASSROOM.TRACKING(classroomId)}>Báo cáo</Link> },
+              { key: "due", label: "Change deadline" },
+              { key: "report", label: <Link href={ROUTES.CLASSROOM.TRACKING(classroomId)}>Report</Link> },
               { type: "divider" },
-              { key: "delete", label: "Xóa bài giao", danger: true },
+              { key: "delete", label: "Delete assignment", danger: true },
             ],
             onClick: ({ key }) => {
               if (key === "delete") onDelete(a.id);
@@ -323,9 +323,9 @@ const JoinRequestsList = ({
             group_add
           </span>
         </span>
-        <p className="mt-4 text-[16px] font-bold text-[#191D24]">Chưa có yêu cầu nào</p>
+        <p className="mt-4 text-[16px] font-bold text-[#191D24]">No pending requests</p>
         <p className="mt-1 text-[13px] text-[#6A7282]">
-          Học sinh tham gia bằng mã/link sẽ xuất hiện ở đây để bạn duyệt.
+          Students who join via code or link will appear here for you to approve.
         </p>
       </div>
     );
@@ -334,7 +334,7 @@ const JoinRequestsList = ({
     <div className="flex flex-col gap-3">
       {requests.map((r) => {
         const [bg, fg] = tintFor(r.user_id);
-        const name = r.name || r.email || "Học sinh";
+        const name = r.name || r.email || "Student";
         return (
           <div
             key={r.id}
@@ -361,7 +361,7 @@ const JoinRequestsList = ({
                       : "bg-blue-50 text-blue-600"
                   }`}
                 >
-                  {r.role === "teacher" ? "Giáo viên" : "Học sinh"}
+                  {r.role === "teacher" ? "Teacher" : "Student"}
                 </span>
               </div>
               <div className="text-[13px] text-[#6A7282]">{r.email || "—"}</div>
@@ -371,13 +371,13 @@ const JoinRequestsList = ({
                 onClick={() => onReject(r)}
                 className="rounded-[10px] border border-[#E5E6E8] px-4 py-2 text-[13px] font-semibold text-[#6A7282] hover:bg-[#F3F4F6] transition-colors"
               >
-                Từ chối
+                Decline
               </button>
               <button
                 onClick={() => onApprove(r.user_id)}
                 className="rounded-[10px] bg-[#B3E653] px-5 py-2 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors"
               >
-                Chấp nhận
+                Accept
               </button>
             </div>
           </div>
@@ -392,10 +392,10 @@ const STUDENT_ASSIGN_GRID = "grid grid-cols-[1fr_104px_160px_120px_150px] items-
 
 const studentStatusMeta = (a: StudentAssignmentView) => {
   if (a.status === "submitted" || a.status === "late")
-    return { label: "Đã nộp", cls: "bg-green-50 text-green-600" };
-  if (a.status === "overdue") return { label: "Quá hạn", cls: "bg-red-50 text-[#E54552]" };
-  if (a.in_progress) return { label: "Đang làm", cls: "bg-blue-50 text-blue-600" };
-  return { label: "Chưa làm", cls: "bg-gray-100 text-gray-600" };
+    return { label: "Submitted", cls: "bg-green-50 text-green-600" };
+  if (a.status === "overdue") return { label: "Overdue", cls: "bg-red-50 text-[#E54552]" };
+  if (a.in_progress) return { label: "In progress", cls: "bg-blue-50 text-blue-600" };
+  return { label: "Not started", cls: "bg-gray-100 text-gray-600" };
 };
 
 const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) => {
@@ -407,9 +407,9 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
             assignment
           </span>
         </span>
-        <p className="mt-4 text-[16px] font-bold text-[#191D24]">Chưa có bài giao nào</p>
+        <p className="mt-4 text-[16px] font-bold text-[#191D24]">No assignments yet</p>
         <p className="mt-1 text-[13px] text-[#6A7282]">
-          Giáo viên chưa giao bài tập nào cho bạn trong lớp này.
+          Your teacher has not assigned any tests in this class yet.
         </p>
       </div>
     );
@@ -420,10 +420,10 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
         <div
           className={`${STUDENT_ASSIGN_GRID} bg-[#FAFAFA] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.06em] text-[#6A7282]`}
         >
-          <span>Tên bài</span>
-          <span>Kỹ năng</span>
-          <span>Hạn nộp</span>
-          <span>Trạng thái</span>
+          <span>Test name</span>
+          <span>Skill</span>
+          <span>Deadline</span>
+          <span>Status</span>
           <span />
         </div>
         {items.map((a) => {
@@ -435,7 +435,7 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
               className={`${STUDENT_ASSIGN_GRID} border-t border-[#F3F4F6] px-5 py-4`}
             >
               <span className="truncate text-[14px] font-semibold text-[#191D24]">
-                {a.quiz_title || "Đề không khả dụng"}
+                {a.quiz_title || "Test unavailable"}
               </span>
               <span>
                 {a.quiz_skill ? (
@@ -449,7 +449,7 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
                 ) : null}
               </span>
               <span className="text-[13px] text-[#6A7282]">
-                {a.due_at ? dayjs(a.due_at).format("DD/MM/YYYY HH:mm") : "Không thời hạn"}
+                {a.due_at ? dayjs(a.due_at).format("DD/MM/YYYY HH:mm") : "No deadline"}
               </span>
               <span>
                 <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ${meta.cls}`}>
@@ -466,7 +466,7 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
                     }
                     className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] bg-[#16A34A] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#138a3e] transition-colors"
                   >
-                    Xem kết quả →
+                    View results →
                   </Link>
                 ) : (
                   <Link
@@ -474,10 +474,10 @@ const StudentAssignmentList = ({ items }: { items: StudentAssignmentView[] }) =>
                     className="inline-flex items-center gap-1 whitespace-nowrap rounded-[10px] bg-[#B3E653] px-4 py-2 text-[12px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors"
                   >
                     {a.status === "overdue"
-                      ? "Nộp muộn →"
+                      ? "Submit late →"
                       : a.in_progress
-                        ? "Tiếp tục làm →"
-                        : "Bắt đầu làm →"}
+                        ? "Continue →"
+                        : "Start →"}
                   </Link>
                 )}
               </span>
@@ -530,7 +530,7 @@ const InviteModal = ({
         <button
           onClick={onClose}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-          aria-label="Đóng"
+          aria-label="Close"
         >
           <span className="material-symbols-rounded text-[18px]">close</span>
         </button>
@@ -731,7 +731,7 @@ export const PageClassroomDetail = ({
   const copy = (text: string, key: string) => {
     const done = () => {
       setCopied(key);
-      message.success("Đã sao chép");
+      message.success("Copied!");
       setTimeout(() => setCopied(null), 2000);
     };
     if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(done);
@@ -748,13 +748,13 @@ export const PageClassroomDetail = ({
   const handleAdd = async () => {
     const email = addEmail.trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setAddErr("Vui lòng nhập email hợp lệ.");
+      setAddErr("Please enter a valid email.");
       return;
     }
     setAdding(true);
     try {
       await addMemberByEmail(supabase, classroom.id, email, inviteOpen!);
-      message.success("Đã thêm thành viên");
+      message.success("Member added");
       setInviteOpen(null);
       setAddEmail("");
       setAddErr("");
@@ -763,10 +763,10 @@ export const PageClassroomDetail = ({
       const msg = e instanceof Error ? e.message : "";
       message.error(
         msg.includes("USER_NOT_FOUND")
-          ? "Không tìm thấy người dùng với email này."
+          ? "No user found with this email."
           : msg.includes("STUDENT_LIMIT_REACHED")
-            ? "Lớp đã đạt giới hạn 50 học viên."
-            : "Không thêm được thành viên."
+            ? "This class has reached the 50-student limit."
+            : "Failed to add member."
       );
     } finally {
       setAdding(false);
@@ -794,11 +794,11 @@ export const PageClassroomDetail = ({
         renameMember.user_id,
         renameValue.trim() || null
       );
-      message.success("Đã cập nhật tên trong lớp");
+      message.success("Display name updated");
       setRenameMember(null);
       refresh();
     } catch {
-      message.error("Không cập nhật được tên.");
+      message.error("Failed to update display name.");
     } finally {
       setSubmitting(false);
     }
@@ -808,10 +808,10 @@ export const PageClassroomDetail = ({
     setConfirmRemove(null);
     try {
       await removeMember(supabase, classroom.id, m.user_id);
-      message.success("Đã xóa thành viên");
+      message.success("Member removed");
       refresh();
     } catch {
-      message.error("Không xóa được thành viên.");
+      message.error("Failed to remove member.");
     }
   };
 
@@ -819,9 +819,9 @@ export const PageClassroomDetail = ({
     try {
       const code = await regenerateInviteCode(supabase, classroom.id);
       setClassroom({ ...classroom, invite_code: code });
-      message.success("Đã đổi mã mời");
+      message.success("Invite code refreshed");
     } catch {
-      message.error("Không đổi được mã mời.");
+      message.error("Failed to refresh invite code.");
     }
   };
 
@@ -849,10 +849,10 @@ export const PageClassroomDetail = ({
       fd.append("file", file);
       const res = await fetch("/api/classroom/upload-image", { method: "POST", body: fd });
       const data = await res.json();
-      if (!res.ok || !data.path) throw new Error(data.message || "Upload thất bại");
+      if (!res.ok || !data.path) throw new Error(data.message || "Upload failed");
       setEditImage(data.path);
     } catch (e) {
-      message.error(e instanceof Error ? e.message : "Không tải được ảnh.");
+      message.error(e instanceof Error ? e.message : "Failed to upload image.");
     } finally {
       setUploadingImage(false);
     }
@@ -860,7 +860,7 @@ export const PageClassroomDetail = ({
 
   const handleSaveEdit = async () => {
     if (!editName.trim()) {
-      message.error("Vui lòng nhập tên lớp.");
+      message.error("Please enter a class name.");
       return;
     }
     setSubmitting(true);
@@ -871,10 +871,10 @@ export const PageClassroomDetail = ({
         image_url: editImage,
       });
       setClassroom(updated);
-      message.success("Đã cập nhật thông tin lớp");
+      message.success("Class info updated");
       setEditOpen(false);
     } catch {
-      message.error("Không cập nhật được thông tin lớp.");
+      message.error("Failed to update class info.");
     } finally {
       setSubmitting(false);
     }
@@ -884,10 +884,10 @@ export const PageClassroomDetail = ({
     setDeleting(true);
     try {
       await deleteClassroom(supabase, classroom.id);
-      message.success("Đã xóa lớp");
+      message.success("Class deleted");
       router.push(ROUTES.CLASSROOM.LIST);
     } catch {
-      message.error("Không xóa được lớp.");
+      message.error("Failed to delete class.");
       setDeleting(false);
     }
   };
@@ -925,7 +925,7 @@ export const PageClassroomDetail = ({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Bạn cần đăng nhập.");
+      if (!user) throw new Error("You need to sign in.");
       const due = dueDate
         ? dueDate
             .hour(dueTime ? dueTime.hour() : 23)
@@ -940,11 +940,11 @@ export const PageClassroomDetail = ({
         studentIds: audience === "subset" ? subset : null,
         createdBy: user.id,
       });
-      message.success(`Đã giao ${selectedQuizzes.length} đề cho học sinh`);
+      message.success(`Assigned ${selectedQuizzes.length} test${selectedQuizzes.length !== 1 ? "s" : ""} to students`);
       resetGiao();
       refresh();
     } catch (e) {
-      message.error(e instanceof Error ? e.message : "Không giao được bài.");
+      message.error(e instanceof Error ? e.message : "Failed to assign tests.");
     } finally {
       setSubmitting(false);
     }
@@ -953,24 +953,24 @@ export const PageClassroomDetail = ({
   const handleDeleteAssignment = async (id: string) => {
     try {
       await deleteAssignment(supabase, id);
-      message.success("Đã xóa bài giao");
+      message.success("Assignment deleted");
       refresh();
     } catch {
-      message.error("Không xóa được bài giao.");
+      message.error("Failed to delete assignment.");
     }
   };
 
   const handleApprove = async (userId: string) => {
     try {
       await approveJoinRequest(supabase, classroom.id, userId);
-      message.success("Đã duyệt học sinh vào lớp");
+      message.success("Student approved");
       refresh();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "";
       message.error(
         msg.includes("STUDENT_LIMIT_REACHED")
-          ? "Lớp đã đạt giới hạn 50 học viên."
-          : "Không duyệt được yêu cầu."
+          ? "This class has reached the 50-student limit."
+          : "Failed to approve request."
       );
     }
   };
@@ -979,10 +979,10 @@ export const PageClassroomDetail = ({
     setConfirmReject(null);
     try {
       await rejectJoinRequest(supabase, classroom.id, userId);
-      message.success("Đã từ chối yêu cầu");
+      message.success("Request declined");
       refresh();
     } catch {
-      message.error("Không từ chối được yêu cầu.");
+      message.error("Failed to decline request.");
     }
   };
 
@@ -1007,11 +1007,11 @@ export const PageClassroomDetail = ({
             .second(0)
         : null;
       await updateAssignmentDueAt(supabase, dueEdit.id, due ? due.toISOString() : null);
-      message.success("Đã cập nhật hạn nộp");
+      message.success("Deadline updated");
       setDueEdit(null);
       refresh();
     } catch {
-      message.error("Không cập nhật được hạn nộp.");
+      message.error("Failed to update deadline.");
     } finally {
       setSubmitting(false);
     }
@@ -1055,7 +1055,7 @@ export const PageClassroomDetail = ({
               <button
                 onClick={() => copy(classroom.invite_code, "code")}
                 className="ml-0.5 text-[#9CA3AF] hover:text-[#5B8A00] transition-colors"
-                title="Sao chép mã"
+                title="Copy code"
               >
                 <span className="material-symbols-rounded text-[16px]">
                   {copied === "code" ? "check" : "content_copy"}
@@ -1066,13 +1066,13 @@ export const PageClassroomDetail = ({
               trigger={["click"]}
               menu={{
                 items: [
-                  { key: "qr", label: "Mã QR lớp học" },
+                  { key: "qr", label: "Class QR code" },
                   { type: "divider" },
-                  { key: "s", label: "Sao chép link mời học sinh" },
-                  { key: "t", label: "Sao chép link mời giáo viên" },
+                  { key: "s", label: "Copy student invite link" },
+                  { key: "t", label: "Copy teacher invite link" },
                   { type: "divider" },
-                  { key: "r", label: "Đổi mã mời" },
-                  { key: "edit", label: "Sửa thông tin lớp" },
+                  { key: "r", label: "Refresh invite code" },
+                  { key: "edit", label: "Edit class info" },
                 ],
                 onClick: ({ key }) => {
                   if (key === "edit") openEdit();
@@ -1123,7 +1123,7 @@ export const PageClassroomDetail = ({
                 ? [{
                     key: "requests",
                     icon: "person_add",
-                    label: "Yêu cầu vào lớp",
+                    label: "Join requests",
                     count: joinRequests.length,
                   }]
                 : []),
@@ -1269,9 +1269,9 @@ export const PageClassroomDetail = ({
                 <div className="flex items-center gap-2 rounded-full border border-[#E5E6E8] bg-[#F5F6F7] p-1">
                   {(
                     [
-                      ["all", "Tất cả"],
-                      ["open", "Đang mở"],
-                      ["expired", "Đã hết hạn"],
+                      ["all", "All"],
+                      ["open", "Open"],
+                      ["expired", "Expired"],
                     ] as const
                   ).map(([k, label]) => (
                     <button
@@ -1292,7 +1292,7 @@ export const PageClassroomDetail = ({
                   className="inline-flex items-center gap-1.5 rounded-full bg-[#B3E653] px-4 py-2 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors"
                 >
                   <span className="material-symbols-rounded text-[16px]">add</span>
-                  Giao bài
+                  Assign tests
                 </button>
               </div>
 
@@ -1303,9 +1303,9 @@ export const PageClassroomDetail = ({
                       assignment
                     </span>
                   </span>
-                  <p className="mt-4 text-[16px] font-bold text-[#191D24]">Chưa giao bài nào</p>
+                  <p className="mt-4 text-[16px] font-bold text-[#191D24]">No assignments yet</p>
                   <p className="mt-1 text-[13px] text-[#6A7282]">
-                    Nhấn &quot;Giao bài&quot; để giao đề cho học sinh
+                    Click &quot;Assign tests&quot; to send tests to students.
                   </p>
                 </div>
               ) : (
@@ -1323,16 +1323,16 @@ export const PageClassroomDetail = ({
                         <div
                           className={`${ASSIGN_GRID} bg-[#FAFAFA] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.06em] text-[#6A7282] border-b border-[#F3F4F6]`}
                         >
-                          <span>Tên bài</span>
-                          <span>Kỹ năng</span>
-                          <span>Giao cho</span>
-                          <span>Tiến độ</span>
-                          <span>Hạn nộp</span>
+                          <span>Test name</span>
+                          <span>Skill</span>
+                          <span>Assigned to</span>
+                          <span>Progress</span>
+                          <span>Deadline</span>
                           <span />
                         </div>
                         {filtered.length === 0 ? (
                           <p className="px-5 py-8 text-center text-[13px] text-[#6A7282]">
-                            Không có bài giao phù hợp.
+                            No matching assignments found.
                           </p>
                         ) : (
                           filtered.map((a) => (
@@ -1363,7 +1363,7 @@ export const PageClassroomDetail = ({
               className="inline-flex items-center gap-1.5 rounded-full border border-[#E54552] px-4 py-2 text-[13px] font-semibold text-[#E54552] hover:bg-[#FEF2F2] transition-colors"
             >
               <span className="material-symbols-rounded text-[16px]">delete</span>
-              Xóa lớp
+              Delete class
             </button>
           </div>
         ) : null}
@@ -1396,7 +1396,7 @@ export const PageClassroomDetail = ({
             <button
               onClick={() => setEditOpen(false)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-              aria-label="Đóng"
+              aria-label="Close"
             >
               <span className="material-symbols-rounded text-[18px]">close</span>
             </button>
@@ -1458,7 +1458,7 @@ export const PageClassroomDetail = ({
                 </span>
                 <div className="flex items-center gap-2">
                   <label className="cursor-pointer rounded-[10px] border border-[#E5E6E8] px-3.5 py-2 text-[12px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors">
-                    {uploadingImage ? "Đang tải…" : editImage ? "Đổi ảnh" : "Tải ảnh lên"}
+                    {uploadingImage ? "Uploading…" : editImage ? "Change image" : "Upload image"}
                     <input
                       type="file"
                       accept="image/*"
@@ -1471,7 +1471,7 @@ export const PageClassroomDetail = ({
                       onClick={() => setEditImage(null)}
                       className="rounded-[10px] px-3 py-2 text-[12px] font-semibold text-[#6A7282] hover:bg-[#F3F4F6] transition-colors"
                     >
-                      Xóa ảnh
+                      Remove image
                     </button>
                   ) : null}
                 </div>
@@ -1491,7 +1491,7 @@ export const PageClassroomDetail = ({
               disabled={submitting || uploadingImage}
               className="rounded-full bg-[#B3E653] px-7 py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors disabled:opacity-60"
             >
-              {submitting ? "Đang lưu…" : "Save changes"}
+              {submitting ? "Saving…" : "Save changes"}
             </button>
           </div>
         </div>
@@ -1521,7 +1521,7 @@ export const PageClassroomDetail = ({
               <button
                 onClick={closeDelete}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-                aria-label="Đóng"
+                aria-label="Close"
               >
                 <span className="material-symbols-rounded text-[18px]">close</span>
               </button>
@@ -1587,7 +1587,7 @@ export const PageClassroomDetail = ({
               <button
                 onClick={closeDelete}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-                aria-label="Đóng"
+                aria-label="Close"
               >
                 <span className="material-symbols-rounded text-[18px]">close</span>
               </button>
@@ -1639,7 +1639,7 @@ export const PageClassroomDetail = ({
                 className="inline-flex items-center gap-1.5 rounded-full bg-[#E54552] px-6 py-2.5 text-[13px] font-bold text-white hover:bg-[#c73d47] transition-colors disabled:opacity-50"
               >
                 <span className="material-symbols-rounded text-[16px]">delete</span>
-                {deleting ? "Đang xóa…" : "Delete permanently"}
+                {deleting ? "Deleting…" : "Delete permanently"}
               </button>
             </div>
           </div>
@@ -1664,14 +1664,14 @@ export const PageClassroomDetail = ({
             </span>
             <h3 className="text-[20px] font-bold text-[#191D24]">
               {giaoStep === 1
-                ? "Chọn bài giao"
-                : `Cấu hình bài giao (${selectedQuizzes.length} mục)`}
+                ? "Select tests to assign"
+                : `Configure assignment (${selectedQuizzes.length} selected)`}
             </h3>
           </div>
           <button
             onClick={() => !submitting && resetGiao()}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <span className="material-symbols-rounded text-[18px]">close</span>
           </button>
@@ -1712,7 +1712,7 @@ export const PageClassroomDetail = ({
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Tìm kiếm đề thi..."
+                  placeholder="Search tests..."
                   className="w-full rounded-[11px] border border-[#E5E6E8] py-2.5 pl-10 pr-4 text-[14px] text-[#191D24] placeholder:text-[#9CA3AF] outline-none focus:border-[#B3E653] transition-colors"
                 />
               </div>
@@ -1721,9 +1721,9 @@ export const PageClassroomDetail = ({
               <div className="mb-3 flex gap-2">
                 {(
                   [
-                    ["all", "Tất cả"],
-                    ["unassigned", "Chưa giao"],
-                    ["assigned", "Đã giao"],
+                    ["all", "All"],
+                    ["unassigned", "Not assigned"],
+                    ["assigned", "Assigned"],
                   ] as const
                 ).map(([k, label]) => (
                   <button
@@ -1743,7 +1743,7 @@ export const PageClassroomDetail = ({
               {/* Quiz list */}
               <div className="max-h-[340px] space-y-2 overflow-y-auto pr-1">
                 {loadingQuizzes ? (
-                  <p className="py-8 text-center text-[13px] text-[#6A7282]">Đang tải đề…</p>
+                  <p className="py-8 text-center text-[13px] text-[#6A7282]">Loading tests…</p>
                 ) : (
                   (() => {
                     const list = quizzes.filter((q) =>
@@ -1756,7 +1756,7 @@ export const PageClassroomDetail = ({
                     if (list.length === 0)
                       return (
                         <p className="py-8 text-center text-[13px] text-[#6A7282]">
-                          Không tìm thấy đề thi.
+                          No tests found.
                         </p>
                       );
                     return list.map((q) => {
@@ -1788,7 +1788,7 @@ export const PageClassroomDetail = ({
                           </span>
                           {assigned ? (
                             <span className="flex-shrink-0 text-[11px] font-bold uppercase tracking-wide text-[#9CA3AF]">
-                              Đã giao
+                              Assigned
                             </span>
                           ) : null}
                         </button>
@@ -1800,21 +1800,21 @@ export const PageClassroomDetail = ({
 
               <div className="mt-5 flex items-center justify-between">
                 <span className="text-[13px] text-[#6A7282]">
-                  Đã chọn {selectedQuizzes.length} đề
+                  {selectedQuizzes.length} selected
                 </span>
                 <button
                   onClick={() => setGiaoStep(2)}
                   disabled={selectedQuizzes.length === 0}
                   className="rounded-full bg-[#B3E653] px-6 py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors disabled:opacity-50"
                 >
-                  Tiếp tục →
+                  Continue →
                 </button>
               </div>
             </>
           ) : (
             <>
               <p className="mb-2 text-[13px] font-bold text-[#6A7282]">
-                Đã chọn ({selectedQuizzes.length})
+                Selected ({selectedQuizzes.length})
               </p>
               <div className="space-y-2">
                 {selectedQuizzes.map((q) => (
@@ -1831,7 +1831,7 @@ export const PageClassroomDetail = ({
                     <button
                       onClick={() => toggleQuiz(q)}
                       className="flex h-6 w-6 items-center justify-center rounded-full text-[#6A7282] hover:bg-white transition-colors"
-                      aria-label="Bỏ chọn"
+                      aria-label="Deselect"
                     >
                       <span className="material-symbols-rounded text-[16px]">close</span>
                     </button>
@@ -1840,7 +1840,7 @@ export const PageClassroomDetail = ({
               </div>
 
               <div className="mt-5 flex items-center justify-between">
-                <label className="text-[14px] font-bold text-[#191D24]">Giao cho:</label>
+                <label className="text-[14px] font-bold text-[#191D24]">Assign to:</label>
                 <button
                   onClick={() => setAudience(audience === "all" ? "subset" : "all")}
                   className="flex items-center gap-2"
@@ -1859,7 +1859,7 @@ export const PageClassroomDetail = ({
                     ) : null}
                   </span>
                   <span className="text-[13px] text-[#191D24]">
-                    Chọn tất cả ({students.length} HS)
+                    All students ({students.length})
                   </span>
                 </button>
               </div>
@@ -1892,38 +1892,38 @@ export const PageClassroomDetail = ({
                     onClick={() => setShowAllChips(true)}
                     className="rounded-full bg-[#F3F4F6] px-3.5 py-1.5 text-[13px] font-medium text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
                   >
-                    + {students.length - 5} khác
+                    + {students.length - 5} more
                   </button>
                 ) : null}
                 {students.length === 0 ? (
-                  <span className="text-[13px] text-[#6A7282]">Chưa có học sinh trong lớp.</span>
+                  <span className="text-[13px] text-[#6A7282]">No students in this class yet.</span>
                 ) : null}
               </div>
 
               <div className="mt-5">
                 <label className="mb-2 block text-[14px] font-bold text-[#191D24]">
-                  Ghi chú (tùy chọn)
+                  Note (optional)
                 </label>
                 <textarea
                   value={note}
                   maxLength={500}
                   rows={3}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="VD: Nộp lúc 23:00 Thứ 6"
+                  placeholder="e.g. Submit by 11 PM on Friday"
                   className="w-full resize-none rounded-[11px] border border-[#E5E6E8] px-4 py-3 text-[14px] text-[#191D24] placeholder:text-[#9CA3AF] outline-none focus:border-[#B3E653] transition-colors"
                 />
               </div>
 
               <div className="mt-5">
                 <label className="mb-2 block text-[14px] font-bold text-[#191D24]">
-                  Hạn nộp (tùy chọn)
+                  Deadline (optional)
                 </label>
                 <div className="flex gap-3">
                   <DatePicker
                     className="flex-1"
                     size="large"
                     format="DD/MM/YYYY"
-                    placeholder="DD/MM/YYYY (gõ hoặc chọn)"
+                    placeholder="DD/MM/YYYY"
                     value={dueDate}
                     onChange={(v) => setDueDate(v)}
                   />
@@ -1943,7 +1943,7 @@ export const PageClassroomDetail = ({
                   onClick={() => setGiaoStep(1)}
                   className="rounded-full border border-[#E5E6E8] px-5 py-2.5 text-[13px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
                 >
-                  ← Quay lại
+                  ← Back
                 </button>
                 <button
                   onClick={handleAssign}
@@ -1951,10 +1951,10 @@ export const PageClassroomDetail = ({
                   className="rounded-full bg-[#B3E653] px-6 py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors disabled:opacity-50"
                 >
                   {submitting
-                    ? "Đang giao…"
-                    : `Giao ${selectedQuizzes.length} mục (${
+                    ? "Assigning…"
+                    : `Assign ${selectedQuizzes.length} test${selectedQuizzes.length !== 1 ? "s" : ""} to ${
                         audience === "all" ? students.length : subset.length
-                      } HS)`}
+                      } student${(audience === "all" ? students.length : subset.length) !== 1 ? "s" : ""}`}
                 </button>
               </div>
             </>
@@ -1974,11 +1974,11 @@ export const PageClassroomDetail = ({
         destroyOnClose
       >
         <div className="mb-4 flex items-start justify-between">
-          <h3 className="text-[18px] font-bold text-[#191D24]">Mã QR lớp học</h3>
+          <h3 className="text-[18px] font-bold text-[#191D24]">Class QR code</h3>
           <button
             onClick={() => setQrOpen(false)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <span className="material-symbols-rounded text-[18px]">close</span>
           </button>
@@ -1993,25 +1993,25 @@ export const PageClassroomDetail = ({
               level="M"
             />
           </div>
-          <p className="mt-4 text-[12px] text-[#6A7282]">Mã mời</p>
+          <p className="mt-4 text-[12px] text-[#6A7282]">Invite code</p>
           <p className="text-[20px] font-bold tracking-[0.15em] text-[#191D24]">
             {classroom.invite_code}
           </p>
           <p className="mt-2 text-center text-[12px] text-[#6A7282]">
-            Học sinh quét mã này để vào lớp.
+            Students can scan this to join the class.
           </p>
           <div className="mt-5 flex w-full gap-3">
             <button
               onClick={() => copy(studentLink, "qr")}
               className="flex-1 rounded-full border border-[#E5E6E8] py-2.5 text-[13px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
             >
-              {copied === "qr" ? "Đã sao chép link" : "Sao chép link"}
+              {copied === "qr" ? "Link copied" : "Copy link"}
             </button>
             <button
               onClick={downloadQr}
               className="flex-1 rounded-full bg-[#B3E653] py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors"
             >
-              Tải mã QR
+              Download QR
             </button>
           </div>
         </div>
@@ -2029,29 +2029,29 @@ export const PageClassroomDetail = ({
         destroyOnClose
       >
         <div className="mb-4 flex items-start justify-between">
-          <h3 className="text-[18px] font-bold text-[#191D24]">Đổi hạn nộp</h3>
+          <h3 className="text-[18px] font-bold text-[#191D24]">Change deadline</h3>
           <button
             onClick={() => setDueEdit(null)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <span className="material-symbols-rounded text-[18px]">close</span>
           </button>
         </div>
-        <p className="mb-4 text-[13px] text-[#6A7282]">{dueEdit?.quiz_title || "Bài giao"}</p>
+        <p className="mb-4 text-[13px] text-[#6A7282]">{dueEdit?.quiz_title || "Assignment"}</p>
         <div className="flex flex-wrap gap-3">
           <div className="flex-1">
-            <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Ngày</label>
+            <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Date</label>
             <DatePicker
               value={editDate}
               onChange={setEditDate}
               format="DD/MM/YYYY"
-              placeholder="Chọn ngày"
+              placeholder="Select date"
               className="w-full"
             />
           </div>
           <div className="flex-1">
-            <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Giờ</label>
+            <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Time</label>
             <TimePicker
               value={editTime}
               onChange={setEditTime}
@@ -2062,7 +2062,7 @@ export const PageClassroomDetail = ({
           </div>
         </div>
         <p className="mt-2 text-[12px] text-[#6A7282]">
-          Để trống ngày = không có hạn nộp. Bỏ trống giờ sẽ mặc định 23:59.
+          Leave date blank for no deadline. Leave time blank to default to 23:59.
         </p>
         <div className="mt-6 flex justify-between gap-3">
           <button
@@ -2072,21 +2072,21 @@ export const PageClassroomDetail = ({
             }}
             className="rounded-full border border-[#E5E6E8] px-4 py-2.5 text-[13px] font-semibold text-[#6A7282] hover:bg-[#F3F4F6] transition-colors"
           >
-            Xóa hạn
+            Clear deadline
           </button>
           <div className="flex gap-3">
             <button
               onClick={() => setDueEdit(null)}
               className="rounded-full border border-[#E5E6E8] px-5 py-2.5 text-[13px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
             >
-              Huỷ
+              Cancel
             </button>
             <button
               onClick={handleSaveDue}
               disabled={submitting}
               className="rounded-full bg-[#B3E653] px-6 py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors disabled:opacity-60"
             >
-              {submitting ? "Đang lưu…" : "Lưu"}
+              {submitting ? "Saving…" : "Save"}
             </button>
           </div>
         </div>
@@ -2112,14 +2112,14 @@ export const PageClassroomDetail = ({
           <button
             onClick={() => setConfirmRemove(null)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <span className="material-symbols-rounded text-[18px]">close</span>
           </button>
         </div>
         <p className="text-[14px] text-[#6A7282]">
           <span className="font-semibold text-[#191D24]">
-            {confirmRemove?.display_name || confirmRemove?.name || confirmRemove?.email || "Thành viên này"}
+            {confirmRemove?.display_name || confirmRemove?.name || confirmRemove?.email || "This member"}
           </span>{" "}
           will lose access to &quot;{classroom.name}&quot; and their progress in this class.
           This can&apos;t be undone.
@@ -2150,26 +2150,26 @@ export const PageClassroomDetail = ({
         centered
         styles={{ content: { borderRadius: 20, padding: 28 } }}
       >
-        <h3 className="text-[18px] font-bold text-[#191D24]">Từ chối yêu cầu vào lớp?</h3>
+        <h3 className="text-[18px] font-bold text-[#191D24]">Decline join request?</h3>
         <p className="mt-2 text-[13px] text-[#6A7282]">
-          Từ chối yêu cầu của{" "}
+          Decline the request from{" "}
           <span className="font-semibold text-[#191D24]">
-            {confirmReject?.name || confirmReject?.email || "người này"}
+            {confirmReject?.name || confirmReject?.email || "this person"}
           </span>
-          ? Họ sẽ cần gửi lại yêu cầu nếu muốn tham gia.
+          ? They will need to submit a new request to join.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={() => setConfirmReject(null)}
             className="rounded-full border border-[#E5E6E8] px-5 py-2.5 text-[13px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
           >
-            Hủy
+            Cancel
           </button>
           <button
             onClick={() => confirmReject && doReject(confirmReject.user_id)}
             className="rounded-full bg-[#E54552] px-6 py-2.5 text-[13px] font-bold text-white hover:bg-[#c73d47] transition-colors"
           >
-            Từ chối
+            Decline
           </button>
         </div>
       </Modal>
@@ -2185,29 +2185,29 @@ export const PageClassroomDetail = ({
         styles={{ content: { borderRadius: 20, padding: 28 } }}
       >
         <div className="mb-4 flex items-start justify-between">
-          <h3 className="text-[18px] font-bold text-[#191D24]">Sửa tên trong lớp</h3>
+          <h3 className="text-[18px] font-bold text-[#191D24]">Edit display name</h3>
           <button
             onClick={() => setRenameMember(null)}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E6E8] transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <span className="material-symbols-rounded text-[18px]">close</span>
           </button>
         </div>
         <p className="text-[13px] text-[#6A7282]">
-          Tên này chỉ hiển thị trong lớp, không đổi tên tài khoản của thành viên.
+          This name is only shown inside the class and does not change the member&apos;s account name.
         </p>
         <div className="mt-5">
-          <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Tên hiển thị</label>
+          <label className="mb-1.5 block text-[12px] font-bold text-[#191D24]">Display name</label>
           <input
             value={renameValue}
             maxLength={120}
             onChange={(e) => setRenameValue(e.target.value)}
-            placeholder={renameMember?.name || "Nhập tên hiển thị"}
+            placeholder={renameMember?.name || "Enter display name"}
             className="w-full rounded-[11px] border border-[#E5E6E8] px-4 py-3 text-[14px] text-[#191D24] outline-none focus:border-[#B3E653] transition-colors"
           />
           <p className="mt-1.5 text-[12px] text-[#6A7282]">
-            Để trống để dùng lại tên tài khoản ({renameMember?.name || renameMember?.email || "—"}).
+            Leave blank to use the account name ({renameMember?.name || renameMember?.email || "—"}).
           </p>
         </div>
         <div className="mt-6 flex justify-end gap-3">
@@ -2215,14 +2215,14 @@ export const PageClassroomDetail = ({
             onClick={() => setRenameMember(null)}
             className="rounded-full border border-[#E5E6E8] px-5 py-2.5 text-[13px] font-semibold text-[#374151] hover:bg-[#F3F4F6] transition-colors"
           >
-            Hủy
+            Cancel
           </button>
           <button
             onClick={handleSaveRename}
             disabled={submitting}
             className="rounded-full bg-[#B3E653] px-6 py-2.5 text-[13px] font-bold text-[#191D24] hover:bg-[#9AD534] transition-colors disabled:opacity-60"
           >
-            {submitting ? "Đang lưu…" : "Lưu"}
+            {submitting ? "Saving…" : "Save"}
           </button>
         </div>
       </Modal>

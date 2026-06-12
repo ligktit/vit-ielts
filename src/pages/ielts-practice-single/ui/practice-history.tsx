@@ -59,7 +59,7 @@ export function PracticeHistoryWidget({ post }: { post: IPracticeSingle }) {
   if (history.length === 0) {
     return (
       <div className="text-center py-6 text-[#6A7282] text-sm">
-        Bạn chưa làm bài test này. Hãy bắt đầu ngay!
+        You haven&apos;t attempted this test yet. Start now!
       </div>
     );
   }

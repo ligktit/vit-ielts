@@ -3,6 +3,7 @@ import { createServerSupabase } from "~supabase/server";
 import { getMasterData } from "~supabase/getMasterData";
 import { getStudentAssignments } from "~services/classroom";
 import { ROUTES } from "@/shared/routes";
+import { isTeacherRole } from "~lib/parseRoles";
 
 export { PageMyAssignments } from "./ui";
 
@@ -15,6 +16,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (!user) {
     return {
       redirect: { destination: ROUTES.LOGIN(context.resolvedUrl), statusCode: 302 },
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("roles")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (isTeacherRole(profile?.roles)) {
+    return {
+      redirect: { destination: ROUTES.CLASSROOM.LIST, statusCode: 302 },
     };
   }
 

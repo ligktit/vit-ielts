@@ -11,12 +11,12 @@ type Props = {
   loading: boolean;
 };
 
-const DAY_HEADERS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const MONTH_NAMES = [
-  "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4",
-  "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8",
-  "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
+  "January", "February", "March", "April",
+  "May", "June", "July", "August",
+  "September", "October", "November", "December",
 ];
 
 export const StreakCalendar = ({
@@ -38,7 +38,7 @@ export const StreakCalendar = ({
           <button
             className={styles.navBtn}
             onClick={onPrevMonth}
-            title="Tháng trước"
+            title="Previous month"
           >
             ‹
           </button>
@@ -46,12 +46,12 @@ export const StreakCalendar = ({
             className={`${styles.navBtn} ${styles.todayBtn}`}
             onClick={onToday}
           >
-            Hôm nay
+            Today
           </button>
           <button
             className={styles.navBtn}
             onClick={onNextMonth}
-            title="Tháng sau"
+            title="Next month"
           >
             ›
           </button>
@@ -107,7 +107,7 @@ export const StreakCalendar = ({
 
       {/* Legend */}
       <div className={styles.legend}>
-        <span>Ít</span>
+        <span>Less</span>
         <div
           className={styles.legendBox}
           style={{ background: "var(--streak-0)" }}
@@ -124,7 +124,7 @@ export const StreakCalendar = ({
           className={styles.legendBox}
           style={{ background: "var(--streak-3)" }}
         />
-        <span>Nhiều</span>
+        <span>More</span>
       </div>
     </div>
   );

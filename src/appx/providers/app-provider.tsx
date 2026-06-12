@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 export type MenuItem = {
   key: number;
@@ -74,7 +74,10 @@ export type MasterData = {
   // userCredentials removed — Supabase Auth manages session internally
 };
 
-type Context = { masterData: MasterData };
+type Context = {
+  masterData: MasterData;
+  updateViewerAvatar: (url: string) => void;
+};
 
 const defaultMasterData: MasterData = {
   websiteOptions: {
@@ -98,24 +101,54 @@ const defaultMasterData: MasterData = {
   menuData: {},
 };
 
-const AppContext = createContext<Context>({ masterData: defaultMasterData });
+const noop = () => {};
+const AppContext = createContext<Context>({ masterData: defaultMasterData, updateViewerAvatar: noop });
 
 export const useAppContext = () => {
   const context = useContext(AppContext);
-  // Đảm bảo luôn có masterData, fallback về default nếu undefined
   return {
     masterData: context?.masterData || defaultMasterData,
+    updateViewerAvatar: context?.updateViewerAvatar ?? noop,
   };
 };
 
 export const AppProvider = ({
   children,
-  masterData,
+  masterData: initialMasterData,
 }: {
   children: React.ReactNode;
   masterData: MasterData;
 }) => {
-  const contextValue = useMemo(() => ({ masterData }), [masterData]);
+  // undefined = use SSR value as-is (no client override yet)
+  // string   = client has uploaded a new avatar; propagate without a hard reload
+  const [avatarOverride, setAvatarOverride] = useState<string | undefined>(undefined);
+
+  const masterData = useMemo<MasterData>(() => {
+    if (!initialMasterData.viewer || avatarOverride === undefined) return initialMasterData;
+    return {
+      ...initialMasterData,
+      viewer: {
+        ...initialMasterData.viewer,
+        userData: {
+          ...initialMasterData.viewer.userData,
+          avatar: {
+            node: {
+              mediaDetails: { sizes: [{ sourceUrl: avatarOverride, width: "96" }] },
+              srcSet: avatarOverride,
+            },
+          },
+        },
+      },
+    };
+  }, [initialMasterData, avatarOverride]);
+
+  const updateViewerAvatar = useCallback((url: string) => setAvatarOverride(url), []);
+
+  const contextValue = useMemo(
+    () => ({ masterData, updateViewerAvatar }),
+    [masterData, updateViewerAvatar]
+  );
+
   return (
     <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );

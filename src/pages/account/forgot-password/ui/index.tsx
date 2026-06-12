@@ -37,39 +37,39 @@ export function PageForgotPassword() {
   return (
     <div className="flex flex-col min-h-screen items-center bg-white">
       <HeroBanner
-        title="Quên mật khẩu"
+        title="Forgot Password"
         breadcrumbs={[
-          { label: "Trang chủ", href: ROUTES.HOME },
-          { label: "Đăng nhập & Đăng ký", href: ROUTES.LOGIN() },
-          { label: "Quên mật khẩu" },
+          { label: "Home", href: ROUTES.HOME },
+          { label: "Sign In & Register", href: ROUTES.LOGIN() },
+          { label: "Forgot Password" },
         ]}
       />
 
       <div className="w-full flex justify-center py-[130px] relative z-30 px-4 max-w-7xl">
         <div className="w-[562px] bg-white rounded-[32px] shadow-[0px_2px_10px_rgba(0,0,0,0.5)] flex flex-col items-center py-8 px-6 sm:px-[64px]">
           <h2 className="font-noto-sans font-bold text-[32px] leading-[39px] text-center text-[#D94A56] mb-[20px]">
-            Quên mật khẩu
+            Forgot Password
           </h2>
 
           {sentTo ? (
             <div className="w-full flex flex-col gap-6 text-center">
               <p className="font-noto-sans text-[16px] leading-[22px] text-[#374151]">
-                Chúng tôi đã gửi link đặt lại mật khẩu đến{" "}
+                We've sent a password reset link to{" "}
                 <span className="font-bold text-[#191D24]">{sentTo}</span>.
                 <br />
-                Vui lòng kiểm tra hộp thư (kể cả Spam) và bấm vào link để tiếp tục.
+                Please check your inbox (including Spam) and click the link to continue.
               </p>
               <Link
                 href={ROUTES.LOGIN()}
                 className="font-noto-sans font-medium text-[16px] text-[#D94A56] hover:underline"
               >
-                Quay lại đăng nhập
+                Back to Sign In
               </Link>
             </div>
           ) : (
             <>
               <p className="font-noto-sans text-[14px] leading-[20px] text-[#374151] text-center mb-[24px]">
-                Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu cho bạn.
+                Enter your registered email and we'll send you a password reset link.
               </p>
 
               <form
@@ -87,10 +87,10 @@ export function PageForgotPassword() {
                     control={control}
                     name="email"
                     rules={{
-                      required: "Vui lòng nhập email",
+                      required: "Please enter your email",
                       pattern: {
                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Email không hợp lệ",
+                        message: "Invalid email",
                       },
                     }}
                     render={({ field }) => (
@@ -117,20 +117,20 @@ export function PageForgotPassword() {
                   className="w-full h-[55px] flex justify-center items-center py-3 px-3 bg-[#D94A56] rounded-[10px] shadow-[0px_4px_20px_-8px_rgba(0,0,0,0.11),0px_0px_10px_rgba(0,0,0,0.1)] hover:bg-[#E3636E] transition-colors disabled:opacity-70 disabled:cursor-not-allowed border-none cursor-pointer"
                 >
                   <span className="font-noto-sans font-bold text-[20px] leading-[24px] text-white">
-                    {isSubmitting ? "Đang gửi..." : "Gửi link đặt lại"}
+                    {isSubmitting ? "Sending..." : "Send Reset Link"}
                   </span>
                 </button>
               </form>
 
               <div className="w-full text-center mt-[24px]">
                 <span className="font-noto-sans font-medium text-[14px] text-[#374151]">
-                  Đã nhớ mật khẩu?{" "}
+                  Remembered your password?{" "}
                 </span>
                 <Link
                   href={ROUTES.LOGIN()}
                   className="font-noto-sans font-medium text-[14px] text-[#D94A56] hover:underline"
                 >
-                  Đăng nhập
+                  Sign In
                 </Link>
               </div>
             </>

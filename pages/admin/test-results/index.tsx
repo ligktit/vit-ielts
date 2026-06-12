@@ -390,7 +390,7 @@ export default function AdminTestResultsPage() {
                         showTotal: (t, range) => `${range[0]}-${range[1]} / ${t} kết quả`,
                         showQuickJumper: true,
                     }}
-                    scroll={{ x: 1000 }}
+                    scroll={{ x: "max-content" }}
                     size="middle"
                 />
             </AdminGlassCard>

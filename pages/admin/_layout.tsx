@@ -407,12 +407,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         algorithm: theme === "dark" ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
         token: theme === "dark"
           ? {
+              colorPrimary: "#9AD534",
               colorText: "#e5e7eb",
               colorTextPlaceholder: "#9ca3af",
               colorBgContainer: "#1a1b23",
               colorBorder: "rgba(255,255,255,0.1)",
             }
           : {
+              colorPrimary: "#9AD534",
               colorText: "#1a1b2e",
               colorTextPlaceholder: "#94a3b8",
               colorBgContainer: "#ffffff",
@@ -431,12 +433,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside className={`admin-sidebar ${collapsed ? "collapsed" : ""} ${mobileOpen ? "mobile-open" : ""}`}>
         {/* Logo */}
         <div className="admin-sidebar-logo">
-          <img
-            src="/logo.png"
-            alt="IELTS Prediction"
-            className="admin-sidebar-logo-img"
-            style={{ height: 46, width: "auto", objectFit: "contain" }}
-          />
+          {collapsed ? (
+            <img
+              src="/assets/logos/Logo.svg"
+              alt="VIT IELTS"
+              style={{ height: 36, width: 36, objectFit: "contain" }}
+            />
+          ) : (
+            <img
+              src={
+                theme === "dark"
+                  ? "/assets/logos/logo-on-dark.svg"
+                  : "/assets/logos/logo-on-bright.svg"
+              }
+              alt="VIT IELTS"
+              style={{ height: 36, width: "auto", objectFit: "contain", maxWidth: 160 }}
+            />
+          )}
         </div>
 
         {/* Menu */}

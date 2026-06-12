@@ -41,25 +41,25 @@ export default function FillupEditor({
 
     return (
         <div className="space-y-4">
-            <p className="px-4 py-3 bg-neutral-100 rounded border border-dashed border-gray-300 text-sm text-gray-600">
-                Dùng <code className="bg-gray-200 px-1 rounded">{"{"} {"}"}</code> để đánh dấu chỗ trống và ghi đáp án đúng bên trong.{" "}
-                Ví dụ: <em>The engine was <strong>{"{inefficient}"}</strong> due to its weight.</em>
+            <p className="px-4 py-3 bg-neutral-100 dark:bg-gray-800 rounded border border-dashed border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+                Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{"{"} {"}"}</code> to mark blanks and write the correct answer inside.{" "}
+                Example: <em>The engine was <strong>{"{inefficient}"}</strong> due to its weight.</em>
                 <br />
-                Nhiều đáp án chấp nhận: <code className="bg-gray-200 px-1 rounded">{"{play | hate | love}"}</code>
+                Multiple accepted answers: <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{"{play | hate | love}"}</code>
             </p>
 
             <RichTextEditor
                 value={question_text}
                 onChange={onChange}
-                placeholder="Nhập nội dung passage / câu hỏi. Bọc đáp án trong { }…"
+                placeholder="Enter passage / question content. Wrap answers in { }…"
             />
 
             {words.length > 0 && (
-                <div className="p-3 bg-neutral-50 rounded border border-dashed border-gray-300">
+                <div className="p-3 bg-neutral-50 dark:bg-gray-900 rounded border border-dashed border-gray-300 dark:border-gray-700">
                     <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-2">
-                        {words.length} đáp án phát hiện
+                        {words.length} answer(s) detected
                         {onExplanationsChange
-                            ? " — click để thêm giải thích"
+                            ? " — click to add explanation"
                             : ""}
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -73,7 +73,7 @@ export default function FillupEditor({
                                     trigger="click"
                                     title={
                                         <span>
-                                            Giải thích:{" "}
+                                            Explanation:{" "}
                                             <strong className="text-green-700">{word}</strong>
                                         </span>
                                     }
@@ -81,7 +81,7 @@ export default function FillupEditor({
                                         <Input.TextArea
                                             rows={3}
                                             style={{ width: 280 }}
-                                            placeholder="Nhập giải thích cho đáp án này…"
+                                            placeholder="Enter explanation for this answer…"
                                             value={wordExplanations?.[String(index)] ?? ""}
                                             onChange={(e) => setExplanation(index, e.target.value)}
                                         />

@@ -30,7 +30,7 @@ export const SingleItem = ({ post, skill }: { post: any; skill: string }) => {
       isPro={post.pro_user_only || post.proUserOnly || post.postMeta?.proUserOnly || false}
       href={ROUTES.SAMPLE_ESSAY.SINGLE(post.slug)}
       isLocked={post.pro_user_only || post.proUserOnly || post.postMeta?.proUserOnly || false}
-      actionText="Xem thêm"
+      actionText="View more"
     />
   );
 };

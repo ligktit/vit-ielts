@@ -6,6 +6,7 @@ import type { DocumentContext } from "next/document";
 const MyDocument = () => (
   <Html lang="en">
     <Head>
+      <style dangerouslySetInnerHTML={{ __html: "@layer theme, base, antd, components, utilities;" }} />
       {/* Google Fonts — loaded via <link> for reliability (CSS @import can be dropped by PostCSS) */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -29,8 +30,119 @@ const MyDocument = () => (
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet"
       />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            #global-skeleton-loader {
+              position: fixed;
+              inset: 0;
+              z-index: 999999;
+              background-color: #ffffff;
+              display: flex;
+              flex-direction: column;
+              padding: 24px;
+              gap: 24px;
+              font-family: system-ui, -apple-system, sans-serif;
+              opacity: 1;
+              transition: opacity 0.4s ease-out;
+            }
+            #global-skeleton-loader.fade-out {
+              opacity: 0;
+              pointer-events: none;
+            }
+            .sk-pulse {
+              animation: sk-pulse 1.5s infinite ease-in-out;
+            }
+            @keyframes sk-pulse {
+              0% { background-color: #e5e7eb; }
+              50% { background-color: #f3f4f6; }
+              100% { background-color: #e5e7eb; }
+            }
+            .sk-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              border-bottom: 1px solid #f3f4f6;
+              padding-bottom: 16px;
+            }
+            .sk-logo {
+              width: 120px;
+              height: 32px;
+              border-radius: 6px;
+            }
+            .sk-nav {
+              display: flex;
+              gap: 16px;
+            }
+            .sk-nav-item {
+              width: 64px;
+              height: 16px;
+              border-radius: 4px;
+            }
+            .sk-banner {
+              width: 100%;
+              height: 200px;
+              border-radius: 16px;
+            }
+            .sk-body {
+              display: flex;
+              gap: 24px;
+              flex: 1;
+            }
+            .sk-main {
+              flex: 1;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            }
+            .sk-title {
+              width: 75%;
+              height: 28px;
+              border-radius: 6px;
+            }
+            .sk-line {
+              width: 100%;
+              height: 16px;
+              border-radius: 4px;
+            }
+            .sk-line.short {
+              width: 80%;
+            }
+            .sk-sidebar {
+              width: 280px;
+              height: 300px;
+              border-radius: 16px;
+            }
+            @media (max-width: 768px) {
+              .sk-sidebar {
+                display: none;
+              }
+            }
+          `,
+        }}
+      />
     </Head>
     <body>
+      <div id="global-skeleton-loader">
+        <div className="sk-header">
+          <div className="sk-logo sk-pulse"></div>
+          <div className="sk-nav">
+            <div className="sk-nav-item sk-pulse"></div>
+            <div className="sk-nav-item sk-pulse"></div>
+            <div className="sk-nav-item sk-pulse"></div>
+          </div>
+        </div>
+        <div className="sk-banner sk-pulse"></div>
+        <div className="sk-body">
+          <div className="sk-main">
+            <div className="sk-title sk-pulse"></div>
+            <div className="sk-line sk-pulse"></div>
+            <div className="sk-line sk-pulse"></div>
+            <div className="sk-line short sk-pulse"></div>
+          </div>
+          <div className="sk-sidebar sk-pulse"></div>
+        </div>
+      </div>
       <Main />
       <NextScript />
     </body>
@@ -44,7 +156,7 @@ MyDocument.getInitialProps = async (ctx: DocumentContext) => {
     originalRenderPage({
       enhanceApp: (App) => (props) =>
       (
-        <StyleProvider cache={cache}>
+        <StyleProvider cache={cache} layer>
           <App {...props} />
         </StyleProvider>
       ),

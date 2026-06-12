@@ -54,7 +54,7 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
 
         return (
             <div className="space-y-4">
-                <div className="prose prose-sm max-w-none leading-loose text-[#2D3142]">
+                <div className="prose prose-sm max-w-none leading-loose text-[#2D3142] dark:text-gray-200">
                     {parse(rawContent, options)}
                 </div>
                 {data.explanations?.[0]?.content && (
@@ -78,10 +78,10 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                             ? q.correct
                             : parseInt(String(q.correct), 10);
                     return (
-                        <div key={idx} className="rounded-lg border border-[#eadfba] bg-[#FAF7EB] p-4">
+                        <div key={idx} className="rounded-lg border border-[#eadfba] dark:border-[#524a2c] bg-[#FAF7EB] dark:bg-[#201f19] p-4">
                             {/* Question stem */}
                             <div className="mb-3 flex items-start gap-2 font-semibold leading-6">
-                                <span className="bg-white px-2 py-0.5 rounded border border-gray-200 text-sm">
+                                <span className="bg-white dark:bg-gray-800 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 text-sm">
                                     Q.{idx + 1}
                                 </span>
                                 <div className="min-w-0 flex-1 break-words prose prose-sm max-w-none">
@@ -92,8 +92,8 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                             {/* Options */}
                             <div className="pl-2">
                                 {isSelect ? (
-                                    <div className="max-w-md rounded-lg border border-gray-200 bg-white p-3">
-                                        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+                                    <div className="max-w-md rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3">
+                                        <div className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                                             Answer Options
                                         </div>
                                         <Select
@@ -130,8 +130,8 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                                                     key={oIdx}
                                                     className={`rounded-lg border px-3 py-2 shadow-sm transition-colors ${
                                                         isCorrect
-                                                            ? "border-green-400 bg-green-50"
-                                                            : "border-white bg-white"
+                                                            ? "border-green-400 bg-green-50 dark:border-green-700 dark:bg-green-950/20"
+                                                            : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
                                                     }`}
                                                 >
                                                     <div className="flex items-center w-full">
@@ -180,7 +180,7 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
     // ── Checkbox ──────────────────────────────────────────────────────────────
     const renderCheckbox = () => {
         return (
-            <div className="bg-[#FAF7EB] p-4 rounded-lg space-y-3">
+            <div className="bg-[#FAF7EB] dark:bg-[#201f19] p-4 rounded-lg space-y-3">
                 {(data.list_of_options || []).map((opt: any, idx) => {
                     const isCorrect = opt.correct === true;
                     return (
@@ -188,8 +188,8 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                             <div
                                 className={`rounded-lg px-3 py-2 border w-full ${
                                     isCorrect
-                                        ? "bg-green-50 border-green-300"
-                                        : "bg-white border-transparent"
+                                        ? "bg-green-50 border-green-300 dark:bg-green-950/20 dark:border-green-800"
+                                        : "bg-white dark:bg-gray-900 border-transparent dark:border-gray-850"
                                 }`}
                             >
                                 <Checkbox checked={isCorrect} disabled className="mt-0.5 w-full flex items-start">
@@ -226,19 +226,19 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
         return (
             <div className="space-y-4">
                 {layoutType === "summary" && summaryText && (
-                    <div className="bg-gray-50 p-4 rounded border border-gray-200">
-                        <h4 className="font-medium mb-2 text-sm text-gray-500 uppercase tracking-wide">
+                    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded border border-gray-200 dark:border-gray-700">
+                        <h4 className="font-medium mb-2 text-sm text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                             Summary
                         </h4>
                         <p className="text-sm leading-relaxed">{summaryText}</p>
                     </div>
                 )}
 
-                <div className="bg-white p-4 rounded border border-gray-200">
+                <div className="bg-white dark:bg-gray-900 p-4 rounded border border-gray-200 dark:border-gray-700">
                     <h4 className="font-medium mb-2">{mq.optionsTitle || mq.options_title || "List of options"}</h4>
                     <div className="flex flex-col gap-2">
                         {answerOptions.map((opt: any, i: number) => (
-                            <div key={i} className="bg-gray-100 px-3 py-2 rounded text-sm border border-gray-200">
+                            <div key={i} className="bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded text-sm border border-gray-200 dark:border-gray-700">
                                 <span className="font-bold mr-2 text-blue-600">{String.fromCharCode(65 + i)}.</span>
                                 {opt.optionText || opt.option_text || `[Option ${i + 1}]`}
                             </div>
@@ -251,8 +251,8 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
                         const correctAnswer = item.correctAnswer || item.correct_answer || "";
                         return (
                             <div key={idx}>
-                                <div className="flex gap-3 items-center bg-[#FAF7EB] p-3 rounded">
-                                    <span className="bg-white px-2 rounded border font-medium text-sm">
+                                <div className="flex gap-3 items-center bg-[#FAF7EB] dark:bg-[#201f19] p-3 rounded">
+                                    <span className="bg-white dark:bg-gray-850 px-2 rounded border border-gray-200 dark:border-gray-750 font-medium text-sm">
                                         Q.{idx + 1}
                                     </span>
                                     <span className="flex-1">
@@ -346,12 +346,12 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
 
     // ── Root render ───────────────────────────────────────────────────────────
     return (
-        <div className="text-left font-noto-sans text-[#2D3142]">
+        <div className="text-left font-noto-sans text-[#2D3142] dark:text-gray-200">
             {/* Title & Instructions */}
             <div className="mb-6">
                 <h3 className="text-lg font-bold mb-2">{data.title || "Untitled Question"}</h3>
                 {data.instructions && data.type !== "fillup" && (
-                    <div className="prose prose-sm text-gray-600 italic">
+                    <div className="prose prose-sm text-gray-600 dark:text-gray-400 italic">
                         {renderRichText(data.instructions)}
                     </div>
                 )}
@@ -373,9 +373,9 @@ export default function QuestionPreview({ data }: QuestionPreviewProps) {
 
 function CorrectAnswerBadge({ label }: { label: string }) {
     return (
-        <div className="mt-3 flex items-center gap-2 rounded-md bg-green-50 border border-green-300 px-3 py-2">
-            <span className="text-green-600 font-bold text-sm">✓ Correct:</span>
-            <span className="text-sm text-green-800">{label}</span>
+        <div className="mt-3 flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-950/20 border border-green-300 dark:border-green-800 px-3 py-2">
+            <span className="text-green-600 dark:text-green-400 font-bold text-sm">✓ Correct:</span>
+            <span className="text-sm text-green-800 dark:text-green-200">{label}</span>
         </div>
     );
 }
@@ -393,17 +393,17 @@ function ExplanationBlock({
             <Collapse
                 ghost
                 size="small"
-                className="bg-amber-50/50 border border-amber-200 rounded-md overflow-hidden"
+                className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200 dark:border-amber-900/50 rounded-md overflow-hidden"
                 items={[
                     {
                         key: "1",
                         label: (
-                            <span className="font-semibold text-amber-900 flex items-center gap-1 text-xs">
+                            <span className="font-semibold text-amber-900 dark:text-amber-200 flex items-center gap-1 text-xs">
                                 💡 Explanation
                             </span>
                         ),
                         children: (
-                            <div className="text-sm text-amber-900 py-1">
+                            <div className="text-sm text-amber-900 dark:text-amber-200 py-1">
                                 <span className="prose prose-sm max-w-none inline">
                                     {renderRichText(content)}
                                 </span>

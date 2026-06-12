@@ -58,7 +58,7 @@ export function QuestionRender({ question, startIndex = 0, readOnly = false }: Q
     default:
       return (
         <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-md">
-          Lỗi: Không tìm thấy component cho loại câu hỏi "{questionType}".
+          Error: No component found for question type "{questionType}".
         </div>
       );
   }

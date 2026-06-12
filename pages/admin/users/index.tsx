@@ -710,7 +710,7 @@ export default function AdminUsersPage() {
                             `${range[0]}-${range[1]} / ${t} users`,
                         showQuickJumper: true,
                     }}
-                    scroll={{ x: 1000 }}
+                    scroll={{ x: "max-content" }}
                     size="middle"
                     className="admin-users-table"
                 />

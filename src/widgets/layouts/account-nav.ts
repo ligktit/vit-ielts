@@ -22,7 +22,7 @@ export type AccountNavItem = {
  */
 export const ACCOUNT_NAVIGATION: AccountNavItem[] = [
   { label: "Tài Khoản Của Tôi", icon: "person", link: ROUTES.ACCOUNT.MY_PROFILE },
-  { label: "Bảng điều khiển", icon: "home", link: ROUTES.ACCOUNT.DASHBOARD },
+  { label: "Bảng điều khiển", icon: "home", link: ROUTES.ACCOUNT.DASHBOARD, studentOnly: true },
   {
     label: "Lớp học",
     icon: "class",
@@ -30,9 +30,9 @@ export const ACCOUNT_NAVIGATION: AccountNavItem[] = [
     match: "/classroom",
     badge: "Beta",
   },
-  { label: "Lịch sử đơn hàng", icon: "shopping_cart", link: ROUTES.ACCOUNT.ORDER_HISTORY },
+  { label: "Lịch sử đơn hàng", icon: "shopping_cart", link: ROUTES.ACCOUNT.ORDER_HISTORY, studentOnly: true },
   { label: "Cộng tác viên", icon: "link", link: ROUTES.ACCOUNT.AFFILIATE },
-  { label: "Thanh toán", icon: "payment", link: ROUTES.CHECKOUT },
+  { label: "Thanh toán", icon: "payment", link: ROUTES.CHECKOUT, studentOnly: true },
   { type: "divider" },
   { label: "Đăng xuất", icon: "logout", link: "#", danger: true },
 ];

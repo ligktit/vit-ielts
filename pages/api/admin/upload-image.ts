@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import formidable from "formidable";
 import fs from "fs";
 import { requireAdmin } from "~lib/admin-auth";
-import { uploadToVPS } from "~lib/vps-upload";
+import { uploadToLocal } from "~lib/local-upload";
 import { dbg } from "~lib/debug";
 
 const log = dbg.upload;
@@ -65,9 +65,9 @@ export default async function handler(
     const fileBuffer = fs.readFileSync(file.filepath);
     try { fs.unlinkSync(file.filepath); } catch { /* ignore */ }
 
-    const result = await uploadToVPS(fileBuffer, originalName, mimeType);
+    const result = await uploadToLocal(fileBuffer, originalName, mimeType);
 
-    log("VPS image upload success:", result.url);
+    log("Local image upload success:", result.url);
 
     // Return { path } for backward compatibility with ImageUpload component
     return res.status(200).json({ path: result.url });

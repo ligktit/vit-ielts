@@ -24,7 +24,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [["html", { open: "never" }], ["list"]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: process.env.BASE_URL || "http://localhost:3000",
     // Lock viewport so snapshots are stable across machines.
     viewport: { width: 1440, height: 900 },
     // Brand font is loaded from Google Fonts; wait for network idle in specs.
@@ -42,7 +42,7 @@ export default defineConfig({
   // Boot the app for the test run. Reuse an already-running dev server locally.
   webServer: {
     command: "pnpm dev",
-    url: "http://localhost:3000",
+    url: process.env.BASE_URL || "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

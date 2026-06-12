@@ -770,7 +770,7 @@ export default function ExamLibraryPage() {
                         showTotal: (t) => `Tổng ${t} collections`,
                         showSizeChanger: false,
                     }}
-                    scroll={{ x: 800 }}
+                    scroll={{ x: "max-content" }}
                 />
             </AdminGlassCard>
 

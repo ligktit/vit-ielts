@@ -22,12 +22,12 @@ export const IeltsTestPlatformIntro = ({ config: _config }: IeltsTestPlatformInt
           Master every part of the test
         </h2>
 
-        {/* Skill cards row — Figma: justify-between, 4 cards 260×252 */}
-        <div className="flex flex-col sm:flex-row items-stretch justify-between gap-4">
-          <SkillCard skill="listening" href={ROUTES.PRACTICE.ARCHIVE_LISTENING} className="sm:w-[260px] sm:h-[252px]" />
-          <SkillCard skill="reading"   href={ROUTES.PRACTICE.ARCHIVE_READING}   className="sm:w-[260px] sm:h-[252px]" />
-          <SkillCard skill="writing"   href={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}  className="sm:w-[260px] sm:h-[252px]" />
-          <SkillCard skill="speaking"  href={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING} className="sm:w-[260px] sm:h-[252px]" />
+        {/* Skill cards grid — Responsive columns with aspect ratio-based sizing */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[24px] w-full justify-items-center">
+          <SkillCard skill="listening" href={ROUTES.PRACTICE.ARCHIVE_LISTENING} className="w-full" />
+          <SkillCard skill="reading"   href={ROUTES.PRACTICE.ARCHIVE_READING}   className="w-full" />
+          <SkillCard skill="writing"   href={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}  className="w-full" />
+          <SkillCard skill="speaking"  href={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING} className="w-full" />
         </div>
       </div>
     </ScrollFadeIn>

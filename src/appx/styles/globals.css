@@ -110,6 +110,10 @@
   --motion-sidebar-control-duration: 200ms;
 
   /* ── Type scale (Figma) — Tailwind v4 text-* tokens ── */
+  --text-error-hero: 120px;          /* 404/error page hero number */
+  --text-error-hero--line-height: 1;
+  --text-error-hero--font-weight: 700;
+  --text-error-hero--letter-spacing: -4.8px;
   --text-display-l: 60px;
   --text-display-l--line-height: 1.04;
   --text-display-l--font-weight: 700;
@@ -380,12 +384,12 @@ body {
 }
 
 @layer antd {
-  body a {
+  body a:not(.admin-shell *) {
     color: inherit;
   }
 }
 
-p {
+p:not(.admin-shell *) {
   line-height: 1.5 !important;
 }
 
@@ -401,7 +405,7 @@ p {
   font-weight: 500;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-splitter-horizontal
+.ant-splitter-horizontal
   > .ant-splitter-bar
   .ant-splitter-bar-dragger::before {
   height: 100%;
@@ -418,7 +422,7 @@ p {
   margin-top: 0 !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-splitter
+.ant-splitter
   > .ant-splitter-bar
   .ant-splitter-bar-dragger::after {
   background-image: url("../../../public/arrow.png");
@@ -833,23 +837,20 @@ html .ant-splitter-panel div {
   filter: brightness(0) saturate(100%);
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper
+.ant-radio-wrapper
   .ant-radio-inner::after {
   background-color: #0075ff !important;
   transform: scale(0.5);
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper
+.ant-radio-wrapper
   .ant-radio-checked
   .ant-radio-inner {
   border-color: #0075ff !important;
   background-color: #fff !important;
 }
 
-.ant-radio-wrapper:hover
-  :where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper,
-:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper:hover
-  .ant-radio-inner {
+.ant-radio-wrapper:hover .ant-radio-inner {
   border-color: #000 !important;
 }
 
@@ -862,11 +863,11 @@ html .ant-splitter-panel div {
   width: 100% !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-space-gap-col-small {
+.ant-space-gap-col-small {
   row-gap: 4px !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-radio-wrapper
+.ant-radio-wrapper
   .ant-radio-inner {
   width: 14px !important;
   height: 14px !important;
@@ -937,20 +938,20 @@ input.active-quizz {
   top: -1px !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-checked
+.ant-checkbox-checked
   .ant-checkbox-inner {
   background-color: #0075ff !important;
   border-color: #0075ff !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-wrapper:not(
+.ant-checkbox-wrapper:not(
     .ant-checkbox-wrapper-disabled
   ):hover
   .ant-checkbox-inner {
   border-color: #0075ff !important;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-disabled + span {
+.ant-checkbox-disabled + span {
   color: #000 !important;
 }
 
@@ -983,7 +984,7 @@ input.active-quizz {
   width: 100%;
 }
 
-:where(.css-dev-only-do-not-override-10l2ewt).ant-checkbox-disabled
+.ant-checkbox-disabled
   .ant-checkbox-inner:after {
   border-color: #fff;
 }

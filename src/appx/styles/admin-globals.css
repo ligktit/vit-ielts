@@ -9,10 +9,10 @@
 
 :root {
   /* Brand */
-  --admin-brand: #d94a56;
-  --admin-brand-light: #f87171;
-  --admin-brand-dark: #c43a46;
-  --admin-brand-glow: rgba(217, 74, 86, 0.25);
+  --admin-brand: #9AD534;
+  --admin-brand-light: #B3E653;
+  --admin-brand-dark: #7DB024;
+  --admin-brand-glow: rgba(154, 213, 52, 0.25);
 
   /* Accents */
   --admin-accent-blue: #3b82f6;
@@ -272,8 +272,8 @@
 }
 
 .admin-menu-item.active {
-  background: linear-gradient(135deg, rgba(217, 74, 86, 0.15) 0%, rgba(217, 74, 86, 0.08) 100%);
-  color: var(--admin-brand-light);
+  background: linear-gradient(135deg, rgba(154, 213, 52, 0.15) 0%, rgba(154, 213, 52, 0.07) 100%);
+  color: var(--admin-brand-dark);
   font-weight: 550;
 }
 
@@ -603,9 +603,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #191D24;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .admin-header-avatar-info {
@@ -815,6 +815,10 @@
 }
 
 /* Table */
+.admin-content .ant-table table {
+  min-width: 100% !important;
+}
+
 [data-admin-theme="dark"] .admin-content .ant-table {
   background: transparent !important;
   color: var(--admin-text-primary) !important;
@@ -840,7 +844,7 @@
 }
 
 [data-admin-theme="dark"] .admin-content .ant-table-tbody > tr.ant-table-row-selected > td {
-  background: rgba(217, 74, 86, 0.08) !important;
+  background: rgba(154, 213, 52, 0.08) !important;
 }
 
 [data-admin-theme="dark"] .admin-content .ant-table-column-sorter {
@@ -919,7 +923,7 @@
 [data-admin-theme="dark"] .admin-content .ant-input-affix-wrapper:focus,
 [data-admin-theme="dark"] .admin-content .ant-input-affix-wrapper-focused {
   border-color: var(--admin-brand) !important;
-  box-shadow: 0 0 0 2px rgba(217, 74, 86, 0.12) !important;
+  box-shadow: 0 0 0 2px rgba(154, 213, 52, 0.12) !important;
 }
 
 [data-admin-theme="dark"] .admin-content .ant-input::placeholder {
@@ -1086,8 +1090,8 @@
 }
 
 [data-admin-theme="dark"] .ant-select-item-option-selected {
-  background: rgba(217, 74, 86, 0.12) !important;
-  color: var(--admin-brand-light) !important;
+  background: rgba(154, 213, 52, 0.12) !important;
+  color: var(--admin-brand-dark) !important;
 }
 
 /* DatePicker Popup */
@@ -1483,4 +1487,16 @@
 
 [data-admin-theme="dark"] .seo-preview-desc {
   color: #9aa0a6;
+}
+
+/* ── Scoped Link Styles for Admin Content ── */
+.admin-content a:not(.ant-btn) {
+  color: var(--admin-brand-dark) !important;
+  text-decoration: none;
+  transition: color var(--admin-transition-fast);
+}
+
+.admin-content a:not(.ant-btn):hover {
+  color: var(--admin-brand) !important;
+  text-decoration: underline;
 }

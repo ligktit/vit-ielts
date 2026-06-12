@@ -77,7 +77,7 @@ export const CategoryCard = ({
       {/* Bottom White Bar (Slides IN on hover) */}
       <div className="absolute -bottom-[2px] left-0 right-0 h-[56px] pb-[2px] bg-white translate-y-[100%] transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:translate-y-0 flex items-center justify-end px-6 lg:px-[30px] z-10 pointer-events-none">
         <span className="text-gray-900 font-bold text-sm md:text-[16px]">
-          Xem thêm
+          View more
         </span>
       </div>
     </Link>

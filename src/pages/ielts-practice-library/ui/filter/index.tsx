@@ -176,7 +176,7 @@ export const Filter = ({ filterData, mobile = false, onClose }: FilterProps) => 
       </FilterSection>
 
       {filterData.sources.length > 0 && (
-        <FilterSection title="Nguồn tài liệu">
+        <FilterSection title="Source">
           <div className="flex flex-col gap-[18px]">
             {filterData.sources.map((source) => (
               <FilterCheckbox
@@ -192,7 +192,7 @@ export const Filter = ({ filterData, mobile = false, onClose }: FilterProps) => 
         </FilterSection>
       )}
 
-      <FilterSection title="Phần">
+      <FilterSection title="Part">
         <div className="flex flex-col gap-[18px]">
           {FILTER_CONFIGS[skill].map((item) => (
             <FilterCheckbox
@@ -207,7 +207,7 @@ export const Filter = ({ filterData, mobile = false, onClose }: FilterProps) => 
         </div>
       </FilterSection>
 
-      <FilterSection title="Loại câu hỏi">
+      <FilterSection title="Question type">
         <div className="flex flex-col gap-[18px]">
           {(skill === "listening" ? LISTENING_QUESTION_FORMS : READING_QUESTION_FORMS).map((item) => (
             <FilterCheckbox

@@ -33,7 +33,7 @@ export default function CheckboxEditor({
     <div className="space-y-2">
       {correctCount > 0 && (
         <p className="text-xs text-blue-600 mb-1">
-          ✓ <strong>{correctCount}</strong> đáp án đúng được chọn
+          ✓ <strong>{correctCount}</strong> correct answer(s) selected
         </p>
       )}
 
@@ -73,12 +73,12 @@ export default function CheckboxEditor({
             open={openExpIdx === idx}
             onOpenChange={(v) => setOpenExpIdx(v ? idx : null)}
             trigger="click"
-            title="Giải thích cho option này"
+            title="Explanation for this option"
             content={
               <Input.TextArea
                 rows={3}
                 style={{ width: 280 }}
-                placeholder="Nhập giải thích…"
+                placeholder="Enter explanation…"
                 value={o.explanation ?? ""}
                 onChange={(e) => update(idx, { explanation: e.target.value })}
               />

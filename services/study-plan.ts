@@ -84,6 +84,105 @@ export async function getStudyWeek(
 }
 
 // ============================================================================
+// generateWeekPlan
+// ============================================================================
+
+/**
+ * Week template: one task per day, balanced across IELTS skills.
+ * Sunday is a rest day (no task inserted).
+ */
+const WEEK_TEMPLATE: Array<{
+  dayOffset: number; // 0 = Monday
+  title: string;
+  skill: string;
+}> = [
+  { dayOffset: 0, skill: "Reading",   title: "Reading practice — Academic passages" },
+  { dayOffset: 1, skill: "Listening", title: "Listening practice — Section 3 & 4" },
+  { dayOffset: 2, skill: "Writing",   title: "Writing Task 2 — argument essay" },
+  { dayOffset: 3, skill: "Speaking",  title: "Speaking practice — Part 2 cue card" },
+  { dayOffset: 4, skill: "Listening", title: "Full mock test — Listening & Reading" },
+  { dayOffset: 5, skill: "Writing",   title: "Review & vocabulary building" },
+  // dayOffset 6 = Sunday: rest day, no task
+];
+
+/**
+ * Inserts a standard template week of study tasks for the given user.
+ *
+ * **Idempotent**: if `study_tasks` already contains any row for this user
+ * whose `due_date` falls within the 7-day window, the function does nothing
+ * and returns the existing tasks grouped by date.
+ *
+ * @param supabase     Browser Supabase client (RLS: inserts as the signed-in user).
+ * @param userId       The authenticated user's UUID.
+ * @param weekStartISO Monday of the target week, e.g. "2026-06-09".
+ */
+export async function generateWeekPlan(
+  supabase: SupabaseClient,
+  userId: string,
+  weekStartISO: string,
+): Promise<StudyWeek> {
+  try {
+    const weekStart = new Date(weekStartISO);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    const weekEndISO = weekEnd.toISOString().slice(0, 10);
+
+    // ── idempotency check ──────────────────────────────────────────────────
+    const { data: existing, error: checkError } = await supabase
+      .from("study_tasks")
+      .select("id, user_id, due_date, title, skill, done, created_at")
+      .eq("user_id", userId)
+      .gte("due_date", weekStartISO)
+      .lte("due_date", weekEndISO)
+      .order("created_at", { ascending: true });
+
+    if (checkError) return {};
+
+    if (existing && existing.length > 0) {
+      // Week already has tasks — return them grouped, do not insert.
+      const grouped: StudyWeek = {};
+      for (const task of existing as StudyTask[]) {
+        const day = task.due_date.slice(0, 10);
+        if (!grouped[day]) grouped[day] = [];
+        grouped[day].push(task);
+      }
+      return grouped;
+    }
+
+    // ── build rows to insert ───────────────────────────────────────────────
+    const rows = WEEK_TEMPLATE.map(({ dayOffset, title, skill }) => {
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + dayOffset);
+      return {
+        user_id: userId,
+        due_date: d.toISOString().slice(0, 10),
+        title,
+        skill,
+        done: false,
+      };
+    });
+
+    const { data: inserted, error: insertError } = await supabase
+      .from("study_tasks")
+      .insert(rows)
+      .select("id, user_id, due_date, title, skill, done, created_at");
+
+    if (insertError || !inserted) return {};
+
+    // ── group and return ───────────────────────────────────────────────────
+    const grouped: StudyWeek = {};
+    for (const task of inserted as StudyTask[]) {
+      const day = task.due_date.slice(0, 10);
+      if (!grouped[day]) grouped[day] = [];
+      grouped[day].push(task);
+    }
+    return grouped;
+  } catch {
+    return {};
+  }
+}
+
+// ============================================================================
 // toggleStudyTask
 // ============================================================================
 

@@ -56,7 +56,7 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
   }, [rows]);
 
   const exportCsv = () => {
-    const header = ["Học sinh", "Email", ...assignments.map((a) => a.quiz_title), "Band TB"];
+    const header = ["Student", "Email", ...assignments.map((a) => a.quiz_title), "Avg Band"];
     const lines = rows.map((r) => {
       const byA = new Map(r.cells.map((c) => [c.assignment_id, c]));
       const cols = assignments.map((a) => {
@@ -80,7 +80,7 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
 
   const columns: ColumnsType<TrackingRow> = [
     {
-      title: "Học sinh",
+      title: "Student",
       key: "student",
       fixed: "left",
       width: 220,
@@ -128,7 +128,7 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
       },
     })),
     {
-      title: "Band TB",
+      title: "Avg Band",
       key: "avg",
       fixed: "right",
       align: "center",
@@ -149,41 +149,40 @@ export const PageClassroomTracking = ({ classroom, assignments, rows }: Props) =
         className="inline-flex items-center gap-1 text-sm text-[#6A7282] hover:text-[#D94A56]"
       >
         <span className="material-symbols-rounded text-[18px]">arrow_back</span>
-        Quay lại lớp
+        Back to class
       </Link>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-extrabold text-[#2D3142]">
-          {classroom.name} — Kết quả làm bài
+          {classroom.name} — Results
         </h2>
         <div className="flex gap-2">
           <Link href={`${ROUTES.CLASSROOM.DETAIL(classroom.id)}?tab=assignments`}>
-            <Button type="primary">+ Giao bài mới</Button>
+            <Button type="primary">+ Assign new test</Button>
           </Link>
           <Button onClick={exportCsv} disabled={rows.length === 0}>
             <span className="material-symbols-rounded mr-1 text-[18px]">download</span>
-            Xuất báo cáo
+            Export report
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard icon="assignment" label="Bài đã giao" value={String(assignments.length)} tint="#2563EB" />
-        <StatCard icon="task_alt" label="Lượt đã nộp" value={String(stats.submittedTotal)} tint="#16A34A" />
-        <StatCard icon="grade" label="Band trung bình" value={stats.avg != null ? String(stats.avg) : "—"} tint="#D94A56" />
-        <StatCard icon="trending_up" label="Tỷ lệ nộp" value={`${stats.submitRate}%`} tint="#7C3AED" />
+        <StatCard icon="assignment" label="Assignments" value={String(assignments.length)} tint="#2563EB" />
+        <StatCard icon="task_alt" label="Submissions" value={String(stats.submittedTotal)} tint="#16A34A" />
+        <StatCard icon="grade" label="Avg band" value={stats.avg != null ? String(stats.avg) : "—"} tint="#D94A56" />
+        <StatCard icon="trending_up" label="Submission rate" value={`${stats.submitRate}%`} tint="#7C3AED" />
       </div>
 
       <div className="flex items-start gap-2 rounded-[10px] bg-blue-50 px-4 py-3 text-sm text-blue-700">
         <span className="material-symbols-rounded text-[18px]">info</span>
         <span>
-          Điểm Reading &amp; Listening được đồng bộ tự động ngay khi học sinh nhấn &quot;Nộp
-          bài&quot;. Cột kết quả cập nhật theo thời gian thực.
+          Reading &amp; Listening scores sync automatically when a student clicks &quot;Submit&quot;. Results update in real time.
         </span>
       </div>
 
       <div className="rounded-[13px] border border-gray-100 bg-white p-5 shadow-sm">
-        <h3 className="mb-3 text-base font-bold text-[#2D3142]">Bảng điểm học viên</h3>
+        <h3 className="mb-3 text-base font-bold text-[#2D3142]">Student score table</h3>
         <Table<TrackingRow>
           columns={columns}
           dataSource={rows}

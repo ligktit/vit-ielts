@@ -50,7 +50,7 @@ export default function QuestionTemplatePicker({ open, onSelect, onCancel }: Pro
             centered
             destroyOnClose
         >
-            <p className="text-gray-500 text-sm mb-6">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
                 Select the IELTS question format you want to create. The editor will configure itself automatically.
             </p>
 
@@ -70,14 +70,14 @@ export default function QuestionTemplatePicker({ open, onSelect, onCancel }: Pro
                                     <button
                                         key={tmpl.id}
                                         onClick={() => onSelect(tmpl)}
-                                        className="flex items-start gap-3 text-left rounded-lg border border-gray-200 bg-white px-4 py-3 hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
+                                        className="flex items-start gap-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950 transition-all cursor-pointer"
                                     >
                                         <span className="text-2xl leading-tight mt-0.5">{tmpl.icon}</span>
                                         <div>
-                                            <p className="font-medium text-gray-800 text-sm leading-snug">
+                                            <p className="font-medium text-gray-800 dark:text-gray-200 text-sm leading-snug">
                                                 {tmpl.label}
                                             </p>
-                                            <p className="text-xs text-gray-400 mt-0.5 leading-snug">
+                                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 leading-snug">
                                                 {tmpl.description}
                                             </p>
                                         </div>

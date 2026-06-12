@@ -39,7 +39,7 @@ export const ClassroomQrScanner = ({
           () => {}
         )
         .catch(() => {
-          message.error("Không mở được camera. Hãy cấp quyền truy cập camera.");
+          message.error("Could not open camera. Please grant camera permission.");
           onClose();
         });
     }, 80);
@@ -68,18 +68,18 @@ export const ClassroomQrScanner = ({
       destroyOnClose
     >
       <div className="mb-4 flex items-start justify-between">
-        <h3 className="text-[20px] font-bold text-[#191D24]">Quét mã QR mời</h3>
+        <h3 className="text-[20px] font-bold text-[#191D24]">Scan invite QR code</h3>
         <button
           onClick={onClose}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6A7282] hover:bg-[#E5E7EB]"
-          aria-label="Đóng"
+          aria-label="Close"
         >
           <CloseOutlined />
         </button>
       </div>
       <div id={READER_ID} className="overflow-hidden rounded-[12px] bg-black" />
       <p className="mt-3 text-center text-[13px] text-[#6A7282]">
-        Đưa mã QR của lớp vào khung để quét tự động.
+        Point the class QR code at the frame to scan automatically.
       </p>
     </Modal>
   );

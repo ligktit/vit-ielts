@@ -318,7 +318,7 @@ export function MatchingQuestion({
     ) {
       return (
         <div className="p-4 border-red-200 bg-red-50 rounded-md">
-          Dữ liệu Matching (Summary) không hợp lệ.
+          Invalid Matching (Summary) data.
         </div>
       );
     }
@@ -835,14 +835,14 @@ export function MatchingQuestion({
     if (!items && !readOnly) {
       return (
         <div className="p-4 border-red-200 bg-red-50 rounded-md">
-          Lỗi: Context chưa cung cấp `items`.
+          Error: context did not provide `items`.
         </div>
       );
     }
     if (answerOptions.length === 0) {
       return (
         <div className="p-4 border-red-200 bg-red-50 rounded-md">
-          Lỗi: Thiếu "Answer Options".
+          Error: missing "Answer Options".
         </div>
       );
     }
@@ -950,7 +950,7 @@ export function MatchingQuestion({
     ) {
       return (
         <div className="p-4 border-red-200 bg-red-50 rounded-md">
-          Dữ liệu Matching (Standard) không hợp lệ.
+          Invalid Matching (Standard) data.
         </div>
       );
     }

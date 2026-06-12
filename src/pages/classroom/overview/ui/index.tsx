@@ -126,7 +126,7 @@ const ClassTableRow = ({ c }: { c: ClassroomSummary }) => {
             {c.name}
           </p>
           <p className="font-inter text-[12px] text-[#6a7282] truncate">
-            {c.description || `Mã: ${c.invite_code}`}
+            {c.description || `Code: ${c.invite_code}`}
           </p>
         </div>
       </div>
@@ -367,10 +367,10 @@ export const PageClassroomOverview = ({ classrooms, stats }: Props) => {
             </span>
           </span>
           <p className="mt-3 font-inter font-medium text-[15px] text-[#6a7282]">
-            Chưa có hoạt động
+            No activity yet
           </p>
           <p className="mt-1 font-inter text-[13px] text-[#9ca3af]">
-            Hoạt động gần đây của học sinh sẽ hiển thị ở đây.
+            Recent student activity will appear here.
           </p>
         </div>
       </div>

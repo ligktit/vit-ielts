@@ -562,7 +562,7 @@ export default function AdminDashboard() {
             rowKey="order_id"
             pagination={false}
             size="small"
-            scroll={{ x: 900 }}
+            scroll={{ x: "max-content" }}
           />
         </AdminGlassCard>
       )}

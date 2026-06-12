@@ -293,9 +293,9 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                                 }
                             }}
                             type="text"
-                            className="mr-2 text-gray-400 hover:text-gray-800 shrink-0"
+                            className="mr-2 text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 shrink-0"
                         />
-                        <div className="w-12 h-12 mr-4 flex items-center justify-center bg-gray-50 rounded-lg shrink-0">
+                        <div className="w-12 h-12 mr-4 flex items-center justify-center bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shrink-0">
                             {currentSkill === "listening" ? (
                                 <img src="/assets/figma/icons/listen%201.svg" alt="Listening" className="w-8 h-8 opacity-70" />
                             ) : (
@@ -303,7 +303,7 @@ function QuizEditor({ quizId }: { quizId?: string }) {
                             )}
                         </div>
                         <div className="flex flex-col min-w-0 flex-1">
-                            <h1 className="text-2xl font-semibold m-0 text-gray-800" style={{ wordBreak: "break-word", lineHeight: 1.3 }}>
+                            <h1 className="text-2xl font-semibold m-0 text-gray-800 dark:text-gray-100" style={{ wordBreak: "break-word", lineHeight: 1.3 }}>
                                 {currentTitle || (isNew ? "Tạo Quiz mới" : "Chỉnh sửa Quiz")}
                                 {currentType && (
                                     <>

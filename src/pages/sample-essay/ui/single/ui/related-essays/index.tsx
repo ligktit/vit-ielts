@@ -25,19 +25,19 @@ function RelatedEssays({
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h3 className="font-bold text-lg text-[#2D3142]">Bài viết nổi bật</h3>
+        <h3 className="font-bold text-lg text-[#2D3142]">Featured essays</h3>
         <TestCard
           title={essays[0].title}
           image={essays[0].featured_image ?? undefined}
           skill={skill as any}
           href={ROUTES.SAMPLE_ESSAY.SINGLE(essays[0].slug)}
-          actionText="Xem thêm"
+          actionText="View more"
         />
       </div>
 
       {essays.length > 1 && (
         <div className="space-y-4">
-          <h3 className="font-bold text-lg text-[#2D3142]">Có thể bạn quan tâm</h3>
+          <h3 className="font-bold text-lg text-[#2D3142]">You might also like</h3>
           <div className="space-y-4">
             {essays.slice(1, 4).map((essay) => (
               <Link

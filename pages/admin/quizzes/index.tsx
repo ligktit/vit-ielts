@@ -866,6 +866,14 @@ export default function AdminQuizzesPage() {
 
     useEffect(() => { fetchQuizzes(); }, [fetchQuizzes]);
 
+    useEffect(() => {
+        if (!loading) {
+            requestAnimationFrame(() => {
+                window.dispatchEvent(new Event("resize"));
+            });
+        }
+    }, [loading]);
+
     const handleDelete = async (id: string) => {
         try {
             const res = await fetch(`/api/admin/quizzes/${id}`, { method: "DELETE" });
@@ -1075,7 +1083,7 @@ export default function AdminQuizzesPage() {
                     loading={loading}
                     onChange={(pagination: TablePaginationConfig) => { setPage(pagination.current ?? 1); setPageSize(pagination.pageSize ?? 20); }}
                     pagination={{ current: page, pageSize, total, showSizeChanger: true, showTotal: (t) => `Tổng ${t} quizzes` }}
-                    scroll={{ x: 1000 }}
+                    scroll={{ x: "max-content" }}
                 />
             </AdminGlassCard>
 

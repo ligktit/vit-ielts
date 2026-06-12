@@ -46,11 +46,11 @@ function PassageItem({
                         <HolderOutlined />
                     </span>
                     {/* Placeholder cho Icon giống legacy */}
-                    <div className="w-8 h-8 shrink-0 bg-gray-100 rounded flex items-center justify-center">
+                    <div className="w-8 h-8 shrink-0 bg-gray-100 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded flex items-center justify-center">
                         <CopyOutlined className="text-gray-500" />
                     </div>
                     <div className="leading-none space-y-1">
-                        <h3 className="font-semibold text-base leading-none text-gray-800">
+                        <h3 className="font-semibold text-base leading-none text-gray-800 dark:text-gray-200">
                             {passage.title || `Passage ${index + 1}`}
                         </h3>
                     </div>

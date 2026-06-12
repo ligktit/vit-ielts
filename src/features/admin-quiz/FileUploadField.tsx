@@ -55,7 +55,7 @@ export default function FileUploadField({
         const uploadSecret = process.env.NEXT_PUBLIC_MEDIA_UPLOAD_SECRET;
 
         const headers: Record<string, string> = {};
-        if (uploadSecret && uploadUrl.includes("ieltspredictiontest.com")) {
+        if (uploadSecret && (uploadUrl.includes("ieltspredictiontest.com") || uploadUrl.includes("vitielts.com"))) {
           headers["X-Upload-Key"] = uploadSecret;
         }
 
@@ -68,12 +68,12 @@ export default function FileUploadField({
         const json = await res.json();
         if (json.success && json.data?.url) {
           onChange(json.data.url);
-          message.success(`Upload "${file.name}" thành công`);
+          message.success(`"${file.name}" uploaded successfully`);
         } else {
-          message.error(json.error || "Upload thất bại");
+          message.error(json.error || "Upload failed");
         }
       } catch (err) {
-        message.error("Lỗi khi upload file");
+        message.error("Upload error");
         console.error("Upload error:", err);
       } finally {
         setUploading(false);
@@ -129,7 +129,7 @@ export default function FileUploadField({
             {buttonLabel}
           </Button>
           {value && (
-            <Button onClick={handleDelete} className="bg-gray-100 border-gray-200">
+            <Button onClick={handleDelete} className="bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               Remove
             </Button>
           )}
@@ -148,7 +148,7 @@ export default function FileUploadField({
           variant="filled" 
           size="large" 
           value={value || ""} 
-          className="flex-1 bg-gray-50 border-transparent hover:border-transparent focus:border-transparent" 
+          className="flex-1 bg-gray-50 dark:bg-gray-900 border-transparent hover:border-transparent focus:border-transparent" 
           style={{ cursor: "default" }}
         />
         <Button size="large" type="primary" onClick={open} loading={uploading} style={{ backgroundColor: "#ff2a55", border: "none" }}>
@@ -183,7 +183,7 @@ export default function FileUploadField({
                 <Text ellipsis style={{ maxWidth: 200, display: "block" }}>{getFilename(value)}</Text>
                 <audio ref={audioRef} src={value} onEnded={() => setAudioPlaying(false)} style={{ display: "none" }} />
                 <Button size="small" type="link" icon={audioPlaying ? <PauseCircleOutlined /> : <PlayCircleOutlined />} onClick={toggleAudio} style={{ padding: 0, marginTop: 4 }}>
-                  {audioPlaying ? "Dừng" : "Phát"}
+                  {audioPlaying ? "Pause" : "Play"}
                 </Button>
               </div>
             </div>
@@ -193,7 +193,7 @@ export default function FileUploadField({
               <FilePdfOutlined style={{ fontSize: 24, color: "#ff4d4f", marginRight: 8 }} />
               <div style={{ flex: 1 }}>
                 <Text ellipsis style={{ maxWidth: 200, display: "block" }}>{getFilename(value)}</Text>
-                <a href={value} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12 }}>Mở PDF ↗</a>
+                <a href={value} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12 }}>Open PDF ↗</a>
               </div>
             </div>
           )}
@@ -203,7 +203,7 @@ export default function FileUploadField({
               <Text ellipsis style={{ maxWidth: 200 }}>{getFilename(value)}</Text>
             </div>
           )}
-          <Button size="small" danger icon={<DeleteOutlined />} onClick={handleDelete} style={{ marginLeft: "auto" }}>Xóa</Button>
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={handleDelete} style={{ marginLeft: "auto" }}>Remove</Button>
         </div>
         <Text type="secondary" style={{ fontSize: 11, marginTop: 4, display: "block" }} copyable={{ text: value }} ellipsis>
           {value}
@@ -228,13 +228,13 @@ export default function FileUploadField({
         {uploading ? (
           <Space direction="vertical" align="center" size="small">
             <Spin />
-            <Text type="secondary">Đang upload...</Text>
+            <Text type="secondary">Uploading...</Text>
           </Space>
         ) : (
           <Space direction="vertical" align="center" size="small">
             <CloudUploadOutlined style={{ fontSize: 28, color: isDragActive ? "#1890ff" : "#bfbfbf" }} />
             <Text type="secondary" style={{ fontSize: 13 }}>
-              {isDragActive ? "Thả file vào đây..." : "Kéo thả file hoặc click để chọn"}
+              {isDragActive ? "Drop file here..." : "Drag & drop or click to select"}
             </Text>
           </Space>
         )}

@@ -13,10 +13,10 @@ const PAGE_SIZE = 5;
 const DEFAULT_HERO: ExamLibraryHeroConfig = {
   title: "IELTS Reading Practice Tests",
   breadcrumb: {
-    homeLabel: "Trang chủ",
+    homeLabel: "Home",
     currentLabel: "Reading",
     items: [
-      { label: "Trang chủ", href: "/" },
+      { label: "Home", href: "/" },
       { label: "Reading" },
     ],
   },

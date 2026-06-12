@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DropzoneOptions, useDropzone } from "react-dropzone";
 import { fileSizeValidator } from "@/shared/lib/fileValidator";
 import { twMerge } from "tailwind-merge";
@@ -23,6 +23,12 @@ export function AvatarUpload({
 }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
+  // Keep a ref to the latest setFile callback so the effect below does NOT need
+  // setFile as a dependency — avoids an infinite loop when the parent re-renders
+  // and passes a new (non-memoised) function reference on every render.
+  const setFileRef = useRef(setFile);
+  setFileRef.current = setFile;
+
   const { acceptedFiles, fileRejections, getRootProps, getInputProps } =
     useDropzone({
       accept: {
@@ -41,7 +47,7 @@ export function AvatarUpload({
 
   useEffect(() => {
     if (acceptedFiles.length) {
-      setFile(acceptedFiles[0]);
+      setFileRef.current(acceptedFiles[0]);
       const blob = URL.createObjectURL(acceptedFiles[0]);
       setPreview(blob);
 
@@ -49,10 +55,10 @@ export function AvatarUpload({
         URL.revokeObjectURL(blob);
       };
     } else {
-      setFile(null);
+      setFileRef.current(null);
       setPreview(previewUrl || null);
     }
-  }, [acceptedFiles, setFile, previewUrl]);
+  }, [acceptedFiles, previewUrl]); // setFile intentionally omitted — use setFileRef
 
   // useEffect(() => {
   //   if (value) {

@@ -281,7 +281,7 @@ export default function QuestionModal({ open, initialData, onCancel, onSave }: Q
                             key: "preview",
                             label: "Preview",
                             children: (
-                                <div className="pt-4 pb-12 bg-white rounded-lg border border-gray-100 p-6 mt-2 shadow-sm min-h-[300px]">
+                                <div className="pt-4 pb-12 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 p-6 mt-2 shadow-sm min-h-[300px]">
                                     <QuestionPreview data={{ ...initialData, ...localData, title: form.getFieldValue("title") || localData.title }} />
                                 </div>
                             ),

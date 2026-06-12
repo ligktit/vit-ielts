@@ -45,14 +45,14 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Prediction Tests",
         description: {
           line1:
-            "IELTS Prediction Tests Online miễn phí tại VitIELTS với đề",
+            "Free IELTS Prediction Tests online at VitIELTS — with full",
           line2:
-            "thi, audio, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
+            "tests, audio, transcripts, answer keys, detailed vocabulary explanations and",
+          line3: "a computer-based test experience.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
         button: {
-          text: "Tìm hiểu khóa học",
+          text: "Learn more",
           link: "#",
         },
       },
@@ -60,14 +60,14 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Prediction Tests",
         description: {
           line1:
-            "IELTS Prediction Tests Online miễn phí tại VitIELTS với đề",
+            "Free IELTS Prediction Tests online at VitIELTS — with full",
           line2:
-            "thi, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
+            "tests, transcripts, answer keys, detailed vocabulary explanations and",
+          line3: "a computer-based test experience.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
         button: {
-          text: "Tìm hiểu khóa học",
+          text: "Learn more",
           link: "#",
         },
       },

@@ -1,9 +1,9 @@
 import { GetServerSideProps } from "next";
 import { createServerSupabase } from "~supabase/server";
 import { getMasterData } from "~supabase/getMasterData";
-import { getClubs } from "~services/community";
+import { getClubs, getRecentPosts } from "~services/community";
 import { ROUTES } from "@/shared/routes";
-import type { Club } from "~services/community";
+import type { Club, CommunityPost } from "~services/community";
 
 export { PageCommunity } from "./ui";
 
@@ -22,18 +22,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     };
   }
 
-  const [master, clubs] = await Promise.all([
+  const [master, clubs, recentPosts] = await Promise.all([
     getMasterData(context),
     getClubs(supabase, user.id),
+    getRecentPosts(supabase, 20),
   ]);
 
   return {
     props: {
       ...master.props,
       clubs,
+      recentPosts,
       userId: user.id,
     },
   };
 };
 
-export type { Club };
+export type { Club, CommunityPost };

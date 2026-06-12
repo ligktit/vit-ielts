@@ -146,7 +146,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
             </div>
           ) : history.length === 0 ? (
             <div className="text-center py-10 text-[#6A7282]">
-              Bạn chưa làm bài test này. Hãy bắt đầu ngay!
+              You haven&apos;t attempted this test yet. Start now!
             </div>
           ) : (
             <div className="rounded-[12px] border border-gray-200 bg-white overflow-hidden">
@@ -245,7 +245,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
         {/* Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between px-6 lg:px-10 py-4 border-t border-gray-100">
           <div className="flex items-center gap-2 mb-4 sm:mb-0">
-            <span className="text-sm text-gray-500">Hiển thị</span>
+            <span className="text-sm text-gray-500">Show</span>
             <select
               value={pageSize}
               onChange={(e) => {
@@ -258,7 +258,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
               <option value={10}>10 / page</option>
               <option value={20}>20 / page</option>
             </select>
-            <span className="text-sm text-gray-500">bài làm</span>
+            <span className="text-sm text-gray-500">entries</span>
           </div>
 
           <div className="flex justify-center gap-4">
@@ -266,7 +266,7 @@ export const TestHistoryModal = ({ isOpen, onClose, quizId, title }: TestHistory
               href={ROUTES.TAKE_THE_TEST(testSlug)}
               className="w-[140px] h-[40px] rounded-full bg-[#D94A56] hover:bg-[#E3636E] font-semibold text-white flex items-center justify-center transition-colors shadow-sm"
             >
-              Thử lại <span className="material-symbols-rounded text-[20px] ml-1">refresh</span>
+              Retry <span className="material-symbols-rounded text-[20px] ml-1">refresh</span>
             </Link>
           </div>
 

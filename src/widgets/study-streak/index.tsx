@@ -16,8 +16,8 @@ import type { TabItem } from "@/shared/ui/ds/molecules/tabs";
 type ViewMode = "calendar" | "weekly";
 
 const VIEW_TABS: TabItem[] = [
-  { id: "calendar", label: "Lịch tháng" },
-  { id: "weekly", label: "Theo tuần" },
+  { id: "calendar", label: "Monthly" },
+  { id: "weekly", label: "Weekly" },
 ];
 
 export const StudyStreak = () => {

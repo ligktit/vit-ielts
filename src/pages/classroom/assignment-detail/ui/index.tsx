@@ -131,7 +131,7 @@ export const PageAssignmentDetail = ({ detail }: Props) => {
       : null;
 
   const exportCsv = () => {
-    const header = ["Học sinh", "Email", "Thời gian làm (phút)", "Band", "Ngày nộp", "Trạng thái"];
+    const header = ["Student", "Email", "Duration (min)", "Band", "Submitted", "Status"];
     const lines = detail.rows.map((r) =>
       [
         r.name || "",
@@ -139,7 +139,7 @@ export const PageAssignmentDetail = ({ detail }: Props) => {
         r.duration_min ?? "",
         r.score ?? "",
         r.submitted_at ? dayjs(r.submitted_at).format("DD/MM/YYYY HH:mm") : "",
-        r.status === "pending" || r.status === "overdue" ? "Chưa nộp" : "Đã nộp",
+        r.status === "pending" || r.status === "overdue" ? "Not submitted" : "Submitted",
       ]
         .map((v) => `"${String(v).replace(/"/g, '""')}"`)
         .join(",")

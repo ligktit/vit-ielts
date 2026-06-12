@@ -58,7 +58,7 @@ function transformPostToLegacy(post: Post, userId?: string): IPost {
       title: seo.meta_title ?? post.title,
       metaDesc: seo.meta_description ?? post.excerpt ?? "",
       breadcrumbs: [
-        { text: "Trang chủ", url: "/" },
+        { text: "Home", url: "/" },
         { text: "Blog", url: "/blog" },
         { text: post.title, url: `/${post.slug}` },
       ],

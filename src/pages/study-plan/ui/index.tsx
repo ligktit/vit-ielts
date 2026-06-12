@@ -1,13 +1,13 @@
 // === PAGE: Study Plan ===
 // Figma node 3495:178 "16 · Study Plan"
 // Layout: plan summary banner, 7-day week grid, today's task list
-//
-// NOTE: Task creation / plan generation is a separate future feature.
-//       This page only renders and toggles existing tasks from the DB.
 import { useState, useCallback } from "react";
 import { AppShell } from "@/widgets/layouts";
 import { createClient } from "~supabase/client";
-import { toggleStudyTask } from "../../../../services/study-plan";
+import {
+  toggleStudyTask,
+  generateWeekPlan,
+} from "../../../../services/study-plan";
 import type { StudyTask, StudyWeek } from "../../../../services/study-plan";
 
 // ── skill tag colours ────────────────────────────────────────────────────────
@@ -158,15 +158,28 @@ function TaskRow({
 
 // ── empty states ─────────────────────────────────────────────────────────────
 
-function EmptyWeek() {
+function EmptyWeek({
+  onGenerate,
+  generating,
+}: {
+  onGenerate: () => void;
+  generating: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-[8px] items-center justify-center py-[32px] w-full">
+    <div className="flex flex-col gap-[12px] items-center justify-center py-[32px] w-full">
       <p className="font-inter font-semibold text-[#6a7282] text-[15px] leading-normal">
         No tasks scheduled this week.
       </p>
-      <p className="font-inter font-normal text-[#6a7282] text-[13px] leading-normal">
-        Task generation is coming soon — check back later.
-      </p>
+      <button
+        type="button"
+        onClick={onGenerate}
+        disabled={generating}
+        className="bg-[#b3e653] flex items-center justify-center overflow-hidden px-[22px] py-[11px] rounded-full hover:bg-[#9ad534] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+      >
+        <span className="font-inter font-bold text-[#191d24] text-[14px] leading-normal whitespace-nowrap">
+          {generating ? "Generating…" : "Generate this week's plan"}
+        </span>
+      </button>
     </div>
   );
 }
@@ -184,6 +197,7 @@ function EmptyToday() {
 export interface PageStudyPlanProps {
   studyWeek: StudyWeek;
   weekStartISO: string;
+  userId: string;
 }
 
 // ── main page ────────────────────────────────────────────────────────────────
@@ -191,9 +205,11 @@ export interface PageStudyPlanProps {
 export const PageStudyPlan = ({
   studyWeek: initialStudyWeek,
   weekStartISO,
+  userId,
 }: PageStudyPlanProps) => {
   // Client-side optimistic state — initialise from SSR props.
   const [studyWeek, setStudyWeek] = useState<StudyWeek>(initialStudyWeek ?? {});
+  const [generating, setGenerating] = useState(false);
 
   const weekDays = buildWeekDays(weekStartISO ?? new Date().toISOString().slice(0, 10));
   const todayISO = new Date().toISOString().slice(0, 10);
@@ -244,6 +260,21 @@ export const PageStudyPlan = ({
     [],
   );
 
+  // ── generate handler ────────────────────────────────────────────────────────
+  const handleGenerate = useCallback(async () => {
+    if (generating) return;
+    setGenerating(true);
+    try {
+      const supabase = createClient();
+      const generated = await generateWeekPlan(supabase, userId, weekStartISO);
+      if (Object.keys(generated).length > 0) {
+        setStudyWeek(generated);
+      }
+    } finally {
+      setGenerating(false);
+    }
+  }, [generating, userId, weekStartISO]);
+
   const hasAnyTasks = allWeekTasks.length > 0;
 
   return (
@@ -284,16 +315,18 @@ export const PageStudyPlan = ({
               )}
             </div>
           </div>
-          <button
-            type="button"
-            className="bg-[#b3e653] flex items-center justify-center overflow-hidden px-[22px] py-[13px] rounded-full shrink-0 hover:bg-[#9ad534] transition-colors cursor-not-allowed opacity-60"
-            title="Task generation coming soon"
-            disabled
-          >
-            <span className="font-inter font-bold text-[#191d24] text-[14px] leading-normal whitespace-nowrap">
-              Adjust plan
-            </span>
-          </button>
+          {!hasAnyTasks && (
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={generating}
+              className="bg-[#b3e653] flex items-center justify-center overflow-hidden px-[22px] py-[13px] rounded-full shrink-0 hover:bg-[#9ad534] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span className="font-inter font-bold text-[#191d24] text-[14px] leading-normal whitespace-nowrap">
+                {generating ? "Generating…" : "Generate plan"}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* This Week section */}
@@ -312,7 +345,7 @@ export const PageStudyPlan = ({
               ))}
             </div>
           ) : (
-            <EmptyWeek />
+            <EmptyWeek onGenerate={handleGenerate} generating={generating} />
           )}
         </div>
 

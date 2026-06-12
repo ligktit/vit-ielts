@@ -25,6 +25,7 @@ const AffiliateTracker = dynamic(
 import { unstableSetRender } from "antd";
 import { createRoot } from "react-dom/client";
 import { ProContentModal } from "@/shared/ui/pro-content";
+import { VocabCapturePopover } from "@/shared/ui/vocab-capture";
 import { AppErrorBoundary } from "@/shared/ui/error-boundary";
 import { MaintenancePage } from "./maintenance";
 
@@ -75,18 +76,57 @@ export default function App({
   const router = useRouter();
 
   useEffect(() => {
+    const loader = document.getElementById("global-skeleton-loader");
+    if (loader) {
+      const delayTimer = setTimeout(() => {
+        loader.classList.add("fade-out");
+      }, 200);
+
+      const removeTimer = setTimeout(() => {
+        loader.remove();
+      }, 600);
+
+      return () => {
+        clearTimeout(delayTimer);
+        clearTimeout(removeTimer);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
     const start = () => BProgress.start();
     const stop = () => BProgress.done();
 
+    // Turbopack dev mode sometimes leaves Next's anti-FOUC style
+    // (`<style data-next-hide-fouc>body{display:none}</style>`) attached after
+    // hydration/navigation. While the body stays hidden, width-measuring
+    // components (antd Table, recharts) mount at 0px and render collapsed —
+    // which is why tables look squeezed until you interact with them and a
+    // reflow finally fires. Removing the stale style and forcing a resize makes
+    // them measure correctly. No-op in production (the style is never present).
+    const unstickFouc = () => {
+      document
+        .querySelectorAll("style[data-next-hide-fouc]")
+        .forEach((el) => el.remove());
+      requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+    };
+
+    const onComplete = () => {
+      stop();
+      unstickFouc();
+    };
+
+    unstickFouc();
+
     // Listen to route change events
     router.events.on("routeChangeStart", start);
-    router.events.on("routeChangeComplete", stop);
+    router.events.on("routeChangeComplete", onComplete);
     router.events.on("routeChangeError", stop);
 
     // Clean up event listeners
     return () => {
       router.events.off("routeChangeStart", start);
-      router.events.off("routeChangeComplete", stop);
+      router.events.off("routeChangeComplete", onComplete);
       router.events.off("routeChangeError", stop);
     };
   }, [router.events]);
@@ -100,6 +140,19 @@ export default function App({
       };
     });
   }, []);
+
+  // Move the `frontend-site` class onto <html> so that Ant Design portals
+  // (Modal, Drawer, Dropdown…) rendered in document.body still inherit all
+  // scoped Tailwind styles. A wrapper <div> can't cover portals that escape
+  // the React tree, but the root <html> element covers the entire document.
+  useEffect(() => {
+    const isAdmin = router.pathname.startsWith("/admin");
+    if (isAdmin) {
+      document.documentElement.classList.remove("frontend-site");
+    } else {
+      document.documentElement.classList.add("frontend-site");
+    }
+  }, [router.pathname]);
 
   const ChildrenComponent = useMemo(
     () => (
@@ -164,6 +217,7 @@ export default function App({
               transition={Bounce}
             />
             <ProContentModal />
+            <VocabCapturePopover />
           </Layout>
         </ConfigProvider>
       </StyleProvider>

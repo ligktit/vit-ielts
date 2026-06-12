@@ -83,7 +83,7 @@ export const MatrixQuestion = ({
   const matrixData = question.matrixQuestion;
 
   if (!matrixData || !matrixData.matrixItems?.length || !matrixData.matrixCategories?.length) {
-    return <div className="p-4 border border-red-200 bg-red-50 rounded-md">Dữ liệu không hợp lệ.</div>;
+    return <div className="p-4 border border-red-200 bg-red-50 rounded-md">Invalid data.</div>;
   }
 
   const { matrixItems, matrixCategories, layoutType: propLayoutType, legendTitle: propLegendTitle } = matrixData;

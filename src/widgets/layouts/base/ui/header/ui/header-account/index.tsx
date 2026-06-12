@@ -52,7 +52,7 @@ export function HeaderAccount() {
       },
       {
         key: "classroom",
-        label: <Link href={ROUTES.CLASSROOM.LIST}>Lớp học</Link>,
+        label: <Link href={ROUTES.CLASSROOM.LIST}>Classes</Link>,
       },
       ...(currentUser?.roles.nodes[0].name === "administrator"
         ? [

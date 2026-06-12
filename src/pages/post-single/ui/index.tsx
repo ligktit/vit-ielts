@@ -133,7 +133,7 @@ export const PageSingle = ({
                   {isProPost && (
                     <ProBadge
                       className="mt-2 shrink-0"
-                      title="Bài viết chỉ dành cho PRO user"
+                      title="PRO members only"
                     />
                   )}
                 </div>
@@ -201,7 +201,7 @@ export const PageSingle = ({
                     <span className="material-symbols-rounded text-lg">
                       {copied ? "check_circle" : "content_copy"}
                     </span>
-                    {copied ? "Đã copy!" : "Copy link"}
+                    {copied ? "Copied!" : "Copy link"}
                   </button>
                   <button
                     className="flex items-center gap-3 text-sm font-medium text-[#6A7282] hover:text-[#D94A56] transition-colors cursor-pointer"

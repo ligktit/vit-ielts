@@ -288,7 +288,7 @@ export default function ActivityLogPage() {
                         pageSizeOptions: ["20", "30", "50", "100"],
                         showTotal: (t) => `Tổng ${t} hoạt động`,
                     }}
-                    scroll={{ x: 900 }}
+                    scroll={{ x: "max-content" }}
                     size="middle"
                 />
             </AdminGlassCard>

@@ -55,7 +55,7 @@ function RelatedPosts({
                     <span className="material-symbols-rounded">
                       play_circle
                     </span>
-                    <span>Làm bài</span>
+                    <span>Start test</span>
                   </LinkButton>
                 </Link>
               ) : isPro && currentUser.userData.isPro ? (
@@ -68,7 +68,7 @@ function RelatedPosts({
                     <span className="material-symbols-rounded">
                       play_circle
                     </span>
-                    <span>Làm bài</span>
+                    <span>Start test</span>
                   </LinkButton>
                 </Link>
               ) : isPro ? (
@@ -78,7 +78,7 @@ function RelatedPosts({
                   onClick={openProContentModal}
                 >
                   <span className="material-symbols-rounded">play_circle</span>
-                  <span>Làm bài</span>
+                  <span>Start test</span>
                 </Button>
               ) : (
                 <Link
@@ -90,7 +90,7 @@ function RelatedPosts({
                     <span className="material-symbols-rounded">
                       play_circle
                     </span>
-                    <span>Làm bài</span>
+                    <span>Start test</span>
                   </LinkButton>
                 </Link>
               )}

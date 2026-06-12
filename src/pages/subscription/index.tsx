@@ -30,8 +30,8 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         bannerConfig: subscriptionBannerConfig ?? {
           backgroundImage: "/img-admin/bg-image-11.jpg",
           subtitle: { text: "Premium" },
-          title: "Nâng cấp tài khoản Pro",
-          description: "Trải nghiệm toàn bộ tính năng cao cấp",
+          title: "Upgrade to Pro",
+          description: "Experience all premium features",
         },
       },
     };

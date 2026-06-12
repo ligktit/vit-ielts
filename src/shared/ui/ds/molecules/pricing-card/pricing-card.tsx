@@ -22,13 +22,13 @@ export const PricingCard = ({
   priceLabel,
   popular = false,
   features,
-  ctaText = 'Mua ngay',
+  ctaText = 'Buy now',
   ctaHref,
   onCtaClick,
   className = '',
 }: PricingCardProps) => (
   <div className={`pricing-card ${popular ? 'pricing-card--popular' : ''} ${className}`}>
-    {popular && <span className="pricing-card__badge">Phổ biến</span>}
+    {popular && <span className="pricing-card__badge">Popular</span>}
     <h3 className="pricing-card__name">{name}</h3>
     <div className="pricing-card__price-row">
       <span className="pricing-card__price">{price}</span>

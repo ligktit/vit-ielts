@@ -77,7 +77,7 @@ const SectionHeader = ({
         onClick={onSeeMore}
         className="inline-flex cursor-pointer items-center gap-0 rounded-md bg-[#f2fadd] py-1 pl-3 pr-1 font-inter text-[12px] font-semibold text-[#191d24] transition-opacity hover:opacity-80"
       >
-        Xem thêm
+        See more
         <span className="material-symbols-rounded text-[14px]">chevron_right</span>
       </button>
     )}
@@ -292,10 +292,10 @@ export const PageIELTSPrediction = ({
             ) : (
               <div className="rounded-[24px] border border-dashed border-[#e5e6e8] bg-[#ffffff] px-6 py-16 text-center">
                 <h3 className="font-display text-[20px] font-bold text-[#191d24]">
-                  Không tìm thấy bài viết phù hợp
+                  No articles found
                 </h3>
                 <p className="mt-2 font-inter text-[14px] text-[#6a7282]">
-                  Thử xoá bớt bộ lọc hoặc tìm với từ khoá khác.
+                  Try removing some filters or searching with a different keyword.
                 </p>
                 <button
                   type="button"

@@ -47,7 +47,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
   }, [activeWeek, activityMap]);
 
   if (currentMonthWeeks.length === 0) {
-    return <div style={{ color: "#9ca3af", textAlign: "center", padding: 24 }}>Không có dữ liệu</div>;
+    return <div style={{ color: "#9ca3af", textAlign: "center", padding: 24 }}>No data available</div>;
   }
 
   return (
@@ -60,7 +60,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
             className={`${styles.weekBtn} ${idx === safeSelectedWeek ? styles.weekBtnActive : ""}`}
             onClick={() => setSelectedWeek(idx)}
           >
-            Tuần {idx + 1}
+            Week {idx + 1}
           </button>
         ))}
       </div>
@@ -70,7 +70,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
       <table className={styles.statsTable}>
         <thead>
           <tr>
-            <th>Ngày</th>
+            <th>Date</th>
             <th>📖 Reading</th>
             <th>🎧 Listening</th>
           </tr>
@@ -93,7 +93,7 @@ export const WeeklyStats = ({ weeks, activities, currentMonth }: Props) => {
           })}
           {/* Totals row */}
           <tr>
-            <td>Tổng</td>
+            <td>Total</td>
             <td>{weekTotals.reading}</td>
             <td>{weekTotals.listening}</td>
           </tr>

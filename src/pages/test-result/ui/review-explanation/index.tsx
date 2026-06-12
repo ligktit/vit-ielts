@@ -189,7 +189,7 @@ function ReviewHeader({
                       arrow_back
                     </span>
                     <span className="hidden lg:inline text-sm whitespace-nowrap">
-                      Quay lại
+                      Go back
                     </span>
                   </Link>
 
@@ -204,7 +204,7 @@ function ReviewHeader({
                       refresh
                     </span>
                     <span className="hidden lg:inline text-sm whitespace-nowrap">
-                      Làm lại
+                      Retry
                     </span>
                   </button>
                 </div>
@@ -244,7 +244,7 @@ function ReviewHeader({
                 <Link
                   href={ROUTES.TEST_RESULT(testResult.id)}
                   className="hidden md:flex items-center justify-center w-10 h-10 rounded-full text-[#222] hover:bg-gray-100 transition-all"
-                  title="Tiếp tục"
+                  title="Continue"
                 >
                   <span className="material-symbols-rounded text-[26px]">
                     arrow_forward

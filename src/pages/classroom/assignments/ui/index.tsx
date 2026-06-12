@@ -98,7 +98,7 @@ const AssignmentRow = ({
         )}
         {!a.assigned_to_all ? (
           <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[12px] font-medium text-amber-600">
-            Giao riêng
+            Selected students only
           </span>
         ) : null}
       </div>
@@ -134,10 +134,10 @@ const AssignmentRow = ({
             View results
           </Link>
           <Popconfirm
-            title="Xóa bài giao này?"
+            title="Delete this assignment?"
             onConfirm={() => onDelete(a.id)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText="Delete"
+            cancelText="Cancel"
             okButtonProps={{ danger: true }}
           >
             <button className="flex h-9 w-9 items-center justify-center rounded-full border border-[#e7e9e4] bg-white text-[#6a7282] hover:bg-gray-50 hover:text-[#e54552] transition-colors">
@@ -252,7 +252,7 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) throw new Error("Bạn cần đăng nhập.");
+      if (!user) throw new Error("You need to sign in.");
       await createAssignments(supabase, {
         classroomId: classroom.id,
         quizIds: selectedQuizzes.map((q) => q.id),
@@ -261,11 +261,11 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
         studentIds: audience === "subset" ? subset : null,
         createdBy: user.id,
       });
-      message.success(`Đã giao ${selectedQuizzes.length} đề cho học sinh`);
+      message.success(`Assigned ${selectedQuizzes.length} test${selectedQuizzes.length !== 1 ? "s" : ""} to students`);
       resetModal();
       router.replace(router.asPath, undefined, { scroll: false });
     } catch (e) {
-      message.error(e instanceof Error ? e.message : "Không giao được bài.");
+      message.error(e instanceof Error ? e.message : "Failed to assign tests.");
     } finally {
       setSubmitting(false);
     }
@@ -274,10 +274,10 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
   const handleDelete = async (id: string) => {
     try {
       await deleteAssignment(supabase, id);
-      message.success("Đã xóa bài giao");
+      message.success("Assignment deleted");
       router.replace(router.asPath, undefined, { scroll: false });
     } catch {
-      message.error("Không xóa được bài giao.");
+      message.error("Failed to delete assignment.");
     }
   };
 
@@ -299,7 +299,7 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
             Assignments
           </h1>
           <p className="mt-[6px] font-inter font-normal text-[15px] text-[#6a7282]">
-            Lớp {classroom.name}
+            Class: {classroom.name}
           </p>
         </div>
         <button
@@ -307,7 +307,7 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
           className="inline-flex items-center gap-2 rounded-full bg-[#b3e653] px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#9ad534] transition-colors"
         >
           <span className="material-symbols-rounded text-[18px]">add</span>
-          Giao bài
+          Assign tests
         </button>
       </div>
 
@@ -326,16 +326,16 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-[#f6f7f4]">
             <span className="material-symbols-rounded text-[32px] text-[#6a7282]">assignment</span>
           </span>
-          <p className="font-display font-bold text-[18px] text-[#191d24]">Chưa giao bài nào</p>
+          <p className="font-display font-bold text-[18px] text-[#191d24]">No assignments yet</p>
           <p className="font-inter text-[14px] text-[#6a7282] max-w-[320px]">
-            Giao bài tập cho học sinh để theo dõi tiến độ và kết quả.
+            Assign tests to students to track their progress and results.
           </p>
           <button
             onClick={() => setOpen(true)}
             className="inline-flex items-center gap-2 rounded-full bg-[#b3e653] px-[22px] py-[11px] text-[14px] font-bold font-inter text-[#191d24] hover:bg-[#9ad534] transition-colors"
           >
             <span className="material-symbols-rounded text-[18px]">add</span>
-            Giao bài đầu tiên
+            Assign your first test
           </button>
         </div>
       ) : (
@@ -346,7 +346,7 @@ export const PageClassroomAssignments = ({ classroom, assignments, students }: P
         </div>
       )}
 
-      {/* ── 2-step Giao bài modal ── */}
+      {/* ── 2-step assign modal ── */}
       <Modal
         open={open}
         onCancel={() => !submitting && resetModal()}

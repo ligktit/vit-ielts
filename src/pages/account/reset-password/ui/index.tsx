@@ -94,7 +94,7 @@ export function PageResetPassword() {
       if (data?.user) {
         setStage("ready");
       } else {
-        setErrorMsg("Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
+        setErrorMsg("The password reset link is invalid or has expired.");
         setStage("invalid");
       }
     };
@@ -121,36 +121,36 @@ export function PageResetPassword() {
   return (
     <div className="flex flex-col min-h-screen items-center bg-white">
       <HeroBanner
-        title="Đặt lại mật khẩu"
+        title="Reset Password"
         breadcrumbs={[
-          { label: "Trang chủ", href: ROUTES.HOME },
-          { label: "Đăng nhập & Đăng ký", href: ROUTES.LOGIN() },
-          { label: "Đặt lại mật khẩu" },
+          { label: "Home", href: ROUTES.HOME },
+          { label: "Sign In & Register", href: ROUTES.LOGIN() },
+          { label: "Reset Password" },
         ]}
       />
 
       <div className="w-full flex justify-center py-[130px] relative z-30 px-4 max-w-7xl">
         <div className="w-[562px] bg-white rounded-[32px] shadow-[0px_2px_10px_rgba(0,0,0,0.5)] flex flex-col items-center py-8 px-6 sm:px-[64px]">
           <h2 className="font-noto-sans font-bold text-[32px] leading-[39px] text-center text-[#D94A56] mb-[24px]">
-            Đặt lại mật khẩu
+            Reset Password
           </h2>
 
           {stage === "verifying" && (
             <p className="font-noto-sans text-[14px] text-[#374151]">
-              Đang xác thực link...
+              Verifying link...
             </p>
           )}
 
           {stage === "invalid" && (
             <div className="w-full flex flex-col gap-4 text-center">
               <p className="font-noto-sans text-[14px] text-red-500">
-                {errorMsg || "Link không hợp lệ."}
+                {errorMsg || "Invalid link."}
               </p>
               <Link
                 href={ROUTES.FORGOT_PASSWORD}
                 className="font-noto-sans font-medium text-[14px] text-[#D94A56] hover:underline"
               >
-                Gửi lại link đặt lại mật khẩu
+                Resend password reset link
               </Link>
             </div>
           )}
@@ -158,14 +158,14 @@ export function PageResetPassword() {
           {stage === "success" && (
             <div className="w-full flex flex-col gap-4 text-center">
               <p className="font-noto-sans text-[16px] text-[#374151]">
-                Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.
+                Password reset successfully. Please sign in with your new password.
               </p>
               <Link
                 href={ROUTES.LOGIN()}
                 className="w-full h-[55px] flex justify-center items-center bg-[#D94A56] rounded-[10px] hover:bg-[#E3636E] transition-colors"
               >
                 <span className="font-noto-sans font-bold text-[18px] text-white">
-                  Đăng nhập
+                  Sign In
                 </span>
               </Link>
             </div>
@@ -181,17 +181,17 @@ export function PageResetPassword() {
                   htmlFor="password"
                   className="font-noto-sans font-bold text-[16px] text-[#191D24]"
                 >
-                  Mật khẩu mới
+                  New Password
                 </label>
                 <div className="w-full relative">
                   <Controller
                     control={control}
                     name="password"
                     rules={{
-                      required: "Vui lòng nhập mật khẩu mới",
+                      required: "Please enter a new password",
                       minLength: {
                         value: 6,
-                        message: "Mật khẩu tối thiểu 6 ký tự",
+                        message: "Password must be at least 6 characters",
                       },
                     }}
                     render={({ field }) => (
@@ -200,7 +200,7 @@ export function PageResetPassword() {
                         id="password"
                         type={showPassword ? "text" : "password"}
                         autoComplete="new-password"
-                        placeholder="Nhập mật khẩu mới"
+                        placeholder="Enter new password"
                         className="w-full box-border border border-[#BDBDBD] rounded-[12px] h-[40px] pl-[18px] pr-[40px] font-noto-sans text-[14px] text-[#374151] outline-none focus:border-[#D94A56] transition-colors"
                       />
                     )}
@@ -210,7 +210,7 @@ export function PageResetPassword() {
                     onClick={() => setShowPassword((s) => !s)}
                     className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#71717A] text-xs"
                   >
-                    {showPassword ? "Ẩn" : "Hiện"}
+                    {showPassword ? "Hide" : "Show"}
                   </button>
                 </div>
                 {errors.password && (
@@ -225,15 +225,15 @@ export function PageResetPassword() {
                   htmlFor="confirmPassword"
                   className="font-noto-sans font-bold text-[16px] text-[#191D24]"
                 >
-                  Xác nhận mật khẩu
+                  Confirm Password
                 </label>
                 <Controller
                   control={control}
                   name="confirmPassword"
                   rules={{
-                    required: "Vui lòng xác nhận mật khẩu",
+                    required: "Please confirm your password",
                     validate: (v) =>
-                      v === watch("password") || "Mật khẩu xác nhận không khớp",
+                      v === watch("password") || "Passwords do not match",
                   }}
                   render={({ field }) => (
                     <input
@@ -241,7 +241,7 @@ export function PageResetPassword() {
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="Nhập lại mật khẩu mới"
+                      placeholder="Repeat new password"
                       className="w-full box-border border border-[#BDBDBD] rounded-[12px] h-[40px] px-[18px] font-noto-sans text-[14px] text-[#374151] outline-none focus:border-[#D94A56] transition-colors"
                     />
                   )}
@@ -259,7 +259,7 @@ export function PageResetPassword() {
                 className="w-full h-[55px] flex justify-center items-center py-3 px-3 bg-[#D94A56] rounded-[10px] shadow-[0px_4px_20px_-8px_rgba(0,0,0,0.11),0px_0px_10px_rgba(0,0,0,0.1)] hover:bg-[#E3636E] transition-colors disabled:opacity-70 disabled:cursor-not-allowed border-none cursor-pointer"
               >
                 <span className="font-noto-sans font-bold text-[20px] text-white">
-                  {isSubmitting ? "Đang lưu..." : "Đặt lại mật khẩu"}
+                  {isSubmitting ? "Saving..." : "Reset Password"}
                 </span>
               </button>
             </form>

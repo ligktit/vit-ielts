@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { BlankLayout } from "@/widgets/layouts";
 import { useAppContext, useAuth } from "@/appx/providers";
@@ -82,8 +82,12 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedBand, setSelectedBand] = useState("Band 7.5");
+  const submittingRef = useRef(false);
 
   const onSubmit = async (data: FormData) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsLoading(true);
     try {
       await signUp({
         name: data.name,
@@ -91,11 +95,13 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
         password: data.password,
       });
 
-      toast.success("Tạo tài khoản thành công!");
+      toast.success("Account created successfully!");
       // signUp already creates the auth session, just sign in to set cookie & redirect
       await signIn({ email: data.email, password: data.password });
     } catch (err: any) {
-      const message = err?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+      setIsLoading(false);
+      submittingRef.current = false;
+      const message = err?.message || "Registration failed. Please try again.";
       setError("email", {
         type: "manual",
         message,
@@ -235,7 +241,7 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
                 />
                 {errors.name && (
                   <span className="font-inter text-[12px] text-[#e54552]">
-                    Vui lòng nhập họ và tên
+                    Please enter your full name
                   </span>
                 )}
               </div>
@@ -255,7 +261,7 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
                     required: { value: true, message: "Email is required" },
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Email không hợp lệ",
+                      message: "Invalid email",
                     },
                   }}
                   render={({ field }) => (
@@ -273,7 +279,7 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
                 />
                 {errors.email && (
                   <span className="font-inter text-[12px] text-[#e54552]">
-                    {errors.email.message || "Vui lòng nhập email"}
+                    {errors.email.message || "Please enter your email"}
                   </span>
                 )}
               </div>
@@ -317,7 +323,7 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
                 />
                 {errors.password && (
                   <span className="font-inter text-[12px] text-[#e54552]">
-                    Vui lòng nhập mật khẩu
+                    Please enter a password
                   </span>
                 )}
               </div>
@@ -334,9 +340,9 @@ export function PageRegister({ registerConfig: _registerConfig }: PageRegisterPr
                   control={control}
                   name="confirm_password"
                   rules={{
-                    required: "Vui lòng nhập lại mật khẩu",
+                    required: "Please confirm your password",
                     validate: (value) =>
-                      value === passwordValue || "Mật khẩu không khớp",
+                      value === passwordValue || "Passwords do not match",
                   }}
                   render={({ field }) => (
                     <Input

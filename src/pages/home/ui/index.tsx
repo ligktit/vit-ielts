@@ -4,6 +4,7 @@ import { WhyChooseUs } from "./why-choose-us";
 import { Testimonials } from "./testimonials";
 import { PracticeSection } from "./practice-section";
 import { MockCollectionSection } from "./mock-collection-section";
+import { CtaBanner } from "./cta-banner";
 import { useAuth } from "@/appx/providers";
 import { AppShell } from "@/widgets/layouts";
 import { PracticeHistory, TargetScore } from "@/widgets";
@@ -100,7 +101,7 @@ export const PageHome = ({
             viewMoreLink={ROUTES.SAMPLE_ESSAY.ARCHIVE_WRITING}
             items={writingSamples as unknown as Quiz[]}
             getItemHref={(item) => ROUTES.SAMPLE_ESSAY.SINGLE(item.slug)}
-            actionText="Xem thêm"
+            actionText="View more"
             hideAttempts={true}
           />
           {/* === Speaking Sample Carousel === */}
@@ -109,7 +110,7 @@ export const PageHome = ({
             viewMoreLink={ROUTES.SAMPLE_ESSAY.ARCHIVE_SPEAKING}
             items={speakingSamples as unknown as Quiz[]}
             getItemHref={(item) => ROUTES.SAMPLE_ESSAY.SINGLE(item.slug)}
-            actionText="Xem thêm"
+            actionText="View more"
             hideAttempts={true}
           />
         </div>
@@ -121,48 +122,10 @@ export const PageHome = ({
       {/* === SECTION: Why Choose Us (dark feature grid) === */}
       <WhyChooseUs config={whyChooseUsConfig} />
 
-      {/* === SECTION: CTA Banner (green) — hidden === */}
-      {/* <CtaBanner /> */}
+      {/* === SECTION: CTA Banner (green) === */}
+      <CtaBanner />
     </div>
   );
 };
 
 PageHome.Layout = AppShell;
-
-// ─── Green CTA Banner ──────────────────────────────────────────────────────────
-
-const CtaBanner = () => (
-  <div className="w-full bg-[#f6f7f4] px-4 sm:px-6 py-6 pb-10">
-    <div className=" mx-auto bg-[#b3e653] rounded-[40px] px-8 sm:px-12 py-14 flex flex-col items-center text-center relative overflow-hidden">
-      {/* Dot pattern overlay */}
-      <div
-        className="absolute inset-0 rounded-[40px] opacity-30 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(circle, rgba(25,29,36,0.3) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-
-      <h2 className="relative z-10 font-display font-bold text-[36px] sm:text-[44px] leading-[1.1] tracking-[-1px] text-[#191d24] mb-[14px] max-w-[700px]">
-        Your target band is closer than you think.
-      </h2>
-      <p className="relative z-10 font-inter font-normal text-[18px] leading-[1.5] text-[#242938] mb-7 max-w-[560px]">
-        Create a free account and take your first full mock test today — no card required.
-      </p>
-      <div className="relative z-10 flex flex-wrap items-center justify-center gap-[14px]">
-        <Link
-          href={ROUTES.REGISTER}
-          className="inline-flex items-center gap-2 bg-[#191d24] hover:bg-[#374151] text-white font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[15px] rounded-full transition-colors duration-200 whitespace-nowrap"
-        >
-          Get started free
-        </Link>
-        <Link
-          href={ROUTES.SUBSCRIPTION}
-          className="inline-flex items-center gap-2 bg-white hover:bg-[#f6f7f4] border-[1.5px] border-[rgba(25,29,36,0.1)] text-[#191d24] font-inter font-bold text-[14px] leading-[1.2] px-[26px] py-[15px] rounded-full transition-colors duration-200 whitespace-nowrap"
-        >
-          Talk to a teacher
-        </Link>
-      </div>
-    </div>
-  </div>
-);

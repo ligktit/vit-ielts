@@ -108,7 +108,7 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
           </div>
 
           {/* ── Right: HeroArt — Figma: 381×440px, 3 ellipses + mascot ── */}
-          <div className="relative shrink-0 w-full lg:w-[381px] h-[280px] sm:h-[360px] lg:h-[440px]">
+          <div className="relative shrink-0 w-full lg:w-[381px] h-[280px] sm:h-[360px] lg:h-[440px]" style={{ position: 'relative' }}>
             {/* Large green ellipse — Figma: 357.887px, left-22.94px top-0 */}
             <div
               className="absolute rounded-full pointer-events-none"
@@ -143,7 +143,7 @@ export const HeroBanner = ({ config }: HeroBannerProps) => {
               }}
             />
             {/* Mascot image — Figma: absolute 360×422px at left-0.45 top-28.44 */}
-            <div className="absolute z-10 inset-0">
+            <div className="absolute z-10 inset-0" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
               <Image
                 src={c.images.mascot}
                 alt="IELTS Mascot"

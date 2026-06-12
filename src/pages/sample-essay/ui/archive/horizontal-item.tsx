@@ -35,7 +35,7 @@ export const HorizontalItem = ({
   ).label;
 
   const metaParts: string[] = [];
-  if (quarter && year) metaParts.push(`Quý ${quarter} T1-T4 ${year}`);
+  if (quarter && year) metaParts.push(`Q${quarter} ${year}`);
   if (partBadge) metaParts.push(partBadge);
   const metaText = metaParts.join(" . ");
 

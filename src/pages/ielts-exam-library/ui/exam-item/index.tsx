@@ -127,7 +127,7 @@ export const ExamItem = ({
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                   <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Đã làm
+                Done
               </span>
             </div>
           )}
@@ -167,7 +167,7 @@ export const ExamItem = ({
                 )}
               </div>
               <span className="font-noto-sans text-[15px] font-bold text-white truncate">
-                {isDone ? "Làm lại" : "Làm bài"}
+                {isDone ? "Retake" : "Start"}
               </span>
             </div>
 
@@ -177,7 +177,7 @@ export const ExamItem = ({
                 type="button"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsHistoryOpen(true); }}
                 className="flex h-[60px] w-[60px] flex-col items-center justify-center rounded-full border-2 border-brand bg-white flex-shrink-0 cursor-pointer hover:bg-brand/10 transition-colors"
-                title="Xem lịch sử làm bài"
+                title="View attempt history"
               >
                 <span
                   className={`text-brand font-noto-sans font-bold leading-none ${

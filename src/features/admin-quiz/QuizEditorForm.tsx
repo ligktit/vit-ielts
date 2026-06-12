@@ -84,7 +84,7 @@ export default function QuizEditorForm({
     }, [form, setSlugEdited, onValuesChange]);
 
     const renderLabel = (text: string, required: boolean = false) => (
-        <span className="font-semibold text-gray-800">
+        <span className="font-semibold text-gray-800 dark:text-gray-200">
             {text} {required && <span className="text-red-500">*</span>}
         </span>
     );
@@ -135,7 +135,7 @@ export default function QuizEditorForm({
 
                 {/* Slug (Not in legacy UI but needed, we put it here) */}
                 <Form.Item label={
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-semibold text-gray-800 dark:text-gray-200">
                         Slug (URL) <span className="text-red-500">*</span>
                         {!isNew && currentSlug && (
                             <Link href={`${currentType === 'practice' ? `/ielts-practice-library/${currentSlug}` : `/ielts-exam-library/${currentSlug}`}?preview=true`} target="_blank" legacyBehavior>

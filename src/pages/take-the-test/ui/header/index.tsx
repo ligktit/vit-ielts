@@ -76,18 +76,18 @@ function Header({ post }: { post: IPracticeSingle }) {
       });
       
       const result = await response.json();
-      if (!response.ok || !result.success) throw new Error(result.error || "Lưu thất bại");
+      if (!response.ok || !result.success) throw new Error(result.error || "Save failed");
 
       notification.success({
-        message: "Thành công",
-        description: "Đã lưu bản nháp bài làm của bạn.",
+        message: "Saved",
+        description: "Your draft has been saved.",
         placement: "topRight",
       });
     } catch (error: any) {
       console.error("Manual Save Error:", error);
       notification.error({
-        message: "Lỗi",
-        description: error?.message || "Không thể lưu bản nháp. Vui lòng thử lại.",
+        message: "Error",
+        description: error?.message || "Could not save draft. Please try again.",
       });
     } finally {
       setIsSaving(false);
@@ -174,7 +174,7 @@ function Header({ post }: { post: IPracticeSingle }) {
       {isRetaking && (
         <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface-card/90 backdrop-blur-sm">
           <span className="material-symbols-rounded text-[48px] text-[#d94a56] animate-spin">refresh</span>
-          <p className="mt-4 text-base font-semibold text-ink-body">Đang chuẩn bị bài thi mới...</p>
+          <p className="mt-4 text-base font-semibold text-ink-body">Preparing new test...</p>
         </div>
       )}
 
@@ -225,7 +225,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                       className="flex flex-col md:flex-row items-center gap-1 text-ink-900 hover:text-[#d94a56] font-medium transition-colors"
                     >
                       <span className="material-symbols-rounded bold block! text-[20px] md:text-[24px]!">arrow_back</span>
-                      <span className="hidden lg:inline text-sm whitespace-nowrap">Quay lại</span>
+                      <span className="hidden lg:inline text-sm whitespace-nowrap">Go Back</span>
                     </Link>
 
                     <button
@@ -239,7 +239,7 @@ function Header({ post }: { post: IPracticeSingle }) {
                       className="flex flex-col md:flex-row items-center gap-1 text-ink-900 hover:text-[#d94a56] font-medium transition-colors disabled:opacity-50"
                     >
                       <span className={`material-symbols-rounded bold block! text-[20px] md:text-[24px]! ${isRetaking ? "animate-spin" : ""}`}>refresh</span>
-                      <span className="hidden lg:inline text-sm whitespace-nowrap">{isRetaking ? "Đang tải..." : "Làm lại"}</span>
+                      <span className="hidden lg:inline text-sm whitespace-nowrap">{isRetaking ? "Loading..." : "Retake"}</span>
                     </button>
                   </>
                 )}

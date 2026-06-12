@@ -374,7 +374,7 @@ export const SubscriptionPlans = ({ buyProLink }: { buyProLink: string }) => {
     const dealNote =
       currentPlanInConfig?.dealNote ||
       (currentPlanInConfig?.originalPrice
-        ? `Giảm ${formatPrice(currentPlanInConfig.originalPrice - (price || 0))}`
+        ? `Save ${formatPrice(currentPlanInConfig.originalPrice - (price || 0))}`
         : config?.dealNoteTemplate || "SAME PRICE AS THE SHORTER PLAN");
 
     const checkoutLink =

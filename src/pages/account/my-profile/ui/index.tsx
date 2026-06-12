@@ -3,7 +3,7 @@ import Head from "next/head";
 import { AppShell } from "@/widgets/layouts";
 import { Button as AntButton, DatePicker, Input, Select, Skeleton } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import { AvatarUpload, UserAccountTypeBadge } from "@/shared/ui";
 import { toast } from "react-toastify";
@@ -17,7 +17,6 @@ type UserDataForm = {
   email: string;
   date_of_birth: Dayjs;
   gender: "male" | "female";
-  avatar: File | null;
   password: string;
   confirm_password: string;
   phoneNumber: string;
@@ -29,6 +28,7 @@ type UserDataForm = {
 export const PageMyProfile = () => {
   const [preview, setPreview] = useState<string | undefined>();
   const [isEditing, setIsEditing] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const {
     setValue,
     control,
@@ -41,6 +41,7 @@ export const PageMyProfile = () => {
     masterData: {
       allSettings: { generalSettingsTitle },
     },
+    updateViewerAvatar,
   } = useAppContext();
   const { currentUser } = useAuth();
   const [userData, setUserData] = useState<any>(null);
@@ -100,6 +101,42 @@ export const PageMyProfile = () => {
   useEffect(() => {
     fetchProfile();
   }, [currentUser?.id]);
+
+  // Avatar saves immediately on file selection.
+  // useCallback keeps the reference stable so AvatarUpload's useEffect doesn't
+  // re-run on every render and trigger an upload loop.
+  const handleAvatarChange = useCallback(async (file: File | null) => {
+    if (!file || !currentUser?.id) return;
+    // Optimistic: show preview immediately before the upload finishes
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPreview(localPreviewUrl);
+    try {
+      setAvatarUploading(true);
+      const fd = new FormData();
+      fd.append("file", file);
+      const uploadRes = await fetch("/api/account/upload-avatar", { method: "POST", body: fd });
+      if (!uploadRes.ok) {
+        const uploadErr = await uploadRes.json().catch(() => ({})) as { message?: string };
+        throw new Error(uploadErr.message || "Avatar upload failed");
+      }
+      const { path } = await uploadRes.json() as { path: string };
+      const supabase = createClient();
+      const { error } = await supabase.from("users").update({ avatar_url: path }).eq("id", currentUser.id);
+      if (error) throw error;
+      // Update context so header + sidebar re-render without a hard page reload
+      updateViewerAvatar(path);
+      setPreview(path);
+      URL.revokeObjectURL(localPreviewUrl);
+      toast.success("Avatar updated");
+    } catch (err: any) {
+      // Revert optimistic preview on failure
+      setPreview(currentUser?.userData?.avatar?.node?.mediaDetails?.sizes?.[0]?.sourceUrl);
+      URL.revokeObjectURL(localPreviewUrl);
+      toast.error(err?.message || "Failed to upload avatar");
+    } finally {
+      setAvatarUploading(false);
+    }
+  }, [currentUser?.id, updateViewerAvatar]);
 
   const data = userData;
 
@@ -196,7 +233,6 @@ export const PageMyProfile = () => {
           data.viewer.userData.targetScore?.listening,
         password: "",
         confirm_password: "",
-        avatar: null,
       });
     }
     setIsEditing(false);
@@ -229,32 +265,26 @@ export const PageMyProfile = () => {
         <div className="flex flex-col gap-5">
           {/* ── Profile card ── */}
           <div className="bg-surface-card rounded-2xl p-6 shadow-primary flex items-center gap-5">
-            {/* Avatar */}
+            {/* Avatar — saves immediately on file selection */}
             <div className="shrink-0">
-              <Controller
-                control={control}
-                name="avatar"
-                render={({ field: { onChange } }) => (
-                  <div className="relative group">
-                    <div className="border-2 border-solid border-border-hairline rounded-full overflow-hidden group-hover:border-brand duration-300 shadow-primary">
-                      <AvatarUpload
-                        classNames={{
-                          container: "w-[72px] h-[72px] border-none",
-                          image: "object-cover",
-                          wrapper: "p-0",
-                        }}
-                        setFile={(file) => file && onChange(file)}
-                        previewUrl={preview}
-                      />
-                    </div>
-                    <div className="bottom-0 right-0 absolute rounded-full pointer-events-none group-hover:text-ink-900 border-border-hairline border-2 bg-surface-card p-0.5 group-hover:border-brand group-hover:bg-brand duration-300">
-                      <span className="material-symbols-rounded block! text-base! leading-none!">
-                        add_a_photo
-                      </span>
-                    </div>
-                  </div>
-                )}
-              />
+              <div className="relative group">
+                <div className={`border-2 border-solid border-border-hairline rounded-full overflow-hidden group-hover:border-brand duration-300 shadow-primary ${avatarUploading ? "opacity-60 pointer-events-none" : ""}`}>
+                  <AvatarUpload
+                    classNames={{
+                      container: "w-[72px] h-[72px] border-none",
+                      image: "object-cover",
+                      wrapper: "p-0",
+                    }}
+                    setFile={handleAvatarChange}
+                    previewUrl={preview}
+                  />
+                </div>
+                <div className="bottom-0 right-0 absolute rounded-full pointer-events-none group-hover:text-ink-900 border-border-hairline border-2 bg-surface-card p-0.5 group-hover:border-brand group-hover:bg-brand duration-300">
+                  <span className="material-symbols-rounded block! text-base! leading-none!">
+                    {avatarUploading ? "sync" : "add_a_photo"}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Name + email + badge */}

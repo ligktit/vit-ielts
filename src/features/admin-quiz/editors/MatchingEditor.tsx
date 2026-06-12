@@ -58,9 +58,9 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
             {/* ── SUMMARY layout ── */}
             {isSummary && (
                 <Form.Item label="Summary Text" className="mb-0">
-                    <p className="px-3 py-2 mb-2 bg-neutral-100 rounded border border-dashed border-gray-300 text-sm text-gray-600">
-                        Dùng <code className="bg-gray-200 px-1 rounded">{"{ }"}</code> để đánh dấu chỗ trống, viết đáp án đúng bên trong.{" "}
-                        Ví dụ: <em>The process is <strong>{"{" + "efficient" + "}"}</strong> and cost-effective.</em>
+                    <p className="px-3 py-2 mb-2 bg-neutral-100 dark:bg-gray-800 rounded border border-dashed border-gray-300 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
+                        Use <code className="bg-gray-200 dark:bg-gray-750 px-1 rounded">{"{ }"}</code> to mark blanks, write the correct answer inside.{" "}
+                        Example: <em>The process is <strong>{"{" + "efficient" + "}"}</strong> and cost-effective.</em>
                     </p>
                     <RichTextEditor
                         value={data.summaryText ?? ""}
@@ -72,13 +72,13 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                         <Alert
                             type="warning"
                             showIcon
-                            message="Không tìm thấy chỗ trống { }. Hãy đặt đáp án trong dấu ngoặc nhọn."
+                            message="No blanks { } found. Wrap correct answers in curly braces."
                             className="mt-2"
                         />
                     )}
                     {summaryGapCount > 0 && (
                         <p className="text-xs text-green-700 mt-1">
-                            ✓ Phát hiện <strong>{summaryGapCount}</strong> chỗ trống
+                            ✓ <strong>{summaryGapCount}</strong> blank(s) detected
                         </p>
                     )}
                 </Form.Item>
@@ -94,8 +94,8 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                     </Divider>
 
                     {isHeading && (
-                        <p className="text-xs text-gray-500 -mt-2 mb-1">
-                            Cột trái: nhãn đoạn văn (i, ii, iii…). Cột phải: chữ cái heading đúng (A, B, C…) từ danh sách Answer Options bên dưới.
+                        <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2 mb-1">
+                            Left column: paragraph labels (i, ii, iii…). Right column: correct heading letter (A, B, C…) from the Answer Options list below.
                         </p>
                     )}
 
@@ -111,10 +111,11 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                                 <div key={idx} className="flex items-center gap-2" style={{ minWidth: 0 }}>
                                     <div
                                         style={{
-                                            background: "#f3f4f6",
+                                            background: "var(--admin-surface-active, #f3f4f6)",
                                             padding: "4px 10px",
                                             borderRadius: 4,
-                                            border: "1px solid #e5e7eb",
+                                            border: "1px solid var(--admin-border, #e5e7eb)",
+                                            color: "var(--admin-text-secondary, #4b5563)",
                                             fontSize: 12,
                                             fontWeight: 500,
                                             whiteSpace: "nowrap",
@@ -142,20 +143,20 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                                         showSearch
                                         notFoundContent={
                                             answerOptionLetters.length === 0
-                                                ? "Thêm Answer Options trước"
-                                                : "Không tìm thấy"
+                                                ? "Add Answer Options first"
+                                                : "Not found"
                                         }
                                     />
                                     <Popover
                                         open={openExpIdx === idx}
                                         onOpenChange={(v) => setOpenExpIdx(v ? idx : null)}
                                         trigger="click"
-                                        title="Giải thích cho câu này"
+                                        title="Explanation for this item"
                                         content={
                                             <Input.TextArea
                                                 rows={3}
                                                 style={{ width: 280 }}
-                                                placeholder="Nhập giải thích…"
+                                                placeholder="Enter explanation…"
                                                 value={item.explanation ?? ""}
                                                 onChange={(e) =>
                                                     updateItem(idx, { explanation: e.target.value })
@@ -201,13 +202,12 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
             </Divider>
 
             {isHeading && (
-                <p className="text-xs text-gray-500 -mt-2 mb-1">
-                    Danh sách heading để match — được đánh nhãn A, B, C… tự động.
+                <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2 mb-1">
+                    List of headings to match — automatically labelled A, B, C…
                 </p>
             )}
 
-            {/* ── Tiêu đề danh sách options ── */}
-            <Form.Item label="Tiêu đề Options" className="mb-4">
+            <Form.Item label="Options Title" className="mb-4">
                 <Input
                     placeholder="List of options"
                     value={data.optionsTitle ?? ""}
@@ -221,16 +221,16 @@ export default function MatchingEditor({ data, onChange }: MatchingEditorProps) 
                     <div key={idx} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                         <div
                             style={{
-                                background: "#e0f2fe",
+                                background: "var(--admin-brand-glow, rgba(154, 213, 52, 0.12))",
                                 padding: "4px 8px",
                                 borderRadius: 4,
-                                border: "1px solid #bae6fd",
+                                border: "1px solid var(--admin-brand-light, rgba(154, 213, 52, 0.3))",
                                 fontSize: 12,
                                 fontWeight: 700,
                                 minWidth: 28,
                                 textAlign: "center",
                                 flexShrink: 0,
-                                color: "#0369a1",
+                                color: "var(--admin-brand-dark, #7DB024)",
                             }}
                         >
                             {String.fromCharCode(65 + idx)}

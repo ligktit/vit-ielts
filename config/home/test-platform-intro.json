@@ -17,12 +17,12 @@
     },
     {
       "name": "Listening Test",
-      "href": "/ielts-practice-library/listening",
+      "href": "/ielts-exam-library?skill=listening",
       "icon": "/img-admin/pantone-1766508050243.png"
     },
     {
       "name": "Reading Test",
-      "href": "/ielts-practice-library/reading",
+      "href": "/ielts-exam-library?skill=reading",
       "icon": "/img-admin/design-1766507797101.png"
     },
     {
@@ -37,7 +37,7 @@
     },
     {
       "name": "Ielts Tips",
-      "href": "https://ieltspredictiontest.com/post",
+      "href": "/blog",
       "icon": "/img-admin/personal-1766508134498.png"
     }
   ]

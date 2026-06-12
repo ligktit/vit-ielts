@@ -316,9 +316,9 @@ export function PageTakeTheTest() {
       if (response.status === 401 && !sessionWarnedRef.current) {
         sessionWarnedRef.current = true;
         notification.warning({
-          message: "Phiên đăng nhập đã hết hạn",
+          message: "Session expired",
           description:
-            "Bài làm chưa được lưu. Vui lòng đăng nhập lại trong tab mới để tiếp tục lưu nháp.",
+            "Your progress was not saved. Please sign in again in a new tab to continue saving your draft.",
           placement: "topRight",
           duration: 0,
         });

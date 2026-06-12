@@ -440,7 +440,7 @@ function MediaLibraryPage() {
                             showTotal: (t) => `Tổng ${t} files`,
                             onChange: (p) => setPage(p),
                         }}
-                        scroll={{ x: 700 }}
+                        scroll={{ x: "max-content" }}
                         size="middle"
                     />
                 ) : (

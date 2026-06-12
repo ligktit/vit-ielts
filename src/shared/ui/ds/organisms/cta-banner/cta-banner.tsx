@@ -20,7 +20,7 @@ export type CTABannerProps = {
 export const CTABanner = ({
   title,
   subtitle,
-  ctaText = 'Nâng cấp Premium',
+  ctaText = 'Upgrade to Premium',
   ctaHref,
   onCtaClick,
   mascotSrc = '/assets/figma/icons/mascot.png',

@@ -460,7 +460,7 @@ const DashboardInner = ({ classrooms = [], assignments = [], recommended = [] }:
 
   const firstName = useMemo(() => {
     const name = currentUser?.name || "";
-    return name.split(" ").at(-1) || "bạn";
+    return name.split(" ").at(-1) || "there";
   }, [currentUser]);
 
   const currentBand = useMemo(() => {

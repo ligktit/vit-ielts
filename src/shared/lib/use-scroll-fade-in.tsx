@@ -10,7 +10,8 @@ import { useEffect, useRef, type RefObject } from "react";
  */
 export function useScrollFadeIn<T extends HTMLElement = HTMLDivElement>(
   delay = 0,
-  threshold = 0.15
+  threshold = 0.15,
+  duration = 3000
 ): RefObject<T | null> {
   const ref = useRef<T | null>(null);
 
@@ -25,8 +26,8 @@ export function useScrollFadeIn<T extends HTMLElement = HTMLDivElement>(
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Apply animation with delay
-          el.style.animation = `fadeInUp 1s ease-out ${delay}ms both`;
+          // Apply animation with delay and custom duration / ease curve
+          el.style.animation = `fadeInUp ${duration}ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms both`;
           observer.disconnect();
         }
       },
@@ -35,7 +36,7 @@ export function useScrollFadeIn<T extends HTMLElement = HTMLDivElement>(
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [delay, threshold]);
+  }, [delay, threshold, duration]);
 
   return ref;
 }
@@ -48,6 +49,7 @@ export function ScrollFadeIn({
   children,
   delay = 0,
   threshold = 0.15,
+  duration = 3000,
   className = "",
   as: Tag = "div",
   ...rest
@@ -55,14 +57,14 @@ export function ScrollFadeIn({
   children: React.ReactNode;
   delay?: number;
   threshold?: number;
+  duration?: number;
   className?: string;
   as?: React.ElementType;
   [key: string]: any;
 }) {
-  const ref = useScrollFadeIn<HTMLElement>(delay, threshold);
+  const ref = useScrollFadeIn<HTMLElement>(delay, threshold, duration);
 
   return (
-    // @ts-expect-error — dynamic tag
     <Tag ref={ref} className={className} {...rest}>
       {children}
     </Tag>

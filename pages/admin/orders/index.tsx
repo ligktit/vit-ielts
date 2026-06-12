@@ -99,7 +99,7 @@ export default function AdminOrdersPage() {
                 <Table columns={columns} dataSource={orders} rowKey="id" loading={loading}
                     onChange={(p: TablePaginationConfig) => { setPage(p.current ?? 1); setPageSize(p.pageSize ?? 20); }}
                     pagination={{ current: page, pageSize, total, showSizeChanger: true, showTotal: (t) => `Tổng ${t} đơn` }}
-                    scroll={{ x: 900 }}
+                    scroll={{ x: "max-content" }}
                 />
             </AdminGlassCard>
         </AdminLayout>

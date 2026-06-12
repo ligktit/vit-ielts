@@ -11,9 +11,9 @@ import { ACCOUNT_NAVIGATION } from "../account-nav";
 
 type Banner = { title: string; breadcrumbs: Array<{ label: string; href?: string }> };
 
-const TRANG_CHU = { label: "Trang chủ", href: ROUTES.HOME };
+const TRANG_CHU = { label: "Home", href: ROUTES.HOME };
 
-// Title = the page's own name; breadcrumb is 2 levels: Trang chủ / {title}.
+// Title = the page's own name; breadcrumb is 2 levels: Home / {title}.
 const make = (title: string): Banner => ({
   title,
   breadcrumbs: [TRANG_CHU, { label: title }],
@@ -21,21 +21,21 @@ const make = (title: string): Banner => ({
 
 /** Banner title + breadcrumb per classroom route (keyed by router.pathname). */
 const BANNERS: Record<string, Banner> = {
-  "/classroom": make("Quản lý Lớp học"),
-  "/classroom/[id]": make("Chi tiết lớp"),
-  "/classroom/[id]/assignments": make("Bài giao"),
-  "/classroom/[id]/assignments/[aid]": make("Kết quả bài giao"),
-  "/classroom/[id]/tracking": make("Báo cáo lớp"),
-  "/classroom/[id]/tracking/[studentId]": make("Lịch sử làm bài"),
-  "/classroom/my-assignments": make("Bài tập của tôi"),
-  "/classroom/my-assignments/[id]": make("Chi tiết bài tập"),
+  "/classroom": make("Classroom Management"),
+  "/classroom/[id]": make("Class Details"),
+  "/classroom/[id]/assignments": make("Assignments"),
+  "/classroom/[id]/assignments/[aid]": make("Assignment Results"),
+  "/classroom/[id]/tracking": make("Class Report"),
+  "/classroom/[id]/tracking/[studentId]": make("Practice History"),
+  "/classroom/my-assignments": make("My Assignments"),
+  "/classroom/my-assignments/[id]": make("Assignment Details"),
 };
 
 export const ClassroomLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const banner = BANNERS[router.pathname] ?? {
-    title: "Lớp học",
-    breadcrumbs: [TRANG_CHU, { label: "Lớp học" }],
+    title: "Classroom",
+    breadcrumbs: [TRANG_CHU, { label: "Classroom" }],
   };
 
   return (

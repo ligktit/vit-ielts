@@ -10,7 +10,7 @@ export const HeroSection = ({ title, skillLabel }: HeroSectionProps) => {
     <DSHeroBanner 
       title={title}
       breadcrumbs={[
-        { label: "Trang chủ", href: "/" },
+        { label: "Home", href: "/" },
         { label: skillLabel }
       ]}
     />

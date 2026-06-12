@@ -37,23 +37,23 @@ const formatCountdown = (totalSeconds: number): string => {
 const getStatusDisplay = (order: any): { text: string; color: string; showContinue: boolean } => {
   switch (order.status) {
     case "completed":
-      return { text: "Thành công", color: "#34D399", showContinue: false };
+      return { text: "Successful", color: "#34D399", showContinue: false };
     case "cancelled":
-      return { text: "Đã hủy", color: "#F87171", showContinue: false };
+      return { text: "Cancelled", color: "#F87171", showContinue: false };
     case "expired":
-      return { text: "Đã hết hạn", color: "#9CA3AF", showContinue: false };
+      return { text: "Expired", color: "#9CA3AF", showContinue: false };
     case "pending":
       if (isOrderPayable(order)) {
-        return { text: "Chờ thanh toán", color: "#FBBF24", showContinue: true };
+        return { text: "Awaiting payment", color: "#FBBF24", showContinue: true };
       }
       // Pending but past TTL (cron hasn't run yet)
-      return { text: "Sắp hết hạn", color: "#F97316", showContinue: false };
+      return { text: "Expiring soon", color: "#F97316", showContinue: false };
     default:
       return { text: order.status, color: "#9CA3AF", showContinue: false };
   }
 };
 
-// Hàm tạo Order ID từ paymentDate
+// Generate order ID from paymentDate
 const generateOrderId = (paymentDate: string, index: number): string => {
   const hash = paymentDate
     .split("")
@@ -81,7 +81,7 @@ const Countdown = ({ createdAt }: { createdAt: string }) => {
 
   return (
     <span className={`text-xs font-medium ${isUrgent ? "text-red-500" : "text-gray-400"}`}>
-      Còn {formatCountdown(remaining)}
+      {formatCountdown(remaining)} left
     </span>
   );
 };

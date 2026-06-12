@@ -36,13 +36,13 @@ export const SkillBreakdown = ({ skillTotals }: Props) => {
         <div className={styles.skillItem}>
           <div className={`${styles.skillDot} ${styles.skillReading}`} />
           <span>
-            Reading ({skillTotals.reading} bài — {readingPct}%)
+            Reading ({skillTotals.reading} tests —{readingPct}%)
           </span>
         </div>
         <div className={styles.skillItem}>
           <div className={`${styles.skillDot} ${styles.skillListening}`} />
           <span>
-            Listening ({skillTotals.listening} bài — {skillTotals.total > 0 ? listeningPct : 0}
+            Listening ({skillTotals.listening} tests —{skillTotals.total > 0 ? listeningPct : 0}
             %)
           </span>
         </div>

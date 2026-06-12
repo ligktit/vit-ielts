@@ -41,7 +41,7 @@ export const TestCard = ({
   isLocked,
   score,
   scoreClassName,
-  actionText = "Làm bài", // default action
+  actionText = "Start test",
   href,
   onClick,
   onScoreClick,

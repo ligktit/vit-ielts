@@ -127,7 +127,7 @@ export function PageTestResult({
       ? (formatBandScore(numericScore) ?? numericScore.toFixed(1))
       : `${scoreData.correctAns}/${scoreData.total_questions}`);
 
-  const scoreLabel = isBandResult ? "Band Score" : "Câu đúng";
+  const scoreLabel = isBandResult ? "Band Score" : "Correct answers";
 
   // Accuracy %
   const accuracyPct =

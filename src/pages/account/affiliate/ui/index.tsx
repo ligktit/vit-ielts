@@ -92,11 +92,11 @@ interface BankInfo {
 }
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending: { label: "Chờ duyệt", color: "orange" },
-  approved: { label: "Đã duyệt", color: "blue" },
-  completed: { label: "Hoàn thành", color: "green" },
-  rejected: { label: "Từ chối", color: "red" },
-  flagged: { label: "Cần xác minh", color: "volcano" },
+  pending: { label: "Pending", color: "orange" },
+  approved: { label: "Approved", color: "blue" },
+  completed: { label: "Completed", color: "green" },
+  rejected: { label: "Rejected", color: "red" },
+  flagged: { label: "Needs review", color: "volcano" },
 };
 
 export const PageAffiliate = () => {
@@ -199,7 +199,7 @@ export const PageAffiliate = () => {
       }
     } catch (error) {
       console.error("Error fetching affiliate data:", error);
-      toast.error("Có lỗi xảy ra khi tải dữ liệu");
+      toast.error("An error occurred while loading data");
     } finally {
       setLoading(false);
     }
@@ -207,7 +207,7 @@ export const PageAffiliate = () => {
 
   const handleRegister = async () => {
     if (!currentUser?.id) {
-      toast.error("Vui lòng đăng nhập để đăng ký affiliate");
+      toast.error("Please sign in to register as an affiliate");
       return;
     }
 
@@ -225,13 +225,13 @@ export const PageAffiliate = () => {
       const data = await res.json();
 
       if (data.success) {
-        toast.success(data.message || "Đăng ký thành công!");
+        toast.success(data.message || "Registration successful!");
         fetchAffiliateData();
       } else {
-        toast.error(data.error || "Đăng ký thất bại");
+        toast.error(data.error || "Registration failed");
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi đăng ký");
+      toast.error("An error occurred during registration");
     }
   };
 
@@ -254,22 +254,22 @@ export const PageAffiliate = () => {
         if (data.message && data.message.includes("đã tồn tại")) {
           toast.info(data.message);
         } else {
-          toast.success("Tạo link thành công!");
+          toast.success("Link created successfully!");
         }
         setCustomLink("");
         await fetchAffiliateData();
       } else {
-        toast.error(data.error || "Tạo link thất bại");
+        toast.error(data.error || "Failed to create link");
       }
     } catch (error) {
       console.error("Error creating link:", error);
-      toast.error("Có lỗi xảy ra khi tạo link");
+      toast.error("An error occurred while creating the link");
     }
   };
 
   const handleCopyLink = (link: string) => {
     navigator.clipboard.writeText(link);
-    toast.success("Đã sao chép link!");
+    toast.success("Link copied!");
   };
 
   const handleUpdateSettings = async () => {
@@ -286,11 +286,11 @@ export const PageAffiliate = () => {
       });
 
       if (res.ok) {
-        toast.success("Cập nhật cài đặt thành công!");
+        toast.success("Settings updated successfully!");
         fetchAffiliateData();
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi cập nhật cài đặt");
+      toast.error("An error occurred while updating settings");
     }
   };
 
@@ -307,23 +307,23 @@ export const PageAffiliate = () => {
       if (data.success) {
         setBankInfo(data.bankInfo);
         setShowBankForm(false);
-        toast.success("Đã lưu thông tin ngân hàng");
+        toast.success("Bank details saved");
       } else {
-        toast.error(data.error || "Lưu thất bại");
+        toast.error(data.error || "Failed to save");
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra");
+      toast.error("An error occurred");
     }
   };
 
   // ──── Payout Request ────
   const handleRequestPayout = async () => {
     if (!payoutAmount || payoutAmount <= 0) {
-      toast.error("Vui lòng nhập số tiền rút");
+      toast.error("Please enter a withdrawal amount");
       return;
     }
     if (!bankInfo) {
-      toast.error("Vui lòng cập nhật thông tin ngân hàng trước");
+      toast.error("Please update your bank details first");
       return;
     }
 
@@ -337,15 +337,15 @@ export const PageAffiliate = () => {
 
       const data = await res.json();
       if (data.success) {
-        toast.success("Yêu cầu rút tiền đã được gửi thành công!");
+        toast.success("Withdrawal request submitted successfully!");
         setShowPayoutModal(false);
         setPayoutAmount(0);
         fetchAffiliateData();
       } else {
-        toast.error(data.error || "Gửi yêu cầu thất bại");
+        toast.error(data.error || "Failed to submit request");
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra");
+      toast.error("An error occurred");
     } finally {
       setPayoutLoading(false);
     }
@@ -360,24 +360,23 @@ export const PageAffiliate = () => {
             {!affiliate ? (
               <>
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Trở thành Affiliate
+                  Become an Affiliate
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Tham gia chương trình affiliate và kiếm hoa hồng khi giới thiệu khách hàng mua
-                  khóa học
+                  Join the affiliate programme and earn commission by referring new customers.
                 </p>
                 <Button type="primary" size="large" onClick={handleRegister} loading={loading}>
-                  Trở thành Affiliate
+                  Become an Affiliate
                 </Button>
               </>
             ) : (
               <>
                 <CheckCircleOutlined className="text-4xl text-yellow-500 mb-4" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Đơn đăng ký của bạn đang chờ duyệt
+                  Your application is pending review
                 </h2>
                 <p className="text-gray-600">
-                  Vui lòng chờ quản trị viên duyệt đơn đăng ký của bạn.
+                  Please wait for an administrator to review your application.
                 </p>
               </>
             )}
@@ -393,9 +392,9 @@ export const PageAffiliate = () => {
         <Card>
           <div className="text-center py-8">
             <h2 className="text-2xl font-bold text-red-600 mb-4">
-              Đơn đăng ký của bạn đã bị từ chối
+              Your application has been rejected
             </h2>
-            <p className="text-gray-600">Vui lòng liên hệ admin để biết thêm chi tiết.</p>
+            <p className="text-gray-600">Please contact an admin for more details.</p>
           </div>
         </Card>
       </div>
@@ -404,19 +403,19 @@ export const PageAffiliate = () => {
 
   const commissionColumns: ColumnsType<Commission> = [
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "order_id",
       key: "order_id",
       render: (orderId?: string) => orderId ? `#${orderId.substring(0, 8)}` : "-",
     },
     {
-      title: "Giá trị đơn",
+      title: "Order value",
       dataIndex: "amount",
       key: "amount",
       render: (amount: number) => formatPrice(amount || 0),
     },
     {
-      title: "Hoa hồng",
+      title: "Commission",
       dataIndex: "commission_amount",
       key: "commission_amount",
       render: (amount: number) => (
@@ -424,7 +423,7 @@ export const PageAffiliate = () => {
       ),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status: string, record: Commission) => {
@@ -436,11 +435,11 @@ export const PageAffiliate = () => {
           review: "volcano",
         };
         const labels: Record<string, string> = {
-          pending: "Đang chờ",
-          approved: "Đã duyệt",
-          paid: "Đã thanh toán",
-          cancelled: "Đã hủy",
-          review: "Đang xem xét",
+          pending: "Pending",
+          approved: "Approved",
+          paid: "Paid",
+          cancelled: "Cancelled",
+          review: "Under review",
         };
 
         return (
@@ -448,7 +447,7 @@ export const PageAffiliate = () => {
             <Tag color={colors[status]}>{labels[status] || status}</Tag>
             {status === "pending" && record.eligible_at && (
               <span className="text-xs text-gray-400">
-                Đủ điều kiện: {dayjs(record.eligible_at).format("DD/MM/YYYY")}
+                Eligible: {dayjs(record.eligible_at).format("DD/MM/YYYY")}
               </span>
             )}
           </Space>
@@ -456,7 +455,7 @@ export const PageAffiliate = () => {
       },
     },
     {
-      title: "Ngày tạo",
+      title: "Created",
       dataIndex: "created_at",
       key: "created_at",
       render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
@@ -475,28 +474,28 @@ export const PageAffiliate = () => {
           return matchedLink.customLink ? (
             <Tag color="processing">ref={matchedLink.customLink}</Tag>
           ) : (
-            <Tag color="default">Mặc định</Tag>
+            <Tag color="default">Default</Tag>
           );
         }
         return `Link ${linkId.substring(0, 8)}`;
       },
     },
     {
-      title: "Thời gian",
+      title: "Time",
       dataIndex: "created_at",
       key: "created_at",
       render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Chuyển đổi",
+      title: "Converted",
       dataIndex: "converted",
       key: "converted",
       render: (converted: boolean) => (
-        <Tag color={converted ? "green" : "default"}>{converted ? "Có" : "Chưa"}</Tag>
+        <Tag color={converted ? "green" : "default"}>{converted ? "Yes" : "No"}</Tag>
       ),
     },
     {
-      title: "Mã đơn",
+      title: "Order ID",
       dataIndex: "order_id",
       key: "order_id",
       render: (orderId?: string) => (orderId ? `#${orderId.substring(0, 8)}` : "-"),
@@ -505,7 +504,7 @@ export const PageAffiliate = () => {
 
   const payoutColumns: ColumnsType<Payout> = [
     {
-      title: "Số tiền",
+      title: "Amount",
       dataIndex: "amount",
       key: "amount",
       render: (amount: number) => (
@@ -513,7 +512,7 @@ export const PageAffiliate = () => {
       ),
     },
     {
-      title: "Trạng thái",
+      title: "Status",
       dataIndex: "status",
       key: "status",
       render: (status: string) => {
@@ -522,20 +521,20 @@ export const PageAffiliate = () => {
       },
     },
     {
-      title: "Lý do từ chối",
+      title: "Rejection reason",
       dataIndex: "reject_reason",
       key: "reject_reason",
       render: (reason: string | null) =>
         reason ? <span className="text-red-500 text-sm">{reason}</span> : "-",
     },
     {
-      title: "Ngày tạo",
+      title: "Created",
       dataIndex: "created_at",
       key: "created_at",
       render: (date: string) => dayjs(date).format("DD/MM/YYYY HH:mm"),
     },
     {
-      title: "Hoàn thành",
+      title: "Completed",
       dataIndex: "completed_at",
       key: "completed_at",
       render: (date: string | null) =>
@@ -547,16 +546,16 @@ export const PageAffiliate = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-black text-gray-900 mb-2">Affiliate Dashboard</h1>
-        <p className="text-gray-600">Quản lý chương trình affiliate của bạn</p>
+        <p className="text-gray-600">Manage your affiliate programme</p>
       </div>
 
       <Tabs defaultActiveKey="overview" size="large">
-        {/* Tab Tổng quan */}
+        {/* Tab Overview */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <DollarOutlined />
-              Tổng quan
+              Overview
             </span>
           }
           key="overview"
@@ -565,7 +564,7 @@ export const PageAffiliate = () => {
           <Card className="mb-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <div className="text-sm text-gray-500 mb-1">Số dư hiện tại</div>
+                <div className="text-sm text-gray-500 mb-1">Current balance</div>
                 <div className="text-3xl font-bold text-green-600">
                   {formatPrice(balance)}
                 </div>
@@ -577,7 +576,7 @@ export const PageAffiliate = () => {
                   size="large"
                   onClick={() => {
                     if (!bankInfo) {
-                      toast.warning("Vui lòng cập nhật thông tin ngân hàng trước");
+                      toast.warning("Please update your bank details first");
                       return;
                     }
                     setPayoutAmount(balance);
@@ -585,14 +584,14 @@ export const PageAffiliate = () => {
                   }}
                   disabled={balance < 200000}
                 >
-                  Rút tiền
+                  Withdraw
                 </Button>
                 <Button
                   icon={<BankOutlined />}
                   size="large"
                   onClick={() => setShowBankForm(true)}
                 >
-                  {bankInfo ? "Sửa thông tin NH" : "Cập nhật ngân hàng"}
+                  {bankInfo ? "Edit bank details" : "Add bank details"}
                 </Button>
               </div>
             </div>
@@ -602,28 +601,28 @@ export const PageAffiliate = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
               <Card>
                 <Statistic
-                  title="Tỷ lệ hoa hồng"
+                  title="Commission rate"
                   value={affiliate?.commission_rate !== undefined ? affiliate.commission_rate * 100 : 20}
                   suffix="%"
                 />
               </Card>
               <Card>
                 <Statistic
-                  title="Tổng hoa hồng"
+                  title="Total commissions"
                   value={stats.totalCommissions}
                   prefix="₫"
                 />
               </Card>
               <Card>
                 <Statistic
-                  title="Lượt ghé thăm"
+                  title="Total visits"
                   value={stats.totalVisits}
                   prefix={<EyeOutlined />}
                 />
               </Card>
               <Card>
                 <Statistic
-                  title="Tỷ lệ chuyển đổi"
+                  title="Conversion rate"
                   value={stats.conversionRate}
                   suffix="%"
                   precision={2}
@@ -631,7 +630,7 @@ export const PageAffiliate = () => {
               </Card>
               <Card>
                 <Statistic
-                  title="Chuyển đổi thành công"
+                  title="Successful conversions"
                   value={stats.totalConversions}
                   prefix={<CheckCircleOutlined />}
                 />
@@ -639,41 +638,41 @@ export const PageAffiliate = () => {
             </div>
           )}
 
-          <Card title="Thống kê chi tiết">
+          <Card title="Detailed stats">
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                <span className="font-semibold">Hoa hồng chờ thanh toán:</span>
+                <span className="font-semibold">Pending commissions:</span>
                 <span className="text-lg font-bold text-orange-600">
                   {stats ? formatPrice(stats.pendingCommissions) : "0 ₫"}
                 </span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                <span className="font-semibold">Hoa hồng đã thanh toán:</span>
+                <span className="font-semibold">Paid commissions:</span>
                 <span className="text-lg font-bold text-green-600">
                   {stats ? formatPrice(stats.paidCommissions) : "0 ₫"}
                 </span>
               </div>
               <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                <span className="font-semibold">Tổng lượt chuyển đổi:</span>
+                <span className="font-semibold">Total conversions:</span>
                 <span className="text-lg font-bold">{stats?.totalConversions || 0}</span>
               </div>
             </div>
           </Card>
         </TabPane>
 
-        {/* Tab Hoa hồng */}
+        {/* Tab Commissions */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <DollarOutlined />
-              Hoa hồng
+              Commissions
             </span>
           }
           key="commissions"
         >
           <Card>
             <Alert
-              message="Hoa hồng có thời gian chờ 7 ngày trước khi được Credit vào số dư"
+              message="Commissions have a 7-day holding period before being credited to your balance"
               type="info"
               showIcon
               className="mb-4"
@@ -687,12 +686,12 @@ export const PageAffiliate = () => {
           </Card>
         </TabPane>
 
-        {/* Tab Rút tiền */}
+        {/* Tab Withdrawals */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <WalletOutlined />
-              Rút tiền
+              Withdrawals
             </span>
           }
           key="payouts"
@@ -706,17 +705,17 @@ export const PageAffiliate = () => {
                 pagination={{ pageSize: 10 }}
               />
             ) : (
-              <Empty description="Chưa có yêu cầu rút tiền nào" />
+              <Empty description="No withdrawal requests yet" />
             )}
           </Card>
         </TabPane>
 
-        {/* Tab Lượt ghé thăm */}
+        {/* Tab Visits */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <EyeOutlined />
-              Lượt ghé thăm
+              Visits
             </span>
           }
           key="visits"
@@ -731,47 +730,47 @@ export const PageAffiliate = () => {
           </Card>
         </TabPane>
 
-        {/* Tab Trình tạo liên kết */}
+        {/* Tab Link builder */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <LinkOutlined />
-              Trình tạo liên kết
+              Link builder
             </span>
           }
           key="links"
         >
-          <Card title="Tạo link affiliate mới" className="mb-6">
+          <Card title="Create new affiliate link" className="mb-6">
             <Space direction="vertical" className="w-full" size="middle">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Link tùy chỉnh (tùy chọn)
+                  Custom link (optional)
                 </label>
                 <Input
-                  placeholder="vd: mylink"
+                  placeholder="e.g. mylink"
                   value={customLink}
                   onChange={(e) => setCustomLink(e.target.value)}
                   addonBefore="ref="
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Nếu để trống, hệ thống sẽ tự động tạo link
+                  Leave blank to have the system generate a link automatically.
                 </p>
               </div>
               <Button type="primary" onClick={handleCreateLink}>
-                Tạo link
+                Create link
               </Button>
             </Space>
           </Card>
 
-          <Card title="Danh sách link của bạn">
+          <Card title="Your links">
             <div className="space-y-4">
               {links.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-4">
-                    Chưa có link nào. Hãy tạo link đầu tiên của bạn!
+                    No links yet. Create your first one!
                   </p>
                   <Button type="primary" onClick={handleCreateLink}>
-                    Tạo link mặc định
+                    Create default link
                   </Button>
                 </div>
               ) : (
@@ -782,15 +781,15 @@ export const PageAffiliate = () => {
                   >
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900 mb-1">
-                        {link.customLink ? `Link tùy chỉnh: ${link.customLink}` : "Link mặc định"}
+                        {link.customLink ? `Custom link: ${link.customLink}` : "Default link"}
                       </div>
                       <div className="text-sm text-gray-600 break-all font-mono">{link.link}</div>
                       <div className="text-xs text-gray-500 mt-1">
-                        Tạo ngày: {dayjs(link.createdAt).format("DD/MM/YYYY HH:mm")}
+                        Created: {dayjs(link.createdAt).format("DD/MM/YYYY HH:mm")}
                       </div>
                     </div>
                     <Button icon={<CopyOutlined />} onClick={() => handleCopyLink(link.link)}>
-                      Sao chép
+                      Copy
                     </Button>
                   </div>
                 ))
@@ -799,39 +798,39 @@ export const PageAffiliate = () => {
           </Card>
         </TabPane>
 
-        {/* Tab Cài đặt */}
+        {/* Tab Settings */}
         <TabPane
           tab={
             <span className="flex items-center gap-2">
               <SettingOutlined />
-              Cài đặt
+              Settings
             </span>
           }
           key="settings"
         >
           {/* Bank Info */}
-          <Card title="🏦 Thông tin ngân hàng" className="mb-6">
+          <Card title="🏦 Bank details" className="mb-6">
             {bankInfo ? (
               <Descriptions bordered column={1} size="small">
-                <Descriptions.Item label="Chủ tài khoản">
+                <Descriptions.Item label="Account holder">
                   {bankInfo.account_holder}
                 </Descriptions.Item>
-                <Descriptions.Item label="Số tài khoản">
+                <Descriptions.Item label="Account number">
                   {bankInfo.account_number}
                 </Descriptions.Item>
-                <Descriptions.Item label="Ngân hàng">
+                <Descriptions.Item label="Bank">
                   {bankInfo.bank_name}
                 </Descriptions.Item>
                 {bankInfo.bank_branch && (
-                  <Descriptions.Item label="Chi nhánh">
+                  <Descriptions.Item label="Branch">
                     {bankInfo.bank_branch}
                   </Descriptions.Item>
                 )}
               </Descriptions>
             ) : (
               <Alert
-                message="Chưa có thông tin ngân hàng"
-                description="Vui lòng cập nhật thông tin ngân hàng để có thể rút tiền."
+                message="No bank details on file"
+                description="Please add your bank details to be able to withdraw funds."
                 type="warning"
                 showIcon
               />
@@ -842,18 +841,18 @@ export const PageAffiliate = () => {
               icon={<BankOutlined />}
               onClick={() => setShowBankForm(true)}
             >
-              {bankInfo ? "Cập nhật thông tin" : "Thêm thông tin ngân hàng"}
+              {bankInfo ? "Update details" : "Add bank details"}
             </Button>
           </Card>
 
           {/* Notification Settings */}
-          <Card title="Cài đặt thông báo">
+          <Card title="Notification settings">
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
-                  <div className="font-semibold">Nhận thông báo qua email</div>
+                  <div className="font-semibold">Email notifications</div>
                   <div className="text-sm text-gray-600">
-                    Nhận thông báo về hoa hồng và thanh toán qua email
+                    Receive commission and payment updates via email
                   </div>
                 </div>
                 <input
@@ -864,31 +863,31 @@ export const PageAffiliate = () => {
                 />
               </div>
               <Button type="primary" onClick={handleUpdateSettings}>
-                Lưu cài đặt
+                Save settings
               </Button>
             </div>
           </Card>
 
           {/* Affiliate Info */}
-          <Card title="Thông tin affiliate" className="mt-6">
+          <Card title="Affiliate info" className="mt-6">
             <div className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Trạng thái:</span>
-                <Tag color="green">Đã duyệt</Tag>
+                <span className="text-gray-600">Status:</span>
+                <Tag color="green">Approved</Tag>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Mức hoa hồng:</span>
+                <span className="text-gray-600">Commission rate:</span>
                 <span className="font-bold text-blue-600">
                   {affiliate?.commission_rate !== undefined ? affiliate.commission_rate * 100 : 20}%
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Ngày đăng ký:</span>
+                <span className="text-gray-600">Registered:</span>
                 <span>{dayjs(affiliate.createdAt).format("DD/MM/YYYY")}</span>
               </div>
               {affiliate.approvedAt && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Ngày duyệt:</span>
+                  <span className="text-gray-600">Approved:</span>
                   <span>{dayjs(affiliate.approvedAt).format("DD/MM/YYYY")}</span>
                 </div>
               )}
@@ -899,7 +898,7 @@ export const PageAffiliate = () => {
 
       {/* ═══ BANK INFO MODAL ═══ */}
       <Modal
-        title="Thông tin ngân hàng"
+        title="Bank details"
         open={showBankForm}
         onCancel={() => setShowBankForm(false)}
         footer={null}
@@ -907,40 +906,40 @@ export const PageAffiliate = () => {
         <Form form={bankForm} layout="vertical" onFinish={handleSaveBankInfo}>
           <Form.Item
             name="accountHolder"
-            label="Chủ tài khoản"
-            rules={[{ required: true, message: "Bắt buộc" }]}
+            label="Account holder"
+            rules={[{ required: true, message: "Required" }]}
           >
             <Input placeholder="NGUYEN VAN A" />
           </Form.Item>
           <Form.Item
             name="accountNumber"
-            label="Số tài khoản"
-            rules={[{ required: true, message: "Bắt buộc" }]}
+            label="Account number"
+            rules={[{ required: true, message: "Required" }]}
           >
             <Input placeholder="1234567890" />
           </Form.Item>
           <Form.Item
             name="bankName"
-            label="Tên ngân hàng"
-            rules={[{ required: true, message: "Bắt buộc" }]}
+            label="Bank name"
+            rules={[{ required: true, message: "Required" }]}
           >
             <Input placeholder="Vietcombank" />
           </Form.Item>
-          <Form.Item name="bankCode" label="Mã ngân hàng (cho VietQR)">
+          <Form.Item name="bankCode" label="Bank code (for VietQR)">
             <Input placeholder="VCB" />
           </Form.Item>
-          <Form.Item name="bankBranch" label="Chi nhánh">
-            <Input placeholder="Hồ Chí Minh" />
+          <Form.Item name="bankBranch" label="Branch">
+            <Input placeholder="Ho Chi Minh City" />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>
-            Lưu thông tin
+            Save details
           </Button>
         </Form>
       </Modal>
 
       {/* ═══ PAYOUT REQUEST MODAL ═══ */}
       <Modal
-        title="Yêu cầu rút tiền"
+        title="Withdrawal request"
         open={showPayoutModal}
         onCancel={() => {
           setShowPayoutModal(false);
@@ -948,7 +947,7 @@ export const PageAffiliate = () => {
         }}
         footer={[
           <Button key="cancel" onClick={() => setShowPayoutModal(false)}>
-            Hủy
+            Cancel
           </Button>,
           <Button
             key="submit"
@@ -956,18 +955,18 @@ export const PageAffiliate = () => {
             loading={payoutLoading}
             onClick={handleRequestPayout}
           >
-            Gửi yêu cầu
+            Submit request
           </Button>,
         ]}
       >
         <div className="space-y-4">
           <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-            <div className="text-sm text-gray-500">Số dư khả dụng</div>
+            <div className="text-sm text-gray-500">Available balance</div>
             <div className="text-2xl font-bold text-green-600">{formatPrice(balance)}</div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Số tiền muốn rút (VNĐ)</label>
+            <label className="block text-sm font-medium mb-2">Withdrawal amount (VND)</label>
             <InputNumber
               value={payoutAmount}
               onChange={(v) => setPayoutAmount(v || 0)}
@@ -977,14 +976,14 @@ export const PageAffiliate = () => {
               style={{ width: "100%" }}
               formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
               parser={(value) => Number(value!.replace(/\$\s?|(,*)/g, ""))}
-              addonAfter="VNĐ"
+              addonAfter="VND"
             />
-            <p className="text-xs text-gray-500 mt-1">Tối thiểu 200,000đ</p>
+            <p className="text-xs text-gray-500 mt-1">Minimum 200,000 VND</p>
           </div>
 
           {bankInfo && (
             <div className="p-3 bg-gray-50 rounded-lg text-sm">
-              <div className="font-semibold mb-1">Chuyển đến:</div>
+              <div className="font-semibold mb-1">Transfer to:</div>
               <div>
                 {bankInfo.bank_name} — {bankInfo.account_number}
               </div>

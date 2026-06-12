@@ -9,6 +9,7 @@ export type SidebarUser = {
   role: string;
   initials: string;
   avatarColor?: string;
+  avatarSrc?: string;
 };
 
 export type SidebarNavEntry = {
@@ -49,6 +50,7 @@ export type SidebarTeacherProps = {
 export type SidebarTopActionsProps = {
   userInitials?: string;
   avatarColor?: string;
+  avatarSrc?: string;
   onSearch?: (q: string) => void;
   onNotifications?: () => void;
   /** When set, the avatar links to this route. */
@@ -77,7 +79,13 @@ const ProfileSection = ({
   profileHref?: string;
   onLogout?: () => void;
 }) => {
-  const avatarNode = (
+  const avatarNode = user.avatarSrc ? (
+    <img
+      src={user.avatarSrc}
+      alt={user.name}
+      className="rounded-[var(--radius-sidebar-avatar)] w-[var(--size-sidebar-avatar)] h-[var(--size-sidebar-avatar)] shrink-0 object-cover"
+    />
+  ) : (
     <div
       className="flex items-center justify-center rounded-[var(--radius-sidebar-avatar)] w-[var(--size-sidebar-avatar)] h-[var(--size-sidebar-avatar)] shrink-0 text-white text-body-s font-bold font-inter"
       style={{ background: user.avatarColor ?? 'var(--color-accent-blue)' }}
@@ -222,31 +230,31 @@ const SidebarLogo = ({
 // ── Data ──────────────────────────────────────────────────────────────────────
 
 const ACCOUNT_ITEMS = [
-  { id: 'settings', icon: 'settings', label: 'Settings' },
-  { id: 'help',     icon: 'help',     label: 'Help & Support' },
+  { id: 'settings', icon: 'Gear', label: 'Settings' },
+  { id: 'help',     icon: 'Question',     label: 'Help & Support' },
  ] as const;
 
 const STUDENT_MENU = [
-  { id: 'home',        icon: 'home',           label: 'Home' },
-  { id: 'mock-tests',  icon: 'quiz',            label: 'Mock Tests' },
-  { id: 'study-plan',  icon: 'calendar_today',  label: 'Study Plan' },
-  { id: 'progress',    icon: 'emoji_events',    label: 'My Progress' },
-  { id: 'vocabulary',  icon: 'menu_book',       label: 'Vocabulary' },
-  { id: 'my-classes',  icon: 'school',          label: 'My Classes' },
-  { id: 'assignments', icon: 'assignment',      label: 'My Assignments' },
+  { id: 'home',        icon: 'House',           label: 'Home' },
+  { id: 'mock-tests',  icon: 'Exam',            label: 'Mock Tests' },
+  { id: 'study-plan',  icon: 'Calendar',        label: 'Study Plan' },
+  { id: 'progress',    icon: 'Trophy',          label: 'My Progress' },
+  { id: 'vocabulary',  icon: 'BookOpenText',    label: 'Vocabulary' },
+  { id: 'my-classes',  icon: 'Chalkboard',      label: 'My Classes' },
+  { id: 'assignments', icon: 'ClipboardText',   label: 'My Assignments' },
 ] as const;
 
 const STUDENT_COMMUNITY = [
-  { id: 'community', icon: 'forum', label: 'Community' },
-  { id: 'blog',      icon: 'book',  label: 'Blog' },
+  { id: 'community', icon: 'UsersThree', label: 'Community' },
+  { id: 'blog',      icon: 'Book',       label: 'Blog' },
 ] as const;
 
 const TEACHER_MENU = [
-  { id: 'overview',      icon: 'home',      label: 'Overview' },
-  { id: 'my-classes',    icon: 'school',    label: 'My Classes' },
-  { id: 'assignments',   icon: 'menu_book', label: 'Assignments' },
-  { id: 'students',      icon: 'person',    label: 'Students' },
-  { id: 'collaborators', icon: 'group',     label: 'Collaborators' },
+  { id: 'overview',      icon: 'House',         label: 'Overview' },
+  { id: 'my-classes',    icon: 'Chalkboard',    label: 'My Classes' },
+  { id: 'assignments',   icon: 'ClipboardText', label: 'Assignments' },
+  { id: 'students',      icon: 'Student',       label: 'Students' },
+  { id: 'collaborators', icon: 'UsersThree',    label: 'Collaborators' },
 ] as const;
 
 // ── SidebarStudent ────────────────────────────────────────────────────────────
@@ -254,7 +262,7 @@ const TEACHER_MENU = [
 export const SidebarStudent = ({
   state = 'expanded',
   activeItem = 'home',
-  user = { name: 'Nhật Minh', role: 'Target: Band 8.0', initials: 'NM' },
+  user = { name: 'Student', role: 'Target: Band 8.0', initials: 'ST' },
   onCollapse,
   menu = STUDENT_MENU,
   community = STUDENT_COMMUNITY,
@@ -404,11 +412,19 @@ export const SidebarTeacher = ({
 export const SidebarTopActions = ({
   userInitials = 'NM',
   avatarColor,
+  avatarSrc,
   onSearch,
   onNotifications,
   profileHref,
   className = '',
-}: SidebarTopActionsProps) => (
+}: SidebarTopActionsProps) => {
+  const avatarContent = avatarSrc ? (
+    <img src={avatarSrc} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+  ) : (
+    <span className="text-white text-[14px] font-bold font-inter">{userInitials}</span>
+  );
+
+  return (
   <div className={`flex gap-[14px] items-center ${className}`}>
     {/* Search bar */}
     <label className="flex items-center gap-[10px] h-[46px] px-[18px] w-[280px] bg-white border border-[rgba(25,29,36,0.1)] rounded-full shrink-0 cursor-text">
@@ -428,17 +444,17 @@ export const SidebarTopActions = ({
       <Link
         href={profileHref}
         aria-label="My Profile"
-        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 text-white text-[14px] font-bold font-inter no-underline cursor-pointer transition-shadow hover:ring-2 hover:ring-[var(--color-brand)] hover:ring-offset-2"
-        style={{ background: avatarColor ?? 'var(--color-accent-blue)' }}
+        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 overflow-hidden no-underline cursor-pointer transition-shadow hover:ring-2 hover:ring-[var(--color-brand)] hover:ring-offset-2"
+        style={avatarSrc ? undefined : { background: avatarColor ?? 'var(--color-accent-blue)' }}
       >
-        {userInitials}
+        {avatarContent}
       </Link>
     ) : (
       <div
-        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 text-white text-[14px] font-bold font-inter"
-        style={{ background: avatarColor ?? 'var(--color-accent-blue)' }}
+        className="flex items-center justify-center w-[46px] h-[46px] rounded-full shrink-0 overflow-hidden"
+        style={avatarSrc ? undefined : { background: avatarColor ?? 'var(--color-accent-blue)' }}
       >
-        {userInitials}
+        {avatarContent}
       </div>
     )}
 
@@ -454,4 +470,5 @@ export const SidebarTopActions = ({
       </span>
     </button>
   </div>
-);
+  );
+};

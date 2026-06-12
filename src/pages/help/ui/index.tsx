@@ -98,10 +98,29 @@ export const PageHelp = () => {
     },
   } = useAppContext();
 
+  // Search query for client-side filtering
+  const [query, setQuery] = useState("");
+
   // Track which FAQ item is open (first one open by default)
   const [openId, setOpenId] = useState<string | null>("q1");
 
   const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id));
+
+  // Derived filtered data — case-insensitive, matches question text or answer
+  const normalised = query.trim().toLowerCase();
+  const isFiltering = normalised.length > 0;
+
+  const filteredQuestions = isFiltering
+    ? POPULAR_QUESTIONS.filter(
+        (q) =>
+          q.question.toLowerCase().includes(normalised) ||
+          q.answer.toLowerCase().includes(normalised)
+      )
+    : POPULAR_QUESTIONS;
+
+  const filteredCategories = isFiltering
+    ? CATEGORIES.filter((c) => c.title.toLowerCase().includes(normalised))
+    : CATEGORIES;
 
   return (
     <>
@@ -127,20 +146,21 @@ export const PageHelp = () => {
         <div className="flex w-full max-w-xl gap-3">
           <input
             type="text"
-            readOnly
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search for help…"
             aria-label="Search for help"
             className="
               flex-1 px-4 py-3 rounded-xl
               bg-ink-700 text-surface-card placeholder:text-ink-muted
               border border-border-hairline/20
-              text-body-m outline-none cursor-default
+              text-body-m outline-none
             "
           />
-          {/* Visual-only search button — no handler wired */}
           <button
             type="button"
-            aria-label="Search (visual only)"
+            onClick={() => setQuery(query.trim())}
+            aria-label="Search"
             className="
               px-6 py-3 rounded-xl
               bg-brand text-ink-900
@@ -159,8 +179,9 @@ export const PageHelp = () => {
         <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-5">
           Browse by topic
         </h2>
+        {isFiltering && filteredCategories.length === 0 ? null : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CATEGORIES.map((cat) => (
+          {filteredCategories.map((cat) => (
             <div
               key={cat.id}
               className="
@@ -192,6 +213,7 @@ export const PageHelp = () => {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       {/* ── Popular questions ── */}
@@ -199,8 +221,17 @@ export const PageHelp = () => {
         <h2 className="text-heading-2 font-display font-bold text-ink-900 mb-5">
           Popular questions
         </h2>
+        {isFiltering && filteredQuestions.length === 0 && filteredCategories.length === 0 ? (
+          <p className="text-body-m text-ink-muted py-4">
+            No results found for &ldquo;{query.trim()}&rdquo;. Try a different search term.
+          </p>
+        ) : isFiltering && filteredQuestions.length === 0 ? (
+          <p className="text-body-m text-ink-muted py-4">
+            No matching questions found for &ldquo;{query.trim()}&rdquo;.
+          </p>
+        ) : (
         <div className="bg-surface-card rounded-2xl shadow-primary overflow-hidden divide-y divide-border-hairline">
-          {POPULAR_QUESTIONS.map((item) => {
+          {filteredQuestions.map((item) => {
             const isOpen = openId === item.id;
             return (
               <div key={item.id}>
@@ -239,6 +270,7 @@ export const PageHelp = () => {
             );
           })}
         </div>
+        )}
       </section>
 
       {/* ── Still need help? CTA ── */}
@@ -253,7 +285,7 @@ export const PageHelp = () => {
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            {/* Live chat — visual only, no handler */}
+            {/* VISUAL-ONLY: Live chat — no backend handler, coming soon */}
             <button
               type="button"
               aria-label="Live chat (coming soon)"

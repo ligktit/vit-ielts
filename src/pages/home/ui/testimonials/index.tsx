@@ -7,30 +7,30 @@ import { ScrollFadeIn } from "@/shared/lib/use-scroll-fade-in";
 
 const DEFAULT_REVIEWS: ReviewItem[] = [
   // Column 1
-  { name: "Nguyễn Thị Lan", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Giao diện thi rất giống thi thật, giúp mình làm quen trước ngày thi. Mình đã đạt band 7.0 sau 2 tháng luyện tập liên tục.", rating: 5 },
-  { name: "Trần Văn Minh", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Đề thi sát với cấu trúc thật. Mình thích cách chấm điểm tự động, tiết kiệm rất nhiều thời gian ôn luyện.", rating: 5 },
-  { name: "Hoàng Minh Tuấn", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Trang web này giúp mình tập làm quen với format thi thật. Sau khi luyện đủ 30 bài, mình tự tin hơn hẳn khi thi chính thức.", rating: 5 },
-  { name: "Bùi Thị Thu", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "Phần Listening rất chuẩn, đúng format. Mình từng mua khóa học bên ngoài nhưng giờ luyện ở đây là đủ rồi.", rating: 5 },
-  { name: "Lý Thanh Sơn", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "Rất hài lòng với chất lượng đề. Hệ thống chấm điểm tức thì giúp mình biết ngay điểm yếu để cải thiện.", rating: 5 },
+  { name: "Nguyễn Thị Lan", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "The exam interface feels just like the real test, which helped me get comfortable before test day. I reached Band 7.0 after 2 months of consistent practice.", rating: 5 },
+  { name: "Trần Văn Minh", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "The questions closely follow the real test structure. I love the automatic scoring — it saves so much prep time.", rating: 5 },
+  { name: "Hoàng Minh Tuấn", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "This platform helped me get used to the real exam format. After completing 30 tests, I felt much more confident on test day.", rating: 5 },
+  { name: "Bùi Thị Thu", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "The Listening section is spot-on with the right format. I used to buy courses elsewhere, but practising here is more than enough.", rating: 5 },
+  { name: "Lý Thanh Sơn", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "Very happy with the quality of the tests. The instant scoring tells me exactly where to improve.", rating: 5 },
   // Column 2
-  { name: "Phạm Thị Hoa", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Platform tốt nhất mình từng dùng để luyện IELTS. Reading và Listening đều rất chất lượng, đề đa dạng.", rating: 5 },
-  { name: "Lê Quốc Bảo", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "Mình luyện tập mỗi ngày với bộ đề ở đây. Sau 3 tháng đã tăng từ 5.5 lên 6.0, rất hài lòng với kết quả.", rating: 5 },
-  { name: "Ngô Thị Mai", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Giao diện rất thân thiện và chuyên nghiệp. Đề thi bám sát thực tế và cập nhật thường xuyên.", rating: 5 },
-  { name: "Đinh Văn Khoa", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Trải nghiệm thi thử rất mượt mà, không khác gì thi thật. Mình đã tăng 1.0 band chỉ sau 2 tháng luyện đề đây.", rating: 5 },
-  { name: "Vương Thị Liên", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Bộ đề phong phú, giải thích chi tiết. Mình đặc biệt thích tính năng xem lại lỗi sai sau mỗi bài thi.", rating: 5 },
+  { name: "Phạm Thị Hoa", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "The best platform I've ever used for IELTS prep. Reading and Listening are both top quality with a wide variety of tests.", rating: 5 },
+  { name: "Lê Quốc Bảo", score: "IELTS 6.0", avatar: "/intro-mascot.png", review: "I practised here every day and went from 5.5 to 6.0 in 3 months. Very pleased with the result.", rating: 5 },
+  { name: "Ngô Thị Mai", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "The interface is very user-friendly and professional. Questions are realistic and updated regularly.", rating: 5 },
+  { name: "Đinh Văn Khoa", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "The mock test experience is incredibly smooth — indistinguishable from the real thing. I jumped 1.0 band in just 2 months.", rating: 5 },
+  { name: "Vương Thị Liên", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Extensive test bank with detailed explanations. I especially love the answer review feature after each test.", rating: 5 },
   // Column 3
-  { name: "Đặng Thu Hương", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "Hệ thống giao diện máy tính rất mượt, đúng với format thi thật. Đặc biệt phần Listening rất chuẩn.", rating: 5 },
-  { name: "Vũ Thế Dũng", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Luyện đề trên này giúp mình quen với áp lực thời gian. Kết quả thi thật tốt hơn mình mong đợi.", rating: 5 },
-  { name: "Trịnh Thị Ngọc", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "Mình đã thử nhiều nền tảng luyện IELTS khác nhau. Đây là nơi có đề sát thực nhất và interface đẹp nhất.", rating: 5 },
-  { name: "Cao Minh Nhật", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Chất lượng đề thi cao, cập nhật liên tục. Mình học Read và Listen ở đây là chủ yếu và thấy hiệu quả rõ rệt.", rating: 5 },
-  { name: "Phan Thị Hải", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "Sau khi dùng nền tảng này 3 tháng, mình đạt 7.5 thật sự bất ngờ. Phần thi thật không khác gì luyện ở đây.", rating: 5 },
+  { name: "Đặng Thu Hương", score: "IELTS 8.0", avatar: "/intro-mascot.png", review: "The computer-based interface is very smooth and true to the actual exam format. The Listening section is especially accurate.", rating: 5 },
+  { name: "Vũ Thế Dũng", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "Practising here got me used to time pressure. My actual test score was better than I expected.", rating: 5 },
+  { name: "Trịnh Thị Ngọc", score: "IELTS 7.0", avatar: "/intro-mascot.png", review: "I've tried many IELTS platforms. This one has the most realistic questions and the best-looking interface.", rating: 5 },
+  { name: "Cao Minh Nhật", score: "IELTS 6.5", avatar: "/intro-mascot.png", review: "High-quality tests updated continuously. Reading and Listening practice here is my main study method and the results speak for themselves.", rating: 5 },
+  { name: "Phan Thị Hải", score: "IELTS 7.5", avatar: "/intro-mascot.png", review: "After 3 months on this platform I scored 7.5 — I was genuinely surprised. The real test felt no different from practising here.", rating: 5 },
 ];
 
 const DEFAULTS: TestimonialsConfig = {
-  title: "Phản hồi từ học viên",
+  title: "What our students say",
   description:
-    "Trải nghiệm thực tế từ học viên đã luyện đề sát cấu trúc thi thật và làm quen giao diện thi máy trước ngày thi.",
-  cta: { text: "Xem Thêm Phản Hồi", link: "#" },
+    "Real experiences from students who practised with exam-realistic tests and got comfortable with the computer-based interface before their test day.",
+  cta: { text: "See More Reviews", link: "#" },
   reviews: DEFAULT_REVIEWS,
 };
 
@@ -141,7 +141,7 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
             </p>
             <div className="mt-2 mb-[20px]">
               <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
-                {c.cta?.text ?? "Xem thêm"}
+                {c.cta?.text ?? "See more"}
               </Button>
             </div>
           </div>
@@ -165,12 +165,12 @@ export const Testimonials = ({ config }: TestimonialsProps) => {
             </p>
             <div className="mt-4">
               <Button variant="white" size="lg" href={c.cta?.link ?? "#"}>
-                {c.cta?.text ?? "Xem thêm"}
+                {c.cta?.text ?? "See more"}
               </Button>
             </div>
           </div>
           {/* Right: 3-column infinite scroll */}
-          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 self-center w-full" aria-label="Phản hồi từ học viên">
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 self-center w-full" aria-label="Student reviews">
             <ScrollColumn reviews={col1} direction="down" />
             <ScrollColumn reviews={col2} direction="up" />
             <div className="hidden xl:block">

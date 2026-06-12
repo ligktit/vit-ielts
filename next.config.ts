@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
         hostname: 'cms.ieltspredictiontest.com',
       },
       {
+        hostname: 'cms.vitielts.com',
+      },
+      {
+        hostname: 'vitielts.com',
+      },
+      {
         hostname: 'placehold.co',
       },
       {

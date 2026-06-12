@@ -268,7 +268,7 @@ function EmailTemplatePage() {
                                 name={["brand", "website"]}
                                 rules={[{ required: true }]}
                             >
-                                <Input placeholder="https://ieltspredictiontest.com" />
+                                <Input placeholder="https://vitielts.com" />
                             </Form.Item>
                             <Form.Item
                                 label="Số điện thoại"
@@ -371,7 +371,7 @@ function EmailTemplatePage() {
                                 label="Link nút"
                                 name={["orderConfirmation", "ctaButton", "link"]}
                             >
-                                <Input placeholder="https://ieltspredictiontest.com" />
+                                <Input placeholder="https://vitielts.com" />
                             </Form.Item>
 
                             <Divider orientation="left">Footer</Divider>
@@ -508,7 +508,7 @@ function EmailTemplatePage() {
                                 <Input placeholder="Bảng điều khiển Affiliate" />
                             </Form.Item>
                             <Form.Item label="Link nút" name={["affiliateApproved", "ctaButton", "link"]}>
-                                <Input placeholder="https://ieltspredictiontest.com/account/affiliate" />
+                                <Input placeholder="https://vitielts.com/account/affiliate" />
                             </Form.Item>
                         </Card>
                     )}
@@ -592,7 +592,7 @@ function EmailTemplatePage() {
                                 <Input placeholder="Xem lịch sử hoa hồng" />
                             </Form.Item>
                             <Form.Item label="Link nút" name={["newCommission", "ctaButton", "link"]}>
-                                <Input placeholder="https://ieltspredictiontest.com/account/affiliate" />
+                                <Input placeholder="https://vitielts.com/account/affiliate" />
                             </Form.Item>
                         </Card>
                     )}

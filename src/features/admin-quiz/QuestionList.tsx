@@ -51,7 +51,7 @@ function getQuestionPreview(q: QuestionData): string {
         const text = q.question_text.replace(/<[^>]*>/g, "").trim();
         return text.length > 60 ? text.slice(0, 60) + "…" : text;
     }
-    return "(Chưa có nội dung)";
+    return "(No content)";
 }
 
 // ---------------------------------------------------------------------------
@@ -118,7 +118,7 @@ function SortableQuestionCard({
                             <span
                                 {...listeners}
                                 className="question-drag-handle"
-                                title="Kéo để sắp xếp"
+                                title="Drag to reorder"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <HolderOutlined />
@@ -154,7 +154,7 @@ function SortableQuestionCard({
 
                         <div className="question-card-header-right" onClick={(e) => e.stopPropagation()}>
                             {subItemCount > 0 && (
-                                <Tooltip title={`${subItemCount} mục con`}>
+                                <Tooltip title={`${subItemCount} sub-items`}>
                                     <Badge
                                         count={subItemCount}
                                         style={{
@@ -167,7 +167,7 @@ function SortableQuestionCard({
                                 </Tooltip>
                             )}
                             {!isExpanded && (
-                                <Tooltip title="Chỉnh sửa">
+                                <Tooltip title="Edit">
                                     <Button
                                         size="small"
                                         icon={<EditOutlined />}
@@ -177,11 +177,11 @@ function SortableQuestionCard({
                                 </Tooltip>
                             )}
                             <Popconfirm
-                                title="Xóa câu hỏi này?"
-                                description={`Câu hỏi Q${qIdx + 1} sẽ bị xóa vĩnh viễn.`}
+                                title="Delete this question?"
+                                description={`Question Q${qIdx + 1} will be permanently deleted.`}
                                 onConfirm={onRemove}
-                                okText="Xóa"
-                                cancelText="Hủy"
+                                okText="Delete"
+                                cancelText="Cancel"
                                 okButtonProps={{ danger: true }}
                             >
                                 <Button
@@ -384,7 +384,7 @@ export default function QuestionList({ questions, onAdd, onRemove, onUpdate, onR
                     block
                     className="question-add-btn"
                 >
-                    Thêm câu hỏi
+                    Add Question
                 </Button>
             </div>
 
@@ -392,7 +392,7 @@ export default function QuestionList({ questions, onAdd, onRemove, onUpdate, onR
                 <div className="question-list-empty">
                     <QuestionCircleOutlined style={{ fontSize: 32, color: '#d9d9d9', marginBottom: 8 }} />
                     <p style={{ color: '#999', margin: 0 }}>
-                        Chưa có câu hỏi nào. Nhấn nút bên trên để thêm.
+                        No questions yet. Click the button above to add one.
                     </p>
                 </div>
             ) : (
@@ -400,7 +400,7 @@ export default function QuestionList({ questions, onAdd, onRemove, onUpdate, onR
                     {/* Collapse/expand all helper */}
                     <div className="question-list-toolbar">
                         <span className="question-list-count">
-                            {safeQuestions.length} câu hỏi
+                            {safeQuestions.length} question(s)
                         </span>
                         {expandedKey && (
                             <Button
@@ -408,7 +408,7 @@ export default function QuestionList({ questions, onAdd, onRemove, onUpdate, onR
                                 type="link"
                                 onClick={() => setExpandedKey(null)}
                             >
-                                Thu gọn tất cả
+                                Collapse all
                             </Button>
                         )}
                     </div>

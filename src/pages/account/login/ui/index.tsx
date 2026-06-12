@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { BlankLayout } from "@/widgets/layouts";
 import { useAuth } from "@/appx/providers";
@@ -58,6 +58,7 @@ export function PageLogin({ loginConfig: _loginConfig }: PageLoginProps) {
   } = useForm<FormData>();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const submittingRef = useRef(false);
 
   const handleGoogleLogin = async () => {
     try {
@@ -69,15 +70,22 @@ export function PageLogin({ loginConfig: _loginConfig }: PageLoginProps) {
   };
 
   const onSubmit = async (data: FormData) => {
-    await signIn({
-      email: data.email,
-      password: data.password,
-    }).catch(() => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setIsLoading(true);
+    try {
+      await signIn({
+        email: data.email,
+        password: data.password,
+      });
+    } catch {
+      setIsLoading(false);
+      submittingRef.current = false;
       setError("email", {
         type: "manual",
-        message: "Email hoặc mật khẩu không đúng.",
+        message: "Invalid email or password.",
       });
-    });
+    }
   };
 
   return (
@@ -195,7 +203,7 @@ export function PageLogin({ loginConfig: _loginConfig }: PageLoginProps) {
                 />
                 {errors.email && (
                   <span className="font-inter text-[12px] text-[#e54552]">
-                    {errors.email.message || "Vui lòng nhập email"}
+                    {errors.email.message || "Please enter your email"}
                   </span>
                 )}
               </div>
@@ -239,7 +247,7 @@ export function PageLogin({ loginConfig: _loginConfig }: PageLoginProps) {
                 />
                 {errors.password && (
                   <span className="font-inter text-[12px] text-[#e54552]">
-                    Vui lòng nhập mật khẩu
+                    Please enter your password
                   </span>
                 )}
               </div>

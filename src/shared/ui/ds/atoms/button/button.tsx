@@ -19,6 +19,7 @@
  *   white        — for use on dark/colored backgrounds
  */
 
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export type ButtonVariant =
@@ -46,7 +47,7 @@ export type ButtonProps = {
   icon?: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void | Promise<void> | any;
   children?: React.ReactNode;
   className?: string;
   /** Render as <a> tag */
@@ -168,6 +169,8 @@ export const Button = ({
   href,
   'aria-label': ariaLabel,
 }: ButtonProps) => {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const activeLoading = loading || internalLoading;
   const isIconOnly = variant === 'icon-circle' && !children;
 
   const classNames = twMerge(
@@ -186,7 +189,7 @@ export const Button = ({
     VARIANT_CLASSES[variant],
     // Modifiers
     fullWidth && 'w-full',
-    loading && 'pointer-events-none',
+    activeLoading && 'pointer-events-none',
     className,
   );
 
@@ -194,39 +197,57 @@ export const Button = ({
   const iconSizeKey = variant === 'icon-circle' ? 'icon-circle' : size;
   const iconClasses = `flex items-center justify-center shrink-0 leading-none ${ICON_SIZE[iconSizeKey]}`;
 
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || activeLoading) {
+      e.preventDefault();
+      return;
+    }
+    if (onClick) {
+      const result = onClick(e);
+      if (result instanceof Promise) {
+        setInternalLoading(true);
+        try {
+          await result;
+        } finally {
+          setInternalLoading(false);
+        }
+      }
+    }
+  };
+
   const content = (
     <>
       {/* Spinner */}
-      {loading && (
+      {activeLoading && (
         <span
           className="w-[18px] h-[18px] border-2 border-current border-r-transparent rounded-full animate-[spin_0.65s_linear_infinite] shrink-0"
           aria-hidden="true"
         />
       )}
       {/* Left icon */}
-      {!loading && leftIcon && (
+      {!activeLoading && leftIcon && (
         <span className={iconClasses} aria-hidden="true">{leftIcon}</span>
       )}
       {/* Icon-only mode (icon-circle without children) */}
-      {!loading && isIconOnly && icon && (
+      {!activeLoading && isIconOnly && icon && (
         <span className={iconClasses} aria-hidden="true">{icon}</span>
       )}
       {/* Label text */}
-      {!loading && !isIconOnly && children && (
-        <span className="inline-flex items-center">{children}</span>
+      {!isIconOnly && children && (
+        <span className={twMerge("inline-flex items-center", activeLoading && "opacity-70")}>{children}</span>
       )}
       {/* Icon alongside text (non icon-only) */}
-      {!loading && !isIconOnly && icon && !leftIcon && !rightIcon && (
+      {!activeLoading && !isIconOnly && icon && !leftIcon && !rightIcon && (
         <span className={iconClasses} aria-hidden="true">{icon}</span>
       )}
       {/* Right icon */}
-      {!loading && rightIcon && (
+      {!activeLoading && rightIcon && (
         <span className={iconClasses} aria-hidden="true">{rightIcon}</span>
       )}
     </>
   );
 
-  if (href && !disabled) {
+  if (href && !disabled && !activeLoading) {
     return (
       <a href={href} className={classNames} aria-label={ariaLabel}>
         {content}
@@ -238,10 +259,10 @@ export const Button = ({
     <button
       type={type}
       className={classNames}
-      disabled={disabled || loading}
-      onClick={onClick}
+      disabled={disabled || activeLoading}
+      onClick={handleClick}
       aria-label={ariaLabel}
-      aria-busy={loading}
+      aria-busy={activeLoading}
     >
       {content}
     </button>

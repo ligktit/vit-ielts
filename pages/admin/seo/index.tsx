@@ -328,7 +328,7 @@ export default function SeoManagerPage() {
                                         showTotal: (t) => `Tổng ${t} redirect rules`,
                                         showSizeChanger: true,
                                     }}
-                                    scroll={{ x: 800 }}
+                                    scroll={{ x: "max-content" }}
                                     size="middle"
                                 />
                             </AdminGlassCard>

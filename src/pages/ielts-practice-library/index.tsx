@@ -64,14 +64,14 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Listening Practice Tests",
         description: {
           line1:
-            "IELTS Listening Practice Tests Online miễn phí tại IELTS PREDICTION với đề",
+            "Free IELTS Listening Practice Tests online — with full",
           line2:
-            "thi, audio, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
+            "tests, audio, transcripts, answer keys, detailed vocabulary explanations and",
+          line3: "a computer-based test experience.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
         button: {
-          text: "Tìm hiểu khóa học",
+          text: "Learn more",
           link: "#",
         },
       },
@@ -79,14 +79,14 @@ export const getServerSideProps: GetServerSideProps = withMultipleWrapper(
         title: "IELTS Reading Practice Tests",
         description: {
           line1:
-            "IELTS Reading Practice Tests Online miễn phí tại DOL Academy với đề",
+            "Free IELTS Reading Practice Tests online — with full",
           line2:
-            "thi, transcript, answer key, giải thích chi tiết từ vựng đi kèm và",
-          line3: "trải nghiệm làm bài thi thử như trên máy.",
+            "tests, transcripts, answer keys, detailed vocabulary explanations and",
+          line3: "a computer-based test experience.",
         },
         backgroundColor: "linear-gradient(180deg, #FFF3F3 0%, #FFF8F0 100%)",
         button: {
-          text: "Tìm hiểu khóa học",
+          text: "Learn more",
           link: "#",
         },
       },

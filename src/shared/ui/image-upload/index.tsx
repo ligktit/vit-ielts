@@ -53,7 +53,7 @@ export function ImageUpload({
       const uploadSecret = process.env.NEXT_PUBLIC_MEDIA_UPLOAD_SECRET;
 
       const headers: Record<string, string> = {};
-      if (uploadSecret && uploadUrl.includes("ieltspredictiontest.com")) {
+      if (uploadSecret && (uploadUrl.includes("ieltspredictiontest.com") || uploadUrl.includes("vitielts.com"))) {
         headers["X-Upload-Key"] = uploadSecret;
       }
 
@@ -65,7 +65,7 @@ export function ImageUpload({
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Upload thất bại");
+        throw new Error(error.message || "Upload failed");
       }
 
       const json = await res.json();
@@ -73,15 +73,15 @@ export function ImageUpload({
       const imagePath = json.path || json.data?.url;
 
       if (!isValidImageUrl(imagePath)) {
-        throw new Error("URL ảnh không hợp lệ. Vui lòng thử lại.");
+        throw new Error("Invalid image URL. Please try again.");
       }
 
       setPreview(imagePath);
       onChange?.(imagePath);
-      message.success("Upload hình ảnh thành công");
+      message.success("Image uploaded successfully");
     } catch (error) {
       message.error(
-        error instanceof Error ? error.message : "Lỗi khi upload hình ảnh"
+        error instanceof Error ? error.message : "Failed to upload image"
       );
     } finally {
       setUploading(false);
@@ -103,11 +103,11 @@ export function ImageUpload({
       const error = fileRejections[0]?.errors[0];
       if (error) {
         if (error.code === "file-too-large") {
-          message.error("File quá lớn. Kích thước tối đa 5MB");
+          message.error("File too large. Maximum size is 5MB.");
         } else if (error.code === "file-invalid-type") {
-          message.error("File không hợp lệ. Chỉ chấp nhận hình ảnh");
+          message.error("Invalid file type. Only images are accepted.");
         } else {
-          message.error(error.message || "Không thể upload file");
+          message.error(error.message || "Cannot upload file");
         }
       }
     },
@@ -172,7 +172,7 @@ export function ImageUpload({
             <Input
               value={preview || ""}
               style={{ fontSize: 12 }}
-              placeholder="Hoặc dán URL ảnh trực tiếp vào đây"
+              placeholder="Or paste an image URL directly here"
               onChange={(e) => {
                 const newValue = e.target.value.trim();
                 if (isValidImageUrl(newValue)) {
@@ -182,7 +182,7 @@ export function ImageUpload({
                   setPreview(null);
                   onChange?.("");
                 } else {
-                  message.warning("URL không hợp lệ. Vui lòng nhập URL đầy đủ (http:// hoặc https://) hoặc đường dẫn relative (/img-admin/...)");
+                  message.warning("Invalid URL. Please enter a full URL (http:// or https://) or a relative path (/img-admin/...).");
                 }
               }}
             />
@@ -205,13 +205,13 @@ export function ImageUpload({
           <UploadOutlined style={{ fontSize: 36, color: "var(--admin-text-secondary, #9ca3af)", marginBottom: 12 }} />
           <p style={{ color: "var(--admin-text-secondary, #6b7280)", marginBottom: 4 }}>
             {isDragActive
-              ? "Thả file vào đây..."
-              : "Kéo thả hình ảnh vào đây hoặc click để chọn"}
+              ? "Drop file here..."
+              : "Drag and drop an image here or click to select"}
           </p>
-          <p style={{ fontSize: 13, color: "var(--admin-text-secondary, #9ca3af)", margin: 0 }}>PNG, JPG, GIF tối đa 5MB</p>
+          <p style={{ fontSize: 13, color: "var(--admin-text-secondary, #9ca3af)", margin: 0 }}>PNG, JPG, GIF up to 5MB</p>
           {uploading && (
             <div style={{ marginTop: 12 }}>
-              <p style={{ color: "#3b82f6" }}>Đang upload...</p>
+              <p style={{ color: "#3b82f6" }}>Uploading...</p>
             </div>
           )}
         </div>

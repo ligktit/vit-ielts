@@ -26,14 +26,14 @@ export const MyProfileLayout = ({
       [ROUTES.ACCOUNT.DASHBOARD]: {
         title: "My Dashboard",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Dashboard" },
         ],
       },
       [ROUTES.ACCOUNT.MY_PROFILE]: {
         title: "My Profile",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
           { label: "My Profile" },
         ],
@@ -41,7 +41,7 @@ export const MyProfileLayout = ({
       [ROUTES.ACCOUNT.ORDER_HISTORY]: {
         title: "Order History",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
           { label: "Order History" },
         ],
@@ -49,7 +49,7 @@ export const MyProfileLayout = ({
       [ROUTES.ACCOUNT.AFFILIATE]: {
         title: "Affiliate",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
           { label: "Affiliate" },
         ],
@@ -57,7 +57,7 @@ export const MyProfileLayout = ({
       [ROUTES.CHECKOUT]: {
         title: "Checkout",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
           { label: "Checkout" },
         ],
@@ -65,7 +65,7 @@ export const MyProfileLayout = ({
       [ROUTES.ORDER_RECEIVED]: {
         title: "Order Received",
         breadcrumbs: [
-          { label: "Trang chủ", href: ROUTES.HOME },
+          { label: "Home", href: ROUTES.HOME },
           { label: "My Account", href: ROUTES.ACCOUNT.DASHBOARD },
           { label: "Order Received" },
         ],

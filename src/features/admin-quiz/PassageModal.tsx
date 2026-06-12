@@ -72,7 +72,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                                 <Form.Item
                                     name="audio_start"
                                     label="Audio Start"
-                                    tooltip="MM:SS hoặc số giây"
+                                    tooltip="MM:SS or seconds"
                                 >
                                     <MMSSInput placeholder="0:40" />
                                 </Form.Item>
@@ -81,7 +81,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                                 <Form.Item
                                     name="audio_end"
                                     label="Audio End"
-                                    tooltip="MM:SS hoặc số giây"
+                                    tooltip="MM:SS or seconds"
                                 >
                                     <MMSSInput placeholder="4:15" />
                                 </Form.Item>
@@ -90,7 +90,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                     )}
                     <Col xs={24} md={isListening ? 6 : 8}>
                         <Form.Item name="start_question_number" label="Start question no">
-                            <InputNumber placeholder="Mặc định: 1" min={1} className="w-full" />
+                            <InputNumber placeholder="Default: 1" min={1} className="w-full" />
                         </Form.Item>
                     </Col>
                 </Row>
@@ -98,7 +98,7 @@ export default function PassageModal({ open, initialData, skill, onCancel, onSav
                     <RichTextEditor
                         value={content}
                         onChange={setContent}
-                        placeholder="Nhập nội dung bài đọc..."
+                        placeholder="Enter passage content..."
                     />
                 </Form.Item>
             </Form>

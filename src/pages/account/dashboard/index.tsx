@@ -4,6 +4,7 @@ import { getMasterData } from "~supabase/getMasterData";
 import { getClassroomsForUser, getStudentAssignments } from "~services/classroom";
 import { getQuizzes } from "~services/quiz";
 import { ROUTES } from "@/shared/routes";
+import { isTeacherRole } from "~lib/parseRoles";
 
 export { PageDashboard } from "./ui";
 
@@ -16,6 +17,18 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (!user) {
     return {
       redirect: { destination: ROUTES.LOGIN(context.resolvedUrl), statusCode: 302 },
+    };
+  }
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("roles")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (isTeacherRole(profile?.roles)) {
+    return {
+      redirect: { destination: ROUTES.CLASSROOM.OVERVIEW, statusCode: 302 },
     };
   }
 

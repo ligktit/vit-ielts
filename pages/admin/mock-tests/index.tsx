@@ -261,7 +261,7 @@ export default function AdminMockTestsPage() {
                         showSizeChanger: true,
                         showTotal: (t) => `Tổng ${t} mock tests`,
                     }}
-                    scroll={{ x: 800 }}
+                    scroll={{ x: "max-content" }}
                 />
             </AdminGlassCard>
 

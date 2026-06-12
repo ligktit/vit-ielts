@@ -30,13 +30,25 @@ export const SidebarNavItem = ({
       active ? 'bg-[var(--color-brand)]' : 'hover:bg-[var(--color-brand-tint)]',
     ].join(' ')}
   >
-    <span
+    <div
       aria-hidden="true"
-      className="material-symbols-rounded text-[var(--size-sidebar-icon)] leading-none shrink-0 w-[var(--size-sidebar-icon)] flex items-center justify-center"
-      style={{ color: active ? 'var(--color-ink-900)' : 'var(--color-ink-muted)' }}
-    >
-      {icon}
-    </span>
+      className="shrink-0 flex items-center justify-center"
+      style={{
+        width: 24,
+        height: 24,
+        minWidth: 24,
+        minHeight: 24,
+        backgroundColor: active ? 'var(--color-ink-900)' : 'var(--color-ink-muted)',
+        maskImage: `url(/assets/icons/${icon}.svg)`,
+        WebkitMaskImage: `url(/assets/icons/${icon}.svg)`,
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+      }}
+    />
 
     <span
       aria-hidden={collapsed}

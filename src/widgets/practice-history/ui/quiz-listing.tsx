@@ -358,7 +358,7 @@ export const QuizListing = ({
           showSizeChanger: true,
           pageSizeOptions: ["5", "10", "20", "50"],
           showTotal: (total) =>
-            `Hiển thị ${total} bài làm trong 60 ngày gần nhất`,
+            `Showing ${total} tests from the last 60 days`,
         }}
         onChange={handleTableChange}
       />

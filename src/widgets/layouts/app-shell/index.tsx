@@ -26,23 +26,23 @@ import { FOOTER_COLUMNS } from "../footer-columns";
 // pending dedicated routes (Study Plan / My Progress / Vocabulary / Community /
 // Settings / Help & Support). See ui-rebuild-status memory.
 const STUDENT_MENU: SidebarNavEntry[] = [
-  { id: "home", icon: "home", label: "Home", href: ROUTES.ACCOUNT.DASHBOARD },
-  { id: "mock-tests", icon: "quiz", label: "Mock Tests", href: ROUTES.EXAM.ARCHIVE },
-  { id: "study-plan", icon: "calendar_today", label: "Study Plan", href: ROUTES.STUDY_PLAN },
-  { id: "progress", icon: "emoji_events", label: "My Progress", href: ROUTES.MY_PROGRESS },
-  { id: "vocabulary", icon: "menu_book", label: "Vocabulary", href: ROUTES.VOCABULARY },
-  { id: "my-classes", icon: "school", label: "My Classes", href: ROUTES.CLASSROOM.LIST },
-  { id: "assignments", icon: "assignment", label: "My Assignments", href: ROUTES.CLASSROOM.MY_ASSIGNMENTS },
+  { id: "home", icon: "House", label: "Home", href: ROUTES.ACCOUNT.DASHBOARD },
+  { id: "mock-tests", icon: "Exam", label: "Mock Tests", href: ROUTES.EXAM.ARCHIVE },
+  { id: "study-plan", icon: "Calendar", label: "Study Plan", href: ROUTES.STUDY_PLAN },
+  { id: "progress", icon: "Trophy", label: "My Progress", href: ROUTES.MY_PROGRESS },
+  { id: "vocabulary", icon: "BookOpenText", label: "Vocabulary", href: ROUTES.VOCABULARY },
+  { id: "my-classes", icon: "Chalkboard", label: "My Classes", href: ROUTES.CLASSROOM.LIST },
+  { id: "assignments", icon: "ClipboardText", label: "My Assignments", href: ROUTES.CLASSROOM.MY_ASSIGNMENTS },
 ];
 
 const STUDENT_COMMUNITY: SidebarNavEntry[] = [
-  { id: "community", icon: "forum", label: "Community", href: ROUTES.COMMUNITY },
-  { id: "blog", icon: "book", label: "Blog", href: ROUTES.BLOG.ARCHIVE },
+  { id: "community", icon: "UsersThree", label: "Community", href: ROUTES.COMMUNITY },
+  { id: "blog", icon: "Book", label: "Blog", href: ROUTES.BLOG.ARCHIVE },
 ];
 
 const STUDENT_ACCOUNT: SidebarNavEntry[] = [
-  { id: "settings", icon: "settings", label: "Settings", href: ROUTES.ACCOUNT.SETTINGS },
-  { id: "help", icon: "help", label: "Help & Support", href: ROUTES.HELP },
+  { id: "settings", icon: "Gear", label: "Settings", href: ROUTES.ACCOUNT.SETTINGS },
+  { id: "help", icon: "Question", label: "Help & Support", href: ROUTES.HELP },
 ];
 
 // ── Teacher nav (Figma node 3689-174) ──────────────────────────────────────
@@ -50,16 +50,16 @@ const STUDENT_ACCOUNT: SidebarNavEntry[] = [
 // shared Settings / Help account group. Items without a dedicated route yet are
 // visual-only (#) — pending pages.
 const TEACHER_MENU: SidebarNavEntry[] = [
-  { id: "overview", icon: "home", label: "Overview", href: ROUTES.CLASSROOM.OVERVIEW },
-  { id: "my-classes", icon: "school", label: "My Classes", href: ROUTES.CLASSROOM.LIST },
-  { id: "assignments", icon: "menu_book", label: "Assignments", href: ROUTES.CLASSROOM.LIST },
-  { id: "students", icon: "person", label: "Students", href: ROUTES.CLASSROOM.STUDENTS },
-  { id: "collaborators", icon: "group", label: "Collaborators", href: ROUTES.CLASSROOM.COLLABORATORS },
+  { id: "overview", icon: "House", label: "Overview", href: ROUTES.CLASSROOM.OVERVIEW },
+  { id: "my-classes", icon: "Chalkboard", label: "My Classes", href: ROUTES.CLASSROOM.LIST },
+  { id: "assignments", icon: "ClipboardText", label: "Assignments", href: "#" },
+  { id: "students", icon: "Student", label: "Students", href: ROUTES.CLASSROOM.STUDENTS },
+  { id: "collaborators", icon: "UsersThree", label: "Collaborators", href: ROUTES.CLASSROOM.COLLABORATORS },
 ];
 
 const TEACHER_ACCOUNT: SidebarNavEntry[] = [
-  { id: "settings", icon: "settings", label: "Settings", href: ROUTES.ACCOUNT.SETTINGS },
-  { id: "help", icon: "help", label: "Help & Support", href: ROUTES.HELP },
+  { id: "settings", icon: "Gear", label: "Settings", href: ROUTES.ACCOUNT.SETTINGS },
+  { id: "help", icon: "Question", label: "Help & Support", href: ROUTES.HELP },
 ];
 
 const activeFromPath = (pathname: string): string => {
@@ -121,8 +121,9 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
-  const name = currentUser?.name ?? (isTeacher ? "Giáo viên" : "Học viên");
+  const name = currentUser?.name ?? (isTeacher ? "Teacher" : "Student");
   const initials = initialsFromName(currentUser?.name);
+  const avatarSrc = currentUser?.userData?.avatar?.node?.mediaDetails?.sizes?.[0]?.sourceUrl ?? undefined;
 
   return (
     <div className="flex min-h-dvh bg-[var(--color-surface-app)]">
@@ -130,7 +131,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         <SidebarTeacher
           state={collapsed ? "collapsed" : "expanded"}
           activeItem={teacherActiveFromPath(router.pathname)}
-          user={{ name, role: "Teacher", initials }}
+          user={{ name, role: "Teacher", initials, avatarSrc }}
           menu={TEACHER_MENU}
           account={TEACHER_ACCOUNT}
           profileHref={ROUTES.ACCOUNT.MY_PROFILE}
@@ -142,7 +143,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
         <SidebarStudent
           state={collapsed ? "collapsed" : "expanded"}
           activeItem={activeFromPath(router.pathname)}
-          user={{ name, role: "Student", initials }}
+          user={{ name, role: "Student", initials, avatarSrc }}
           menu={STUDENT_MENU}
           community={STUDENT_COMMUNITY}
           account={STUDENT_ACCOUNT}
@@ -158,6 +159,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
           {isSignedIn ? (
             <SidebarTopActions
               userInitials={initials}
+              avatarSrc={avatarSrc}
               profileHref={ROUTES.ACCOUNT.MY_PROFILE}
             />
           ) : (

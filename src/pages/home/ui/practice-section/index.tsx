@@ -74,11 +74,11 @@ export const PracticeSection = ({
           setSelectedQuiz(result.data);
           setIsModalOpen(true);
         } else {
-          toast.error("Không thể tải thông tin bài thi");
+          toast.error("Could not load exam information");
         }
       } catch (error) {
         console.error("Error fetching quiz summary:", error);
-        toast.error("Có lỗi xảy ra khi tải thông tin bài thi");
+        toast.error("An error occurred while loading the exam");
       } finally {
         setLoadingQuiz(false);
       }
@@ -142,7 +142,7 @@ export const PracticeSection = ({
                 {items.map((quiz) => {
                   let partLabel: string | undefined = "Part 1";
                   if (quiz.type === 'exam') {
-                    partLabel = "Trọn bộ";
+                    partLabel = "Full set";
                   } else if (quiz.type === 'academic') {
                     partLabel = undefined;
                   } else {
